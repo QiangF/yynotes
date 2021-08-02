@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-02 Mon 23:56 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1 / chx^n 形式的不定积分</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">1 / chx^n 形式的不定积分</h1>
+<p>
+今日在计算习题时遇到了 \(\int_{}^{}dx/ch^3x\) 的积分， 由于一个寒假没有碰过数学书的缘故， 算了将近一个小时也不见结果， 上网百度也只有常见的双曲函数积分，实在无奈。 又花了将近半个小时，终于推出了结果（还是间接推出来的，唉），接着又用了将近两个小时推出一般公式。现在附上推导过程和最后的递推公式。
+</p>
+
+<p>
+部分地方的表达可能不太规范（没有写积分常数云云&#x2026;）。
+</p>
+
+<p>
+如果你也因为相同的原因上网搜索相应公式，而看到这点笔记，希望有所帮助，如有错误，希望向我指出。
+</p>
+
+<p>
+不想听我废话的可以跳到<a href="#org8a574d7">这里</a>。
+</p>
+
+<p>
+首先看一道物理题：
+</p>
+
+<p>
+在宇宙中， 有两个各为 1kg 的小球，相距 1m，若周围没有任何物体，两小球在引力的作用下相互靠近，问两小球接触需要花多久？
+</p>
+
+<p>
+很明显，由题目的描述，可以列出几个方程。
+</p>
+
+<p>
+\(l = len - 2 \times s\)
+</p>
+
+
+<p>
+由万有引力定律， 两者之间的引力大小为：
+</p>
+
+<p>
+\(F = \frac{G\times m^{2}}{l^{2}}\)
+</p>
+
+<p>
+加速度大小为路程对时间的二阶导数，则：
+</p>
+
+<p>
+\(a = \frac{d^{2}s}{dt^{2}}\)
+</p>
+
+<p>
+再由牛顿第二定律，则有：
+</p>
+
+<p>
+\(\frac{F}{m} = a\) , 也就是 \(\frac{G \times m}{(len - 2 \times s)^{2}} = \frac{d^{2}s}{dt^{2}}\)
+</p>
+
+<p>
+得到了一个微分方程，首先让它变成一阶的，得到：
+</p>
+
+<p>
+\(\sqrt {\frac{len - 2 \times s}{s}}ds = \sqrt{G \times m}dt\)
+</p>
+
+<p>
+解这个方程的左边时，我手贱地使用了换元，先令 \(t = \sqrt {\frac{len - 2 \times s}{s}}\), 得到 \(s = \frac {1}{t^{2} + 2}\) (len 等于 1 ，下面都直接写成了数字), 左边变为：\(\frac {-2t^{2}}{(t^{2}+2)^2}dt\) 。
+</p>
+
+<p>
+再双曲变换一下，令 \(t = \sqrt 2sh\theta\), 得到 \(\sqrt 2 (\frac{1}{ch^{3} \theta} - \frac{1}{ch\theta})d\theta\) ，
+</p>
+
+<p>
+\(\int_{}{} \frac{1}{ch\theta}d\theta\) 很简单， 但是前一个我实在无能为力&#x2026;&#x2026; 后来突然想起来还有分部积分大法，一下子就积分积出了左式。直接得到：
+</p>
+
+<p>
+\(K(s)=\int{}{}\sqrt {\frac{1 - 2s}{s}}ds = \sqrt {s - 2\times s^{2}} +\frac{1}{ 2\sqrt 2}arcsin(4s - 1)\) 。
+</p>
+
+<p>
+这样一来，这个问题也就解决了：
+</p>
+
+<p>
+\(K(\frac {1}{2}) -K(0)\) = \(\int_{0}^{t} \sqrt{G\times m}dt =\sqrt{G \times m}\times t\)，得到 \(t = \frac {\pi}{2 \sqrt{2Gm}}\) ， 终于做出来了（大约需要 26.7 个小时&#x2026;）。
+</p>
+
+<p>
+既然公式都推导出来了，现在就可以间接得到 \(\int_{}{} \frac {1}{ch^{3}\theta}d\theta\) 了。
+</p>
+
+<p>
+由 \(s = \frac {1}{t^{2} + 2}\) 和 \(t = \sqrt 2sh\theta\) ，可以得到 \(s = \frac {1}{2ch^{2}\theta}\) , 那么：
+</p>
+
+<p>
+\(\sqrt {s - 2\times s^{2}} +\frac{1}{ 2\sqrt 2}arcsin(4s - 1) = \frac{sh\theta}{\sqrt2ch^{2}\theta}+ \frac{1}{2\sqrt2}arcsin(\frac{2}{ch^{2}\theta}-1)\)
+</p>
+
+<p>
+\(\int_{}{}\sqrt 2 (\frac{1}{ch^{3} \theta} - \frac{1}{ch\theta})d\theta = -\sqrt2arcsin(th\theta)+\sqrt2 \int_{}{}\frac{1}{ch^{3}\theta}d\theta\)
+</p>
+
+<p>
+由这两个式子，我终于得到了那个梦寐以求的式子：
+</p>
+
+<p>
+\(\int_{}{} \frac{1}{ch^{3}\theta}d\theta = \frac {sh \theta}{2ch^{2}\theta}+arcsin(th\theta)+\frac{1}{4}arcsin(\frac{2}{ch^{2}\theta}-1)\)
+</p>
+
+<p>
+对 \(\frac{1}{4}arcsin(\frac{2}{ch^{2}\theta}-1)\) 求导，就会得到 \(- \frac {1}{2ch\theta}\) ，也就是 \(- \frac{arcsin(th\theta)}{2}\) 的导数，这样一来，上式可以简化为：
+</p>
+
+<p>
+\(\int_{}{} \frac{1}{ch^{3}\theta}d\theta = \frac {sh \theta}{2ch^{2}\theta}+\frac{arcsin(th\theta)}{2}\)
+</p>
+
+<p>
+到了这里，题目已经完成，相应的积分公式也推出来了，但我又对一般形式十分感兴趣，又接着求了 \(\int_{}{}\frac{1}{ch^{4}\theta}d\theta\) ，把它们都列在一起：
+</p>
+
+<p>
+\(\int_{}{} \frac{1}{ch\theta}d\theta = arcsin(th\theta)\)
+</p>
+
+<p>
+\(\int_{}{}\frac{1}{ch^{2}\theta}d\theta = \frac{sh\theta}{ch\theta}\)
+</p>
+
+<p>
+\(\int_{}{}\frac{1}{ch^{3}\theta}d\theta = \frac {sh \theta}{2ch^{2}\theta}+\frac{arcsin(th\theta)}{2}\)
+</p>
+
+<p>
+\(\int_{}{} \frac{1}{ch^{4}\theta}d\theta = \frac{sh\theta}{3ch^{3}\theta}+\frac{2}{3}\frac{sh\theta}{ch\theta}\)
+</p>
+
+<p>
+推到这里，就可以看到一点规律了，\(\int_{}{}\frac{1}{ch^{3}\theta}d\theta\) 很明显和 \(\int_{}{}\frac{1}{ch\theta}d\theta\) 有关，\(\int_{}{}\frac{1}{ch^{4}\theta}d\theta\) 和 \(\int_{}{}\frac{1}{ch^{2}\theta}d\theta\) 也有关。每一项的系数也与 \(ch\theta\) 的次数有很直接的关系，那就猜想：
+</p>
+
+<p>
+<a id="org8a574d7"></a>
+</p>
+
+<p>
+\(\int_{}{}\frac{1}{ch^{n}\theta}d\theta = \frac{1}{n-1}(\frac{sh\theta}{ch^{n-1}\theta}+(n-2)\int_{}{}\frac{1}{ch^{n-2}\theta}d\theta)\) \(n\geq 3\)
+</p>
+
+<p>
+证明很容易，直接微分就是了。
+</p>
+
+<p>
+这个积分公式与 \(\int_{}{}sin^{n}xdx\) 有着相似之处，两者会不会有什么联系呢？
+</p>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2019-03-18 Mon 00:00</p> <p>Last modified: 2021-08-02 Mon 23:56</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
