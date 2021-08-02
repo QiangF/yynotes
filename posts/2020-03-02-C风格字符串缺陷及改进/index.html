@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-02 周一 23:33 -->
+<!-- 2021-08-03 Tue 00:13 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C风格字符串缺陷及改进</title>
@@ -60,31 +60,37 @@
  <a accesskey="h" href="../../index.html"> UP </a>
  |
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
-</div><div id="content">
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
 <h1 class="title">C风格字符串缺陷及改进</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org626ee42">1. 为什么 C 风格字符串十分糟糕</a>
+<li><a href="#org64ae7ee">1. 为什么 C 风格字符串十分糟糕</a>
 <ul>
-<li><a href="#orga033192">1.1. gets() 函数的问题</a></li>
-<li><a href="#org62a3631">1.2. fgets() 函数的问题</a></li>
-<li><a href="#org300cae9">1.3. strncpy() 的问题</a></li>
-<li><a href="#org037b6c0">1.4. NULL 参数问题</a></li>
-<li><a href="#org381f0f3">1.5. 重叠问题</a></li>
-<li><a href="#orgd10e996">1.6. 线程安全问题</a></li>
-<li><a href="#org2fb038f">1.7. 内存管理问题</a></li>
-<li><a href="#org854927e">1.8. 问题总结</a></li>
+<li><a href="#org17d8061">1.1. gets() 函数的问题</a></li>
+<li><a href="#org528b73d">1.2. fgets() 函数的问题</a></li>
+<li><a href="#org6f065d6">1.3. strncpy() 的问题</a></li>
+<li><a href="#org07a8134">1.4. NULL 参数问题</a></li>
+<li><a href="#orgc76df8c">1.5. 重叠问题</a></li>
+<li><a href="#org23b9d3d">1.6. 线程安全问题</a></li>
+<li><a href="#org1eb1ab0">1.7. 内存管理问题</a></li>
+<li><a href="#org402c91d">1.8. 问题总结</a></li>
 </ul>
 </li>
-<li><a href="#orgab0d452">2. 如何改进</a>
+<li><a href="#org69dbe30">2. 如何改进</a>
 <ul>
-<li><a href="#org385c826">2.1. 弃用一些危险的函数</a></li>
-<li><a href="#orgb24fbcf">2.2. 使用更加安全的字符串函数库</a></li>
+<li><a href="#orgb0a20df">2.1. 弃用一些危险的函数</a></li>
+<li><a href="#org4f26ff0">2.2. 使用更加安全的字符串函数库</a></li>
 </ul>
 </li>
-<li><a href="#org5734028">3. 参考资料</a></li>
+<li><a href="#orgf0e3523">3. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -96,8 +102,8 @@
 本文指出了 C 语言字符串的一些问题，并对如何改进操纵字符串提出了一些建议和方案。
 </p>
 
-<div id="outline-container-org626ee42" class="outline-2">
-<h2 id="org626ee42"><span class="section-number-2">1</span> 为什么 C 风格字符串十分糟糕</h2>
+<div id="outline-container-org64ae7ee" class="outline-2">
+<h2 id="org64ae7ee"><span class="section-number-2">1</span> 为什么 C 风格字符串十分糟糕</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 C 风格的字符串是一个以 '\0' 结尾的字符数组，它的长度并不是显式给出的，或者说是不确定的。这是一个约定，而不是一个强制性的要求，C 语言中并没有真正的字符串类型。
@@ -137,8 +143,8 @@ C 风格的字符串是一个以 '\0' 结尾的字符数组，它的长度并不
 </p>
 </div>
 
-<div id="outline-container-orga033192" class="outline-3">
-<h3 id="orga033192"><span class="section-number-3">1.1</span> gets() 函数的问题</h3>
+<div id="outline-container-org17d8061" class="outline-3">
+<h3 id="org17d8061"><span class="section-number-3">1.1</span> gets() 函数的问题</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 gets() 的函数原型如下：
@@ -163,8 +169,8 @@ gets() 没有限制它的读取长度，非常容易溢出。如果溢出，多�
 </div>
 </div>
 
-<div id="outline-container-org62a3631" class="outline-3">
-<h3 id="org62a3631"><span class="section-number-3">1.2</span> fgets() 函数的问题</h3>
+<div id="outline-container-org528b73d" class="outline-3">
+<h3 id="org528b73d"><span class="section-number-3">1.2</span> fgets() 函数的问题</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 fgets() 的函数原型为：
@@ -232,8 +238,8 @@ fgets() 从指定的流中读取一行，并将内容存储在字符数组 str �
 </div>
 </div>
 
-<div id="outline-container-org300cae9" class="outline-3">
-<h3 id="org300cae9"><span class="section-number-3">1.3</span> strncpy() 的问题</h3>
+<div id="outline-container-org6f065d6" class="outline-3">
+<h3 id="org6f065d6"><span class="section-number-3">1.3</span> strncpy() 的问题</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 该函数的原型为：
@@ -254,8 +260,8 @@ fgets() 从指定的流中读取一行，并将内容存储在字符数组 str �
 </div>
 </div>
 
-<div id="outline-container-org037b6c0" class="outline-3">
-<h3 id="org037b6c0"><span class="section-number-3">1.4</span> NULL 参数问题</h3>
+<div id="outline-container-org07a8134" class="outline-3">
+<h3 id="org07a8134"><span class="section-number-3">1.4</span> NULL 参数问题</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 将 NULL 或者其他不合法的字符串地址传递给字符串处理函数会导致对内存的非法操作，将直接导致程序的崩溃。这个问题不是 C 库中的字符串函数所独有的。但是，这些字符串函数并没有通过返回值或者其他方式来反馈这些错误的出现，这些错误是没有检查的。除非使用调试器，否则我们只会看到程序的崩溃，而不知道具体的错误信息。
@@ -277,8 +283,8 @@ fgets() 从指定的流中读取一行，并将内容存储在字符数组 str �
 </div>
 </div>
 
-<div id="outline-container-org381f0f3" class="outline-3">
-<h3 id="org381f0f3"><span class="section-number-3">1.5</span> 重叠问题</h3>
+<div id="outline-container-orgc76df8c" class="outline-3">
+<h3 id="orgc76df8c"><span class="section-number-3">1.5</span> 重叠问题</h3>
 <div class="outline-text-3" id="text-1-5">
 <p>
 当向函数传递两个参数，其中一个指向的数据结构与另一个在内存上重叠时，重叠问题便出现了。
@@ -309,8 +315,8 @@ C 的字符串是一个字符接着一个字符的连续形式，在某些场景
 </div>
 </div>
 
-<div id="outline-container-orgd10e996" class="outline-3">
-<h3 id="orgd10e996"><span class="section-number-3">1.6</span> 线程安全问题</h3>
+<div id="outline-container-org23b9d3d" class="outline-3">
+<h3 id="org23b9d3d"><span class="section-number-3">1.6</span> 线程安全问题</h3>
 <div class="outline-text-3" id="text-1-6">
 <p>
 有关多线程有一个笑话：“之前我有一个问题，使用了多线程之后，现在两个题问我有”。文档作者提到 strtok() 因为会对字符串参数进行修改而不具有线程安全性，这可能说明对字符串进行修改的 C 库中的字符串函数都不具有线程安全性。
@@ -318,8 +324,8 @@ C 的字符串是一个字符接着一个字符的连续形式，在某些场景
 </div>
 </div>
 
-<div id="outline-container-org2fb038f" class="outline-3">
-<h3 id="org2fb038f"><span class="section-number-3">1.7</span> 内存管理问题</h3>
+<div id="outline-container-org1eb1ab0" class="outline-3">
+<h3 id="org1eb1ab0"><span class="section-number-3">1.7</span> 内存管理问题</h3>
 <div class="outline-text-3" id="text-1-7">
 <p>
 C 中没有真正的字符串类型，它连像是 fopen/fclose 的管理机制都没有提供，对字符串的操作不可避免的会涉及到手动内存管理，而这正是 C 程序中许多耗时 bug 的主要来源。
@@ -327,8 +333,8 @@ C 中没有真正的字符串类型，它连像是 fopen/fclose 的管理机制�
 </div>
 </div>
 
-<div id="outline-container-org854927e" class="outline-3">
-<h3 id="org854927e"><span class="section-number-3">1.8</span> 问题总结</h3>
+<div id="outline-container-org402c91d" class="outline-3">
+<h3 id="org402c91d"><span class="section-number-3">1.8</span> 问题总结</h3>
 <div class="outline-text-3" id="text-1-8">
 <p>
 我至少可以这样总结：C 风格字符串没有线程安全，没有内存管理机制，字符串函数操作没有错误检查，函数接口设计不合理，函数功能杂乱，等等&#x2026;&#x2026; 它唯一的优点似乎就是速度了。这些缺陷很大程度上来自历史原因，毕竟 C 语言出生的时候还没有多线程这种东西。在这些函数大量使用的时候， C 语言还没有一个严谨统一的标准。 <i>The C Standard Library</i> 中这样写到：
@@ -347,12 +353,12 @@ C 中没有真正的字符串类型，它连像是 fopen/fclose 的管理机制�
 </div>
 </div>
 
-<div id="outline-container-orgab0d452" class="outline-2">
-<h2 id="orgab0d452"><span class="section-number-2">2</span> 如何改进</h2>
+<div id="outline-container-org69dbe30" class="outline-2">
+<h2 id="org69dbe30"><span class="section-number-2">2</span> 如何改进</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org385c826" class="outline-3">
-<h3 id="org385c826"><span class="section-number-3">2.1</span> 弃用一些危险的函数</h3>
+<div id="outline-container-orgb0a20df" class="outline-3">
+<h3 id="orgb0a20df"><span class="section-number-3">2.1</span> 弃用一些危险的函数</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 正如 <i>The Standard C Library</i> 中所言，&lt;string.h&gt; 中的函数接口并不是精心设计的，使用有明显缺陷的函数会增加程序出现 bug 的可能性。
@@ -364,16 +370,16 @@ bString 在 bsafe.h 中列出了几个“危险”的函数，它们分别是 st
 </div>
 </div>
 
-<div id="outline-container-orgb24fbcf" class="outline-3">
-<h3 id="orgb24fbcf"><span class="section-number-3">2.2</span> 使用更加安全的字符串函数库</h3>
+<div id="outline-container-org4f26ff0" class="outline-3">
+<h3 id="org4f26ff0"><span class="section-number-3">2.2</span> 使用更加安全的字符串函数库</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 相比于 &lt;string.h&gt; 近乎于裸奔的字符串函数，另外的一些函数库在安全性上要大大的优于它。在这里我对 Microsoft 的 strsafe 和上文中提到的 bstring 进行简单的介绍，并分析它们相对于 C 库字符串函数的优点。
 </p>
 </div>
 
-<div id="outline-container-orgf83f3e7" class="outline-4">
-<h4 id="orgf83f3e7"><span class="section-number-4">2.2.1</span> strsafe</h4>
+<div id="outline-container-org223ec1b" class="outline-4">
+<h4 id="org223ec1b"><span class="section-number-4">2.2.1</span> strsafe</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 微软的官方文档对它的优点进行了简要说明，翻译如下：
@@ -398,8 +404,8 @@ Strsafe 的具体内容，可参阅微软<sup><a id="fnr.2" class="footref" href
 </div>
 </div>
 
-<div id="outline-container-org7ba4c22" class="outline-4">
-<h4 id="org7ba4c22"><span class="section-number-4">2.2.2</span> bString</h4>
+<div id="outline-container-orgcc58551" class="outline-4">
+<h4 id="orgcc58551"><span class="section-number-4">2.2.2</span> bString</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 bString 提供了它自己定义的 bString 类型
@@ -439,8 +445,8 @@ bString 是一个开源的字符串库，详细的文档和源代码可以在 so
 </div>
 </div>
 
-<div id="outline-container-org5734028" class="outline-2">
-<h2 id="org5734028"><span class="section-number-2">3</span> 参考资料</h2>
+<div id="outline-container-orgf0e3523" class="outline-2">
+<h2 id="orgf0e3523"><span class="section-number-2">3</span> 参考资料</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <i>Learn C the hard way &#x2014; Zed A. Shaw</i>
@@ -475,10 +481,24 @@ bString 是一个开源的字符串库，详细的文档和源代码可以在 so
 </div>
 </div></div>
 <div id="postamble" class="status">
-<p class="date">Date: 2020-03-02 周一 00:00</p>
-<p class="author">Author: include-yy</p>
-<p class="date">Created: 2021-08-02 周一 23:33</p>
-<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+<hr class="Solid">
+<p>Create Date: 2020-03-02 Mon 00:00</p> <p>Last modified: 2021-08-03 Tue 00:06</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
 </div>
 </body>
 </html>
