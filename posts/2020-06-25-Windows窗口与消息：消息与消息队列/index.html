@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-03 Tue 15:34 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Windows窗口与消息：消息与消息队列 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNTU1MDg4.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">Windows窗口与消息：消息与消息队列 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNTU1MDg4.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd4c9882">1. 关于窗口与消息</a></li>
+<li><a href="#orgaa7ad9e">2. Windows 消息</a>
+<ul>
+<li><a href="#org08a2df6">2.1. 系统定义消息</a></li>
+<li><a href="#org9ffde2f">2.2. 应用定义消息</a></li>
+</ul>
+</li>
+<li><a href="#org7b3a7fd">3. 消息路由（Routing）</a>
+<ul>
+<li><a href="#org7a6769f">3.1. 队列消息</a></li>
+<li><a href="#org30cb243">3.2. 非队列消息</a></li>
+</ul>
+</li>
+<li><a href="#orgc7b94c4">4. 消息处理</a>
+<ul>
+<li><a href="#orge11d4b8">4.1. 消息循环</a></li>
+</ul>
+</li>
+<li><a href="#org448c8e8">5. 消息过滤</a></li>
+<li><a href="#orgf54f9dd">6. 投递（posting）和发送（sending）消息</a>
+<ul>
+<li><a href="#org8c400de">6.1. 投递消息</a></li>
+<li><a href="#org3f938a3">6.2. 发送消息</a></li>
+</ul>
+</li>
+<li><a href="#orgf15cce6">7. 消息死锁</a></li>
+<li><a href="#org4f89a11">8. 广播消息</a></li>
+<li><a href="#org40dd932">9. 查询消息（Query Messages）</a></li>
+<li><a href="#orga0ccc0d">10. 常见的消息</a>
+<ul>
+<li><a href="#org115c13e">10.1. WM_CREATE</a></li>
+<li><a href="#orgf872133">10.2. WM_SIZE</a></li>
+<li><a href="#org811be9b">10.3. WM_PAINT</a></li>
+<li><a href="#orgcb1b743">10.4. WM_DESTROY</a></li>
+<li><a href="#orgdba2c72">10.5. WM_COMMAND</a></li>
+<li><a href="#orgfa53fd8">10.6. WM_SETFOCUS</a></li>
+<li><a href="#org7bb8c44">10.7. WM_KILLFOCUS</a></li>
+</ul>
+</li>
+<li><a href="#org6231a61">11. 参考资料</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgd4c9882" class="outline-2">
+<h2 id="orgd4c9882"><span class="section-number-2">1</span> 关于窗口与消息</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Windows 应用是事件驱动的，它们不会通过显式的函数调用（例如 C 运行时库函数调用）来获得输入。取而代之的是，它们等待系统传递输入。
+</p>
+
+<p>
+系统将对一个应用的所有输入传递给应用中的各个窗口。每个窗口都有一个窗口过程，系统在对窗口输入时会调用该函数。窗口过程对输入进行处理，并将控制权返还给系统。
+</p>
+
+<p>
+如果顶级窗口（top-level）超过数秒没有响应消息，系统会认为该窗口是无响应状态。这种情况下，系统会隐藏该窗口，并用一个有着相同 Z order（窗口重叠顺序）、位置、大小和可视属性的幽灵窗口代替它。这允许用户对窗口进行移动，调整大小，甚至关闭应用。然而，这些动作只在窗口真正无响应的情况下进行。当处于调试模式时，系统不会生成幽灵窗口。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaa7ad9e" class="outline-2">
+<h2 id="orgaa7ad9e"><span class="section-number-2">2</span> Windows 消息</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+消息可以分为系统定义消息和应用定义消息两大类。
+</p>
+</div>
+
+<div id="outline-container-org08a2df6" class="outline-3">
+<h3 id="org08a2df6"><span class="section-number-3">2.1</span> 系统定义消息</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+当系统与应用交流时，它会发送或投递（send or post，两者的区别见下文） <b>系统定义消息</b> 。它使用这些消息来控制应用的操作，并为应用提供输入和其他让应用处理的信息。应用也可以发送或投递系统定义消息。应用一般使用这些消息来控制用预定义窗口类创建的窗口的操作。
+</p>
+
+<p>
+每个系统定义消息都有一个唯一的标识符和一个对应的符号常量（在软件开发 kit（SDK）的头文件中），符号常量说明了消息的目的。例如，<a href="https://docs.microsoft.com/en-us/windows/desktop/gdi/wm-paint">WM_PAINT</a> 常数要求窗口绘制它的内容。
+</p>
+
+<p>
+符号常量指定了系统定义消息的归属。常量标识符的前缀确定了能够解释和处理消息的窗口类型。关于各式各样的前缀，可以参考<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-messages-and-message-queues">这里</a>。
+</p>
+
+<p>
+一般窗口消息覆盖了广泛的信息和请求，包括鼠标和键盘的输入，菜单和对话框的输入，窗口创建和管理，以及动态数据交换（DDE）。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9ffde2f" class="outline-3">
+<h3 id="org9ffde2f"><span class="section-number-3">2.2</span> 应用定义消息</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+应用可以创建消息供自己的窗口使用或与其他进程中的窗口交流。如果应用创建了自己的消息，接收消息的窗口过程必须对消息进行解释并提供合理的处理。
+</p>
+
+<p>
+消息标识符的值使用方法如下：
+</p>
+
+<ul class="org-ul">
+<li>系统保留的消息标识符值的范围是 0x0000 到 0x03FF（<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-user">WM_USER</a> - 1）。应用不能使用这些值作为私有消息</li>
+
+<li>在 0x0400（<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-user">WM_USER</a>）到 0x7FFFF 范围内的值用于私有窗口类的消息标识符</li>
+
+<li>调用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerwindowmessagea">RegisterWindowMessage</a> 函数注册一个消息时，系统会返回一个在 0xC000 到 0xFFFF 范围内的消息标识符。这个返回的消息标识符保证在整个系统中是唯一的。通过使用这个函数，如果其他应用以不同的目的使用了这个函数，可以避免冲突。</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org7b3a7fd" class="outline-2">
+<h2 id="org7b3a7fd"><span class="section-number-2">3</span> 消息路由（Routing）</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+系统使用两种方式将消息路由到窗口过程：将消息投递（post）到一个 FIFO 的队列，它叫做 <b>消息队列</b> （message queue），是系统定义的内存对象，负责暂存消息和将消息直接发送到窗口过程。
+</p>
+
+<p>
+投递到消息队列的消息叫做 <b>队列消息</b> 。这些消息基本是用户通过鼠标和键盘的输入的结果，比如 <a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-mousemove">WM_MOUSEMOVE</a>，<a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-lbuttondown">WM_LBUTTONDOWN</a>，<a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-keydown">WM_KEYDOWN</a>，和 <a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-char">WM_CHAR</a> 消息。其他的队列消息包括计时器，绘制，和退出消息：<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-timer">WM_TIMER</a>，<a href="https://docs.microsoft.com/en-us/windows/desktop/gdi/wm-paint">WM_PAINT</a>，和 <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-quit">WM_QUIT</a>。大多数的其他消息叫做 *非队列消息*，它们直接发送（send）到窗口。
+</p>
+</div>
+
+<div id="outline-container-org7a6769f" class="outline-3">
+<h3 id="org7a6769f"><span class="section-number-3">3.1</span> 队列消息</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+系统可以在同一时间显示任意数量的窗口。要将鼠标和键盘输入路由到合适的窗口，系统使用了消息队列。
+</p>
+
+<p>
+系统维护了一个系统消息队列，也为每个 GUI 线程维护了一个线程指定的消息队列。为了避免给非 GUI 线程创建多余的消息队列，所有的线程创建时是没有消息队列的。仅当线程第一次调用了特定的用户函数，系统才创建线程的消息队列。GUI 函数的调用不会导致消息队列的创建。
+</p>
+
+<p>
+当用户移动鼠标，按下鼠标按键，或在键盘上打字，鼠标或键盘的设备驱动会将输入转化为消息并放入系统消息队列。每隔一段时间，系统会从系统消息队列中移除消息，对其测试并决定其目标窗口，随后将消息投递到创建目标窗口的线程的消息队列。线程的消息队列会接收线程创建的窗口的所有鼠标和键盘消息。线程从队列中删除消息，并指示系统将它们发送到合适的窗口过程进行处理。
+</p>
+
+<p>
+除了 <a href="https://docs.microsoft.com/en-us/windows/desktop/gdi/wm-paint">WM_PAINT</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-timer">WM_TIMER</a>，和 <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-quit">WM_QUIT</a> 这三个消息之外，系统总是会将消息投递到消息队列的末尾。窗口是以 FIFO 的顺序接收它的输入消息的。 然而 WM_PAINT 消息，WM_TIMER 消息和 WM_QUIT 消息会被保留在消息队列中，仅当队列不包含其他消息时再发送到窗口过程。另外，一个窗口的多个 WM_PAINT 消息会被组合为单个 WM_PAINT 消息，并把客户区的所有无效区域整合为单个区域。对 WM_PAINT 消息的组合减少了窗口对客户区内容的重绘次数。
+</p>
+
+<p>
+系统通过填充一个 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-msg">MSG</a> 结构来将消息投递到线程的消息队列，随后将其拷贝到消息队列中。 MSG 结构的信息包括：指定窗口的句柄，消息标识符，两个消息参数，消息投递的时间，以及鼠标光标的位置。通过使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-postmessagea">PostMessage</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-postthreadmessagea">PostThreadMessage</a> 函数，线程可以将一个消息投递到自己的消息队列或其他线程的消息队列。
+</p>
+
+<p>
+应用可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessage">GetMessage</a> 来删除队列中的消息。要在不删除消息的情况下检查队列消息，应用可以使用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-peekmessagea">PeekMessage</a> 函数，该函数会使用消息填充 MSG 。
+</p>
+
+<p>
+在从队列删除消息后，应用可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-dispatchmessage">DispatchMessage</a> 函数来指示系统把消息发送给窗口过程进行处理。DispatchMessage 接收一个 MSG 结构的指针，该结构已经使用 GetMessage 或 PeekMessage 填充过。DispatchMessage 将窗口句柄，消息标识符，和两个消息参数传递给窗口过程，但它不会传递时间和鼠标光标位置。应用在处理消息时可以通过 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagetime">GetMessageTime</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessagepos">GetMessagePos</a> 函数检索时间和位置信息。
+</p>
+
+<p>
+如果消息队列中没有消息，线程可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-waitmessage">WaitMessage</a> 将控制权交给其他的线程。该函数会挂起线程，直到新的消息被放在线程的消息队列中才会返回。
+</p>
+
+<p>
+你可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setmessageextrainfo">SetMessageExtraInfo</a> 函数来将一个值与当前线程消息队列关联起来。随后调用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessageextrainfo">GetMessageExtraInfo</a> 来获得与最后一个使用 GetMessage 或 PeekMessage 检索的消息关联的值。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org30cb243" class="outline-3">
+<h3 id="org30cb243"><span class="section-number-3">3.2</span> 非队列消息</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+非队列消息直接发送到目标窗口的窗口过程，绕过系统消息队列和线程消息队列。系统一般会向窗口发送非队列消息来提醒影响到窗口的事件。例如，当用户激活一个新的应用窗口时，系统会发送一系列消息给窗口，包括 <a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-activate">WM_ACTIVATE</a>，<a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-setfocus">WM_SETFOCUS</a>，和 <a href="https://docs.microsoft.com/en-us/windows/desktop/menurc/wm-setcursor">WM_SETCURSOR</a>。这些消息会通知窗口它已经被激活了，键盘输入被指向窗口，鼠标光标也移入了窗口范围内。非队列消息也可由应用调用某些系统函数产生。例如，在应用使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos">SetWindowPos</a> 函数移动窗口后，系统会发送 <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-windowposchanged">WM_WINDOWPOSCHANGED</a> 消息。
+</p>
+
+<p>
+一些可以发送非队列消息的函数是 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-broadcastsystemmessage">BroadcastSystemMessage</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-broadcastsystemmessageexa">BroadcastSystemMessage</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessage">SendMessage</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagetimeouta">SendMessageTimeOut</a>，和 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendnotifymessagea">SendNotifyMessage</a>。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc7b94c4" class="outline-2">
+<h2 id="orgc7b94c4"><span class="section-number-2">4</span> 消息处理</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+应用必须对投递到它的线程的消息进行删除和处理。单线程应用通常在它的 WinMain 中使用一个 <b>消息循环</b> 来删除和发送消息给窗口过程处理。多线程应用可以在创建窗口时为每一个窗口都引入一个消息循环。
+</p>
+</div>
+
+<div id="outline-container-orge11d4b8" class="outline-3">
+<h3 id="orge11d4b8"><span class="section-number-3">4.1</span> 消息循环</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+简单的消息循环由对下列三个函数的调用完成：GetMessage，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-translatemessage">TranslateMessage</a> 和 DispatchMessage。注意，如果存在错误，GetMessage 会返回 -1，因此需要对其进行测试：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">MSG</span> <span style="color: #a0522d;">msg</span>;
+<span style="color: #228b22;">BOOL</span> <span style="color: #a0522d;">bRet</span>;
+
+<span style="color: #a020f0;">while</span>((bRet = GetMessage( &amp;msg, <span style="color: #008b8b;">NULL</span>, 0, 0 )) != 0)
+{
+    <span style="color: #a020f0;">if</span> (bRet == -1)
+    {
+        <span style="color: #b22222;">// </span><span style="color: #b22222;">handle the error and possibly exit</span>
+    }
+    <span style="color: #a020f0;">else</span>
+    {
+        TranslateMessage(&amp;msg);
+        DispatchMessage(&amp;msg);
+    }
+}
+</pre>
+</div>
+
+<p>
+GetMessage 从消息队列中检索消息，并将其拷贝到一个 MSG 结构中。除了遇到了 <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-quit">WM_QUIT</a> 时返回 FALSE 并终止循环，它的返回值为一个非 0 值。在单线程应用中，结束消息循环通常是关闭应用的第一步。应用使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-postquitmessage">PostQuitMessage</a> 来结束它的循环，这通常是对主窗口窗口过程的 <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-destroy">WM_DESTROY</a> 消息的响应。
+</p>
+
+<p>
+如果你在 GetMessage 函数的第二参数指定了一个窗口句柄，只有指定窗口的消息才会被从窗口中检索。GetMessage 能够对队列消息进行过滤，只对指定范围的那些消息进行检索。
+</p>
+
+<p>
+如果线程要从键盘中接收字符输入，线程的消息循环必须包括 TranslateMessage。每当用户按下一个键时，系统会生成虚拟键消息（<a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-keydown">WM_KEYDOWN</a> 和 <a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-keyup">WM_KEYUP</a>）。虚拟键消息包括一个标识按下按键的虚拟键代码，这不是它的字符值。要检索这个值，消息循环必须包含 TranslateMessage，它将虚拟键消息翻译为字符消息（<a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-char">WM_CHAR</a>），并将它放入应用消息队列中。字符消息可以在随后的消息循环中被删除和发送到窗口过程。
+</p>
+
+<p>
+DispatchMessage 函数将消息发送到由 MSG 结构指定的窗口句柄的窗口过程。如果窗口句柄是 HWND_TOPMOST，DispatchMessage 会将消息发送到系统中所有的顶级窗口的窗口过程中。
+</p>
+
+<p>
+应用的主线程在初始化应用和创建至少一个窗口后开始它的消息循环。在开始后，消息循环持续从线程的消息队列中检索消息并派发到合适的窗口。当 GetMessage 从消息队列中删除 WM_QUIT 消息后，消息循环就结束了。
+</p>
+
+<p>
+每一个线程队列只需要一个消息循环，即便应用包含多个窗口。DispatchMessage 总是会将消息派发到合适的窗口；这是因为队列中的每个消息都是包含标识了消息归属的窗口句柄的 MSG 结构。
+</p>
+
+<p>
+你可以用多种方式修改一个消息循环。例如，你可以从队列中检索消息而不派发给窗口。这对于投递（post）不指定窗口的消息是有用的。你可以指示 GetMessage 搜索特定的消息，把其他消息留在队列中。如果你必须暂时绕过通常的 FIFO 顺序，这是很有用的。
+</p>
+
+<p>
+使用加速键的应用必须能够将键盘消息翻译为命令消息。要做到这一点，应用消息循环必须包含一个对 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-translateacceleratora">TranslateAccelerator</a> 函数的调用。更多关于加速键的信息，可见于 <a href="https://docs.microsoft.com/en-us/windows/desktop/menurc/keyboard-accelerators">Keyboard Accelerators</a>。
+</p>
+
+<p>
+如果线程使用了一个模态对话框，消息循环必须包含一个 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-isdialogmessagea">IsDialogMessage</a> 函数以便对话框能够接收键盘输入。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org448c8e8" class="outline-2">
+<h2 id="org448c8e8"><span class="section-number-2">5</span> 消息过滤</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+通过使用 GetMessage 和 PeekMessage 指定一个消息过滤器，应用可以选择从消息队列中检索特定的消息（忽略其他消息）。过滤器是一个消息标识符范围（由第一个和最后一个标识符指定），一个窗口句柄，或两者都用。GetMessage 和 PeekMessage 使用一个消息过滤器来选择从队列中检索的消息。如果应用必须从消息队列中搜索之后才到的消息，消息过滤是有用的。如果应用必须在处理投递的消息前处理（硬件）输入消息，这也是有用的。
+</p>
+
+<p>
+WM_KEYFIRST 和 WM_KEYLAST 常数可以用作检索所有键盘消息的过滤值；WM_MOUSEFIRST 和 WM_MOUSELAST 可以用于检索所有的鼠标消息。
+</p>
+
+<p>
+任何对消息进行过滤的应用必须保证满足消息过滤器的消息可以被投递。例如，如果一个应用在不接收键盘输入的窗口中过滤其他消息而想要得到 <a href="https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-char">WM_CHAR</a> 消息，GetMessage 函数是不会返回的。这样会“悬挂”该应用。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf54f9dd" class="outline-2">
+<h2 id="orgf54f9dd"><span class="section-number-2">6</span> 投递（posting）和发送（sending）消息</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+任何应用都能够投递和发送消息。像系统一样，应用也可以通过把消息拷贝到消息队列投递消息，和把消息数据作为窗口过程的参数来发送消息。要投递消息，应用可使用 PostMessage 函数。应用可以通过调用 SendMessage，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-broadcastsystemmessage">BroadcastSystemMessage</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagecallbacka">SendMessageCallback</a>，SendMessageTimeout，SendNotifyMessage，或 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-senddlgitemmessagea">SendDlgItemMessage</a> 函数来发送消息。
+</p>
+</div>
+
+<div id="outline-container-org8c400de" class="outline-3">
+<h3 id="org8c400de"><span class="section-number-3">6.1</span> 投递消息</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+应用一般对指定窗口投递一个消息来执行一个任务。PostMessage 为消息创建一个 MSG 结构并将它拷贝到消息队列中。应用的消息循环最终会检索到该消息并派发到合适的窗口过程。
+</p>
+
+<p>
+应用可以在不指定窗口的情况下投递消息。如果在调用 PostMessage 时，应用以 NULL 作为窗口句柄参数的值，消息会被投递到与当前线程关联的队列中。因为没有指定窗口句柄，应用必须在消息循环中处理这个消息，而不是在指定的窗口中。
+</p>
+
+<p>
+有时，你可能想要将一个消息投递到系统所有的顶级窗口中。应用可以在调用 PostMessage 时指定 HWND_TOPMOST 作为 <b>hwnd</b> 参数。
+</p>
+
+<p>
+一个通常的编程错误是假定 PostMessage 总是会投递一个消息。当消息队列已经满了的时候这是不对的。应用应该对 PostMessage 的返回值进行检查来决定消息是否被投递了，如果还没有，再投递一次。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3f938a3" class="outline-3">
+<h3 id="org3f938a3"><span class="section-number-3">6.2</span> 发送消息</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+应用通常向窗口发送消息，来提醒窗口过程立即执行任务。函数 SendMessage 将消息发送到指定窗口的窗口过程。该函数会等待窗口过程完成处理，并在之后返回消息结果。父窗口和子窗口通常通过互相发送消息来交流。例如，父窗口有一个编辑控件子窗口，它可以通过向子窗口发送消息来设置文本。控件也可以通过向父窗口发送消息来通知父窗口由用户带来的文本改变。
+</p>
+
+<p>
+函数 SendMessageCallback 也向指定的窗口的窗口过程发送消息。但不同的是，这个函数会立即返回。在窗口处理消息后，系统会调用指定的回调函数。更多关于回调函数的信息，可见于 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-sendasyncproc">SendAsynaProc</a> 。
+</p>
+
+<p>
+有时，你可能想要对在系统中的所有顶级窗口发送消息。例如，如果应用改变了系统时间，它必须发送 <a href="https://docs.microsoft.com/en-us/windows/win32/sysinfo/wm-timechange">WM_TIMECHANGE</a> 通知所有的顶级窗口。这可以通过在 SendMessage 调用中指定 HWND_TOPMOST 作为 <b>hwnd</b> 参数。你也可以指定 <b>lpdwRecipients</b> 为 BSM_APPLICATIONS，通过调用 BroadcastSystemMessage 来对所有应用广播消息。
+</p>
+
+<p>
+通过使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-insendmessage">InSendMessage</a> 和 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-insendmessageex">InSendMessageEx</a> 函数，窗口过程可以判断是否在处理由其他线程发送的消息。当消息处理依赖于消息来源时，这个功能是有用的。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf15cce6" class="outline-2">
+<h2 id="orgf15cce6"><span class="section-number-2">7</span> 消息死锁</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+调用 SendMessage 来向其他线程发送消息的线程在处理消息的窗口过程返回前是不能继续执行的。如果接收消息的线程在处理时转交了控制权，发送消息的线程就不能继续执行了，因为它在等待 SendMessage 的返回。如果接收方被附加到与发送方一样的队列上，它会造成应用的死锁。（journal hook 可以把线程附加到相同的队列）
+</p>
+
+<p>
+接收方不需要显式移交控制权；调用下面任一函数都会导致线程隐式移交控制权。
+</p>
+
+<ul class="org-ul">
+<li><a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-dialogboxa">DialogBox</a></li>
+
+<li><a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-dialogboxindirecta">DialogBoxIndirect</a></li>
+
+<li><a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-dialogboxindirectparama">DialogBoxIndirectParam</a></li>
+
+<li><a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-dialogboxparama">DialogBoxParam</a></li>
+
+<li>GetMessage</li>
+
+<li><a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-messagebox">MessageBox</a></li>
+
+<li>PeekMessage</li>
+
+<li>SendMessage</li>
+</ul>
+
+
+<p>
+为了避免应用中潜在的死锁，考虑使用 SendNotifyMessage 或 SendMessageTimeout 函数。不这样的话，窗口过程可以通过 InSendMessage 或 InSendMessageEx 来判断它收到的消息是否来自其他线程。处理消息时，在调用上面列表函数前，窗口过程应该首先调用 InSendMessage 或 InSendMessageEx。如果函数返回 TRUE，窗口过程必须在调用任何可能造成控制权转交函数前先调用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-replymessage">ReplyMessage</a>。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4f89a11" class="outline-2">
+<h2 id="org4f89a11"><span class="section-number-2">8</span> 广播消息</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+<b>消息广播</b> 就是将一个消息发送给系统中的接收者。要从应用广播一个消息，可使用 BroadcastSystemMessage 函数，并指定消息的接收者。这并不是指定接收者，而是指定一个或多个接收者的类型。接收者的类型是应用，安装的驱动，网络驱动，和系统级的设备驱动。系统会对指定类型的成员发送广播消息。
+</p>
+
+<p>
+一般来说，系统通过广播消息来响应系统级设备驱动程序或相关组件中发生的更改。驱动或相关的组件向应用和其他组件进行广播来告知它们变化的发生。例如，当软盘驱动器的设备驱动检测到介质更改（如用户插入磁盘）时，负责磁盘驱动的组件会广播信息。
+</p>
+
+<p>
+系统广播的接收者顺序是：系统级设备驱动，网络驱动，安装的驱动，以及应用。这也意味着，如果系统级设备驱动被选作接收者的话，它总是会得到首先对消息做出反应的机会。在给定的接收者类型中，没有驱动能够保证在其他驱动之前接收到消息。这意味着对一个指定驱动的消息必须有一个全局唯一的消息标识符来保证其他设备不会不经意间处理它。
+</p>
+
+<p>
+你也可以通过在 SendMessage，SendMessageCallback，SendMessageTimeout 或 SendNotifyMessage 函数中指定 HWND_BROADCAST 来对所有的顶级应用广播消息。
+</p>
+
+<p>
+应用通过它们的顶级窗口的窗口过程来接收消息。消息不会被发送到子窗口。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org40dd932" class="outline-2">
+<h2 id="org40dd932"><span class="section-number-2">9</span> 查询消息（Query Messages）</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+你可以创建你的自定义信息并使用它们协调应用与系统其他组件的活动。如果你要创建自己的可安装驱动或系统级设备驱动时，这是很有用的。你的自定义消息可以携带消息来往于驱动与使用驱动的设备之间。
+</p>
+
+<p>
+要轮询接收者来寻求执行给定动作的权限，可以使用 <b>查询消息</b> （query message）。你可以通过在调用 BroadcastSystemMessage 时指定 <b>dwFlags</b> 参数为 BSF_QUERY 来生成你自己的查询消息。每个查询消息的接收者都必须返回 TURE 以使得消息能够发送到下一个接收者。如果接收者返回了 BROADCAST_QUERY_DENY，广播会立刻结束，函数会返回 0。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga0ccc0d" class="outline-2">
+<h2 id="orga0ccc0d"><span class="section-number-2">10</span> 常见的消息</h2>
+<div class="outline-text-2" id="text-10">
+</div>
+<div id="outline-container-org115c13e" class="outline-3">
+<h3 id="org115c13e"><span class="section-number-3">10.1</span> WM_CREATE</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+当应用通过调用 CreateWindow 或 CreateWindow 要求创建一个窗口时，会发送这个消息（在函数返回前消息就被发送）。新窗口的窗口过程在窗口创建后会接收到这个消息，但是是在窗口可见之前。
+</p>
+
+<p>
+这是窗口过程接收到的第一个消息。
+</p>
+
+<p>
+接收该消息时，窗口过程的 <b>wParam</b> 参数值不被使用，它的 <b>lParam</b> 是一个指向 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-createstructa">CREATESTRUCT</a> 结构的指针。这个结构包含了窗口初始化的参数。
+</p>
+
+<p>
+处理该消息后，窗口过程应该返回 0 以继续窗口的创建。如果窗口过程返回 -1，窗口会被销毁，CreateWindow 或 CreateWindowEx 会返回空句柄。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf872133" class="outline-3">
+<h3 id="orgf872133"><span class="section-number-3">10.2</span> WM_SIZE</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+在窗口尺寸改变后向窗口发送该消息。
+</p>
+
+<p>
+<b>wParam</b> 是尺寸改变的类型，它可以是下列值中的一个；
+</p>
+
+<ul class="org-ul">
+<li>SIZE_MAXHIDE，当其他窗口最大化时，该消息会发送到所有弹出（pop-up)窗口</li>
+
+<li>SIZE_MAXIMIZED，窗口已经最大化了</li>
+
+<li>SIZE_MAXSHOW，当其他窗口恢复到之前尺寸时，该消息会发送到所有弹出窗口</li>
+
+<li>SIZE_MINIMIZED，窗口已经最小化了</li>
+
+<li>SIZE_RESTORED，窗口的尺寸改变了，但不是最大化和最小化</li>
+</ul>
+
+
+<p>
+<b>lParam</b> 的低位是客户区的新宽度，高位是客户区的新高度。虽然窗口的宽度和高度是 32 位值， <b>lParam</b> 只包含宽高值的低 16 位。
+</p>
+
+<p>
+窗口过程处理该消息后应该返回 0。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org811be9b" class="outline-3">
+<h3 id="org811be9b"><span class="section-number-3">10.3</span> WM_PAINT</h3>
+<div class="outline-text-3" id="text-10-3">
+<p>
+当系统或其他应用要求对应用窗口的部分进行绘制时，会发送该消息。调用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-updatewindow">UpdateWindow</a> 或 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-redrawwindow">RedrawWindow</a> 函数时，或在应用通过使用 GetMessage 或 PeekMessage 获得 WM_PAINT 并调用 DispatchMessage 函数后，消息会被发送到窗口过程。
+</p>
+
+<p>
+<b>lParam</b> 和 <b>wParam</b> 都不被使用。
+</p>
+
+<p>
+WM_PAINT 消息由系统生成，它不应由应用发送。要想强制应用绘制特定的设备上下文，可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/gdi/wm-print">WM_PRINT</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/gdi/wm-printclient">WM_PRINTCLIENT</a> 消息。
+</p>
+
+<p>
+当应用消息队列中没有其他消息时，系统会把该消息送入队列。当应用消息队列中没有其他消息时，调用 GetMessage 会返回 WM_PAINT，DispatchMessage 会把消息发送到合适的窗口。
+</p>
+
+<p>
+DefWindowProc 函数会将绘制区域有效化。
+</p>
+
+<p>
+窗口可能因使用 RDW_INTERNALPAINT 调用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-redrawwindow">RedrawWindow</a> 而受到内部绘制消息。在这种情况下，窗口可能没有更新区域。应用可以调用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-getupdaterect">GetUpdateRect</a> 来判断窗口是否存在更新区域。如果 GetUpeateRect 返回 0，则窗口不必调用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-beginpaint">BeginPaint</a> 和 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-endpaint">EndPaint</a>。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgcb1b743" class="outline-3">
+<h3 id="orgcb1b743"><span class="section-number-3">10.4</span> WM_DESTROY</h3>
+<div class="outline-text-3" id="text-10-4">
+<p>
+当窗口将被销毁时发送该消息。在窗口被从屏幕删除后，它会被发送到删除的窗口的窗口过程。
+</p>
+
+<p>
+该消息首先被发送到被销毁的窗口，之后发送到子窗口（如果有的话）。在消息的主窗口处理过程中，可以假设所有子窗口还是存在的。
+</p>
+
+<p>
+<b>wParam</b> 和 <b>lParam</b> 不被使用。如果处理了该消息，窗口过程应返回 0。
+</p>
+
+<p>
+如果被销毁的窗口是剪切板链的一部分，在 WM_DESTROY 消息处理返回前，窗口必须将它从链条中移除。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdba2c72" class="outline-3">
+<h3 id="orgdba2c72"><span class="section-number-3">10.5</span> WM_COMMAND</h3>
+<div class="outline-text-3" id="text-10-5">
+<p>
+当用户从菜单选中一个命令时会发送，当控件向它的父窗口发送提醒消息时会发送，当加速键被翻译时会发送。
+</p>
+
+<p>
+如果应用处理了该消息，它应该返回 0。
+</p>
+
+<p>
+在消息来源是菜单时， <b>wParam</b> 的高位是 0，低位是菜单标识符（IDM_*）， <b>lParam</b> 是 0。
+</p>
+
+<p>
+消息来源是加速键时， <b>wParam</b> 的高位是 1，低位是加速键标识符（IDM_*）， <b>lParam</b> 是 0。
+</p>
+
+<p>
+消息来源是控件时， <b>wParam</b> 的高位是控件特定的通知码，低位是控件标识符， <b>lParam</b> 是控件窗口句柄。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfa53fd8" class="outline-3">
+<h3 id="orgfa53fd8"><span class="section-number-3">10.6</span> WM_SETFOCUS</h3>
+<div class="outline-text-3" id="text-10-6">
+<p>
+窗口获得键盘输入焦点后会接收该消息。
+</p>
+
+<p>
+<b>wParam</b> 是失去键盘输入焦点的窗口的句柄。这个参数可以是 NULL。
+</p>
+
+<p>
+<b>lParam</b> 不被使用。
+</p>
+
+<p>
+处理消息后，窗口过程应返回 0。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7bb8c44" class="outline-3">
+<h3 id="org7bb8c44"><span class="section-number-3">10.7</span> WM_KILLFOCUS</h3>
+<div class="outline-text-3" id="text-10-7">
+<p>
+在一个窗口即将失去键盘焦点前，会向它发送该消息。
+</p>
+
+<p>
+<b>wParam</b> 是接收键盘焦点的窗口。它可以是 NULL。
+</p>
+
+<p>
+<b>lParam</b> 不被使用。
+</p>
+
+<p>
+处理消息后，窗口过程应返回 0。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6231a61" class="outline-2">
+<h2 id="org6231a61"><span class="section-number-2">11</span> 参考资料</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+<a id="org928478f">【1】</a> About Messages and Message Queues：<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-messages-and-message-queues">https://docs.microsoft.com/en-us/windows/win32/winmsg/about-messages-and-message-queues</a>
+</p>
+
+<p>
+<a id="orgf4d5d2d">【2】</a> <i>Programming Windows</i> , Charles Petzold
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2020-06-25 Thu 00:00</p> <p>Last modified: 2021-08-03 Tue 15:33</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
