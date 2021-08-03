@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-03 Tue 13:10 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>什么是base64编码 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">什么是base64编码 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgb8cf267">1. 什么是 Base64</a></li>
+<li><a href="#org0f97851">2. Base64 编码表</a></li>
+<li><a href="#org511fabb">3. 缀词（padding） =</a></li>
+<li><a href="#org4fdb7f5">4. Base64 的解码</a></li>
+<li><a href="#org2c07838">5. 一个简单的 C 实现</a>
+<ul>
+<li><a href="#org9638505">5.1. 编码</a></li>
+<li><a href="#org4667c14">5.2. 解码</a></li>
+<li><a href="#orga613a6c">5.3. 测试</a></li>
+</ul>
+</li>
+<li><a href="#orgf16e6e3">6. 在 Python 中使用 Base64</a>
+<ul>
+<li><a href="#org9b3f7b7">6.1. Python 的 base64 模块</a></li>
+<li><a href="#orge1720d4">6.2. 接口函数</a></li>
+<li><a href="#orgfae18b6">6.3. 具体用法</a></li>
+</ul>
+</li>
+<li><a href="#org4daa14e">7. 参考资料</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgb8cf267" class="outline-2">
+<h2 id="orgb8cf267"><span class="section-number-2">1</span> 什么是 Base64</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Base64 是二进制到字符编码的一种方案，将二进制数据使用 ASCII 字符串格式表示，即翻译为基数为 64 的一种表示。每个 Base64 数字表示一个 6 比特的数据。三个字节（共 24 个比特）因此可以被表示为 4 个 Base64 数字。
+</p>
+
+<p>
+Base64 常用于处理文本数据的场合，表示、传输、存储一些二进制数据。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0f97851" class="outline-2">
+<h2 id="org0f97851"><span class="section-number-2">2</span> Base64 编码表</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+从 0 到 25 ，也就是从 000000 到 011001，是 ASCII 字符 A - Z
+</p>
+
+<p>
+从 26 到 51，也就是从 011010 到 110011，是 ASCII 字符 a - z
+</p>
+
+<p>
+从 52 到 61，也就是从 110100 到 111101，是 ASCII 字符 0 - 9
+</p>
+
+<p>
+62 （111110）是 ASCII 字符 +
+</p>
+
+<p>
+63 （111111）是 ASCII 字符 /
+</p>
+</div>
+</div>
+
+<div id="outline-container-org511fabb" class="outline-2">
+<h2 id="org511fabb"><span class="section-number-2">3</span> 缀词（padding） =</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+因为 Base64 是每 6 个比特进行一次编码，而现代电脑上的编码值被分为了一个个 8 比特的字节，因此，在 Base64 编码的文本中，每 4 个字符表示三个字节的未编码的文本或数据。这就意味着，当未编码的输入的字节数不是 3 的倍数时，编码输出必须加上缀词来使得输出的长度是 4 的倍数。这个缀词便是 <code>=</code> ，它表明：不再需要更多的比特来进行解码。
+</p>
+
+<p>
+<code>=</code> 数量规则如下：
+</p>
+
+<ul class="org-ul">
+<li>若源数据的字节数是 3 的倍数，则不需要加 <code>=</code></li>
+
+<li>若源数据的字节数除 3 余 1，则加两个 <code>=</code></li>
+
+<li>若源数据的字节数除 3 余 2，则加一个 <code>=</code></li>
+</ul>
+
+
+<p>
+举个例子来说明 <code>=</code> 的使用：
+</p>
+
+<p>
+字符串 "Man" 的 ASCII 编码是 <code>01001101</code> ， <code>01100001</code> ， <code>01101110</code> ，（0x4d，0x61，0x6e）。拆成六个一组，就是 <code>010011</code> ， <code>010110</code> ， <code>000101</code> ， <code>101110</code> 。对应于 Base64 编码表中的 T，W，F，u，故编码后 ASCII 编码的"Man" 对应于 "TWFu"。
+</p>
+
+<p>
+字符串 "Ma" 的 ASCII 是 <code>01001101</code> ， <code>01100001</code> 。拆开得到 <code>010011</code> ， <code>010110</code> ， <code>0001</code> 。最后一组还少两个比特，补零得到 <code>000100</code> 。对应于 Base64 编码得到 T，W，E，编码结果为 "TWE="。此处的 <code>=</code> 表明补了两个比特。
+</p>
+
+<p>
+字符串 "M" 的 ASCII 是 <code>01001101</code> ，拆开之，得到 <code>010011</code> ， <code>01</code> 。最后一组要补四个零，得到 <code>010000</code> 。对应 Base64 得到 T，Q。编码结果为 "TQ=="， <code>==</code> 表明补了四个比特。
+</p>
+
+<p>
+实际上，缀词 <code>=</code> 并不是必须的，因为缺少的字节可以从编码文本的长度中计算得到。例如 “YW55IGNhcm5hbCBwbGVhc3VyZS4” 这个编码串共有 27 个字符，不是 4 的倍数， 且由 mod(27, 4) = 1 可知它补充了两个比特。通过这些信息就可以知道源文本（或数据）（若为 ASCII 编码）是 “any carnal pleasure.”。但是，如果多个 Base64 编码字符串被连接在一起, <code>=</code> 是必要的，因为需要使用它来区分不同来源的字符串。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4fdb7f5" class="outline-2">
+<h2 id="org4fdb7f5"><span class="section-number-2">4</span> Base64 的解码</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+当对 Base64 进行解码时，四个字符通常会被转化为三个字节。当存在缀词时则可能是两个或一个，一个 <code>=</code> 表明四个字符会被转化为两个字节，两个 <code>=</code> 表明四字符会被转为一个字节。上面的例子便是如此。
+</p>
+
+<p>
+如果没有缀词，在对所有的四字符组进行转码后，若还有剩下的字符，剩下的字符数一定小于四。这种情况下，只可能剩下两个或三个字符。若剩下两个字符，则转为一个字节，若为三个则转为两个字节。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2c07838" class="outline-2">
+<h2 id="org2c07838"><span class="section-number-2">5</span> 一个简单的 C 实现</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+以下代码在 MINGW 下通过编译并通过了下面的测试。
+</p>
+
+<p>
+简便起见，我没用使用 stdint 头文件，所有下面的代码想要正确运行的话，必须满足 <code>int</code> 是 32 位。
+</p>
+</div>
+
+<div id="outline-container-org9638505" class="outline-3">
+<h3 id="org9638505"><span class="section-number-3">5.1</span> 编码</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+要想将一个个字节编码为 Base64，首先需要一张二进制码（000000 - 111111）到 64 个字符的映射表：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">char</span> <span style="color: #a0522d;">base64_encode_table</span>[64] =
+{
+    <span style="color: #8b2252;">'A'</span>, <span style="color: #8b2252;">'B'</span>, <span style="color: #8b2252;">'C'</span>, <span style="color: #8b2252;">'D'</span>, <span style="color: #8b2252;">'E'</span>, <span style="color: #8b2252;">'F'</span>, <span style="color: #8b2252;">'G'</span>, <span style="color: #8b2252;">'H'</span>, <span style="color: #8b2252;">'I'</span>, <span style="color: #8b2252;">'J'</span>, <span style="color: #8b2252;">'K'</span>, <span style="color: #8b2252;">'L'</span>,
+    <span style="color: #8b2252;">'M'</span>, <span style="color: #8b2252;">'N'</span>, <span style="color: #8b2252;">'O'</span>, <span style="color: #8b2252;">'P'</span>, <span style="color: #8b2252;">'Q'</span>, <span style="color: #8b2252;">'R'</span>, <span style="color: #8b2252;">'S'</span>, <span style="color: #8b2252;">'T'</span>, <span style="color: #8b2252;">'U'</span>, <span style="color: #8b2252;">'V'</span>, <span style="color: #8b2252;">'W'</span>, <span style="color: #8b2252;">'X'</span>, <span style="color: #8b2252;">'Y'</span>, <span style="color: #8b2252;">'Z'</span>,
+    <span style="color: #8b2252;">'a'</span>, <span style="color: #8b2252;">'b'</span>, <span style="color: #8b2252;">'c'</span>, <span style="color: #8b2252;">'d'</span>, <span style="color: #8b2252;">'e'</span>, <span style="color: #8b2252;">'f'</span>, <span style="color: #8b2252;">'g'</span>, <span style="color: #8b2252;">'h'</span>, <span style="color: #8b2252;">'i'</span>, <span style="color: #8b2252;">'j'</span>, <span style="color: #8b2252;">'k'</span>, <span style="color: #8b2252;">'l'</span>,
+    <span style="color: #8b2252;">'m'</span>, <span style="color: #8b2252;">'n'</span>, <span style="color: #8b2252;">'o'</span>, <span style="color: #8b2252;">'p'</span>, <span style="color: #8b2252;">'q'</span>, <span style="color: #8b2252;">'r'</span>, <span style="color: #8b2252;">'s'</span>, <span style="color: #8b2252;">'t'</span>, <span style="color: #8b2252;">'u'</span>, <span style="color: #8b2252;">'v'</span>, <span style="color: #8b2252;">'w'</span>, <span style="color: #8b2252;">'x'</span>, <span style="color: #8b2252;">'y'</span>, <span style="color: #8b2252;">'z'</span>,
+    <span style="color: #8b2252;">'0'</span>, <span style="color: #8b2252;">'1'</span>, <span style="color: #8b2252;">'2'</span>, <span style="color: #8b2252;">'3'</span>, <span style="color: #8b2252;">'4'</span>, <span style="color: #8b2252;">'5'</span>, <span style="color: #8b2252;">'6'</span>, <span style="color: #8b2252;">'7'</span>, <span style="color: #8b2252;">'8'</span>, <span style="color: #8b2252;">'9'</span>, <span style="color: #8b2252;">'+'</span>, <span style="color: #8b2252;">'/'</span>
+};
+</pre>
+</div>
+
+<p>
+由于现在的计算机中一个字节是 8 位，而 Base64 编码中每 6 位进行一次编码，在处理过程中若直接使用字节（字符）数组可能不是太方便。考虑到 3 * 8 = 4 * 6，先编写一次性对 3 个字节进行处理的函数会方便不少，而且若最后还剩下 1 或 2 个字节，可以一并处理。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">void</span> <span style="color: #0000ff;">base64_convert3</span>(<span style="color: #228b22;">char</span> * <span style="color: #a0522d;">dststr</span>, <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">c1</span>, <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">c2</span>, <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">c3</span>, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">num</span>)
+{
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">dststr must be big enough to contain four char</span>
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">num is the number of byte to convert</span>
+
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">convert</span> = 0;
+    convert = (c1 &lt;&lt; 16) | (c2 &lt;&lt; 8) | c3;
+    <span style="color: #a020f0;">for</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 0; i &lt; 4; i++)
+    {
+        <span style="color: #228b22;">int</span> <span style="color: #a0522d;">temp</span> = (convert &gt;&gt; (i * 6)) &amp; 0x3f; <span style="color: #b22222;">//</span><span style="color: #b22222;">0x3f = 00111111</span>
+
+        dststr[3 - i] = base64_encode_table[temp];
+    }
+
+    <span style="color: #a020f0;">for</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 3; i &gt; num; i--)
+    {
+        dststr[i] = <span style="color: #8b2252;">'='</span>;
+    }
+}
+</pre>
+</div>
+
+<p>
+上面的函数的三个字符参数 <code>c1, c2, c3</code> 是顺序排列的 3 个字节，参数 <code>num</code> 是处理字节的个数。如果 <code>num</code> 的值不为 3，那么 c2 或 c3 的值应该设为 0 来确保得到正确的结果。
+</p>
+
+<p>
+这个函数没有对参数的合理性进行检验。
+</p>
+
+<p>
+接下来就可以完成编码函数了。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">base64_encoder</span>(<span style="color: #228b22;">char</span> * <span style="color: #a0522d;">dststr</span>, <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">srcstr</span>, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">num</span>, <span style="color: #228b22;">int</span> * <span style="color: #a0522d;">dstlength</span>)
+{
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">num is the number of byte</span>
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">dstlength is the number of encoded char, include '='</span>
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">dststr must be big enough to carry encoded char</span>
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">return non-zero means failed</span>
+    <span style="color: #a020f0;">if</span> (dststr == <span style="color: #008b8b;">NULL</span> || srcstr == <span style="color: #008b8b;">NULL</span> || num &lt;= 0 || dstlength == <span style="color: #008b8b;">NULL</span>)
+    {
+        <span style="color: #a020f0;">return</span> 1;
+    }
+
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">cnt</span> = 0;
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 0;
+    <span style="color: #a020f0;">for</span> (i = 0; i &lt;= num - 3; i += 3)
+    {
+        base64_convert3(dststr + cnt, srcstr[i], srcstr[i + 1], srcstr[i + 2], 3);
+        cnt += 4;
+    }
+
+    <span style="color: #a020f0;">if</span> (i == num)
+    {
+        dstlength[0] = cnt;
+        <span style="color: #a020f0;">return</span> 0;
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (i == num - 1)
+    {
+        base64_convert3(dststr + cnt, srcstr[i], 0, 0, 1);
+        cnt += 4;
+        dstlength[0] = cnt;
+        <span style="color: #a020f0;">return</span> 0;
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (i == num - 2)
+    {
+        base64_convert3(dststr + cnt, srcstr[i], srcstr[i + 1], 0, 2);
+        cnt += 4;
+        dstlength[0] = cnt;
+        <span style="color: #a020f0;">return</span> 0;
+    }
+    <span style="color: #a020f0;">else</span>
+    {
+        <span style="color: #a020f0;">return</span> 1;
+    }
+
+    <span style="color: #a020f0;">return</span> 1;
+}
+</pre>
+</div>
+
+<p>
+该函数做了最低限度的参数检查。 <code>dststr</code> 代表编码后字符串的目标位置， <code>srcstr</code> 表示源字符串， <code>num</code> 是源字符串的长度， <code>dstlength</code> 指向一个整型变量，用于存储得到的编码的长度。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4667c14" class="outline-3">
+<h3 id="org4667c14"><span class="section-number-3">5.2</span> 解码</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+与编码相似，解码也需要一张映射表，不过 Base64 只规定了从二进制到字符进行编码，而没有规定字符的编码，至于字符编码是 ASCII 还是其他的比如 UTF-8，EBCDEC 。为了简便起见，这里使用 ASCII。可以使用一个一个 if else 来去掉字符集依赖性，不过也太麻烦了点：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #0000ff;">base64_decode_table</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">ch</span>)
+{
+    <span style="color: #b22222;">//</span><span style="color: #b22222;">use ascii code</span>
+    <span style="color: #a020f0;">if</span> (isupper(ch))
+    {
+        <span style="color: #a020f0;">return</span> ch - 65; <span style="color: #b22222;">// </span><span style="color: #b22222;">'A' is 65</span>
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (islower(ch))
+    {
+        <span style="color: #a020f0;">return</span> ch - 97 + 26; <span style="color: #b22222;">// </span><span style="color: #b22222;">'a' is 97</span>
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (isdigit(ch))
+    {
+        <span style="color: #a020f0;">return</span> ch - 48 + 52; <span style="color: #b22222;">// </span><span style="color: #b22222;">'0' is 48</span>
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (ch == <span style="color: #8b2252;">'+'</span>)
+    {
+        <span style="color: #a020f0;">return</span> 62;
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (ch == <span style="color: #8b2252;">'/'</span>)
+    {
+        <span style="color: #a020f0;">return</span> 63;
+    }
+    <span style="color: #a020f0;">else</span>
+    {
+        <span style="color: #a020f0;">return</span> 255;
+    }
+}
+</pre>
+</div>
+
+<p>
+同样，与编码类似，解码时也可以考虑将四个字符看成一组，这样处理带 <code>=</code> 时更方便：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">void</span> <span style="color: #0000ff;">base64_convert4</span>(<span style="color: #228b22;">char</span> * <span style="color: #a0522d;">dststr</span>, <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">c1</span>, <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">c2</span>, <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">c3</span>, <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">char</span> <span style="color: #a0522d;">c4</span>, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">num</span>)
+{
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">num is the number of char</span>
+    <span style="color: #b22222;">// </span><span style="color: #b22222;">dststr must not be null</span>
+
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">convert</span> = 0;
+    convert = base64_decode_table(c4);
+    convert = convert | (base64_decode_table(c3) &lt;&lt; 6);
+    convert = convert | (base64_decode_table(c2) &lt;&lt; 12);
+    convert = convert | (base64_decode_table(c1) &lt;&lt; 18);
+    <span style="color: #a020f0;">for</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 0; i &lt;= num - 2; i++)
+    {
+        dststr[i] = convert &gt;&gt; (8 * (2 - i)) &amp; 0xff;
+    }
+}
+</pre>
+</div>
+
+<p>
+接下来就可以编写解码函数了，因为要处理使用 <code>=</code> 和不使用 <code>=</code> 的情况，代码的选择支有点多，看起来有点长：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">base64_decoder</span>(<span style="color: #228b22;">char</span> * <span style="color: #a0522d;">dststr</span>, <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">srcstr</span>, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">num</span>, <span style="color: #228b22;">int</span> *<span style="color: #a0522d;">dstlength</span>)
+{
+    <span style="color: #b22222;">//</span><span style="color: #b22222;">the min value of num is 2</span>
+    <span style="color: #a020f0;">if</span> (dststr == <span style="color: #008b8b;">NULL</span> || srcstr == <span style="color: #008b8b;">NULL</span> || num &lt; 2 || dstlength == <span style="color: #008b8b;">NULL</span>)
+    <span style="color: #a020f0;">return</span> 1;
+
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span>;
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">cnt</span> = 0;
+
+    <span style="color: #a020f0;">for</span> (i = 0; i &lt;= num - 8; i += 4)
+    {
+        base64_convert4(dststr + cnt, srcstr[i], srcstr[i + 1], srcstr[i + 2], srcstr[i + 3], 4);
+        cnt += 3;
+    }
+
+    <span style="color: #a020f0;">if</span> (i == num - 4)
+    {
+        <span style="color: #a020f0;">if</span> (srcstr[num - 1] != <span style="color: #8b2252;">'='</span>)
+        {
+            base64_convert4(dststr + cnt, srcstr[i], srcstr[i + 1], srcstr[i + 2], srcstr[i + 3], 4);
+            cnt += 3;
+            dstlength[0] = cnt;
+            <span style="color: #a020f0;">return</span> 0;
+        }
+        <span style="color: #a020f0;">else</span>
+        {
+            <span style="color: #a020f0;">if</span> (srcstr[num - 2] == <span style="color: #8b2252;">'='</span>)
+            {
+                base64_convert4(dststr + cnt, srcstr[i], srcstr[i + 1], 0, 0, 2);
+                cnt += 1;
+                dstlength[0] = cnt;
+                <span style="color: #a020f0;">return</span> 0;
+            }
+            <span style="color: #a020f0;">else</span>
+            {
+                base64_convert4(dststr + cnt, srcstr[i], srcstr[i + 1], srcstr[i + 2], 0, 3);
+                cnt += 2;
+                dstlength[0] = cnt;
+                <span style="color: #a020f0;">return</span> 0;
+            }
+        }
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (i == num - 3)
+    {
+        base64_convert4(dststr + cnt, srcstr[i], srcstr[i + 1], srcstr[i + 2], 0, 3);
+        cnt += 2;
+        dstlength[0] = cnt;
+        <span style="color: #a020f0;">return</span> 0;
+    }
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (i == num - 2)
+    {
+        base64_convert4(dststr + cnt, srcstr[i], srcstr[i + 1], 0, 0, 2);
+        cnt += 1;
+        dstlength[0] = cnt;
+        <span style="color: #a020f0;">return</span> 0;
+    }
+    <span style="color: #a020f0;">else</span>
+    {
+        <span style="color: #a020f0;">return</span> 1;
+    }
+    <span style="color: #a020f0;">return</span> 1;
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga613a6c" class="outline-3">
+<h3 id="orga613a6c"><span class="section-number-3">5.3</span> 测试</h3>
+<div class="outline-text-3" id="text-5-3">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">main</span>(<span style="color: #228b22;">void</span>)
+{
+    <span style="color: #228b22;">char</span> <span style="color: #a0522d;">man</span>[] = <span style="color: #8b2252;">"Man"</span>;
+    <span style="color: #228b22;">char</span> <span style="color: #a0522d;">trans_man</span>[3][20];
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">len</span>[3];
+
+    <span style="color: #b22222;">//</span><span style="color: #b22222;">test encode</span>
+    <span style="color: #a020f0;">for</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 0; i &lt; 3; i++)
+    {
+        base64_encoder(trans_man[i], man, 3 - i, len + i);
+        trans_man[i][len[i]] = <span style="color: #8b2252;">'\0'</span>;
+        printf(<span style="color: #8b2252;">"%s\n"</span>, trans_man[i]);
+    }
+
+    <span style="color: #b22222;">//</span><span style="color: #b22222;">test decode</span>
+    <span style="color: #228b22;">char</span> <span style="color: #a0522d;">restore</span>[3][20];
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">lenres</span>[3];
+    <span style="color: #a020f0;">for</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 0; i &lt; 3; i++)
+    {
+        base64_decoder(restore[i], trans_man[i], 4, lenres + i);
+        restore[i][lenres[i]] = <span style="color: #8b2252;">'\0'</span>;
+        printf(<span style="color: #8b2252;">"%s\n"</span>, restore[i]);
+    }
+
+    <span style="color: #b22222;">//</span><span style="color: #b22222;">test for situation without '='</span>
+    base64_decoder(restore[0], trans_man[1], 3, lenres);
+    restore[0][lenres[0]] = <span style="color: #8b2252;">'\0'</span>;
+    printf(<span style="color: #8b2252;">"%s\n"</span>, restore[0]);
+
+    base64_decoder(restore[0], trans_man[2], 2, lenres);
+    restore[0][lenres[0]] = <span style="color: #8b2252;">'\0'</span>;
+    printf(<span style="color: #8b2252;">"%s\n"</span>, restore[0]);
+
+    <span style="color: #228b22;">char</span> <span style="color: #a0522d;">myself</span>[] = <span style="color: #8b2252;">"include-yy"</span>;
+    <span style="color: #228b22;">char</span> <span style="color: #a0522d;">myself_encode</span>[20];
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">myself_len</span>;
+    base64_encoder(myself_encode, myself, 10, &amp;myself_len);
+    myself_encode[myself_len] = <span style="color: #8b2252;">'\0'</span>;
+    printf(<span style="color: #8b2252;">"\n%s\n"</span>, myself_encode);
+
+    base64_decoder(restore[0], myself_encode, myself_len, lenres);
+    restore[0][lenres[0]] = <span style="color: #8b2252;">'\0'</span>;
+    printf(<span style="color: #8b2252;">"%s\n"</span>, restore[0]);
+
+
+    <span style="color: #a020f0;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+输出结果应该为：
+</p>
+
+<pre class="example">
+TWFu
+TWE=
+TQ==
+Man
+Ma
+M
+Ma
+M
+
+aW5jbHVkZS15eQ==
+include-yy
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf16e6e3" class="outline-2">
+<h2 id="orgf16e6e3"><span class="section-number-2">6</span> 在 Python 中使用 Base64</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Python 随处可见，用起来也比 C 方便的多，故学习 Python 的用法肯定还是有用的。
+</p>
+</div>
+
+<div id="outline-container-org9b3f7b7" class="outline-3">
+<h3 id="org9b3f7b7"><span class="section-number-3">6.1</span> Python 的 base64 模块</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+base64 模块提供了将二进制数据编码为可打印 ASCII 字符和将编码解码为二进制数据的函数。
+</p>
+
+<p>
+base64 模块提供的函数不限于操作 base64，还有 base16，base32 等，不过这里只关注 base64 的编码和解码。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge1720d4" class="outline-3">
+<h3 id="orge1720d4"><span class="section-number-3">6.2</span> 接口函数</h3>
+<div class="outline-text-3" id="text-6-2">
+<div class="org-src-container">
+<pre class="src src-python">base64.b64encode(s, altchars=<span style="color: #008b8b;">None</span>)
+</pre>
+</div>
+
+<p>
+该函数将<a href="https://docs.python.org/3/glossary.html#term-bytes-like-object">类字节对象</a>（bytes-like object）使用 base64 进行编码，并返回编码后的字节。
+</p>
+
+<p>
+<code>altchars</code> 必须是长度至少为 2 的类字节对象，这些字符指定了代替 <code>+</code> 和 <code>/</code> 的字符。这就允许该函数生成 URL 安全的 Base64 字符串。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">base64.b64decode(s, altchars=<span style="color: #008b8b;">None</span>, validate=<span style="color: #008b8b;">False</span>)
+</pre>
+</div>
+
+<p>
+该函数被编码的字符串解码并返回解码字节。
+</p>
+
+<p>
+<code>altchars</code> 必须是长度至少为 2 的类字节对象或 ASCII 字符串，这些字符串指定了用来代替 <code>+</code> 和 <code>/</code> 的字符。
+</p>
+
+<p>
+<code>validate</code> 默认为 <code>False</code> ，既不是 base-64 字符也不是备用字母表中的字符会被丢弃。如果 <code>validate</code> 为 <code>True</code> ，非 base64 字符会导致 <a href="https://docs.python.org/3/library/binascii.html#binascii.Error">binascii.Error</a> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfae18b6" class="outline-3">
+<h3 id="orgfae18b6"><span class="section-number-3">6.3</span> 具体用法</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+首先，导入 python 的 base64 模块
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a020f0;">import</span> base64
+</pre>
+</div>
+
+<p>
+创建一个字符串，并使用 encode 方法，将其转化为字节对象：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a0522d;">s</span> = <span style="color: #8b2252;">'include-yy'</span>
+<span style="color: #a0522d;">s</span> = s.encode()
+</pre>
+</div>
+
+<p>
+（encode 方法的默认编码是 'uft-8'）
+</p>
+
+<p>
+接着使用 `base64.b64encode()` ，便可得到结果：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">base.b64encode(s)
+</pre>
+</div>
+
+<p>
+想要解码，则调用 `base64.b64decode()`
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a0522d;">s2</span> = base.b64encode(s)
+base64.b64decode(s2.encode());
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4daa14e" class="outline-2">
+<h2 id="org4daa14e"><span class="section-number-2">7</span> 参考资料</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+<a href="https://en.wikipedia.org/wiki/Base64">https://en.wikipedia.org/wiki/Base64</a>
+</p>
+
+<p>
+<a href="https://docs.python.org/3/library/base64.html?highlight=base64#module-base64">https://docs.python.org/3/library/base64.html?highlight=base64#module-base64</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2020-05-06 Wed 00:00</p> <p>Last modified: 2021-08-03 Tue 13:09</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
