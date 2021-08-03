@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-03 Tue 15:46 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Windows窗口与消息：计时器 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNjE5MzIw.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">Windows窗口与消息：计时器 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNjE5MzIw.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgada640a">1. 计时器简述</a></li>
+<li><a href="#org6858985">2. 计时器的操纵</a>
+<ul>
+<li><a href="#org8cf5054">2.1. WM_TIMER 消息</a></li>
+<li><a href="#org4a916d4">2.2. 计时器过程（TimerProc）</a></li>
+<li><a href="#org5f1052d">2.3. 代码示例：随机矩形</a></li>
+</ul>
+</li>
+<li><a href="#org2693299">3. 高精度计时器</a></li>
+<li><a href="#orga38ec00">4. 可等（Waitable）计时器对象</a></li>
+<li><a href="#orgd8b8407">5. 参考资料</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgada640a" class="outline-2">
+<h2 id="orgada640a"><span class="section-number-2">1</span> 计时器简述</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+应用使用计时器来在指定时间过去后安排事件的发生。每当给计时器指定的一个时间区间过去后，系统会给和计时器关联的窗口发送通知。因为计时器的精确度依赖于系统时钟精度和应用从消息队列检索消息的频率，计时器的时间区间只能看作一个粗略值。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6858985" class="outline-2">
+<h2 id="org6858985"><span class="section-number-2">2</span> 计时器的操纵</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+应用可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-settimer">SetTimer</a> 函数创建计时器。计时器一创建就开始计时。应用可以使用 SetTimer 来修改计时器的时间间隔值，可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-killtimer">KillTimer</a> 销毁一个计时器。
+</p>
+
+<p>
+每个计时器都有一个唯一的标识符。当创建计时器时，应用可以指定一个标识符，也可以让系统创造一个唯一值。<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-timer">WM_TIMER</a> 消息包含了计时器的标识符。
+</p>
+
+<p>
+如果在调用 SetTimer 时指定了窗口句柄，应用会将计时器与窗口关联起来。当过去一个计时器时间区间后，系统会向与计时器关联的窗口投递一个 WM_TIMER 消息。如果没有指定窗口句柄，创建计时器的应用必须在消息队列中监视 WM_TIMER 消息并派发到合适的窗口。如果你指定了 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-timerproc">TimerProc</a> 回调函数，默认窗口过程会在接收到 WM_TIMER 消息时调用回调函数来处理它。因此，你需要在主调线程中派发消息，即便在你使用 TimerProc 而不是在窗口过程中处理它。
+</p>
+</div>
+
+<div id="outline-container-org8cf5054" class="outline-3">
+<h3 id="org8cf5054"><span class="section-number-3">2.1</span> WM_TIMER 消息</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+当计时器经过给定时间后，会发送到线程的消息队列。
+</p>
+
+<p>
+<b>wParam</b> 是计时器标识符，*lParam* 是在计时器安装时，传递给 SetTimer 的应用定义的回调函数的函数指针。
+</p>
+
+<p>
+如果应用处理了该消息，窗口过程应该返回 0。
+</p>
+
+<p>
+WM_TIMER 消息优先级很低。GetMessage 和 PeekMessage 仅在队列中没有其他高优先级消息时才会投递该消息。
+</p>
+
+<p>
+WM_TIMER 不会连续在消息队列中添加多个，Windows 会把多个 WM_TIMER 消息合成为一个。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4a916d4" class="outline-3">
+<h3 id="org4a916d4"><span class="section-number-3">2.2</span> 计时器过程（TimerProc）</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+函数的原型如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">TIMERPROC</span> <span style="color: #a0522d;">Timerproc</span>;
+<span style="color: #b22222;">//</span><span style="color: #b22222;">VOID CALLBACK TimerProc(HWND, UINT, UINT_PTR, DWORD);</span>
+
+<span style="color: #228b22;">void</span> <span style="color: #0000ff;">Timerproc</span>(
+  <span style="color: #228b22;">HWND</span> <span style="color: #a0522d;">Arg1</span>,
+  <span style="color: #228b22;">UINT</span> <span style="color: #a0522d;">Arg2</span>,
+  <span style="color: #228b22;">UINT_PTR</span> <span style="color: #a0522d;">Arg3</span>,
+  <span style="color: #228b22;">DWORD</span> <span style="color: #a0522d;">Arg4</span>
+)
+{...}
+</pre>
+</div>
+
+<p>
+<b>Arg1</b> 是与计时器关联的窗口句柄
+</p>
+
+<p>
+<b>Arg2</b> 是 WM_TIMER 消息标识符值
+</p>
+
+<p>
+<b>Arg3</b> 是计时器标识符
+</p>
+
+<p>
+<b>Arg4</b> 是系统启动后过去的时间，以毫秒为单位。这个值由 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-gettickcount">GetTickCount</a> 函数返回。
+</p>
+
+<p>
+该函数不需要返回值。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5f1052d" class="outline-3">
+<h3 id="org5f1052d"><span class="section-number-3">2.3</span> 代码示例：随机矩形</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+<b>Programming Windows</b> 中有一个有趣的例子：在用户区上绘制各种颜色的随机矩形。在书中作者使用的是无阻塞的 PeekMessage 完成的操作，此处也可以使用计时器。
+</p>
+
+<p>
+为了能够控制矩形的生成，可以使用鼠标消息，单击左键开始生成随机矩形，单击右键使其停止。
+</p>
+
+<p>
+以下代码在 VS2019 下通过编译并顺利测试。
+</p>
+
+<p>
+首先，在 VS 中创建一个标准桌面应用项目。然后在源文件的最上方加上计时器过程的声明，以及计时器标识符的宏：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #483d8b;">#define</span> <span style="color: #a0522d;">ID_TIMER</span> 1
+VOID <span style="color: #228b22;">CALLBACK</span> <span style="color: #0000ff;">TimerProc</span>(HWND, UINT, UINT_PTR, DWORD);
+</pre>
+</div>
+
+<p>
+在 WndProc 函数头加上一个静态变量，记录计时器是否已创建：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #a020f0;">static</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">bCreated</span>;
+</pre>
+</div>
+
+<p>
+在 WndProc 的 switch 语句块中加入鼠标消息的处理代码：（这里让计时器每秒计时大约 30 次）
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #a020f0;">case</span> WM_LBUTTONDOWN:
+    <span style="color: #a020f0;">if</span> (bCreated)
+        <span style="color: #a020f0;">return</span> 0;
+    <span style="color: #0000ff;">SetTimer</span>(hWnd, ID_TIMER, 33, TimerProc);
+    bCreated = 1;
+    <span style="color: #a020f0;">return</span> 0;
+<span style="color: #a020f0;">case</span> WM_RBUTTONDOWN:
+    <span style="color: #a020f0;">if</span> (!bCreated)
+        <span style="color: #a020f0;">return</span> 0;
+    <span style="color: #0000ff;">KillTimer</span>(hWnd, ID_TIMER);
+    bCreated = 0;
+    <span style="color: #a020f0;">return</span> 0;
+<span style="color: #b22222;">//</span><span style="color: #b22222;">...</span>
+<span style="color: #b22222;">// </span><span style="color: #b22222;">and add timer killer at WM_DESTROY</span>
+<span style="color: #a020f0;">case</span> WM_DESTROY:
+    <span style="color: #a020f0;">if</span> (bCreated)
+        <span style="color: #0000ff;">KillTimer</span>(hWnd, ID_TIMER);
+    PostQuitMessage(0);
+    <span style="color: #a020f0;">return</span> 0;
+</pre>
+</div>
+
+<p>
+接下来可以编写计时器处理过程了，随机矩形的尺寸由 rand 函数得到：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c">VOID <span style="color: #228b22;">CALLBACK</span> <span style="color: #0000ff;">TimerProc</span>(<span style="color: #228b22;">HWND</span> <span style="color: #a0522d;">hwnd</span>, <span style="color: #228b22;">UINT</span> <span style="color: #a0522d;">iMsg</span>, <span style="color: #228b22;">UINT_PTR</span> <span style="color: #a0522d;">iTimerID</span>, <span style="color: #228b22;">DWORD</span> <span style="color: #a0522d;">dwTime</span>)
+{
+    <span style="color: #228b22;">RECT</span> <span style="color: #a0522d;">rect</span>;
+    <span style="color: #228b22;">HBRUSH</span> <span style="color: #a0522d;">hBr</span>;
+    <span style="color: #228b22;">HDC</span> <span style="color: #a0522d;">hdc</span>;
+    GetClientRect(hwnd, &amp;rect);
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">cxClient</span> = rect.right;
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">cyClient</span> = rect.bottom;
+    <span style="color: #a020f0;">if</span> (cxClient == 0 || cyClient == 0)
+        <span style="color: #a020f0;">return</span>;
+    SetRect(&amp;rect, rand() % cxClient, rand() % cyClient,
+                   rand() % cxClient, rand() % cyClient);
+    hBr = CreateSolidBrush( RGB(rand() % 256, rand() % 256, rand() % 256));
+    hdc = GetDC(hwnd);
+    FillRect(hdc, &amp;rect, hBr);
+    ReleaseDC(hwnd, hdc);
+    DeleteObject(hBr);
+
+}
+</pre>
+</div>
+
+<p>
+运行并按下鼠标左键，即可看到各种颜色的小矩形。按下右键可使矩形停止显示。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2693299" class="outline-2">
+<h2 id="org2693299"><span class="section-number-2">3</span> 高精度计时器</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+计数器（counter）是一个编程中普遍使用的术语，它指一个增长的变量。一些系统包括了一个高精度性能计数器，它提供高精度的计时。
+</p>
+
+<p>
+如果高精度性能计数器存在于系统中，你可以使用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/profileapi/nf-profileapi-queryperformancefrequency">QueryPerformanceFrequency</a> 函数来表达频率，以赫兹为单位。计时器的值是依赖于处理器的。例如，在某些处理器上，计数可能是处理器时钟的循环速率。
+</p>
+
+<p>
+<a href="https://docs.microsoft.com/en-us/windows/desktop/api/profileapi/nf-profileapi-queryperformancecounter">QueryPerformanceCounter</a> 函数会检索当前高精度性能计数器的值。通过在一段代码的开头和结尾调用这个函数，应用可以把计数器当作高精度计时器使用。例如，假设 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/profileapi/nf-profileapi-queryperformancefrequency">QueryPerformanceFrequency</a> 表明计数器的频率为 50000 Hz。如果在需要计时的代码块头和尾立即调用 QueryPerformanceCounter，计数器的值可能是 1500 个计数和 3500 个计数。这些值就表示过去了 0.4 秒（2000 个计数）。
+</p>
+
+<p>
+C 标准库中的 &lt;time.h&gt; 包含了一系列的时间函数。time 函数返回基于 UNIX 时间的当前时间，clock 函数返回程序消耗的处理器时间。通过 clock 函数可以粗略的测试某段代码运行的时间。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;stdio.h&gt;</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;time.h&gt;</span>
+<span style="color: #228b22;">int</span> <span style="color: #0000ff;">main</span>(<span style="color: #228b22;">void</span>)
+{
+    <span style="color: #228b22;">clock_t</span> <span style="color: #a0522d;">time1</span>;
+    <span style="color: #228b22;">clock_t</span> <span style="color: #a0522d;">time2</span>;
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span>;
+    time1 = clock();
+    <span style="color: #a020f0;">for</span> (i = 0; i &lt; 0xfffffffe; i++)
+        ;
+    time2 = clock();
+    printf(<span style="color: #8b2252;">"%u\n"</span>, time2 - time1);
+    <span style="color: #a020f0;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+在 WSL1上使用 <code>gcc -o 1.out 1.c</code> 编译并运行，得到的时间是 <code>6265625</code> ，Linux 上 clock_t 的时间单位好像是微秒。（加上 -O1 优化得到 <code>1218750</code> ）
+</p>
+
+<p>
+在 VS2019 上编译并运行，得到的时间是 <code>7002</code> （再优化一下直接变成 0 了，把空循环优化没了XD）。
+</p>
+
+<p>
+自然，这里可以是用上面提到的两个 API。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;stdio.h&gt;</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;Windows.h&gt;</span>
+
+<span style="color: #228b22;">int</span> <span style="color: #0000ff;">main</span>(<span style="color: #228b22;">void</span>)
+{
+    <span style="color: #228b22;">LARGE_INTEGER</span> <span style="color: #a0522d;">freq</span>;
+    <span style="color: #228b22;">LARGE_INTEGER</span> <span style="color: #a0522d;">t1</span>;
+    <span style="color: #228b22;">LARGE_INTEGER</span> <span style="color: #a0522d;">t2</span>;
+    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span>;
+    QueryPerformanceCounter(&amp;t1);
+    <span style="color: #a020f0;">for</span> (i = 0; i &lt; 0xfffffffe; i++)
+        ;
+    QueryPerformanceCounter(&amp;t2);
+    QueryPerformanceFrequency(&amp;freq);
+    <span style="color: #228b22;">double</span> <span style="color: #a0522d;">totaltime</span> = (t2.QuadPart - t1.QuadPart) * 1.0 / freq.QuadPart;
+    printf(<span style="color: #8b2252;">"%lf\n"</span>, totaltime);
+    <span style="color: #a020f0;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+编译并运行，在我的电脑上的结果为 <code>7.014975</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga38ec00" class="outline-2">
+<h2 id="orga38ec00"><span class="section-number-2">4</span> 可等（Waitable）计时器对象</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+可等计时器对象是一个同步对象，当指定时间到来时，它的状态被设置为发送信号。可以创建的可等计时器类型有两种：手动复位和同步。任一类型的计时器也可作为定期计时器（periodic timer）。
+</p>
+
+<p>
+线程使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createwaitabletimerw">CreateWaitableTimer</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createwaitabletimerexw">CreateWaitableTimerEx</a> 来创建一个计时器对象。创建计时器的线程对计时器的类型进行指定。线程可以为计时器对象指定一个名字。其他进程中的线程可以通过在 <a href="https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-openwaitabletimerw">OpenWaitableTimer</a> 函数调用中指定名字，来打开一个已存在计时器的句柄。任何带有计时器对象的句柄的线程可以使用一个等待函数来等待计时器的状态被设置为信号发送。
+</p>
+
+<p>
+更多关于使用等待计时器用于线程同步的信息，可见于 <a href="https://docs.microsoft.com/en-us/windows/desktop/Sync/waitable-timer-objects">Waitable Timer Objects</a>。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd8b8407" class="outline-2">
+<h2 id="orgd8b8407"><span class="section-number-2">5</span> 参考资料</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+<a id="org7c7cc00">【1】</a> About Timers：<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-timers">https://docs.microsoft.com/en-us/windows/win32/winmsg/about-timers</a>
+</p>
+
+<p>
+<a id="org2e5146d">【2】</a> <i>Programming Windows</i> , Charles Petzold
+</p>
+
+<p>
+<a id="orgf820e4d">【3】</a> cppreferance:ctime：<a href="http://www.cplusplus.com/reference/ctime/">http://www.cplusplus.com/reference/ctime/</a>
+</p>
+
+<p>
+<a id="orgafec787">【4】</a> LARGE_INTEGER union：<a href="https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-large_integer~r1">https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-large_integer~r1</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2020-06-26 Fri 00:00</p> <p>Last modified: 2021-08-03 Tue 15:45</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
