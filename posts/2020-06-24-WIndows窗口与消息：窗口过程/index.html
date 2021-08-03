@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-03 Tue 15:02 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WIndows窗口与消息：窗口过程 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNTY4OTE2.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">WIndows窗口与消息：窗口过程 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNTY4OTE2.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgf2a5366">1. 什么是窗口过程</a></li>
+<li><a href="#org1c364e1">2. 窗口过程的结构</a>
+<ul>
+<li><a href="#org710cddd">2.1. 默认窗口过程</a></li>
+</ul>
+</li>
+<li><a href="#org59177c3">3. 窗口过程子类化</a>
+<ul>
+<li><a href="#orge2e45f9">3.1. 实例子类化</a></li>
+<li><a href="#orgd9f9157">3.2. 全局子类化</a></li>
+</ul>
+</li>
+<li><a href="#orgf064ea3">4. 窗口过程超类化</a></li>
+<li><a href="#org40395ff">5. 参考资料</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf2a5366" class="outline-2">
+<h2 id="orgf2a5366"><span class="section-number-2">1</span> 什么是窗口过程</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+每个窗口都有一个与之相关联的窗口过程 —— 一个处理所有发送到某个类的所有窗口的消息的函数。窗口的外观和行为的各个方面都依赖于窗口过程对消息的反应。
+</p>
+
+<p>
+每个窗口都是某个窗口类的成员。窗口类决定了用来处理消息的默认窗口过程。所有属于同一个类的窗口使用相同的默认窗口过程。例如，系统为组框类（ <b>COMBOBOX</b> ）定义了窗口过程；所有的组框都会使用这个过程。
+</p>
+
+<p>
+一个应用一般会至少注册一个新的窗口类，和与之关联的窗口过程。在注册完成后，应用可以创建该类的窗口，所有的窗口使用同一个窗口过程。因为这意味着多个地方可能会同时调用一处的代码，你必须对在窗口过程中修改共享资源多加小心。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1c364e1" class="outline-2">
+<h2 id="org1c364e1"><span class="section-number-2">2</span> 窗口过程的结构</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+窗口过程是一个拥有四个参数，并返回一个信号值的函数。它的参数包括窗口句柄，一个 <b>UINT</b> 类型的消息标识，还有两个 <b>WPARAM</b> 和 <b>LPARAM</b> 类型的消息参数。更多信息可见于<a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85">WndowProc</a>)。消息参数通常在它们的低位和高位中都存在。应用可以使用一些宏来从消息参数中提取信息。<a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms632659(v=vs.85">LOWORD</a>) 宏可以从消息参数中提取低位的字（从 0 到 15 的比特）。其他的宏包括 <a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms632657(v=vs.85">HIWORD</a>)，<a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms632658(v=vs.85">LOBYTE</a>) 和 <a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms632656(v=vs.85">HIBYTE</a>)。
+</p>
+
+<p>
+对返回值的解释取决于特定的消息。在判断返回值的意义时可查询各消息的描述。
+</p>
+
+<p>
+因为对窗口过程的递归调用时可能的，尽量减少函数的局部参数个数是很重要的。当处理独立消息时，应用应该在窗口过程外部调用窗口过程函数，来避免对局部变量的多余使用，以及可能因深度递归导致的栈溢出。
+</p>
+</div>
+
+<div id="outline-container-org710cddd" class="outline-3">
+<h3 id="org710cddd"><span class="section-number-3">2.1</span> 默认窗口过程</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+默认的窗口过程函数 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-defwindowproca">DefWindowProc</a> 定义了被所有窗口共享的几种最基本的行为。默认窗口过程提供了窗口的最小功能。应用定义的窗口过程应该将它不处理的消息传递给 <b>DefWindowProc</b> 来使用默认方式处理。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org59177c3" class="outline-2">
+<h2 id="org59177c3"><span class="section-number-2">3</span> 窗口过程子类化</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+当应用创建一个窗口时，系统会分配一块内存来存储窗口特定的信息，它包括处理窗口信息的窗口过程的地址。当系统需要给窗口传递消息时，它会在窗口特定信息中搜索窗口过程的地址，并将消息传递给该过程。
+</p>
+
+<p>
+<b>子类化</b> 是一种技术，它允许应用在窗口有机会处理消息前拦截和处理发送到特定窗口的消息。通过将窗口子类化，应用可以增添，修改或监视窗口的行为。应用可以将一个属于系统类的窗口子类化，比如编辑控件和表框。例如，应用可以将编辑控件子类化来使其不接受某些字符。然而，你不能将属于其他应用的窗口或窗口类子类化。所有的子类化必须在一个进程中进行。
+</p>
+
+<p>
+将窗口的原窗口过程地址替换为一个新的窗口过程地址，这就是窗口的子类化，新的窗口过程叫做子类过程（subclass procedure）。之后，子类过程会接收任何发送到窗口的消息。
+</p>
+
+<p>
+接收到消息时，子类过程可以做三件事：它可以将消息传递给原窗口过程，对消息进行修改并传给原过程，或直接对消息进行处理而不传给原过程。如果子类过程处理了一个消息，它可以在它将消息传给原过程之前或之后处理这个消息，或在之前和之后都处理这个消息。
+</p>
+
+<p>
+系统提供了两种子类化类型：实例（instance）和全局（global）。在实例子类化中，应用对单个窗口实例的窗口过程地址进行替换。应用必须使用实例子类化来对已存在的窗口进行子类化。在全局子类化中，应用将窗口类的 <b>WNDCLASS</b> 结构中的窗口过程地址进行替换。随后使用该类创建的所有窗口都使用子类过程的地址，但先前的窗口不受影响。
+</p>
+</div>
+
+<div id="outline-container-orge2e45f9" class="outline-3">
+<h3 id="orge2e45f9"><span class="section-number-3">3.1</span> 实例子类化</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+应用通过使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlonga">SetWindowLong</a> 函数来将窗口子类化。应用将 <b>GWL_WNDPROC</b> 标志，需要子类化的窗口的句柄和子类过程的地址传递给 <b>SetWindowLong</b> 。子类过程可在应用的可执行文件中，也可在 DLL 中。
+</p>
+
+<p>
+<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlonga">SetWindowLong</a> 返回原始窗口过程的地址。应用必须保存该地址，以便在随后对 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-callwindowproca">CallWindowProc</a> 函数的调用中使用它。要除去子类窗口过程，应用也必须保留原始窗口过程的地址。若要除去子类，应用可以再次调用 <b>SetWindowLong*，将原始窗口过程地址和 *GWL_WNDPROC</b> 标志以及窗口句柄传递给 <b>SetWindowLong</b> 。
+</p>
+
+<p>
+系统拥有系统类，而且控件可能随着系统的版本改变。如果应用必须对属于系统类的窗口使用子类，开发者可能需要在新系统发布时对应用进行更新。
+</p>
+
+<p>
+因为实例子类化发生在窗口创建后，你不能为窗口添加额外的字节。子类化窗口的应用应该使用窗口属性表来存储实例子类化的窗口的数据。更多窗口属性的信息可见于 <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/window-properties">Window Properties</a>。
+</p>
+
+<p>
+当应用对子类化后的窗口进行子类化时，它必须以与进行子类化相反的顺序除去子类。如果除去顺序不是反序，可能会发生不可恢复的系统错误。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd9f9157" class="outline-3">
+<h3 id="orgd9f9157"><span class="section-number-3">3.2</span> 全局子类化</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+要想进行全局子类化，应用必须有类的一个窗口的句柄。应用也需要一个句柄来去除子类化。要得到窗口句柄，应用一般会创建该类的一个隐藏的窗口。在获得句柄后，应用调用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setclasslonga">SetClassLong</a> 函数，并指定句柄， <b>GCL_WNDPROC</b> 标志和子类过程地址。 <b>SetClassLong</b> 函数返回原始窗口过程的地址。
+</p>
+
+<p>
+原始窗口过程地址的使用和实例子类化中的方式是一样的。子类通过调用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-callwindowproca">CallWindowProc</a> 函数来调用原始窗口过程。应用可以通过再次调用 <b>SetClassLong</b> 来去除子类化，指定 <b>GCL_WNDPROC</b> 标志，类的窗口的句柄和原始窗口过程地址。对控件类进行全局子类化的应用必须在应用终止时去掉子类化，否则可能会出现不可恢复的系统错误。
+</p>
+
+<p>
+全局子类化和实例子类化有着相同的限制，还要加上几条。应用不应该在不知道原始窗口过程如何使用额外字节的情况下使用这些额外字节。如果应用必须将数据与窗口关联，它应该使用窗口属性。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf064ea3" class="outline-2">
+<h2 id="orgf064ea3"><span class="section-number-2">4</span> 窗口过程超类化</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+超类化 是一个技术，它允许应用使用已存在的类的基本功能创建新的窗口类，并加上由应用提供的强化功能。超类基于的窗口类被叫做 <b>基类</b> 。基类一般都是像是编辑控件的系统类，不过它可以是任何窗口类。
+</p>
+
+<p>
+超类拥有它自己的窗口过程，叫做超类过程。超类过程可以在收到消息时做三件事：它可以将消息传给原始窗口过程，可以修改消息并传给原始窗口过程，或直接处理消息。如果超类过程处理一个消息，它可以在处理前，处理后或处理的前后将消息传给原始窗口过程。
+</p>
+
+<p>
+与子类过程不同的是，超类过程可以处理窗口创建消息（<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-nccreate">WM_NCCREATE</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-create">WM_CREATE</a> 等等），但是它必须将它们传给原始窗口过程，以便基类窗口过程可以进行它的初始化。
+</p>
+
+<p>
+要将一个窗口超类化，应用首先调用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclassinfoa">GetClassInfo</a> 函数来检索基类的信息。 <b>GetClassInfo</b> 使用从基类获得的 <b>WNDCLASS</b> 值来填充一个 <b>WNDCLASS</b> 结构。下一步，应用将它的实例句柄拷贝到得到的 <b>WNDCLASS</b> 结构的 <b>hInstance</b> 成员中，将超类名拷贝到 <b>lpszClassName</b> 成员中。如果基类有菜单，应用必须提供一个带有相同菜单标识的新菜单，并将其拷贝到 <b>lpszMenuName</b> 成员中。如果超类处理了 <a href="https://docs.microsoft.com/en-us/windows/desktop/menurc/wm-command">WM_COMMAND</a> 消息，并且没有传递给基类的窗口过程，菜单就不需要对应的标识。 <b>GetClassInfo</b> 不会返回 <b>lpszMenuName</b> ， <b>lpszClassName</b> ，或 <b>hInstance</b> 。
+</p>
+
+<p>
+应用也必须设置 <b>lpfnWndProc</b> 成员。 <b>GetClassInfo</b> 函数会用类的原始窗口过程填充 <b>WNDCLASS</b> 结构。应用必须保存这个地址，用来给原始窗口过程传递消息，并在之后将超类过程地址拷贝到 <b>lpfnWndProc</b> 成员。如果必须的话，应用可以修改 <b>WNDCLASS</b> 的任何成员。在填充 <b>WNDCLASS</b> 结构后，应用使用 <b>RegisterClass</b> 来注册超类。超类随后可用于创建新窗口。
+</p>
+
+<p>
+因为超类注册了一个新的窗口类，应用可以添加额外类字节和额外窗口字节。超类不能使用基类的额外类字节或窗口的额外字节，原因和实例子类与全局子类不能使用额外字节一样。如果应用为类或窗口实例添加了额外字节，它必须参考与由基类使用的额外字节关联的额外字节。因为基类使用的字节数量可能随版本而变化，超类拥有的额外字节的起始偏移也可能随着基类的版本变化而变化。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org40395ff" class="outline-2">
+<h2 id="org40395ff"><span class="section-number-2">5</span> 参考资料</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+<a id="org8d29b1f">【1】</a> About Window Procedures：<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-procedures">https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-procedures</a>
+</p>
+
+<p>
+<a id="org985b06d">【2】</a> <i>Programming Windows</i>, Charles Petzold
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2020-06-24 Wed 00:00</p> <p>Last modified: 2021-08-03 Tue 15:02</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
