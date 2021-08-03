@@ -1,0 +1,1049 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-03 Tue 18:11 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scheme的callcc <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">Scheme的callcc <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd4c1b96">1. 什么是 continuation</a></li>
+<li><a href="#org66a4f2e">2. 什么是 call/cc</a></li>
+<li><a href="#orga1239f2">3. call/cc 的使用</a>
+<ul>
+<li><a href="#org4f21a70">3.1. nonlocal exits</a></li>
+<li><a href="#orgfe0eb02">3.2. backtracking</a></li>
+<li><a href="#org4e112bf">3.3. coroutine</a></li>
+<li><a href="#org501ddec">3.4. 添加控制结构</a></li>
+</ul>
+</li>
+<li><a href="#org637a110">4. 什么是 CPS</a>
+<ul>
+<li><a href="#org9666fae">4.1. 例子：斐波拉契函数的 CPS</a></li>
+</ul>
+</li>
+<li><a href="#org731dbd5">5. 其他的一些有趣的问题</a>
+<ul>
+<li><a href="#org4561759">5.1. (call/cc call/cc)</a></li>
+<li><a href="#orgba6aae0">5.2. 阴阳谜题（yin-yang puzzle）</a></li>
+</ul>
+</li>
+<li><a href="#orga113bed">6. 参考资料</a></li>
+</ul>
+</div>
+</div>
+<p>
+本文是 include-yy 对 scheme 中的 call-with-current-continuation 过程相关知识的总结。内容包括对延续（continuation）的理解，对 call/cc 过程的使用用例，以及对延续传递风格（continuation-passing style, cps）的简单介绍。
+</p>
+
+<p>
+那么，先从 continuation 的概念开始吧。
+</p>
+
+<div id="outline-container-orgd4c1b96" class="outline-2">
+<h2 id="orgd4c1b96"><span class="section-number-2">1</span> 什么是 continuation</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+根据维基百科上<a href="#org0018ea2">【1】</a>的介绍，continuation 是计算机程序控制状态的一种抽象表示，它实现了程序的控制状态。换句话说，continuation 可以是一种数据结构，它表现了程序在运行过程中某一点的状态。在某些编程语言中（比如 scheme），该数据结构可以访问而不是被运行时环境隐藏（比如 C）。continuation 也可以用来表示 first-class continuation，它允许编程语言存储程序执行过程中任何一点的执行状态，并一次或多次向这个点返回。
+</p>
+
+<p>
+current continuation 是这样一种 continuation，它从当前程序执行点处得到。
+</p>
+
+<p>
+维基百科上的介绍看上去可能有些生涩难懂， <i>The Scheme Programming Language</i> <a href="#org605ba27">【2】</a>上有着更好的解释。Kent 在该书的第 3 章第 3 小节这样写到：
+</p>
+
+<blockquote>
+<p>
+在对 Scheme 表达式求值时，Scheme 实现必须搞清楚两件事：
+</p>
+
+<ol class="org-ol">
+<li>对什么进行求值（what to evaluate）</li>
+
+<li>如何处理这个值（what to do with the value）</li>
+</ol>
+
+<p>
+我们将 “如何处理这个值” 称为某个表达式求值的 continuation
+</p>
+</blockquote>
+
+<p>
+理解了这两句话，就可以说是理解了 continuation 为何物。Kent 在书中使用了以下代码来作为例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">if</span> (null? x) (quote ()) (cdr x))
+</pre>
+</div>
+
+<p>
+上面代码的功能是判断 x 是否为空表，若是，则表达式的值为空表 <code>'()</code> ，否则为 x 的 cdr 部分。首先，我们需要对表达式 <code>(null? x)</code> 进行求值，来判断接下来对 if 子表达式的哪一分支进行求值。现在对照 Kent 的两句话，对这个例子，我们可以得到结构相似的另外两句话：
+</p>
+
+<ol class="org-ol">
+<li>对 <code>(null? x)</code> 进行求值</li>
+
+<li>通过 <code>(null? x)</code> 表达式的结果来判断 if 语句执行哪条分支</li>
+</ol>
+
+
+<p>
+那么， <code>(null? x)</code> 在上面的 if 表达式中的 continuation 就是：用于接下来对 if 语句分支执行的判断。通俗一点来说，continuation 就是“表达式求值后下一步该做什么”。
+</p>
+
+<p>
+现在，我们来考虑整个 if 表达式，它的求值过程也可以写成：
+</p>
+
+<ol class="org-ol">
+<li>对 <code>(if (null? x) (quote ()) (cdr x))</code> 进行求值</li>
+
+<li>拿得到的值做点什么</li>
+</ol>
+
+
+<p>
+那么究竟要做点什么呢？这得取决于它的求值环境。如果你是在 REPL 中输入这串表达式，那要做的就是把值丢掉（不考虑输出到屏幕）；如果它是赋值语句的一部分，那么下一步就是把这个值赋给相应的变量；如果它是某个过程的最后的表达式，那么要做的就是把值返回给过程的调用者&#x2026;&#x2026; 不论是哪种情况，”求值后下一步要做的事“就是某个表达式的 continuation。
+</p>
+
+<p>
+continuation 的概念并不限于 scheme，它是一个普遍的概念，只不过其他编程语言可能不能像 scheme 一样通过 call/cc 对 continuation 进行捕获，并对 continuation 进行显式的操作。以下的 C 代码与上面的 scheme 代码功能相同，并且也可以使用相同的方法来分析它的continuation：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #a020f0;">if</span> (plist != <span style="color: #008b8b;">NULL</span>)
+{
+    <span style="color: #a020f0;">return</span> plist-&gt;next;
+}
+<span style="color: #a020f0;">else</span>
+{
+    <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">NULL</span>;
+}
+</pre>
+</div>
+
+<p>
+为了下文叙述的方便，这里引入一个符号 <code>[a-zA-z]@exp</code> 来标识表达式， <code>@</code> 前面的字母对作为表达式的 id。上面的例子可以写成：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">a@(<span style="color: #a020f0;">if</span> b@(null? x) (quote ()) (cdr x))
+</pre>
+</div>
+
+<p>
+同时，将某个表达式的 continuation 记为 <code>k@[a-zA-Z]</code> ，即上面的 if 表达式和判断表达式的 continuation 分别记为 k@a和 k@b。此处的记号借鉴于文章<a href="#org14753ad">【3】</a>。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org66a4f2e" class="outline-2">
+<h2 id="org66a4f2e"><span class="section-number-2">2</span> 什么是 call/cc</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+scheme 允许任意表达式的 continuation 通过 call/cc 过程来进行捕获。call/cc 接收一个单参数过程 p，并将 current continuation 的具体表示传递给过程 p，continuation 本身使用过程来表示，这里记作 k。每当 k 被应用到一个值时，它会将这个值返回到调用 call/cc 处的 continuation，这个值就成为了调用 call/cc 的结果值。如果 k 没有被调用，过程 p 的返回值将作为 call/cc 表达式的值。
+</p>
+
+<p>
+还是以上面的代码来作为例子，不过这里我们加上 call/cc：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">if</span> (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span>(k) (null? x))) (quote ()) (cdr x))
+</pre>
+</div>
+
+<p>
+通过 call/cc，我们捕获了 <code>(null? x)</code> 的 continuation。虽然获得了它，但是我们没有做任何其他的事情，所以该表达式的结果与没有加 call/cc 的代码没有什么区别。现在，我们将这个 continuation 保存在一个变量中，并对其进行调用来观察它的行为：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">x</span> '(1 2 3))
+(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">k-if</span> #f)
+
+(<span style="color: #a020f0;">if</span> (<span style="color: #a020f0;">call/cc</span>
+       (<span style="color: #a020f0;">lambda</span>(k)
+          (set! k-if k)
+          (null? x)))
+    '()
+    (cdr x))
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">(2 3)</span>
+
+(k-if #t)
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">()</span>
+
+(k-if #f)
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">(2 3)</span>
+</pre>
+</div>
+
+<p>
+通过将 continuation 保存到变量中并调用该 continuation，我们改变了表达式的行为。通过将 #t 或 #f 传递给 <code>(null? x)</code> 的 continuation，if 的执行分支随之改变。
+</p>
+
+<p>
+多看几个例子可能会更容易理解 call/cc，例如，以下代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">let</span> ([x (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (k) k))])
+ (x (<span style="color: #a020f0;">lambda</span> (ignore) <span style="color: #8b2252;">"hi"</span>)))
+</pre>
+</div>
+
+<p>
+这个例子表达式的值为 "hi"，此处 call/cc 捕获的 continuation 是将表达式的值赋给 x。 <code>(lambda(k) k)</code> 直接将参数作为返回值，也就是说这个 continuation 被赋给了 x。形式性地表示一下就是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">let</span> ([x a@(<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (k) k))])
+ (x (<span style="color: #a020f0;">lambda</span> (ignore) <span style="color: #8b2252;">"hi"</span>)))
+=&gt;
+(<span style="color: #a020f0;">let</span> ([x k@a])
+ (x (<span style="color: #a020f0;">lambda</span> (ignore) <span style="color: #8b2252;">"hi"</span>)))
+</pre>
+</div>
+
+<p>
+将 x 应用于过程 <code>(lambda (ignore) "hi")</code> ，就是回到 continuation 处，也就是将这个过程作为 k@a 的值赋给 x，表达式就变成了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">let</span> ([x (<span style="color: #a020f0;">lambda</span> (ignore) <span style="color: #8b2252;">"hi"</span>)])
+ (x (<span style="color: #a020f0;">lambda</span> (ignore) <span style="color: #8b2252;">"hi"</span>)))
+=&gt;
+((<span style="color: #a020f0;">lambda</span> (ignore) <span style="color: #8b2252;">"hi"</span>) (<span style="color: #a020f0;">lambda</span> (ignore) <span style="color: #8b2252;">"hi"</span>))
+=&gt;
+<span style="color: #8b2252;">"hi"</span>
+</pre>
+</div>
+
+<p>
+也就是说， <code>(let ([x (call/cc (lambda(k) k))]) (x f))</code> 等价于 <code>(f f)</code> 。
+</p>
+
+<p>
+看完了这个，那么以下表达式也就不难理解了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(((<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (k) k)) (<span style="color: #a020f0;">lambda</span> (x) x)) <span style="color: #8b2252;">"HEY!"</span>)
+=&gt;
+<span style="color: #8b2252;">"KEY"</span>
+(((<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (k) (k k))) (<span style="color: #a020f0;">lambda</span> (x) x)) <span style="color: #8b2252;">"HEY!"</span>)
+=&gt;
+<span style="color: #8b2252;">"KEY"</span>
+</pre>
+</div>
+
+<p>
+在 Scheme 中，continuation 是 first-class 的，这意味着你可以相当方便地使用它。 <i>the Scheme Programming Language</i> 上有一道习题：使用 call/cc 编写一个死循环程序，打印出从零开始的递增序列。要求不能使用递归过程，也不能使用任何的赋值语句。我们可以这样做：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">let</span> ([x (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span>(k) k))])
+    (<span style="color: #a020f0;">if</span> (pair? x)
+         (<span style="color: #a020f0;">begin</span>
+            (display (car x))
+                 ((cdr x) (cons (+ (car x) 1) (cdr x))))
+         (<span style="color: #a020f0;">begin</span>
+            (display 0)
+            (x (cons 1 x)))))
+</pre>
+</div>
+
+<p>
+更多相关的例子，可以参考 <i>the Scheme Programming Language</i> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga1239f2" class="outline-2">
+<h2 id="orga1239f2"><span class="section-number-2">3</span> call/cc 的使用</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+<i>the Scheme Programming Language</i> 上面写到：call/cc 可以用来实现非本地退出（nonlocal exits），回溯（backtracking），协程（coroutines）和多任务（multitasking）。它还可以配合宏来创造新的控制结构，比如 return 语句之类的东西。
+</p>
+</div>
+
+<div id="outline-container-org4f21a70" class="outline-3">
+<h3 id="org4f21a70"><span class="section-number-3">3.1</span> nonlocal exits</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+scheme 标准库中有一个 member 过程，它接收一个元素和一个列表，判断元素是否属于列表。若是则返回包含该元素的表，否则返回 #f。它的一个简单实现如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">member</span>
+   (<span style="color: #a020f0;">lambda</span> (x ls)
+      (<span style="color: #a020f0;">cond</span>
+         ((null? ls) #f)
+         ((equal? x (car ls)) ls)
+         (<span style="color: #a020f0;">else</span> (member x (cdr ls))))))
+</pre>
+</div>
+
+<p>
+这个过程是尾递归的，也就是说它会被优化为循环，如果 ls 中没有找到 x 元素的话，member 会直接向它的调用者返回 #f。但假设（仅仅是假设）没有尾递归的话，#f 需要逐级向上返回，直到返回到第一级 member 调用时才会将 #f 返回给调用者。使用 call/cc 可以在查找不到 x 元素时直接向调用者返回 #f：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">member</span>
+   (<span style="color: #a020f0;">lambda</span> (x ls)
+      (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (k)
+                  (<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> ([ls ls])
+                    (<span style="color: #a020f0;">cond</span>
+                      ((null? ls) (k #f))
+                      ((equal? (car ls) x) (k ls))
+                      (<span style="color: #a020f0;">else</span> (f (cdr ls)))))))))
+</pre>
+</div>
+
+<p>
+这并不是一个很好的例子，有种没有需求就创造需求的感觉。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfe0eb02" class="outline-3">
+<h3 id="orgfe0eb02"><span class="section-number-3">3.2</span> backtracking</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+说到回溯，有一个运算符与它有着紧密的联系，那就是 <code>amb</code> 。amb 是 ambiguous 的一个缩写，它用于非确定性计算。
+</p>
+
+<p>
+参考资料<a href="#org4fc6ecc">【7】</a>对 amb 进行了描述： <code>amb</code> 接收一个或多个表达式，并在它们中进行一次非确定选择，这个选择使得程序趋向于有意义。不带参数调用 <code>amb</code> 不会有返回值并会出错。
+</p>
+
+<p>
+举个例子 <code>(amb 1 2)</code> 会返回 1 或 2，因为两个值都是有意义的。但是 <code>(amb 1 (amb))</code> 会返回 1，因为 <code>(amb)</code> 是无意义的。
+</p>
+
+<p>
+参考资料<a href="#org029f36c">【6】</a>给出了 amb 的一个实现，这里直接拿过来了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme"><span style="color: #b22222;">;;; </span><span style="color: #b22222;">FAIL is called to backtrack when a condition fails.  At the top</span>
+<span style="color: #b22222;">;;; </span><span style="color: #b22222;">level, however, there is no more to backtrack, so we signal an</span>
+<span style="color: #b22222;">;;; </span><span style="color: #b22222;">error with SRFI 23.</span>
+(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">fail</span>
+  (<span style="color: #a020f0;">lambda</span> ()
+    (raise <span style="color: #8b2252;">"Amb tree exhausted"</span>)))
+
+(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">amb</span>
+  (<span style="color: #a020f0;">syntax-rules</span> ()
+    ((amb) (fail))                      <span style="color: #b22222;">; </span><span style="color: #b22222;">Two shortcuts.</span>
+    ((amb expression) expression)
+    ((amb expression ...)
+     (<span style="color: #a020f0;">let</span> ((fail-save fail))
+       ((<span style="color: #a020f0;">call/cc</span>                        <span style="color: #b22222;">; </span><span style="color: #b22222;">Capture a continuation to</span>
+          (<span style="color: #a020f0;">lambda</span> (k-success)           <span style="color: #b22222;">;   </span><span style="color: #b22222;">which we return possibles.</span>
+            (<span style="color: #a020f0;">call/cc</span>
+              (<span style="color: #a020f0;">lambda</span> (k-failure)       <span style="color: #b22222;">; </span><span style="color: #b22222;">K-FAILURE will try the next</span>
+                (set! fail              <span style="color: #b22222;">;   </span><span style="color: #b22222;">possible expression.</span>
+                      (<span style="color: #a020f0;">lambda</span> () (k-failure #f)))
+                (k-success              <span style="color: #b22222;">; </span><span style="color: #b22222;">Note that the expression is</span>
+                 (<span style="color: #a020f0;">lambda</span> ()             <span style="color: #b22222;">;   </span><span style="color: #b22222;">evaluated in tail position</span>
+                   expression))))       <span style="color: #b22222;">;   </span><span style="color: #b22222;">with respect to AMB.</span>
+            ...
+            (set! fail fail-save)      <span style="color: #b22222;">; </span><span style="color: #b22222;">Finally, if this is reached,</span>
+            fail-save)))))))           <span style="color: #b22222;">;   </span><span style="color: #b22222;">we restore the saved FAIL.</span>
+
+(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">require</span> condition)
+  (<span style="color: #a020f0;">if</span> (not condition)
+      (fail)))
+
+<span style="color: #b22222;">;;; </span><span style="color: #b22222;">As an auxiliary example, AMB-POSSIBILITY-LIST is a special form</span>
+<span style="color: #b22222;">;;; </span><span style="color: #b22222;">that returns a list of all values its input expression may return.</span>
+
+(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">amb-possibility-list</span>
+  (<span style="color: #a020f0;">syntax-rules</span> ()
+    ((amb-possibility-list expression)
+     (<span style="color: #a020f0;">let</span> ((value-list '()))
+       <span style="color: #b22222;">;; </span><span style="color: #b22222;">This requires that AMB try its sub-forms left-to-right.</span>
+       (amb (<span style="color: #a020f0;">let</span> ((value expression))
+              (set! value-list (cons value value-list))
+              (fail))
+            (reverse value-list))))))   <span style="color: #b22222;">; </span><span style="color: #b22222;">Order it nicely.</span>
+</pre>
+</div>
+
+<p>
+上面的定义使用了宏来对参数数量进行判断，零参数时直接调用 fail，单参数时使用参数值作为返回值。这个宏定义的要点在于多参数的情况，而它的核心代码就是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">call/cc</span>
+  (<span style="color: #a020f0;">lambda</span> (k-failure)
+     (set! fail
+        (<span style="color: #a020f0;">lambda</span> () (k-failure #f)))
+     (k-success
+        (<span style="color: #a020f0;">lambda</span> ()
+          expression))))
+...
+</pre>
+</div>
+
+<p>
+多个表达式的展开表示如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">call/cc</span>
+  (<span style="color: #a020f0;">lambda</span> (k-failure)
+     (set! fail
+        (<span style="color: #a020f0;">lambda</span> () (k-failure #f)))
+     (k-success
+        (<span style="color: #a020f0;">lambda</span> ()
+          expression1))))
+(<span style="color: #a020f0;">call/cc</span>
+  (<span style="color: #a020f0;">lambda</span> (k-failure)
+     (set! fail
+        (<span style="color: #a020f0;">lambda</span> () (k-failure #f)))
+     (k-success
+        (<span style="color: #a020f0;">lambda</span> ()
+          expression2))))
+(<span style="color: #a020f0;">call/cc</span>
+  (<span style="color: #a020f0;">lambda</span> (k-failure)
+     (set! fail
+        (<span style="color: #a020f0;">lambda</span> () (k-failure #f)))
+     (k-success
+        (<span style="color: #a020f0;">lambda</span> ()
+          expression3))))
+...
+</pre>
+</div>
+
+<p>
+初始条件下，将 fail 设置为当前捕获的 k-failure 后，接着调用 k-success 返回当前（第一个）表达式的值。此后，调用 fail 即可返回到 k-failure 处，并将 #f 作为 call/cc 表达式的值，接着向下继续顺序求值。那么应该在什么时候调用 fail 呢？那就是 <code>require</code> 条件不满足的时候。调用 fail 后，#f 作为某个 <code>expression</code> 的值，并接着使用下一个 expression，直到满足条件为止。
+</p>
+
+<p>
+例如，以下代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">let</span> ((a (amb 1 2))
+      (b (amb 1 2)))
+   (require (&lt; a b))
+   (list a b))
+</pre>
+</div>
+
+<p>
+得到的结果为 <code>(1 2)</code> ，因为只有它满足 <code>(require (&lt; a b)</code> 。
+</p>
+
+<p>
+上面使用了 raise 过程，如果有的 scheme 实现使用 error，可以将 raise 替换为 error。某些实现也可能已经定义了 require 标识符，可以将它替换为其他的标识符。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4e112bf" class="outline-3">
+<h3 id="org4e112bf"><span class="section-number-3">3.3</span> coroutine</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+协程是一般化的子函数。一个协程可以在某个执行点挂起并在之后从挂起点恢复。与子函数不同的是，协程不需要在它返回前完成整个执行过程。
+</p>
+
+<p>
+一个比较简单的例子如下所示：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">one</span>
+   (<span style="color: #a020f0;">lambda</span> (go)
+      (display 1)
+      (set! go (<span style="color: #a020f0;">call/cc</span> go))
+      (display 2)
+      (set! go (<span style="color: #a020f0;">call/cc</span> go))
+      (display 3)
+      (set! go (<span style="color: #a020f0;">call/cc</span> go))))
+
+(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">two</span>
+   (<span style="color: #a020f0;">lambda</span> (go)
+      (display #\a)
+      (set! go (<span style="color: #a020f0;">call/cc</span> go))
+      (display #\b)
+      (set! go (<span style="color: #a020f0;">call/cc</span> go))
+      (display #\c)
+      (set! go (<span style="color: #a020f0;">call/cc</span> go))))
+</pre>
+</div>
+
+<p>
+调用 <code>(one two)</code> ，可以看到输出为 <code>1a2b3c</code> ，调用 <code>(two one)</code> 则是 <code>a1b2c3</code> 。
+</p>
+
+<p>
+通过使用 call/cc，上面的程序实现了在两个过程中互相传递 current continuation。
+</p>
+</div>
+
+<div id="outline-container-org3898148" class="outline-4">
+<h4 id="org3898148"><span class="section-number-4">3.3.1</span> 在 Scheme 中使用 generator</h4>
+<div class="outline-text-4" id="text-3-3-1">
+<p>
+维基百科<a href="#org206990f">【10】</a>对 generator 的定义是：generator 是一种特殊的子程序，它类似于返回数组的函数，但是它不是一次性构造出所有值并一次性返回，而是每次调用都产生一个值。
+</p>
+
+<p>
+使用 call/cc 捕获并存储当前 continuation，使得下一次运行从这一点开始即可。参考资料<a href="#org6db5eda">【11】</a>给出了一种实现：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">make-generator</span> procedure)
+  (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">last-return</span> values)
+  (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">last-value</span> #f)
+  (<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">last-continuation</span> _)
+    (<span style="color: #a020f0;">let</span> ((result (procedure yield)))
+      (last-return result)))
+
+  (<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">yield</span> value)
+    (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (continuation)
+               (set! last-continuation continuation)
+               (set! last-value value)
+               (last-return value))))
+
+  (<span style="color: #a020f0;">lambda</span> args
+    (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (return)
+               (set! last-return return)
+               (<span style="color: #a020f0;">if</span> (null? args)
+                   (last-continuation last-value)
+                   (apply last-continuation args))))))
+</pre>
+</div>
+
+<p>
+上面的过程使用 <code>last-continuation</code> 存储了 continuation。
+</p>
+
+<p>
+使用它，我们可以定义一个斐波拉契数列的 generator：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">fib-gen</span>
+   (make-generator
+      (<span style="color: #a020f0;">lambda</span> (collect)
+         (<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> ([a 0] [b 1])
+            (collect a)
+            (f b (+ a b))))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org501ddec" class="outline-3">
+<h3 id="org501ddec"><span class="section-number-3">3.4</span> 添加控制结构</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+call/cc 配合宏使用，可以在 scheme 中添加一些自定义的控制结构。
+</p>
+
+<p>
+这里的例子来自 <i>the scheme Programming Language</i> ，使用 syntax-case 宏定义了一个循环结构：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">loop</span>
+   (<span style="color: #a020f0;">lambda</span> (x)
+     (syntax-case x ()
+       [(k e ...)
+         (with-syntax ([break (datum-&gt;syntax #'k 'break)])
+            #'(<span style="color: #a020f0;">call/cc</span>
+               (<span style="color: #a020f0;">lambda</span> (break)
+                 (<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> () e ... (f)))))])))
+</pre>
+</div>
+
+<p>
+当然，上面的代码重点在于 call/cc 的使用而不是 syntax-case 的使用。上面的代码添加了 break 语句，可以直接退出循环。下面的例子可以说明这一点：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">let</span> ([n 3] [ls '()])
+ (loop
+    (<span style="color: #a020f0;">if</span> (= n 0) (break ls))
+        (set! ls (cons 'a ls))
+    (set! n (- n 1))))
+</pre>
+</div>
+
+<p>
+输出结果为 3 个 a，即 <code>aaa</code> 。
+</p>
+
+<p>
+有关 multitasking 的内容，可以参看 <i>the Scheme Programming Language</i> 的 engine 部分，这里就不介绍了。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org637a110" class="outline-2">
+<h2 id="org637a110"><span class="section-number-2">4</span> 什么是 CPS</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+CPS，全称 continuation-passing style，中文意思为延续传递风格。
+</p>
+
+<p>
+维基百科上对 CPS 的解释是：在函数式编程语言中显式地将控制通过 continuation 传递的编程风格。
+</p>
+
+<p>
+使用 CPS 编写的函数会带有一个额外参数：一个显式的 continuation，也就是一个单参数函数。当 CPS 函数计算出它的返回值后，它通过调用 continuation 函数来进行”返回“。这就意味着在调用 CPS 函数时，调用者需要提供一个函数供 CPS 函数进行返回。
+</p>
+
+<p>
+直接风格的函数可以变换得到 CPS 函数，例如：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">add</span> x y)
+   (+ x y)
+=&gt;
+(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">add</span> x y k)
+   (+&amp; x y k)
+</pre>
+</div>
+
+<p>
+上面的 <code>+&amp;</code> 是 <code>+</code> 的 CPS 形式。
+</p>
+
+<p>
+更加复杂的例子比如：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">pyth</span> x y)
+ (sqrt (+ (* x x) (* y y)))
+=&gt;
+(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">pyth&amp;</span> x y k)
+ (*&amp; x x (<span style="color: #a020f0;">lambda</span> (x2)
+          (*&amp; y y (<span style="color: #a020f0;">lambda</span> (y2)
+                   (+&amp; x2 y2 (<span style="color: #a020f0;">lambda</span> (x2py2)
+                              (sqrt&amp; x2py2 k))))))))
+</pre>
+</div>
+
+<p>
+以及：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">factorial</span> n)
+ (<span style="color: #a020f0;">if</span> (= n 0)
+     1     <span style="color: #b22222;">; </span><span style="color: #b22222;">NOT tail-recursive</span>
+     (* n (factorial (- n 1)))))
+=&gt;
+(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">factorial&amp;</span> n k)
+ (=&amp; n 0 (<span style="color: #a020f0;">lambda</span> (b)
+          (<span style="color: #a020f0;">if</span> b                    <span style="color: #b22222;">; </span><span style="color: #b22222;">growing continuation</span>
+              (k 1)                <span style="color: #b22222;">; </span><span style="color: #b22222;">in the recursive call</span>
+              (-&amp; n 1 (<span style="color: #a020f0;">lambda</span> (nm1)
+                       (factorial&amp; nm1 (<span style="color: #a020f0;">lambda</span> (f)
+                                        (*&amp; n f k)))))))))
+</pre>
+</div>
+
+<p>
+使用 CPS 后表达式显得更加复杂，但是也有一些有用的应用。CPS 允许过程向它的 continuation 传递多个结果，因为实现 continuation 的过程可以接受任意数量的参数。 <i>the Scheme Programming Language</i> 中有一个 <code>car&amp;cdr</code> 过程，它的定义如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">car&amp;cdr</span>
+ (<span style="color: #a020f0;">lambda</span> (p k)
+    (k (car p) (cdr p))))
+</pre>
+</div>
+
+<p>
+使用不同的 continuation 函数，就可以得到不同的结果：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(car&amp;cdr '(a b c)
+  (<span style="color: #a020f0;">lambda</span> (x y)
+    (list y x))) =&gt; ((b c) a)
+(car&amp;cdr '(a b c) cons) =&gt;(a b c)
+(car&amp;cdr '(a b c a d) memv) =&gt; (a d)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org9666fae" class="outline-3">
+<h3 id="org9666fae"><span class="section-number-3">4.1</span> 例子：斐波拉契函数的 CPS</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+使用斐波拉契函数作为 CPS 例子有两个好处：第一，它足够简单；第二，它不是太简单。
+</p>
+
+<p>
+根据斐波拉契数列的数学定义，可以直接写出 <code>fib</code> 过程：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">fib</span>
+   (<span style="color: #a020f0;">lambda</span> (n)
+      (<span style="color: #a020f0;">cond</span>
+         ((&lt; n 0) #f)
+         ((= n 0) 0)
+         ((= n 1) 1)
+         (<span style="color: #a020f0;">else</span> (+ (fib (- n 1))
+                  (fib (- n 2)))))))
+</pre>
+</div>
+
+<p>
+当然，我们可以把递归形式改成迭代形式，但是这并不是我们的重点。问题在于怎么把它改成 CPS。这里不考虑初等过程的 CPS，则 <code>fib</code> 的 CPS 可以写成：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">fib-cps</span>
+  (<span style="color: #a020f0;">lambda</span> (n k)
+    (<span style="color: #a020f0;">cond</span>
+     ((&lt; n 0) (k #f))
+     ((= n 0) (k 0))
+     ((= n 1) (k 1))
+     (<span style="color: #a020f0;">else</span>
+      (fib-cps (- n 1)
+           (<span style="color: #a020f0;">lambda</span> (n1)
+              (fib-cps (- n 2) (<span style="color: #a020f0;">lambda</span> (n2) (k (+ n1 n2))))))))))
+</pre>
+</div>
+
+<p>
+除此之外，还可以这么写：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">fib-cps2</span>
+  (<span style="color: #a020f0;">lambda</span> (n k)
+    (<span style="color: #a020f0;">cond</span>
+     ((&lt; n 0) (k #f #f))
+     ((= n 0) (k 0 0))
+     ((= n 1) (k 1 0))
+     ((= n 2) (k 1 0))
+     (<span style="color: #a020f0;">else</span>
+      (fib-cps2 (- n 1)
+         (<span style="color: #a020f0;">lambda</span> (n1 n2)
+             (fib-cps2 (- n 2)
+                 (<span style="color: #a020f0;">lambda</span> (n3 n4)(k (+ n1 n2) (+ n3 n4))))))))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org731dbd5" class="outline-2">
+<h2 id="org731dbd5"><span class="section-number-2">5</span> 其他的一些有趣的问题</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-org4561759" class="outline-3">
+<h3 id="org4561759"><span class="section-number-3">5.1</span> (call/cc call/cc)</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+玩了这么久的 call/cc，不知道你有没有想过将它应用于自身是什么结果。在 chez-scheme 的 REPL 中输入 <code>(call/cc call/cc)</code> ，你会得到 <code>#&lt;system continuation in new-cafe&gt;</code> 。在 racket 中输入 <code>(call/cc call/cc)</code> ，你会得到 <code>#&lt;continuation&gt;</code> 。不管怎么说，结果还是个 continuation。参考资料<a href="#org14753ad">【3】</a>给出了对它的分析。我在这里简单地说明一下。
+</p>
+
+<p>
+将 <code>(call/cc call/cc)</code> 记作 <code>a@(call/cc1 call/cc2)</code> ，即使用 a 作为整个表达式的标识符，同时使用 1 和 2 对两个 call/cc 进行区分。
+</p>
+
+<p>
+将 call/cc1 应用于 call/cc2，上面的表达式就变成了 <code>a@(call/cc2 k@a)</code> ，也就是使用 a 的 continuation 来作为 call/cc2 的参数。
+</p>
+
+<p>
+再次变换，就得到了 <code>a@(k@a k@a)</code> ，这里的前一个 k@a是 call/cc1捕获的，后一个 k@a是 call/cc2 捕获的。这个表达式的值是显而易见的：continuation 调用 continuation，得到的还是 continuation。也就是说，最终结果就是 <code>k@a</code> 。
+</p>
+
+<p>
+可以使用 <code>((call/cc call/cc) (lambda(x) 1))</code> 来验证结果的正确性，在 REPL 中输入这串代码，得到的结果应该为 1。
+</p>
+
+<p>
+也就是说 <code>(call/cc call/cc)</code> 和之前提到过的 <code>(call/cc (lambda (x) x))</code> 是等价的。 <code>(call/cc call/cc)</code> 等价于 <code>(lambda(f) (f f))</code> 。
+</p>
+
+<p>
+比较有意思的一点是，这样的构造是幂等的，也就是说， <code>(call/cc call/cc)</code> 和 <code>((call/cc call/cc) call/cc)</code> 是一样的， <code>(call/cc (call/cc call/cc))</code> 也可以。一直构造下去没有任何问题。
+</p>
+
+<p>
+已知 Y combinator 的写法是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">Y</span> f)
+  ((<span style="color: #a020f0;">lambda</span> (x)
+     (<span style="color: #a020f0;">lambda</span> (n) ((f (x x)) n)))
+   (<span style="color: #a020f0;">lambda</span> (x)
+     (<span style="color: #a020f0;">lambda</span> (n) ((f (x x)) n)))))
+</pre>
+</div>
+
+<p>
+使用 call/cc 就可以改写为：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">Y</span> f)
+  ((<span style="color: #a020f0;">lambda</span> (u)
+     (u (<span style="color: #a020f0;">lambda</span> (x)
+      (<span style="color: #a020f0;">lambda</span> (n) ((f (u x)) n)))))
+   (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (x) x)))))
+</pre>
+</div>
+
+<p>
+或：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">Y</span> f)
+  ((<span style="color: #a020f0;">lambda</span> (u)
+     (u (<span style="color: #a020f0;">lambda</span> (x)
+      (<span style="color: #a020f0;">lambda</span> (n) ((f (u x)) n)))))
+   (<span style="color: #a020f0;">call/cc</span> call/cc)))
+</pre>
+</div>
+
+<p>
+但是， <code>((call/cc call/cc) (call/cc call/cc))</code> 却是一个死循环。
+</p>
+
+<p>
+上式可以写作 <code>(a@(call/cc call/cc) b@(call/cc call/cc))</code> ，变换后的结果为：
+</p>
+
+<p>
+<code>(k@a k@b)</code> ，a 的 continuation 是接受一个参数来作为 <code>a@(call/cc call/cc)</code> 过程的参数，b 的 continuation 是作为 <code>a@(call/cc call/cc)</code> 的参数。进一步变换后得到：
+</p>
+
+<p>
+<code>(k@b k@b)</code> ，这也就是为什么死循环的原因吧。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgba6aae0" class="outline-3">
+<h3 id="orgba6aae0"><span class="section-number-3">5.2</span> 阴阳谜题（yin-yang puzzle）</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+通过以下的代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">let*</span> ((yin
+        ((<span style="color: #a020f0;">lambda</span> (cc) (display #\@) cc)
+         (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (c) c))))
+       (yang
+        ((<span style="color: #a020f0;">lambda</span> (cc) (display #\*) cc)
+         (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (c) c)))))
+  (yin yang))
+</pre>
+</div>
+
+<p>
+可以得到一个死循环程序，程序的输出还非常有规律 <code>@*@**@***@****@*****@******@*******@********@*********</code> 。
+</p>
+
+<p>
+参考<a href="#orga8a8b87">【13】</a>，我们可以一步一步地推出整个式子的来龙去脉。
+</p>
+
+<p>
+首先，yin 和 yang 分别与它们的 continuation 绑定，输出 <code>@*</code> 。这里，我们将 yin 和 yang 绑定的 continuation 分别记为 C1, C2。
+</p>
+
+<p>
+随后，调用表达式 <code>(yin yang)</code> ，yin 的绑定值变为 yang 的绑定值 C2，并输出 <code>@</code> ，yang 的绑定值更新为 C3，并输出 <code>*</code> 。需要注意的是，C3 与 C2 是不同的。
+</p>
+
+<p>
+之后再次调用 <code>(yin yang)</code> ，yin 的值为 C2，所以此时跳跃到的地方不是 yin 的绑定过程，而是 yang 的绑定过程，yang 被绑定为 C3。因为没有经过 yin 的绑定过程，所以输出的只有 <code>*</code> 。此时你可能会认为 yin 是 C2 而 yang 是 C3，但事实并非如此，因为 yin 为 C2，所以 跳回的是 yin 为 C1，yang 为 C2 时的 point。正确的结果应该是 yin 为 C1，yang 为 C3。
+</p>
+
+<p>
+接着调用 <code>(yin yang)</code> ，又回到了最初的绑定 point，yin 的值被赋为 C3，而 yang 的值更新为 C4，输出 <code>@*</code> 。
+</p>
+
+<p>
+再次调用 <code>(yin yang)</code> ，yin 的值为 C3，回到 C3 处，输出 <code>*</code> ，yang 变为 C4，此时 yin 的值成为 C2（因为 yang 为 C3 时 yin 为 C2）。
+</p>
+
+<p>
+下一次调用，yin 的值变为 C1，yang 的值变为 C4，输出 <code>*</code> 。（因为此时 yin 为 C2，所以回到 yang 为 C2 的 point，而 yang 为 C2 时 yin 为 C1）
+</p>
+
+<p>
+&#x2026;&#x2026;.
+</p>
+
+<p>
+让我们看看现在输出了什么 <code>@*@**@***</code> ，再继续下去当然没有问题，不过现在已经可以从中看出一些规律出来了，列一张表来观察随着 <code>(yin yang)</code> 调用 yin 和 yang 的值的变化。
+</p>
+
+<ol class="org-ol">
+<li>调用 0 次。yin：C1，yang：C2。输出 @*</li>
+
+<li>调用 1 次。yin：C2，yang：C3。输出 @*</li>
+
+<li>调用 2 次。yin：C1，yang：C3。输出 *</li>
+
+<li>调用 3 次。yin：C3，yang：C4。输出 @*</li>
+
+<li>调用 4 次。yin：C2，yang：C4。输出 *</li>
+
+<li>调用 5 次。yin：C1，yang：C4。输出 *</li>
+
+<li>&#x2026;&#x2026;.</li>
+</ol>
+
+
+<p>
+规律已经很明显了，由 yin 所在的赋值表达式的 call/cc 只调用了 1 次，也就是产生了 C1。而 yang 处的 call/cc 随调用次数增多不断变大，使得回到 C1 的所需的调用次数也不断增多，从而出现了上面的输出效果。
+</p>
+
+<p>
+关于这个结论的证明可以参考<a href="#orga8a8b87">【13】</a>。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga113bed" class="outline-2">
+<h2 id="orga113bed"><span class="section-number-2">6</span> 参考资料</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+<a id="org0018ea2">【1】</a> Wikipedia:Continuation： <a href="https://en.wikipedia.org/wiki/Continuation">https://en.wikipedia.org/wiki/Continuation</a>
+</p>
+
+<p>
+<a id="org605ba27">【2】</a> <i>The Scheme Programming Language</i>, R.Kent Dybvig
+</p>
+
+<p>
+<a id="org14753ad">【3】</a> (call/cc call/cc) and friends, Pavel Panchekha： <a href="https://pavpanchekha.com/blog/callcc-trees.html">https://pavpanchekha.com/blog/callcc-trees.html</a>
+</p>
+
+<p>
+<a id="org40c6c79">【4】</a> Undelimited continuations are not functions： <a href="http://okmij.org/ftp/continuations/undelimited.html">http://okmij.org/ftp/continuations/undelimited.html</a>
+</p>
+
+<p>
+<a id="org15a7e24">【5】</a> Coroutines, exceptions, time-traveling search, generators and threads: Continuations by example： <a href="http://matt.might.net/articles/programming-with-continuations--exceptions-backtracking-search-threads-generators-coroutines/">http://matt.might.net/articles/programming-with-continuations--exceptions-backtracking-search-threads-generators-coroutines/</a>
+</p>
+
+<p>
+<a id="org029f36c">【6】</a> amb： <a href="http://community.schemewiki.org/?amb">http://community.schemewiki.org/?amb</a>
+</p>
+
+<p>
+<a id="org4fc6ecc">【7】</a> Scheme 语言简明教程： <a href="https://wizardforcel.gitbooks.io/teach-yourself-scheme/content/140-nondeterminism.html">https://wizardforcel.gitbooks.io/teach-yourself-scheme/content/140-nondeterminism.html</a>
+</p>
+
+<p>
+<a id="org1f24cdb">【8】</a> Scheme Coroutine Example： <a href="https://wiki.c2.com/?SchemeCoroutineExample">https://wiki.c2.com/?SchemeCoroutineExample</a>
+</p>
+
+<p>
+<a id="org393920f">【9】</a> Implementing Coroutines with call/cc： <a href="http://pages.cs.wisc.edu/~fischer/cs538.s08/lectures/Lecture20.pdf">http://pages.cs.wisc.edu/~fischer/cs538.s08/lectures/Lecture20.pdf</a>
+</p>
+
+<p>
+<a id="org206990f">【10】</a> Generator (computer programming) - Wikipedia： <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)">https://en.wikipedia.org/wiki/Generator_(computer_programming)</a>
+</p>
+
+<p>
+<a id="org6db5eda">【11】</a> generator - Does call/cc in Scheme the same thing with yield in Python and JavaScript? - Stack Overflow： <a href="https://stackoverflow.com/questions/44514890/does-call-cc-in-scheme-the-same-thing-with-yield-in-python-and-javascript">https://stackoverflow.com/questions/44514890/does-call-cc-in-scheme-the-same-thing-with-yield-in-python-and-javascript</a>
+</p>
+
+<p>
+<a id="org8e825b0">【12】</a> Continuation-passing style - Wikipedia： <a href="https://en.wikipedia.org/wiki/Continuation-passing_style">https://en.wikipedia.org/wiki/Continuation-passing_style</a>
+</p>
+
+<p>
+<a id="orga8a8b87">【13】</a> scheme - How does the yin-yang puzzle work? - Stack Overflow： <a href="https://stackoverflow.com/questions/2694679/how-does-the-yin-yang-puzzle-work">https://stackoverflow.com/questions/2694679/how-does-the-yin-yang-puzzle-work</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2020-08-11 Tue 00:00</p> <p>Last modified: 2021-08-03 Tue 18:08</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
