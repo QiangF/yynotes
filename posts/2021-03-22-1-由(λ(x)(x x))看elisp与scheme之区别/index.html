@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-04 Wed 00:21 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1-由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="content">
+<h1 class="title">1-由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org91755aa">1. 原因分析</a></li>
+<li><a href="#org0655638">2. elisp 的调用规则</a></li>
+<li><a href="#org05c137d">3. 总结</a></li>
+<li><a href="#org80c2c78">4. 参考资料</a></li>
+</ul>
+</div>
+</div>
+<p>
+首先，让我们来看一个小问题：如何在不使用循环语句和跳转语句的情况下写出死循环程序来？
+</p>
+
+<p>
+自然，比较容易想到的用 C 语言的解决方案是：（在不使用非本地跳转的情况下）
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">fun</span>(<span style="color: #228b22;">void</span>)
+{
+    <span style="color: #a020f0;">return</span> fun();
+}
+</pre>
+</div>
+
+<p>
+由上面的程序可以得到 Program finished with exit code 139，也就是说明堆栈溢出了。
+</p>
+
+<p>
+如果进一步，不能定义函数呢？这种情况下我暂时还没想出使用 C 语言来解这个问题（宏就算了）。在 Scheme 中，使用匿名的 lambda 函数可以轻松解决：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">((<span style="color: #a020f0;">lambda</span> (x) (x x)) (<span style="color: #a020f0;">lambda</span> (x) (x x)))
+</pre>
+</div>
+
+<p>
+相比于 C 语言，Scheme 还有一个优势，由于 Scheme 进行了尾调用优化，上面的过程调用是不会导致调用栈溢出的情况的。但是在 Emacs 中对这个表达式进行求值时，debugger 会显示如下信息：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">Debugger entered--Lisp error: (void-function x)
+  (x x)
+  (<span style="color: #a020f0;">lambda</span> (x) (x x))((<span style="color: #a020f0;">lambda</span> (x) (x x)))
+  eval(((<span style="color: #a020f0;">lambda</span> (x) (x x)) #'(lambda (x) (x x))) nil)
+...
+</pre>
+</div>
+
+<p>
+自然，接收了 <code>(lambda(x) (x x))</code> 作为值的形参 x 的值不可能为空，出现错误的原因肯定和 elisp 的求值方式有关。
+</p>
+
+<div id="outline-container-org91755aa" class="outline-2">
+<h2 id="org91755aa"><span class="section-number-2">1</span> 原因分析</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+出错了最快的解决方法自然是使用搜索引擎，不过就靠 <code>(lambda(x) (x x))</code> 来作为关键词还真搜不出什么来。那就只能读读文档了。在 elisp mannual 的 function-indirection 一节<a href="#org5d5a196">【1】</a>中我找到了原因。
+</p>
+
+<blockquote>
+<p>
+If the first element of the list is a symbol then evaluation examines the symbol’s function cell, and uses its contents instead of the original symbol. If the contents are another symbol, this process, called <b>symbol function indirection</b>, is repeated until it obtains a non-symbol.
+</p>
+</blockquote>
+
+<p>
+翻译一下：如果表的第一项是一个 symbol，那么求值过程会检查 symbol 的 function cell，使用这个来代替原 symbol。如果它是另一个符号，那么这个过程会继续下去，直到它获得了一个非符号值。这个过程叫做 <b>函数间接</b> （function indirection）。
+</p>
+
+<p>
+既然是检查 symbol 的 function cell，由于 (lambda (x) (x x)) 中 x 实际上使用的是它的 value cell 来绑定实参，它的 function cell 自然是空的，所以就会有 void-function error。
+</p>
+
+<p>
+那么，要怎样对上面的错误进行修正呢？elisp 提供了一个叫做 <code>funcall</code> <a href="#org48b40c4">【2】</a>的函数，它接收一个函数和一个或多个值作为参数，并返回函数返回的值。我们可以这样修改上面的代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+</pre>
+</div>
+
+<p>
+这样就可以得到“正确”的结果了，即：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">Debugger entered--Lisp error: (<span style="color: #ff0000; font-weight: bold;">error</span> <span style="color: #8b2252;">"Lisp nesting exceeds &#8216;</span><span style="color: #008b8b;">max-lisp-eval-depth</span><span style="color: #8b2252;">&#8217;"</span>)
+ funcall((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+  (<span style="color: #a020f0;">lambda</span> (x) (funcall x x))((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+  funcall((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+  (<span style="color: #a020f0;">lambda</span> (x) (funcall x x))((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+  funcall((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+  (<span style="color: #a020f0;">lambda</span> (x) (funcall x x))((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+......
+</pre>
+</div>
+
+<p>
+<code>funcall</code> 这个函数很有意思，如果它的第一参数值是函数对象的话，它直接使用函数来进行调用，如果值是 symbol 的话，它也会使用 <code>function indirection</code> 规则来获取函数对象。在上面的代码中，形参 x 的 value cell 为 <code>(lambda (x) (funcall x x))</code> ，对 x 求值就会得到函数对象。
+</p>
+
+<p>
+下面的代码可以说明这一点：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">a</span> (x) (+ x 1))
+(<span style="color: #a020f0;">setq</span> a (<span style="color: #a020f0;">lambda</span> (x) (+ x 2)))
+
+(funcall a 1)
+=&gt; 3
+
+(funcall 'a 1)
+=&gt; 2
+</pre>
+</div>
+
+<p>
+与之相似的还有 <code>apply</code> 函数，示例代码如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">a</span> (x) (+ x 1))
+(<span style="color: #a020f0;">setq</span> a (<span style="color: #a020f0;">lambda</span> (x) (+ x 2)))
+
+(apply a 1 nil)
+=&gt; 3
+(apply 'a 1 nil)
+=&gt; 2
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0655638" class="outline-2">
+<h2 id="org0655638"><span class="section-number-2">2</span> elisp 的调用规则</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+elisp 文档中这样写道：
+</p>
+
+<blockquote>
+<p>
+A form that is a nonempty list is either a function call, a macro call, or a special form, according to its first element. These three kinds of forms are evaluated in different ways
+</p>
+
+<ul class="org-ul">
+<li>If the first element of a list being evaluated is a Lisp function object, byte-code object or primitive function object, then that list is a <b>function call</b>.</li>
+
+<li>If the first element of a list being evaluated is a macro object, then the list is a <b>macro call</b></li>
+
+<li>A <b>special form</b> is a primitive function specially marked so that its arguments are not all evaluated.</li>
+</ul>
+</blockquote>
+
+<p>
+如果一个表满足上面三种情况中的一种，那么它就是一种调用形式（call form）。
+</p>
+
+<p>
+那么，能不能像 Scheme 一样，调用形式的第一项是一个表达式呢？就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">((car (list + -)) 1 2)
+=&gt; 3
+</pre>
+</div>
+
+<p>
+在 elisp 中使用上面相似代码进行测试，得到的错误如下：
+</p>
+
+<p>
+<code>Debugger entered--Lisp error: (invalid-function (car (list (symbol-function '+))))</code>
+</p>
+
+<p>
+这也许说明调用形式的首个项只能是一个元素（element），而不能是一个待求值的表达式。 <code>((lambda (x) (funcall x x)) (lambda (x) (funcall x x)))</code> 中是 lambda 函数表达式作为第一项，这样的形式被允许好像是特殊情况。毕竟官方文档<a href="#org5d5a196">【1】</a>中更推荐使用 <code>funcall</code> 的形式。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org05c137d" class="outline-2">
+<h2 id="org05c137d"><span class="section-number-2">3</span> 总结</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+这个问题其实就是 Lisp-1 和 Lisp-2 的区别导致的，Lisp-1 的变量命名空间和函数命名空间是统一的，而在 Lisp-2 中两者是分开的。Scheme 的变量和函数显得更加统一一些。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org80c2c78" class="outline-2">
+<h2 id="org80c2c78"><span class="section-number-2">4</span> 参考资料</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<a id="org5d5a196">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection</a>
+</p>
+
+<p>
+<a id="org48b40c4">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions">https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions</a>
+</p>
+
+<p>
+<a id="orgcc3a3ed">【3】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-03-22 Mon 00:00</p> <p>Last modified: 2021-08-04 Wed 00:21</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
