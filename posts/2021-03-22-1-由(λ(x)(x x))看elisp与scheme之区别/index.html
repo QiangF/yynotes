@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 00:21 -->
+<!-- 2021-08-04 Wed 13:46 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>1-由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></title>
@@ -39,16 +39,22 @@
  <a accesskey="h" href="../../index.html"> UP </a>
  |
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
-</div><div id="content">
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
 <h1 class="title">1-由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org91755aa">1. 原因分析</a></li>
-<li><a href="#org0655638">2. elisp 的调用规则</a></li>
-<li><a href="#org05c137d">3. 总结</a></li>
-<li><a href="#org80c2c78">4. 参考资料</a></li>
+<li><a href="#orgc23f3e3">1. 原因分析</a></li>
+<li><a href="#orgca459fc">2. elisp 的调用规则</a></li>
+<li><a href="#orgf0622c9">3. 总结</a></li>
+<li><a href="#orgc6e3ac3">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -98,11 +104,11 @@
 自然，接收了 <code>(lambda(x) (x x))</code> 作为值的形参 x 的值不可能为空，出现错误的原因肯定和 elisp 的求值方式有关。
 </p>
 
-<div id="outline-container-org91755aa" class="outline-2">
-<h2 id="org91755aa"><span class="section-number-2">1</span> 原因分析</h2>
+<div id="outline-container-orgc23f3e3" class="outline-2">
+<h2 id="orgc23f3e3"><span class="section-number-2">1</span> 原因分析</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-出错了最快的解决方法自然是使用搜索引擎，不过就靠 <code>(lambda(x) (x x))</code> 来作为关键词还真搜不出什么来。那就只能读读文档了。在 elisp mannual 的 function-indirection 一节<a href="#org5d5a196">【1】</a>中我找到了原因。
+出错了最快的解决方法自然是使用搜索引擎，不过就靠 <code>(lambda(x) (x x))</code> 来作为关键词还真搜不出什么来。那就只能读读文档了。在 elisp mannual 的 function-indirection 一节<a href="#orgb69d620">【1】</a>中我找到了原因。
 </p>
 
 <blockquote>
@@ -120,7 +126,7 @@ If the first element of the list is a symbol then evaluation examines the symbol
 </p>
 
 <p>
-那么，要怎样对上面的错误进行修正呢？elisp 提供了一个叫做 <code>funcall</code> <a href="#org48b40c4">【2】</a>的函数，它接收一个函数和一个或多个值作为参数，并返回函数返回的值。我们可以这样修改上面的代码：
+那么，要怎样对上面的错误进行修正呢？elisp 提供了一个叫做 <code>funcall</code> <a href="#org5fea1bb">【2】</a>的函数，它接收一个函数和一个或多个值作为参数，并返回函数返回的值。我们可以这样修改上面的代码：
 </p>
 
 <div class="org-src-container">
@@ -181,8 +187,8 @@ If the first element of the list is a symbol then evaluation examines the symbol
 </div>
 </div>
 
-<div id="outline-container-org0655638" class="outline-2">
-<h2 id="org0655638"><span class="section-number-2">2</span> elisp 的调用规则</h2>
+<div id="outline-container-orgca459fc" class="outline-2">
+<h2 id="orgca459fc"><span class="section-number-2">2</span> elisp 的调用规则</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 elisp 文档中这样写道：
@@ -225,13 +231,13 @@ A form that is a nonempty list is either a function call, a macro call, or a spe
 </p>
 
 <p>
-这也许说明调用形式的首个项只能是一个元素（element），而不能是一个待求值的表达式。 <code>((lambda (x) (funcall x x)) (lambda (x) (funcall x x)))</code> 中是 lambda 函数表达式作为第一项，这样的形式被允许好像是特殊情况。毕竟官方文档<a href="#org5d5a196">【1】</a>中更推荐使用 <code>funcall</code> 的形式。
+这也许说明调用形式的首个项只能是一个元素（element），而不能是一个待求值的表达式。 <code>((lambda (x) (funcall x x)) (lambda (x) (funcall x x)))</code> 中是 lambda 函数表达式作为第一项，这样的形式被允许好像是特殊情况。毕竟官方文档<a href="#orgb69d620">【1】</a>中更推荐使用 <code>funcall</code> 的形式。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org05c137d" class="outline-2">
-<h2 id="org05c137d"><span class="section-number-2">3</span> 总结</h2>
+<div id="outline-container-orgf0622c9" class="outline-2">
+<h2 id="orgf0622c9"><span class="section-number-2">3</span> 总结</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 这个问题其实就是 Lisp-1 和 Lisp-2 的区别导致的，Lisp-1 的变量命名空间和函数命名空间是统一的，而在 Lisp-2 中两者是分开的。Scheme 的变量和函数显得更加统一一些。
@@ -239,19 +245,19 @@ A form that is a nonempty list is either a function call, a macro call, or a spe
 </div>
 </div>
 
-<div id="outline-container-org80c2c78" class="outline-2">
-<h2 id="org80c2c78"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-orgc6e3ac3" class="outline-2">
+<h2 id="orgc6e3ac3"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="org5d5a196">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection</a>
+<a id="orgb69d620">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection</a>
 </p>
 
 <p>
-<a id="org48b40c4">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions">https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions</a>
+<a id="org5fea1bb">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions">https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions</a>
 </p>
 
 <p>
-<a id="orgcc3a3ed">【3】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms</a>
+<a id="org197e5de">【3】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms</a>
 </p>
 </div>
 </div>

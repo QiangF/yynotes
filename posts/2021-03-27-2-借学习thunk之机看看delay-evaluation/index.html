@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 13:10 -->
+<!-- 2021-08-04 Wed 13:47 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>借学习thunk之机看看delay-evaluation <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,17 +51,17 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org40f0a98">1. 什么是延时求值</a></li>
-<li><a href="#org106eb7d">2. Elisp 中的延时求值</a></li>
-<li><a href="#orge5e60c7">3. 使用延时求值的一些例子</a>
+<li><a href="#org45da801">1. 什么是延时求值</a></li>
+<li><a href="#orgc1c497b">2. Elisp 中的延时求值</a></li>
+<li><a href="#orgb65e163">3. 使用延时求值的一些例子</a>
 <ul>
-<li><a href="#orge4c2866">3.1. SICP 中的流</a></li>
-<li><a href="#org17e1763">3.2. 用流表示级数</a></li>
-<li><a href="#org9bcf115">3.3. 延时求值与动态规划问题</a></li>
+<li><a href="#orged721cc">3.1. SICP 中的流</a></li>
+<li><a href="#orgf2786ad">3.2. 用流表示级数</a></li>
+<li><a href="#org7edf129">3.3. 延时求值与动态规划问题</a></li>
 </ul>
 </li>
-<li><a href="#org86d84e1">4. 总结</a></li>
-<li><a href="#orge96d4d1">5. 参考资料</a></li>
+<li><a href="#orgfc8e126">4. 总结</a></li>
+<li><a href="#orgfbb69fa">5. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -90,8 +90,8 @@ Elisp Mannual 在 Evaluation 一章的最后一小节中对 elisp 中的延时/�
 阅读本文需要一定的 Lisp 使用经验，没玩过 Lisp 系语言的话，您可以去学一学。
 </p>
 
-<div id="outline-container-org40f0a98" class="outline-2">
-<h2 id="org40f0a98"><span class="section-number-2">1</span> 什么是延时求值</h2>
+<div id="outline-container-org45da801" class="outline-2">
+<h2 id="org45da801"><span class="section-number-2">1</span> 什么是延时求值</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 延时求值，顾名思义就是不立即求值，而是在值不得不被使用的时候再进行求值。在一次求值之后，后面的求值会直接使用第一次求值得到的值，而无需再次对原表达式进行求值。延时求值在不同的语言中有不同的实现，这里只谈 Lisp 系语言。
@@ -146,11 +146,11 @@ Elisp Mannual 在 Evaluation 一章的最后一小节中对 elisp 中的延时/�
 </div>
 </div>
 
-<div id="outline-container-org106eb7d" class="outline-2">
-<h2 id="org106eb7d"><span class="section-number-2">2</span> Elisp 中的延时求值</h2>
+<div id="outline-container-orgc1c497b" class="outline-2">
+<h2 id="orgc1c497b"><span class="section-number-2">2</span> Elisp 中的延时求值</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-延时求值被作为标准加入 Emacs 的时间并不早，参阅 Github 上 Emacs 镜像的 commit 历史<a href="#orga65be61">【1】</a>，thunk.el 第一次提交出现在 2015 年，提交者是 NicolasPetton。初期的实现只包括了 <code>thunk-delay</code> ， <code>thunk-force</code> 和 <code>thunk-evaluated-p</code> 。其中 <code>thunk-evaluated-p</code> 用来判断是否已经求过值。
+延时求值被作为标准加入 Emacs 的时间并不早，参阅 Github 上 Emacs 镜像的 commit 历史<a href="#orgb441a81">【1】</a>，thunk.el 第一次提交出现在 2015 年，提交者是 NicolasPetton。初期的实现只包括了 <code>thunk-delay</code> ， <code>thunk-force</code> 和 <code>thunk-evaluated-p</code> 。其中 <code>thunk-evaluated-p</code> 用来判断是否已经求过值。
 </p>
 
 <p>
@@ -214,8 +214,8 @@ Elisp Mannual 在 Evaluation 一章的最后一小节中对 elisp 中的延时/�
 </div>
 </div>
 
-<div id="outline-container-orge5e60c7" class="outline-2">
-<h2 id="orge5e60c7"><span class="section-number-2">3</span> 使用延时求值的一些例子</h2>
+<div id="outline-container-orgb65e163" class="outline-2">
+<h2 id="orgb65e163"><span class="section-number-2">3</span> 使用延时求值的一些例子</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 从这里开始就是本文的主体部分了，延时求值这个概念很好理解，但光是谈谈它的实现那就一点意思也没有了，那么又有哪些好玩的使用例子呢？且看以下内容。
@@ -226,8 +226,8 @@ Elisp Mannual 在 Evaluation 一章的最后一小节中对 elisp 中的延时/�
 </p>
 </div>
 
-<div id="outline-container-orge4c2866" class="outline-3">
-<h3 id="orge4c2866"><span class="section-number-3">3.1</span> SICP 中的流</h3>
+<div id="outline-container-orged721cc" class="outline-3">
+<h3 id="orged721cc"><span class="section-number-3">3.1</span> SICP 中的流</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 SICP当然指的是大名鼎鼎的《计算机程序的构造与解释》啦。偶然间聊天的时候突然想到 SICP 在第三章中的流模型中举过一些例子，正好来作为本文的一部分。
@@ -344,8 +344,8 @@ SICP当然指的是大名鼎鼎的《计算机程序的构造与解释》啦。�
 </p>
 </div>
 
-<div id="outline-container-org76be6e3" class="outline-4">
-<h4 id="org76be6e3"><span class="section-number-4">3.1.1</span> 一些常见的数列</h4>
+<div id="outline-container-orgead6abc" class="outline-4">
+<h4 id="orgead6abc"><span class="section-number-4">3.1.1</span> 一些常见的数列</h4>
 <div class="outline-text-4" id="text-3-1-1">
 <p>
 ①由 <b>斐波那契数列</b> 的定义 <code>F(n) = F(n - 1) + F(n - 2)</code> ，我们可以这样表示它：
@@ -467,8 +467,8 @@ SICP 上用埃氏筛法筛出了一定范围内的素数，可以去上面看看
 </div>
 </div>
 
-<div id="outline-container-org17e1763" class="outline-3">
-<h3 id="org17e1763"><span class="section-number-3">3.2</span> 用流表示级数</h3>
+<div id="outline-container-orgf2786ad" class="outline-3">
+<h3 id="orgf2786ad"><span class="section-number-3">3.2</span> 用流表示级数</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 这一部分是我觉得最有意思的部分，通过流来表示函数的泰勒级数展开，可以用流来表示各种各样的初等函数。
@@ -548,13 +548,13 @@ SICP 上用埃氏筛法筛出了一定范围内的素数，可以去上面看看
 </p>
 
 <p>
-以上级数计算的正确性可以去网站<a href="#orgf23a860">【3】</a>进行验证。
+以上级数计算的正确性可以去网站<a href="#org3e75e1f">【3】</a>进行验证。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org9bcf115" class="outline-3">
-<h3 id="org9bcf115"><span class="section-number-3">3.3</span> 延时求值与动态规划问题</h3>
+<div id="outline-container-org7edf129" class="outline-3">
+<h3 id="org7edf129"><span class="section-number-3">3.3</span> 延时求值与动态规划问题</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 延时求值与动态规划看上去貌似很难联系到一起，实际上也应该如此。但是某天我在计算斐波那契数列时，偶然想到了一种表达方式，且听我细细道来。
@@ -608,7 +608,7 @@ SICP 上用埃氏筛法筛出了一定范围内的素数，可以去上面看看
 </p>
 
 <p>
-Projecteuler81 <a href="#org7a60eb0">【4】</a>。题目大意是：给出一个矩阵，要求你从左上角走到右下角，你只能向右或向下运动，要求求出最小路径和（即走过路径上的所有数的和）。
+Projecteuler81 <a href="#org4ac750c">【4】</a>。题目大意是：给出一个矩阵，要求你从左上角走到右下角，你只能向右或向下运动，要求求出最小路径和（即走过路径上的所有数的和）。
 </p>
 
 <p>
@@ -702,8 +702,8 @@ thunk 矩阵的含义是：它的 <code>(i, j)</code> 元素的值是从 <code>(
 </div>
 </div>
 
-<div id="outline-container-org86d84e1" class="outline-2">
-<h2 id="org86d84e1"><span class="section-number-2">4</span> 总结</h2>
+<div id="outline-container-orgfc8e126" class="outline-2">
+<h2 id="orgfc8e126"><span class="section-number-2">4</span> 总结</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 网上关于延时求值的内容并不多，当我看完 Elisp 这一部分的文档之后，我也准备直接往下继续学习了。但是 SICP 提醒了我可以用延时求值来构建无穷流，这部分正好来作为文章的主题部分。写完流的部分后，我又突然想到了斐波那契数列的计算其实也可以算作动态规划，稍加扩展就是本文的第二个主体部分。
@@ -714,11 +714,11 @@ thunk 矩阵的含义是：它的 <code>(i, j)</code> 元素的值是从 <code>(
 </p>
 
 <p>
-我把上面的无穷流的一些函数整理后放到了 gist <a href="#orgea88072">【7】</a>上，想试一试的可以下载下来玩玩。由于这些函数没有做任何的错误检查，如果写错了代码，调试起来可能会有点麻烦。这部分代码的实用性很差，因为 thunk 一多就会爆栈。之后我可能会考虑将部分递归改成循环。
+我把上面的无穷流的一些函数整理后放到了 gist <a href="#org4dd7cae">【7】</a>上，想试一试的可以下载下来玩玩。由于这些函数没有做任何的错误检查，如果写错了代码，调试起来可能会有点麻烦。这部分代码的实用性很差，因为 thunk 一多就会爆栈。之后我可能会考虑将部分递归改成循环。
 </p>
 
 <p>
-关于延时求值的内容大都和<a href="#org42fc8e2">【5】</a>的深度差不多，也许是我的检索能力不够，但无穷流是我唯一能在网上找到的比较有趣的例子了。
+关于延时求值的内容大都和<a href="#orgac14617">【5】</a>的深度差不多，也许是我的检索能力不够，但无穷流是我唯一能在网上找到的比较有趣的例子了。
 </p>
 
 <p>
@@ -727,35 +727,35 @@ Elisp 的递归体验实在过于糟糕，thunk 估计在实际编程中用的�
 </div>
 </div>
 
-<div id="outline-container-orge96d4d1" class="outline-2">
-<h2 id="orge96d4d1"><span class="section-number-2">5</span> 参考资料</h2>
+<div id="outline-container-orgfbb69fa" class="outline-2">
+<h2 id="orgfbb69fa"><span class="section-number-2">5</span> 参考资料</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-<a id="orga65be61">【1】</a> <a href="https://github.com/emacs-mirror/emacs/commits/master/lisp/emacs-lisp/thunk.el">History for lisp/emacs-lisp/thunk.el - emacs-mirror/emacs (github.com)</a>
+<a id="orgb441a81">【1】</a> <a href="https://github.com/emacs-mirror/emacs/commits/master/lisp/emacs-lisp/thunk.el">History for lisp/emacs-lisp/thunk.el - emacs-mirror/emacs (github.com)</a>
 </p>
 
 <p>
-<a id="orga51d8c8">【2】</a> <i>Structure and Interpretation of Computer Programs</i>
+<a id="org6616cd3">【2】</a> <i>Structure and Interpretation of Computer Programs</i>
 </p>
 
 <p>
-<a id="orgf23a860">【3】</a> <a href="https://www.wolframalpha.com/input/?i=expand+tan+to+order+20">expand tan to order 20 - Wolfram|Alpha</a>
+<a id="org3e75e1f">【3】</a> <a href="https://www.wolframalpha.com/input/?i=expand+tan+to+order+20">expand tan to order 20 - Wolfram|Alpha</a>
 </p>
 
 <p>
-<a id="org7a60eb0">【4】</a> <a href="https://projecteuler.net/problem=81">Problem 81 - Project Euler</a>
+<a id="org4ac750c">【4】</a> <a href="https://projecteuler.net/problem=81">Problem 81 - Project Euler</a>
 </p>
 
 <p>
-<a id="org42fc8e2">【5】</a> <a href="https://homepages.inf.ed.ac.uk/stg/NOTES/node73.html">Delaying evaluation (ed.ac.uk)</a>
+<a id="orgac14617">【5】</a> <a href="https://homepages.inf.ed.ac.uk/stg/NOTES/node73.html">Delaying evaluation (ed.ac.uk)</a>
 </p>
 
 <p>
-<a id="orga992940">【6】</a> <a href="https://sicp.readthedocs.io/en/latest/index.html">SICP 解题集 — SICP 解题集</a>
+<a id="orgbe3d9a2">【6】</a> <a href="https://sicp.readthedocs.io/en/latest/index.html">SICP 解题集 — SICP 解题集</a>
 </p>
 
 <p>
-<a id="orgea88072">【7】</a> <a href="https://gist.github.com/include-yy/598c57b63da4b1955291dcfc22d348d4">A stream implemented with elisp (github.com)</a>
+<a id="org4dd7cae">【7】</a> <a href="https://gist.github.com/include-yy/598c57b63da4b1955291dcfc22d348d4">A stream implemented with elisp (github.com)</a>
 </p>
 </div>
 </div>
