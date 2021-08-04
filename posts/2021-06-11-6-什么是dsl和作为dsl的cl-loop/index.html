@@ -1,0 +1,1232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-04 Wed 10:50 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>6-什么是dsl和作为dsl的cl-loop <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzMxOTEy.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">6-什么是dsl和作为dsl的cl-loop <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzMxOTEy.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org8d9e47c">1. 什么是 DSL（domain-specific language）</a>
+<ul>
+<li><a href="#org03efd4b">1.1. 内部 DSL 与 外部 DSL</a></li>
+<li><a href="#org3c1cc67">1.2. DSL 的优点和缺点</a></li>
+</ul>
+</li>
+<li><a href="#orge8c1467">2. elisp 中的 cl-loop</a>
+<ul>
+<li><a href="#org0be2383">2.1. the Basic</a></li>
+<li><a href="#org916b9b7">2.2. cl-loop 中的顺序执行</a></li>
+<li><a href="#org3756148">2.3. cl-loop 中的选择结构</a></li>
+<li><a href="#org194e8d3">2.4. cl-loop 的循环结构</a></li>
+<li><a href="#org3e7e0f4">2.5. 总结</a></li>
+</ul>
+</li>
+<li><a href="#orgdaab4e9">3. 延申阅读</a></li>
+<li><a href="#org44b6d36">4. 参考资料</a></li>
+</ul>
+</div>
+</div>
+<p>
+大约两年前，我在松本行弘的《代码的未来》中首次了解到了 DSL 这个词，但也仅限于了解的程度，毕竟当时我连 C 语言的基本用法都没有完全掌握。前些天学习 cl-loop 的时候，我又突然想了起来。借此机会学习一下 dsl 和 cl-loop 是个不错的选择。
+</p>
+
+<p>
+本文关于 dsl 的叙述主要参考了 wikipedia 和 《代码的未来》，关于 cl-loop 的内容主要参考 cl-lib 的有关文档。由于本人并非是什么编程语言专家，dsl 的部分只能尽量参考权威资料，其中难免有疏漏之处，如有发现还请指出。
+</p>
+
+<p>
+本文的主要内容如下：
+</p>
+
+<ul class="org-ul">
+<li>什么是 DSL</li>
+
+<li>elisp 中的 cl-loop</li>
+</ul>
+
+
+<div id="outline-container-org8d9e47c" class="outline-2">
+<h2 id="org8d9e47c"><span class="section-number-2">1</span> 什么是 DSL（domain-specific language）</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+DSL 是一种用于特殊应用领域的编程语言。DSL 与 GPL（通用目的语言，即 general-purose language）相对，通用语言可用于多个领域。在《代码的未来》一书中作者这样写道：
+</p>
+
+<blockquote>
+<p>
+所谓 DSL，是指利用为特定领域所专门设计的词汇和语法，简化程序设计过程，提高生产效率的技术，同时也让非编程领域专家的人直接描述逻辑成为可能。DSL 的优点是可以直接使用对象领域中的概念，集中描述 What，而不必对 How 进行描述。
+</p>
+
+<p>
+DSL 并不单指程序语言，它是指计算机语言。DSL 还可以根据语言的种类继续细分，如特定领域标记语言，特定领域建模语言，特定领域程序语言等。特定目的的计算机语言从计算机开始存在时就有了，但是 DSL 这个提法是随着特定领域建模的兴起而变得流行的。仅用于简单的小程序的 DSL 有时也被叫做迷你语言（mini-languages）。松本行宏还这样写道：
+</p>
+
+<p>
+DSL 这个对特定目的的小规模语言的称呼，是最近才出现的比较新的叫法，但这种方法本身并不是什么稀罕的东西，尤其是 UNIX 社区中就诞生了许多用来解释像这样的“专用语言”的工具。
+</p>
+
+<p>
+其中，以列为单位进行文本处理的脚本语言 awk 算是比较有名的，除此之外，UNIX 中还开发了许多“迷你语言”，比如用来描述依赖关系的 Makefile 和用来读取它的 make 命令，以行为单位进行数据流编辑的 sed 命令、用来描述文档中嵌入图像的 pic 命令，用来生成表格的 tbl 命令等等。此外，为了对这些迷你语言的编写提供支持，UNIX 中还提供了语法分析器生成工具 yacc，以及词法分析器生成工具 lex，而 yacc 和 lex 本身也用于自己的迷你语言。
+</p>
+
+<p>
+这些迷你语言几乎都是专用于特定用途的，大多数情况下无法完成复杂的工作，但是它们都能够比较简单的配置文件描述更多的内容，并为命令的处理带来了更大的灵活性，因此和 DSL 在本质上是相同的。
+</p>
+</blockquote>
+
+<p>
+通用目的语言和特定领域语言的分界线并不一定非常明显，通用目的语言可能对某个特定领域提供专门的特性，而特定领域语言可能可以用于通用目的编程。例如，Perl 原本被设计为文本处理语言和胶水语言，就像 awk 一样，但是它随后被作为通用目的程序语言使用了。与之相对的，PostScript 是一种图灵完备的语言，可用于任何任务，但它主要用来描述页面。
+</p>
+</div>
+
+<div id="outline-container-org03efd4b" class="outline-3">
+<h3 id="org03efd4b"><span class="section-number-3">1.1</span> 内部 DSL 与 外部 DSL</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+使用独立的解释器或编译器实现的 DSL 被称为外部 DSL（External Domain Specific Language），比较有名的例子有 LaTex 或 AWK。
+</p>
+
+<p>
+外部 DSL 的优点在于它是独立于程序开发语言的。对某个特定领域进行操作的程序不一定是使用同一种语言来写的。SQL 就是一种 DSL，学会了 SQL 就可以在不同的语言中使用相同的 SQL 来操作数据库。
+</p>
+
+<p>
+外部 DSL 实际上是全新设计的语言和语言引擎，因此可以根据它的目的进行自由的设计，不必被特定的执行模块和现有的语法所左右。由于自由度很高，在特定领域中能够大幅度提高生产效率。但是，使用外部 DSL 也就意味着需要学习一门新的语言，会带来额外的学习负担。
+</p>
+
+<p>
+内部 DSL（Embedded/Internal Domain Specific Language）则是在一个宿主语言（host language）中实现，它一般以库的形式实现，并倾向于使用宿主语言中的语法。
+</p>
+
+<p>
+内部 DSL 的优点和缺点与外部 DSL 相反，它借助了宿主语言的语法，程序员无需学习一种新的语言。但是它被限制在宿主语言能够描述的范围内，因此自由度较低。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3c1cc67" class="outline-3">
+<h3 id="org3c1cc67"><span class="section-number-3">1.2</span> DSL 的优点和缺点</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+中文的维基百科居然没有英文对应的翻译（汗），这里我自己翻译一下：
+</p>
+
+<p>
+DSL 的优点：
+</p>
+
+<ul class="org-ul">
+<li>DSL 允许使用在问题领域的抽象层次的术语来表达问题的解。理想情况下领域专家应该可以理解，验证，修改甚至开发 DSL 程序，但是这种情况很少见。</li>
+
+<li>DSL 有助于将商业信息系统的开发从传统的软件开发人员转移到群体更大的领域专家，它们对领域有着更加深入的了解。</li>
+
+<li>由于 DSL 限制了应用范围，它们学起来比较容易</li>
+</ul>
+
+
+<p>
+DSL 的缺点
+</p>
+
+<ul class="org-ul">
+<li>学习一门新语言的成本可能大于掌握它带来的提升</li>
+
+<li>需要对 DSL 进行设计，实现和维护，以及提供开发工具</li>
+
+<li>在通用目的语言和特定领域语言中找到一个合适的折衷是很困难的</li>
+
+<li>不会编程的领域专家可能会觉得编写 DSL 很困难</li>
+
+<li>很难找到代码示例</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orge8c1467" class="outline-2">
+<h2 id="orge8c1467"><span class="section-number-2">2</span> elisp 中的 cl-loop</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+我在上一篇文章中简单介绍了 <code>cl-loop</code> 的用法，我感觉日常是够用了，但是还不够全面。这篇文章里我会把参考文档里面所有的内容做一个总结，并给出足够详细的例子。
+</p>
+
+<p>
+<code>cl-loop</code> 当然算是一种 DSL，而且是内部 DSL。相比于学习一个库，这里我还是用学习语言的步骤来整理整个文档比较好。程序的基本结构有三种：顺序、选择和循环。不妨从这三个方面来对 <code>cl-loop</code> 进行顺序介绍。
+</p>
+
+<p>
+首先我们需要知道的是， <code>cl-loop</code> 是一种基于语句的 DSL，在文档中它的形式就是 <code>cl-loop clauses ...</code> 。语句的类型大致是这几种：初始化语句（initialization clause），动作语句（action clause）和结束语句（final clause）。
+</p>
+</div>
+
+<div id="outline-container-org0be2383" class="outline-3">
+<h3 id="org0be2383"><span class="section-number-3">2.1</span> the Basic</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+首先，让我们看看如果没有任何语句的话 <code>cl-loop</code> 会给出怎样的结果：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>)
+</pre>
+</div>
+
+<p>
+将光标放到表达式的后面，按下 C-x C-e 运行这段代码，你会发现 emacs 的光标无法移动了，再摁 <code>C-g</code> 你又发现它可以动了，就像这样：
+</p>
+
+
+<div id="orgce59222" class="figure">
+<p><img src="./1.gif" alt="1.gif" />
+</p>
+</div>
+
+<p>
+这就说明没有语句的 <code>cl-loop</code> 就是个死循环，下面的例子可以更好地说明这一点：
+</p>
+
+
+<div id="org2ceebef" class="figure">
+<p><img src="./2.gif" alt="2.gif" />
+</p>
+</div>
+
+<p>
+（这里的 do 也可以省略，至于 <code>do</code> 的作用下面会说）
+</p>
+
+<p>
+为啥它不会停止呢？如果我们在 <code>cl-loop</code> 里面使用正常的 for 语句之类的迭代语句的话，在迭代达到终止条件后整个 <code>cl-loop</code> 表达式就停止执行了。文档里面没有说这一点，毕竟用于循环的 <code>cl-loop</code> 没多大必要考虑单条非循环语句的执行。这里我只能做个猜想，那就是： <code>cl-loop</code> 维护了一个标志，当专用的迭代语句执行完毕后标值变为真，从而完成 <code>cl-loop</code> 的执行。
+</p>
+
+<p>
+另外一个问题就是 <code>cl-loop</code> 这个表达式的返回值， <code>cl-loop</code> 在内部是提供了 <code>return</code> 关键字的，可以使用它来不经过迭代语句的终止而直接退出循环，就像这样：
+</p>
+
+
+<div id="org31ce4f9" class="figure">
+<p><img src="./3.gif" alt="3.gif" />
+</p>
+</div>
+
+<p>
+可以看到，前一个 <code>cl-loop</code> 的返回值是 <code>nil</code> ，后一个 <code>cl-loop</code> 直接返回 55。也就是说，单纯的迭代语句是无法影响 <code>cl-loop</code> 表达式的返回值的。不过它的返回值不一定要通过 <code>return</code> 得到，还可以这样：
+</p>
+
+
+<div id="org57e296c" class="figure">
+<p><img src="./4.gif" alt="4.gif" />
+</p>
+</div>
+
+<p>
+可以看到，使用了 <code>sum</code> 后，i 的值在某个地方被积累了，并在最后作为表达式的返回值返回。像 <code>sum</code> 这样的语句在 <code>cl-loop</code> 中被称为 <i>Accumulation Clause</i> ，即累积语句，除 <code>sum</code> 外，还有 <code>collect</code> ， <code>append</code> ， <code>concat</code> 等等。
+</p>
+
+<p>
+从上面一些简单的代码中，我们可以得出这样的猜想：
+</p>
+
+<ul class="org-ul">
+<li>存在某个标志变量，当迭代语句结束后它的值被置为真从而使表达式结束</li>
+
+<li>存在某个变量负责存储返回值，使用积累语句可以对它进行修改</li>
+</ul>
+
+
+<p>
+有了上面的基础，现在我们可以开始正式介绍 <code>cl-loop</code> 了，首先从顺序结构开始吧。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org916b9b7" class="outline-3">
+<h3 id="org916b9b7"><span class="section-number-3">2.2</span> cl-loop 中的顺序执行</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+首先需要提到的就是 elisp 表达式在 <code>cl-loop</code> 中的执行，这样的表达式在 <code>cl-loop</code> 里是合法的： <code>(cl-loop (setq x 0))</code> ， <code>(cl-loop (print 1) (print 2) (print 3))</code> 。但是下面是不行的，需要使用错误示例的下面的代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">wrong example</span>
+(<span style="color: #a020f0;">cl-loop</span> collect 1 (+ 1 2))
+
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">right</span>
+(<span style="color: #a020f0;">cl-loop</span> collect 1 do (+ 1 2))
+</pre>
+</div>
+
+<p>
+上面的代码中，前者会直接报错，后者可以顺利进入死循环（汗）。这是因为 <code>(+ 1 2)</code> 的前面没有 <code>do</code> 关键字，它不是一个合法的语句。前面的 <code>(cl-loop (print 1) (print 2) (print 3))</code> 可以运行是因为 <code>cl-loop</code> 的开头可以正常使用 elisp 表达式。
+</p>
+
+<p>
+看了上面的例子你就应该明白了， <code>do</code> 语句是用来顺序执行 elisp 表达式的，它的功能和 <code>progn</code> 是一样的。但是有一点很蛋疼，那就是 <code>do</code> 是不接受原子值作为 <code>form</code> 的，演示如下：
+</p>
+
+
+<div id="org26d08db" class="figure">
+<p><img src="./5.gif" alt="5.gif" />
+</p>
+</div>
+
+<p>
+使用上面的第二种形式时，emacs 会报错，报错为： <code>Debugger entered--Lisp error: (error "Syntax error on ‘do’ clause")</code> ，说明是 <code>do</code> 语句的问题。使用 <code>(quote 1)</code> 则无此问题。考虑到在 <code>cl-loop</code> 中对单个原子值的求值没太大意义， <code>do</code> 语句不支持原子值求值也不是没有道理。
+</p>
+
+<p>
+那么，在 <code>cl-loop</code> 这门语言中怎么定义变量呢？这里需要用到专门的关键字 <code>with</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> with x = 1 return (+ x 1))
+=&gt; 2
+
+(<span style="color: #a020f0;">cl-loop</span> with x = 1 do (incf x) (incf x) (incf x) return x)
+=&gt; 4
+
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = 1
+ with y = x
+ with z = (+ 1 y)
+ return (+ x y z))
+=&gt; 4
+</pre>
+</div>
+
+<p>
+使用 <code>with</code> 语句和在 <code>cl-loop</code> 的外面使用 <code>let</code> 表达式的效果是一样的，即：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> with x = 17 do &#8230;)
+
+(<span style="color: #a020f0;">let</span> ((x 17)) (<span style="color: #a020f0;">cl-loop</span> do &#8230;))
+</pre>
+</div>
+
+<p>
+从我上面的例子中可以看出，变量定义是顺序执行的，定义多个变量就等于嵌套的 <code>let</code> 表达式。
+</p>
+
+<p>
+在开始介绍选择结构之前，需要先介绍完作为简单语句的累积语句，毕竟它也属于顺序结构的一部分（虽然绝大多少时候都是在循环中使用）。上面我们也看到了， <code>sum</code> 是对数字进行累积，其他所有的累积语句如下：
+</p>
+
+<ul class="org-ul">
+<li><b>collect form</b> ，将 <b>form</b> 的值收集到一个表中</li>
+
+<li><b>append form</b> ，将 <b>form</b> 使用 append 函数添加到表中</li>
+
+<li><b>nconc form</b> ，将 <b>form</b> append 到表中，但是会修改 form 对象</li>
+
+<li><b>concat form</b> ，将 <b>form</b> 连接到一字符串中</li>
+
+<li><b>vconcat form</b> ，将 <b>form</b> 连接到向量中</li>
+
+<li><b>count form</b> ，对 <b>form</b> 求值为非 nil 值进行计数，即 form 为真时计数器加一</li>
+
+<li><b>sum form</b> ，将 <b>form</b> 加到当前积累值上，并得到新的积累值</li>
+
+<li><b>maximize form</b> ，若 <b>form</b> 大于当前值，则记录 <b>form</b> 的值</li>
+
+<li><b>minimize form</b> ，若 <b>form</b> 小于当前值，则记录 <b>form</b> 的值</li>
+</ul>
+
+
+<p>
+可以看到，最一般的是 collect，其他的都或多或少的互斥，在一个 <code>cl-loop</code> 中是不能同时使用操作值类型不同的积累语句的。
+</p>
+
+<p>
+一些简单的累积语句用法如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">collect</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 collect i)
+=&gt; (0 1 2 3 4 5 6 7 8 9 10)
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">append</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 append (list i))
+=&gt; (0 1 2 3 4 5 6 7 8 9 10)
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">=nconc' is similar to append, but use nconc to concate instead</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">type C-h f to see nconc's definition</span>
+
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">concat</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from ?a to ?z concat (string i))
+=&gt; <span style="color: #8b2252;">"abcdefghijklmnopqrstuvwxyz"</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">vconcat</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 vconcat (vector i))
+=&gt; [0 1 2 3 4 5 6 7 8 9 10]
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">count</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 count t)
+=&gt; 11
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">sum</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 sum i)
+=&gt; 55
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">maximize</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 maximize i)
+=&gt; 10
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">minimize</span>
+(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 minimize i)
+=&gt; 0
+</pre>
+</div>
+
+<p>
+还有另一种语法可以让我们将积累值放入变量中,它的语法是： <code>AC form into var</code> ，AC 是任意一种积累器关键字，var 是一个变量，它会被自动创建且和使用 <code>with</code> 创建的变量不同。使用这种语法的积累器不会对 <code>cl-loop</code> 的返回值产生影响。通过以下例子可以观察累积器的行为：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+collect 1 into w
+collect 1 into w
+collect 1 into w
+collect 1 into w
+collect 1 into w
+return w)
+=&gt; (1 1 1 1 1)
+
+(<span style="color: #a020f0;">cl-loop</span>
+sum 1 into x
+sum 2 into x
+sum 3 into x
+sum 4 into x
+return x)
+=&gt; 10
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i from 0 to 10
+collect i
+sum (+ i 1) into x
+collec t x)
+=&gt; (0 1 1 3 2 6 3 10 4 15 5 21 6 28 7 36 8 45 9 55 10 66)
+</pre>
+</div>
+
+<p>
+通过上面的一些例子可以看到， <code>cl-loop</code> 是以语句为单位的语言，它自上而下逐条执行，若循环还未停止，则回到开头继续从上向下执行。这就是它的顺序结构。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3756148" class="outline-3">
+<h3 id="org3756148"><span class="section-number-3">2.3</span> cl-loop 中的选择结构</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+选择结构非常简单，就是通常语言里面的 <code>if-else</code> 语句，不过它没有 <code>elseif</code> 之类的语句。它的语法是 <code>if condition clause else clause</code> ，其中 <code>else</code> 语句是可选的。可以看到它只接受一条 clause，不过可以通过 <code>and</code> 来将多条语句连接在一起作为一条语句，就像 C 中的复合语句一样。此外，为了避免悬挂 <code>if</code> 的问题，还可以在某个不完整 <code>if</code> 语句后面加上 <code>end</code> 来结束 <code>if</code> 的作用范围：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">the mistake nest if</span>
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = 2
+ if (&gt; x 1)
+ do (print 1)
+ and if (&gt; x 1.5)
+ do (print 2)
+ else do (print 1.5)
+ return 1)
+=&gt; &lt;print 1 and 2&gt;
+
+
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = 1
+ if (&gt; x 1)
+ do (print 1)
+ and if (&gt; x 1.5)
+ do (print 2)
+ else do (print 1.5)
+ return 1)
+=&gt; &lt;print nothing&gt;
+
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">the right one</span>
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = 1
+ if (&gt; x 1)
+ do (print 1)
+ and if (&gt; x 1.5)
+ do (print 2) end
+ else do (print 1.5)
+ return 1)
+=&gt; &lt;print 1.5&gt;
+</pre>
+</div>
+
+<p>
+可以看到，在正确的例子中，我在 <code>print 2</code> 的后面加上了 <code>end</code> 关键字，表示内部的 <code>if</code> 语句在此终止，而不会使下面的 <code>else</code> 语句与之匹配。
+</p>
+
+<p>
+除了 <code>if</code> 外，还有 <code>when</code> 和 <code>unless</code> 语句，它们的语法与 elisp 的 <code>when</code> 和 <code>unless</code> 并不相同， <code>when</code> 在 <code>cl-loop</code> 里面就是 <code>if</code> 的同义词，和 <code>if</code> 的使用方法一致， <code>unless</code> 就是将条件表达式取反，其余与 <code>if</code> 一致。两者后面都可以跟 <code>else</code> 语句：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> when t do (print 1) return 0) =&gt; &lt;print 1&gt;
+(<span style="color: #a020f0;">cl-loop</span> unless nil do (print 1) return 0) =&gt; &lt;print 1&gt;
+
+(<span style="color: #a020f0;">cl-loop</span> when t do (print 1) else do (print 2) return 0) =&gt; &lt;print 1&gt;
+(<span style="color: #a020f0;">cl-loop</span> when nil do (print 1) else do (print 2) return 0) =&gt; &lt;print 2&gt;
+(<span style="color: #a020f0;">cl-loop</span> unless nil do (print 1) else do (print 2) return 0) =&gt; &lt;print 1&gt;
+(<span style="color: #a020f0;">cl-loop</span> unless t do (print 1) else do (print 2) return 0) =&gt; &lt;print 2&gt;
+</pre>
+</div>
+
+<p>
+使用 <code>when</code> 和 <code>unless</code> 也可以向上面一样构建出更加复杂的符合条件语句，这里就不啰嗦了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org194e8d3" class="outline-3">
+<h3 id="org194e8d3"><span class="section-number-3">2.4</span> cl-loop 的循环结构</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+这里就到了最重要的部分了，毕竟我们使用 <code>cl-loop</code> 就是冲着循环来的。通过使用循环语句，我们就可以正常地退出 <code>cl-loop</code> 表达式了。
+</p>
+
+<p>
+在正式介绍循环语句之前，我们先介绍一下初始化语句和结束语句，有了正常退出的循环，这些语句终于有了用武之地。
+</p>
+
+<p>
+初始化语句的语法是 <code>initially [do] forms ...</code> ，通过使用它可以在整个循环开始之前就对一些表达式进行求值以完成初始化，这里只能使使用 elisp 表达式而不能是 <code>cl-loop</code> 语句。 <code>cl-loop</code> 对它出现的位置没有要求，如果有多个初始化语句的话，就会按照它们出现的顺序进行求值。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ initially (<span style="color: #a020f0;">setq</span> j 10)
+ for i from 0 to 10
+ collect (+ i j))
+=&gt; (10 11 12 13 14 15 16 17 18 19 20)
+
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">also ok</span>
+(<span style="color: #a020f0;">cl-loop</span>
+for i from 0 to 10
+collect (+ i j)
+initially (<span style="color: #a020f0;">setq</span> j 10))
+</pre>
+</div>
+
+<p>
+上面的初始化表达式只有一条，即 <code>(setq j 10)</code> ， <code>initially</code> 也支持多条表达式，这里用不用 <code>do</code> 都没关系。
+</p>
+
+<p>
+结束语句的语法是 <code>finally [do] forms ...</code> ，在循环结束之后它的表达式会被执行。它的用法和 <code>initially</code> 是一样的，这里就不赘述了。
+</p>
+
+<p>
+还有另一种结束语句 <code>finally return form</code> ，它表示在循环结束后使用 <code>form</code> 的值来作为 <code>cl-loop</code> 的返回值。 <code>form</code> 执行时，使用 <code>for</code> ， <code>with</code> 和 <code>into</code> 产生的变量依然是可见的。
+</p>
+
+<p>
+那么这两种结束语句能否一起使用呢？通过这个例子可以体现：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ with x = 5
+ for i from 0 to 0
+ do (identity 1)
+ finally (<span style="color: #a020f0;">cl-incf</span> x)
+ finally (<span style="color: #a020f0;">cl-incf</span> x)
+ finally return x
+ finally (<span style="color: #a020f0;">cl-incf</span> x))
+=&gt; 8
+</pre>
+</div>
+
+<p>
+上面的表达式返回值是 8，如果按照顺序执行的话，返回值应该是 7 才对。这就说明不论顺序， <code>finally return</code> 总是最后执行的。
+</p>
+</div>
+
+<div id="outline-container-org95d3874" class="outline-4">
+<h4 id="org95d3874"><span class="section-number-4">2.4.1</span> 简单的迭代语句</h4>
+<div class="outline-text-4" id="text-2-4-1">
+<p>
+除了 <code>for</code> 语句之外，还有更简单的迭代语句，所以这里我们先从它们开始。
+</p>
+
+<p>
+<code>repeat</code> 语句的形式是 <code>repeat integer</code> ，它表示重复 <code>integer</code> 次。就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ repeat 10 count t)
+=&gt; 10
+
+(<span style="color: #a020f0;">cl-loop</span>
+ repeat 10 sum 1)
+=&gt; 10
+
+(<span style="color: #a020f0;">cl-loop</span>
+ repeat 10 collect 1)
+=&gt; (1 1 1 1 1 1 1 1 1 1)
+</pre>
+</div>
+
+<p>
+<code>while</code> 语句的语法是 <code>while condition</code> ，它接受一个条件值，当值为假时就跳出循环。 <code>while</code> 语句和以下的 <code>while</code> 表达式是相同的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">while</span> cond forms ...) <span style="color: #b22222;">;; </span><span style="color: #b22222;">eslip code</span>
+(<span style="color: #a020f0;">cl-loop</span> while cond do forms ...) <span style="color: #b22222;">;; </span><span style="color: #b22222;">cl-loop code</span>
+</pre>
+</div>
+
+<p>
+<code>until</code> 语句和 <code>while</code> 语句是反过来的，当条件为真时才跳出循环。
+</p>
+
+<p>
+接下来还有全称量词语句和存在量词语句，它们分别是： <code>always</code> ， <code>never</code> 和 <code>thereis</code> 。三者都接受一个条件值， <code>always</code> 表示全为真，当条件之为假时它就会停止循环并使用 <code>nil</code> 作为 <code>cl-loop</code> 的返回值。 <code>never</code> 则是反过来的，它要求全位假，为真则返回 <code>nil</code> ，而 <code>thereis</code> 只要求存在一次真即可。就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ with x = 10
+ repeat 10
+ do (<span style="color: #a020f0;">cl-incf</span> x 2)
+ always (cl-evenp x))
+=&gt; t
+
+
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = 10
+ repeat 10
+ do (<span style="color: #a020f0;">cl-incf</span> x 2)
+ never (cl-oddp x))
+=&gt; t
+
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = 10
+ repeat 10
+ do (<span style="color: #a020f0;">cl-incf</span> x 2)
+ thereis (= x 16))
+=&gt; t
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdaf8027" class="outline-4">
+<h4 id="orgdaf8027"><span class="section-number-4">2.4.2</span> for 语句</h4>
+<div class="outline-text-4" id="text-2-4-2">
+<p>
+可以说 <code>cl-loop</code> 的大部分精华都在 <code>for</code> 语句上面了， <code>for</code> 语句提供了相当多的选项来面对多种多样的循环方法。要分类的话大致可以分为这几类：
+</p>
+</div>
+
+<ol class="org-ol">
+<li><a id="orgf84c98d"></a>from to 类型<br />
+<div class="outline-text-5" id="text-2-4-2-1">
+<p>
+这一类的 <code>for</code> 语句的典型形式拿 C 来举例的话就是 <code>for (int i = 0; i &lt; N; i++)</code> 这样的。前面我们一直在用的 <code>for i from 0 to 10</code> 就是这一种。
+</p>
+
+<p>
+<code>for var from exp1 to exp2 by exp3</code> ，这种 <code>for</code> 语句创建了一个计数循环。它有三个子项，即 <code>from</code> ， <code>to</code> 和 <code>by</code> ，这三个都是可选的，但是至少需要一项来表明这条语句是一个计数 <code>for</code> 语句。它们三个分别表示循环的起始值，循环的终止值和步长值，步长值必须为正。循环默认从 exp1 向上到 exp2，exp2 也被算作循环内，也就是小于等于 expt2。
+</p>
+
+<p>
+如果省略了 <code>from</code> 项，那么循环默认从 0 开始；如果省略了 <code>to</code> 项，那么循环不会停止（除非使用其他的停止语句，比如 return）；如果省略了 <code>by</code> 项，那么循环的步长就是 1。
+</p>
+
+<p>
+除了 <code>form</code> 外，还可以使用 <code>upfrom</code> 和 <code>downfrom</code> ，来表明循环是向上还是向下。相似地，可以使用 <code>upto</code> 和 <code>downto</code> 来表明是向上到达还是向下到达。 <code>below</code> 对应于 <code>upto</code> ，它表示向上到达，但不包括边界； <code>above</code> 对应于 <code>downto</code> ，但它也不包括边界条件。
+</p>
+
+<p>
+总结一下大概就是这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">for VAR from/upfrom/downfrom EXPR1
+        to/upto/downto/above/below EXPR2
+        by EXPR3
+</pre>
+</div>
+
+<p>
+可以看到， <code>upfrom</code> 对应 <code>upto</code> 和 <code>below</code> ， <code>downfrom</code> 对应 <code>downto</code> 和 <code>above</code> ，如果错配的话会出现怎样的结果呢？
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x upfrom 0 downto -10
+ collect x)
+=&gt; (0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10)
+(<span style="color: #a020f0;">cl-loop</span>
+for x downfrom 0 upto -10
+collect x)
+=&gt; (0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10)
+
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for x upfrom 0 downto 10
+ collect x)
+=&gt; nil
+(<span style="color: #a020f0;">cl-loop</span>
+for x downfrom 0 upto 10
+collect x)
+=&gt; nil
+</pre>
+</div>
+
+<p>
+从得到的结果上来看， <code>down</code> 的优先级似乎是要高于 <code>up</code> 的。
+</p>
+
+<p>
+还需要注意的是，在使用向下循环时， <code>from</code> 项是必要的，这样的代码是错误的： <code>(cl-loop for x downto 5)</code> 。
+</p>
+
+<p>
+以下是一些例子，可供参考：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+for i from 0 to 10
+collect (* i i))
+=&gt; (0 1 4 9 16 25 36 49 64 81 100)
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i to 10
+collect (+ i i))
+=&gt; (0 2 4 6 8 10 12 14 16 18 20)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i from 0
+ if (= i 11)
+ return x
+ else
+ collect i into x)
+=&gt; (0 1 2 3 4 5 6 7 8 9 10)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i by 3
+ if (&lt; i 20)
+ collect i into x
+ else
+ return x)
+=&gt; (0 3 6 9 12 15 18)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i upfrom 0 to 10
+ sum i)
+=&gt; 55
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i downfrom 10 to 0
+sum i)
+=&gt; 55
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i upfrom 10
+when (&gt; i 100) return x
+do (<span style="color: #a020f0;">cl-incf</span> i i)
+collect i into x)
+=&gt; (20 42 86 174)
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i downfrom 10 by 2
+when (&lt; i 0) return x
+sum i into x)
+=&gt; 30
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i from 0 upto 10
+collect i)
+=&gt; (0 1 2 3 4 5 6 7 8 9 10)
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i upto 10
+collect i)
+=&gt; (0 1 2 3 4 5 6 7 8 9 10)
+
+(<span style="color: #a020f0;">cl-loop</span>
+for i from 0 downto -5
+collect i)
+=&gt; (0 -1 -2 -3 -4 -5)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i below 10
+ collect i)
+=&gt; (0 1 2 3 4 5 6 7 8 9)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i from 10 above 5
+ collect i)
+=&gt; (10 9 8 7 6)
+
+......
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgf2ac169"></a>遍历语句<br />
+<div class="outline-text-5" id="text-2-4-2-2">
+<p>
+准确地说，这应该是和 <code>map</code> 和 <code>foreach</code> 比较相近的迭代方法。
+</p>
+
+<p>
+对于 <code>list</code> 类型，有这三种写法：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">for var in list by function
+for var on list by function
+for var in-ref list by function
+</pre>
+</div>
+
+<p>
+第一种写法类似于 Scheme 中的 foreach，你可以在遍历过程中访问表中的元素， <code>var</code> 就表示当前的列表元素。 <code>by</code> 项是步长函数，默认值是 <code>cdr</code> ，你也可以使用其他的一员函数来代替，比如 <code>cddr</code> 。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x in '(1 2 3) by 'cddr
+ collect x)
+=&gt; (1 3)
+</pre>
+</div>
+
+<p>
+第二种方法和第一种类似，不过这里的 <code>var</code> 不是当前的元素，而是剩余的列表
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x on '(1 2 3)
+ collect x)
+=&gt; ((1 2 3) (2 3) (3))
+</pre>
+</div>
+
+<p>
+第三种和第一种相似，但是这里的 var 就成了左值，可以进行修改：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ with x = (list 1 2 3)
+ for i in-ref x
+ do (<span style="color: #a020f0;">cl-incf</span> i)
+ finally return x)
+=&gt; (2 3 4)
+</pre>
+</div>
+
+<p>
+对于数组，也有两种方式进行遍历：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">for var across array
+for var across-ref array
+</pre>
+</div>
+
+<p>
+具体用法和上面的很相似：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+with x = [1 2 3]
+for i across x
+collect i)
+=&gt; (1 2 3)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = (string ?a ?b ?c)
+ for i across-ref x
+ do (<span style="color: #a020f0;">cl-incf</span> i 23)
+ finally return x)
+=&gt; <span style="color: #8b2252;">"xyz"</span>
+</pre>
+</div>
+
+<p>
+还有一种大一统的写法，可以表示序列的遍历：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">for var being the elements of sequence
+for var being the elements of-ref sequence
+</pre>
+</div>
+
+<p>
+例子如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ with x = (vector 1 2 3)
+ for i being the elements of x
+ do (print i))
+=&gt; &lt;print 1, 2, 3&gt;
+
+(<span style="color: #a020f0;">cl-loop</span>
+ with x = (vector 1 2 3)
+ for i being the elements of-ref x
+ do (<span style="color: #a020f0;">cl-incf</span> i 100)
+ finally return x)
+=&gt; [101 102 103]
+</pre>
+</div>
+
+<p>
+上面的遍历对象只是序列而已， <code>cl-loop</code> 还支持很多其他对象的遍历，这里我就不一一举例了，只列出它们的语法：
+</p>
+
+<ul class="org-ul">
+<li><code>for var being the symbols [of obarray]</code> ，对 obarray 的遍历</li>
+
+<li><code>for var being the hash-keys of hash-table</code> ，对哈希表的哈希键进行遍历</li>
+
+<li><code>for var being the hash-values of hash-table</code> ，对哈希表的哈希值进行遍历</li>
+
+<li><code>for var being the key-codes of keymap</code> ，对 keymap 的按键进行遍历</li>
+
+<li><code>for var being the key-bindings of keymap</code> ，对 keymap 的键绑定进行遍历</li>
+
+<li><code>for var being the key-seqs of keymap</code> ，对 keymap 的键序列进行遍历，与上面两个不同的是，它会遍历嵌套的 keymap 以得到完整的 key sequence</li>
+
+<li><code>for var being the intervals [of buffer] …</code> ，对区间内的文本属性进行遍历</li>
+
+<li><code>for var being the frames</code> ，对所有的 Emacs frame 进行遍历</li>
+
+<li><code>for var being the windows [of frame]</code> ，对（某个 frame）所有的 window 进行遍历</li>
+
+<li><code>for var being the buffers</code> ，对所有的 buffer 进行遍历</li>
+</ul>
+</div>
+</li>
+
+
+<li><a id="orgce50042"></a>通用 <code>for</code> 语句<br />
+<div class="outline-text-5" id="text-2-4-2-3">
+<p>
+它的语法如下： <code>for var = expr1 then expr2</code> 。
+</p>
+
+<p>
+开始循环时， <code>var</code> 会绑定到 <code>expr1</code> ，在随后的迭代过程中，它的值是对 <code>expr2</code> 求值得到的值。以下的两条语句的效果是一样的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> for x on my-list by 'cddr do &#8230;)
+(<span style="color: #a020f0;">cl-loop</span> for x = my-list then (cddr x) while x do &#8230;)
+</pre>
+</div>
+
+<p>
+如果没有 <code>then</code> 这一项的话，那么 <code>var</code> 在每次迭代后都会对 <code>expr1</code> 进行求值，并以求得的值作为新值。
+</p>
+
+<p>
+这一类型的 <code>for</code> 语句不含终止条件，它需要使用其他的语句来辅助终止循环。
+</p>
+
+<p>
+以下是一个简单的例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+for x = 1 then (<span style="color: #a020f0;">cl-incf</span> x)
+when (&gt; x 10) return y
+collect x into y)
+=&gt; (1 2 3 4 5 6 7 8 9 10)
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org2d34b19" class="outline-4">
+<h4 id="org2d34b19"><span class="section-number-4">2.4.3</span> cl-loop 多循环语句与多重循环</h4>
+<div class="outline-text-4" id="text-2-4-3">
+<p>
+自然，某些时候一重循环是不够的，比如遍历二阶矩阵就需要二重循环。现在假设我要对如下的二阶矩阵所有元素求和，这样做可以吗：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> mat2 [[1 200 300]
+            [200 3 400]
+            [300 400 5]])
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i below 3
+ for j below 3
+ sum (aref (aref mat2 i) j))
+=&gt; 9
+</pre>
+</div>
+
+<p>
+由我给出的矩阵易知 9 = 1 + 3 + 5，那我们只得到了对角线上的和，也就是上面方阵的迹。这也就说明上面的两个 <code>for</code> 语句的关系是并列关系而不是嵌套关系。想要表示二重循环需要这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for i below 3
+ sum (<span style="color: #a020f0;">cl-loop</span>
+      for j below 3
+      sum (aref (aref mat2 i) j)))
+=&gt; 1809
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">another approach</span>
+(<span style="color: #a020f0;">cl-loop</span>
+ for i across mat2
+ sum (<span style="color: #a020f0;">cl-loop</span>
+      for j across i
+      sum j))
+=&gt; 1809
+</pre>
+</div>
+
+<p>
+这样一来就可以得到正确结果了。由此可知，需要多少层的嵌套就需要多少个 <code>cl-loop</code> 表达式嵌套。
+</p>
+
+<p>
+现在问题来了，有时候我们会希望直接跳出内层循环，甚至直接结束整个循环，这时候仅凭 <code>return</code> 语句是无法完成的，因为 <code>retrun</code> 就像 C 语言中的 <code>break</code> 一样，只能跳出一层循环。这个时候我们需要使用 <code>named</code> 关键字为 <code>cl-loop</code> 块命名，以使用 <code>cl-return-from</code> 来进行非局部跳转：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+named hello
+for i to 10
+do (<span style="color: #a020f0;">cl-loop</span>
+    for j from i to 10
+    if (<span style="color: #a020f0;">and</span> (= i 5) (= j 9))
+    do (<span style="color: #a020f0;">cl-return-from</span> hello w)
+    else
+    collect (list i j) into w))
+=&gt; ((5 5) (5 6) (5 7) (5 8))
+</pre>
+</div>
+
+<p>
+嵌套循环的问题我们解决掉了，现在我们来看看多循环语句的效果。 <code>cl-loop</code> 的文档中这样描述到： <i>if you include several for clauses in a row, the are treated sequentially</i> ，也就是说多个 <code>for</code> 语句的执行也是从上至下的，下面的例子可以说明这一点：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for i from 1 to 10
+ for j to 100 by i
+ collect (list i j)
+=&gt; ((0 0) (1 0) (2 0) (3 0) (4 0) (5 0) (6 0) (7 0) (8 0) (9 0) (10 0)))
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i from 1 to 10
+ for j to 100 by i
+ collect (list i j))
+=&gt; ((1 0) (2 1) (3 2) (4 3) (5 4) (6 5) (7 6) (8 7) (9 8) (10 9))
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for i from 1 to 10
+ for j to 5 by i
+ collect (list i j))
+=&gt; ((1 0) (2 1) (3 2) (4 3) (5 4) (6 5))
+</pre>
+</div>
+
+<p>
+这个例子可以说明第二个 <code>for</code> 语句使用了第一个 <code>for</code> 语句的 <code>i</code> 来作为步长，同时也说明步长只在初始化过程得到值。
+</p>
+
+<p>
+还有最重要的一点，那就是只要有一个循环语句的终止条件达到了，那么整个 <code>cl-loop</code> 就会终止，并向调用者返回值。
+</p>
+
+<p>
+文档中还提到了另外的一种写法，使用 <code>and</code> 关键字将两个或多个 <code>for</code> 语句关联起来，这样在迭代过程时它们的迭代就是并行的而不是顺序的，不过这种用法只适用于 <code>for v = e1 then e2</code> 的情况，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x below 5
+ for y = nil then x
+ collect (list x y))
+=&gt; ((0 nil) (1 1) (2 2) (3 3) (4 4))
+
+(<span style="color: #a020f0;">cl-loop</span>
+for x below 5
+and y = nil then x
+collect (list x y))
+=&gt; ((0 nil) (1 0) (2 1) (3 2) (4 3))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3e7e0f4" class="outline-3">
+<h3 id="org3e7e0f4"><span class="section-number-3">2.5</span> 总结</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+<a href="#orgd69cea4">【6】</a>中总结了 cl-loop 的所有语法，这里直接拿过来：
+</p>
+
+<pre class="example">
+loop is an alias for cl-loop in =cl.el.
+
+(loop CLAUSE...)
+
+The Common Lisp `loop' macro.
+Valid clauses include:
+  For clauses:
+    for VAR from/upfrom/downfrom EXPR1 to/upto/downto/above/below EXPR2 by EXPR3
+    for VAR = EXPR1 then EXPR2
+    for VAR in/on/in-ref LIST by FUNC
+    for VAR across/across-ref ARRAY
+    for VAR being:
+      the elements of/of-ref SEQUENCE [using (index VAR2)]
+      the symbols [of OBARRAY]
+      the hash-keys/hash-values of HASH-TABLE [using (hash-values/hash-keys V2)]
+      the key-codes/key-bindings/key-seqs of KEYMAP [using (key-bindings VAR2)]
+      the overlays/intervals [of BUFFER] [from POS1] [to POS2]
+      the frames/buffers
+      the windows [of FRAME]
+  Iteration clauses:
+    repeat INTEGER
+    while/until/always/never/thereis CONDITION
+  Accumulation clauses:
+    collect/append/nconc/concat/vconcat/count/sum/maximize/minimize FORM
+      [into VAR]
+  Miscellaneous clauses:
+    with VAR = INIT
+    if/when/unless COND CLAUSE [and CLAUSE]... else CLAUSE [and CLAUSE...]
+    named NAME
+    initially/finally [do] EXPRS...
+    do EXPRS...
+    [finally] return EXPR
+
+For more details, see Info node `(cl)Loop Facility'.
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdaab4e9" class="outline-2">
+<h2 id="orgdaab4e9"><span class="section-number-2">3</span> 延申阅读</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+<code>cl-loop</code> 是源于 <code>cl</code> 的 <code>loop</code> 的，更多内容可以参考参考资料。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org44b6d36" class="outline-2">
+<h2 id="org44b6d36"><span class="section-number-2">4</span> 参考资料</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<a id="org0174b37">【1】</a> 《代码的未来》松本行宏
+</p>
+
+<p>
+<a id="org56c0178">【2】</a> <a href="https://en.wikipedia.org/wiki/Domain-specific_language">Domain-specific language - Wikipedia</a>
+</p>
+
+<p>
+<a id="orgd5d704c">【3】</a> <a href="http://www.ai.sri.com/pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
+</p>
+
+<p>
+<a id="orgbc67418">【4】</a> <a href="https://gigamonkeys.com/book/loop-for-black-belts.html">LOOP for Black Belts (gigamonkeys.com)</a>
+</p>
+
+<p>
+<a id="org8728607">【5】</a> <a href="http://www.ai.sri.com/~pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
+</p>
+
+<p>
+<a id="orgd69cea4">【6】</a> <a href="https://kitchingroup.cheme.cmu.edu/blog/2014/11/20/The-loop-macro-in-emacs-lisp/">The loop macro in emacs lisp (cmu.edu)</a>
+</p>
+
+<p>
+<a id="org4c5dbf1">【7】</a> Loop Facility： <a href="https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html">https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-06-11 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 10:49</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
