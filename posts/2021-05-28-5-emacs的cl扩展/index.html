@@ -1,0 +1,1030 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-04 Wed 10:16 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>5-emacs的cl扩展 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzY3NjU4.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">5-emacs的cl扩展 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzY3NjU4.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd49b2c8">1. 什么是 cl-lib</a></li>
+<li><a href="#org4fd38a5">2. cl-lib 的组成</a></li>
+<li><a href="#org07563c7">3. 一些常用的控制结构</a>
+<ul>
+<li><a href="#org9a2e55b">3.1. cl-incf/cl-decf</a></li>
+<li><a href="#org5c2f786">3.2. cl-psetq</a></li>
+<li><a href="#orga9fdcc9">3.3. cl-flet</a></li>
+<li><a href="#orgffc8c3e">3.4. cl-case</a></li>
+<li><a href="#orgb3a9c43">3.5. Blocks</a></li>
+<li><a href="#org5f2de71">3.6. cl-do</a></li>
+<li><a href="#org0d38fba">3.7. cl-loop</a></li>
+</ul>
+</li>
+<li><a href="#orgb44caef">4. 一些数学函数</a>
+<ul>
+<li><a href="#orge1d2a74">4.1. 数值函数</a></li>
+<li><a href="#org176424a">4.2. 随机函数</a></li>
+</ul>
+</li>
+<li><a href="#orga787d42">5. 其他</a></li>
+<li><a href="#orgd983a48">6. 后记</a></li>
+<li><a href="#org9237cdd">7. 参考资料</a></li>
+</ul>
+</div>
+</div>
+<p>
+在一开始学习 elisp 的时候，我想到的学习方法是把用其他语言编写的程序翻译到 elisp 中来。某日我找到了一个解二阶魔方的<a href="https://comwrg.github.io/2018/12/26/algorithm-solve-pocket-cube/#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0">程序</a>。其他都还好说，但是抄到 bfs 的时候我被其中的嵌套循环恶心到了，由于 elisp 中没有 break 之类的局部跳转语句（在不考虑各种宏扩展的情况下），要想跳出 <code>while</code> 循环还得靠 <code>throw/catch</code> 来完成。<a href="https://gist.github.com/include-yy/96e35b7b4f86004be0f8a741a7936afd#file-cube-el-L130">这种写法</a>可是相当地不好受。通过 google <code>emacs loop</code> 我发现了 <code>cl-loop</code> 这个神奇的宏，也顺带了解了 <code>cl-lib</code> 这个强大的包。
+</p>
+
+<p>
+本文的目的是介绍 <code>cl-lib</code> 中的一些常用的函数和宏，比如 <code>incf</code> ， <code>decf</code> 和 <code>cl-loop</code> 等。文章的主要组成部分应该是各种各样的函数用法和示例，希望对你有所帮助。由于 cl-lib 是一个很大的包，这里不可能做到面面俱到。
+</p>
+
+<div id="outline-container-orgd49b2c8" class="outline-2">
+<h2 id="orgd49b2c8"><span class="section-number-2">1</span> 什么是 cl-lib</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+CL 包为 elisp 提供了一系列的 Common Lisp 函数和控制结构，它添加了足够多的功能，使 elisp 编程变得更加方便。但是它也忽略了 Common Lisp 中许多其他的特性，这是出于两方面考虑：某些特性过于复杂，比如 CLOS；某些特性无法在不修改 elisp 解释器的情况下加入 elisp 中，比如大小写不敏感，多值返回等。
+</p>
+
+<p>
+cl-lib 之前的名字是 cl，随着新的命名约定的出现，它变成了 cl-lib。如果你使用了一些比较老的包的话，在包加载过程中可能会看到这样的消息：
+</p>
+
+<blockquote>
+<p>
+Package cl is deprecated
+</p>
+</blockquote>
+
+<p>
+这是由于老包没有使用较新的 cl-lib。cl-lib 中所有的公开名字都使用 cl- 来作为名字前缀。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4fd38a5" class="outline-2">
+<h2 id="org4fd38a5"><span class="section-number-2">2</span> cl-lib 的组成</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+cl-lib 有四个主要的文件：
+</p>
+
+<ul class="org-ul">
+<li><b>cl-lib.el</b> ，它包含了基础的函数，以及关于整个包的信息</li>
+
+<li><b>cl-extra.el</b> ，它包含了一些更大更复杂的函数，它被单独分离出来是为了在使用像是 <code>cl-incf</code> 之类的简单函数时不需要关注其他东西</li>
+
+<li><b>cl-seq.el</b> ，它包含了操作序列的高级函数</li>
+
+<li><b>cl-macs.el</b> ，它包含了一些宏，提供了语法扩展</li>
+</ul>
+
+
+<p>
+<b>cl-lib.el</b> 包含了所有必要的 <code>autoload</code> 指令。你只需要 <code>(require 'cl-lib)</code> ，在需要使用其他文件内的东西时 <code>autoload</code> 会处理好的。
+</p>
+
+<p>
+本文主要介绍一些简单的函数和宏。所谓二八定律嘛，一些比较复杂和高级的特性只有在被用到时才会有用，但这种机会对我来说应该没有几次。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org07563c7" class="outline-2">
+<h2 id="org07563c7"><span class="section-number-2">3</span> 一些常用的控制结构</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+以下内容大概列举了几个常用的宏，我会用一些代码来作为示例，并使用实现相同功能的 elisp 代码来进行对比，以体现其优越性。
+</p>
+
+<p>
+<code>cl-loop</code> 我会放在这一节的最后来介绍，它已经可以称得上是一种 dsl 了。
+</p>
+</div>
+
+<div id="outline-container-org9a2e55b" class="outline-3">
+<h3 id="org9a2e55b"><span class="section-number-3">3.1</span> cl-incf/cl-decf</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+这里的 inc 和 dec 取 <b>increase</b> 和 <b>decrease</b> 的前几个字母，尾字母 <code>f</code> 指的是 <code>formal</code> 的意思，就像是 <code>setf</code> 的 <code>f</code> 一样，它们和 <code>setf</code> 一样可以接受 <code>formal</code> 而不仅仅是变量来作为第一个参数，关于什么是 <code>formal</code> 我会在下面给出一些例子。
+</p>
+
+<p>
+它们接受一个参数，以及一个可选参数，如果只使用一个参数的话， <code>cl-incf</code> 会将变量增加 1，并返回增加后的值； <code>cl-decf</code> 则会减去 1，并返回减去后的值。它们会对变量进行修改，用修改过的值来作为变量的新值。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> x 1)
+(<span style="color: #a020f0;">cl-incf</span> x)
+=&gt; 2
+x
+=&gt; 2
+(<span style="color: #a020f0;">cl-decf</span> x)
+=&gt; 1
+x
+=&gt; 1
+(<span style="color: #a020f0;">cl-incf</span> x 114513)
+=&gt; 114514
+(<span style="color: #a020f0;">cl-decf</span> x 114495)
+=&gt; 19
+</pre>
+</div>
+
+<p>
+相比于下面这种写法，使用 <code>cl-incf</code> 可以少打几个字：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> x 1)
+(<span style="color: #a020f0;">progn</span> (<span style="color: #a020f0;">setq</span> x (+ x 1)) x)
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">the better way</span>
+(<span style="color: #a020f0;">cl-incf</span> x 1)
+</pre>
+</div>
+
+<p>
+通过下面的代码可以说明 <code>formal</code> 是什么意思：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> x (list 1 2 3))
+(<span style="color: #a020f0;">cl-incf</span> (car x))
+=&gt; 2
+x
+=&gt; (2 2 3)
+(<span style="color: #a020f0;">setq</span> x (vectir 1 2 3))
+(<span style="color: #a020f0;">cl-incf</span> (aref x 0) 2)
+=&gt; 3
+x
+=&gt; [3 2 3]
+</pre>
+</div>
+
+<p>
+完整的 <code>formal</code> 支持可见于 gnu elisp 文档的 general-variable 一节。这种用法我见的不多。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5c2f786" class="outline-3">
+<h3 id="org5c2f786"><span class="section-number-3">3.2</span> cl-psetq</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+这里的 <code>p</code> 是 <b>parallel</b> 的意思， <code>setq</code> 就是符号设置，psetq 表示平行赋值之意，这是相对于 <code>setq</code> 的顺序赋值而言的。使用它可以方便地交换两个变量的值，而不需要中间变量：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> x 1)
+(<span style="color: #a020f0;">setq</span> y 2)
+(<span style="color: #a020f0;">cl-psetq</span> x y
+          y x)
+(list x y) =&gt; (2 1)
+(<span style="color: #a020f0;">setq</span> x y
+      y x)
+(list x y) =&gt; (1 1)
+</pre>
+</div>
+
+<p>
+从上面的代码中我们可以清楚地看出“平行”与“顺序”的区别。下面是一个 <code>fib</code> 计算例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">let</span> ((i 0)
+      (x 0)
+      (y 1))
+  (<span style="color: #a020f0;">while</span> (&lt; i 10)
+    (<span style="color: #a020f0;">cl-psetq</span> x y y (+ x y))
+    (<span style="color: #a020f0;">cl-incf</span> i))
+  x)
+</pre>
+</div>
+
+<p>
+<code>cl-psetq</code> 也有一个 <code>formal</code> 的版本，叫做 <code>cl-psetf</code> ，这里就不详述了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga9fdcc9" class="outline-3">
+<h3 id="orga9fdcc9"><span class="section-number-3">3.3</span> cl-flet</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<code>f</code> 就是 <b>function</b> 的意思， <code>let</code> 是用来绑定值与符号的 value cell 的， <code>flet</code> 则是用来绑定函数与符号 function cell 的。它的定义部分的格式必须是 <code>(name arglist body ...)</code> 而不能是其他形式。如果要将通过它定义的函数传递给其他调用时，需要对它使用 <code>#'</code> （即 <code>function</code> ）而不能用 <code>'</code> （ <code>quote</code> ）。定义的函数使用静态绑定，因为 Common Lisp 就是静态作用域的语言。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-flet</span> ((a (x) (+ x 1))
+          (b (x y) (+ x y)))
+  (+ (a 1) (b 2 3)))
+=&gt; 7
+</pre>
+</div>
+
+<p>
+就像 <code>let</code> 一样，定义的名字在定义时还是不可见的，以下代码是无法正常工作的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-flet</span> ((a (ls)
+             (<span style="color: #a020f0;">if</span> (null ls)
+                 0
+               (+ 1 (a (cdr ls))))))
+  (mapcar #'a '((1 2 3) (2 3 4) (3 4 5))))
+=&gt; Debugger entered--Lisp error: (void-function a)
+</pre>
+</div>
+
+<p>
+这可以通过使用 <code>cl-label</code> 解决，它就像是 <code>letrec</code> 一样，不过是针对函数的版本。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-labels</span> ((a (ls)
+               (<span style="color: #a020f0;">if</span> (null ls)
+                   0
+                 (+ 1 (a (cdr ls))))))
+  (mapcar #'a '((1 2 3) (2 3 4) (3 4 5))))
+=&gt; (3 3 3)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgffc8c3e" class="outline-3">
+<h3 id="orgffc8c3e"><span class="section-number-3">3.4</span> cl-case</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+Scheme 中有个类似的结构叫做 <code>case</code> ，C 语言中的 Switch 语句也与之类似。它接受一个表达式，对其求值并将得到的值与分支语句中的值比对，相同则进入相应的分支。如果没有分支与之匹配，整个表达式返回 =nil=。
+</p>
+
+<p>
+分支的形式是 <code>(keylist body-forms ...)</code> ， <code>keylist</code> 可以是一个键值，也可以是一个由键值构成的表， <code>cl-case</code> 中所有的键值必须是互不相同的。如果键值是 <code>t</code> 的话， <code>cl-case</code> 会无条件匹配它，这样的语句一般放在表达式的末尾。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">swt</span> (x)
+  (<span style="color: #a020f0;">cl-case</span> x
+   (1 (+ x 1))
+   (2 (+ x 2))
+   ((3 4 5) (+ x 3))
+   (t (+ x 100))))
+
+(swt 1) =&gt; 2
+(swt 2) =&gt; 4
+(swt 3) =&gt; 6
+(swt 4) =&gt; 7
+(swt 5) =&gt; 8
+(swt 6) =&gt; 106
+......
+</pre>
+</div>
+
+<p>
+平时貌似 <code>cond</code> 用的比较多，连 <code>pcase</code> 都没用什么，更不用说 <code>cl-case</code> 了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb3a9c43" class="outline-3">
+<h3 id="orgb3a9c43"><span class="section-number-3">3.5</span> Blocks</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+文章的开头我提到过，写 <code>while</code> 表达式时由于没有局部跳转关键字而不得不手写 <code>catch/throw</code> 块。cl-lib 的块扩展解决了这个问题，它提供了静态作用域的非局部退出的机制。与之相关的宏有三个： <code>cl-block</code>  ， <code>cl-return-from</code> 以及 <code>cl-return</code> 。通过 <code>cl-block</code> 可以建立一个有名字的块，在块内可以通过 <code>cl-return</code> 进行跳转，从而直接退出块的执行。
+</p>
+
+<p>
+<code>cl-block</code> 的使用形式是 <code>(cl-block name forms ...)</code> ，如果 <code>forms</code> 中没有含 return 的形式的话，它的效果就和 <code>progn</code> 是一样的，以最后一个 <code>form</code> 的值返回。但是如果存在 <code>cl-return</code> 或 <code>cl-return-from</code> 的话，它会直接从 <code>cl-block</code> 中返回，并以=cl-return= 或 <code>cl-return-from</code> 的参数作为返回值。
+</p>
+
+<p>
+<code>block</code> 看起来和 <code>catch/throw</code> 很相似，但它们的机制并不相同。 <code>block</code> 的名字是未被求值的符号，不像 <code>catch</code> 的名字，它是在运行时被求值得到的 tag。而且 <code>block</code> 总是静态作用域的。对于动态作用域的 <code>catch</code> ，在 <code>catch</code> body 内调用的函数也可以使用 <code>throw</code> 来向这个 catch 抛出。但是 <code>cl-block</code> 中是不能这样做的， <code>cl-return-from</code> 必须出现在 <code>cl-block</code> 的 <code>forms</code> 里面，不能超出 <code>block</code> 的范围。这是它静态性的体现。
+</p>
+
+<p>
+在 Common Lisp 中， <code>defun</code> 和 <code>defmacro</code> 会使用隐含的 <code>block</code> 来包住函数体，这样就可以在函数体中直接使用 <code>cl-return</code> 了，但是 elisp 中不会这样做。可以使用 <code>cl-defun</code> 和 <code>cl-defmacro</code> 来创建隐含的 <code>block</code> 。隐含 <code>block</code> 的还有 <code>cl-loop</code> ， <code>cl-do</code> ， <code>cl-dolist</code> ， <code>cl-dotimes</code> 等等。
+</p>
+
+<p>
+<code>cl-return-from</code> 接受一个名字来作为要返回的块的位置，以及一个可选的返回值来作为 <code>block</code> 的值，如果没有返回值的话， <code>block</code> 的值为 nil。 <code>cl-return</code> 等价于 <code>cl-return-from nil result)</code> ，它一般用于隐含了 <code>block</code> 的结构中。
+</p>
+
+<p>
+<code>cl-blcok</code> 所接受的所谓的未求值符号就是裸符号，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-block</span> wocao
+(+ 1 2)
+(<span style="color: #a020f0;">setq</span> x 1)
+(<span style="color: #a020f0;">while</span> (&lt; x 10)
+  (<span style="color: #a020f0;">cl-incf</span> x)
+  (<span style="color: #a020f0;">when</span> (= x 5) (<span style="color: #a020f0;">cl-return-from</span> wocao x))))
+</pre>
+</div>
+
+<p>
+上面的 wocao 就是 cl-block 的名字。使用 nil 作为块名字的话就可以直接使用 <code>cl-return</code> 了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5f2de71" class="outline-3">
+<h3 id="org5f2de71"><span class="section-number-3">3.6</span> cl-do</h3>
+<div class="outline-text-3" id="text-3-6">
+<p>
+Scheme 中有 <code>do</code> 这个关键字， <code>cl-do</code> 的用法与它很相似，不过与其说是相似，倒不如说 Scheme 中的 <code>do</code> 就是从 Common Lisp 里面抄过去的。
+</p>
+
+<p>
+<code>cl-do</code> 的语法如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-do</span> (spec ...) (end-test [result ...]) forms ...)
+spec <span style="color: #483d8b;">:=</span> (var [init [step]])
+</pre>
+</div>
+
+<p>
+这个控制结构与 C 语言中的 for 循环很相似，for 循环的语法是 <code>for(初始化; 跳出条件; 更新)</code> ， <code>spec</code> 也是如此。 <code>spec</code> 包含 <code>cl-do</code> 内变量的名字，初始化和每次循环对变量的更新三部分组成。其中只有变量名是必须的，变量的赋值和更新可以在 form 中完成。不过如果没有初值的话，变量的默认值就是 nil 了。
+</p>
+
+<p>
+<code>end-test</code> 对应 for 语句中的跳出条件，当 end-test 为真时循环结束，如果 <code>[result ...]</code> 不空的话，它就作为 <code>cl-do</code> 表达式的值。
+</p>
+
+<p>
+<code>forms</code> 就是循环过程中执行的代码，对应于 for 循环中的循环体。在循环过程中也可以使用 <code>cl-return</code> 直接跳出，因为 <code>cl-do</code> 有隐含的 <code>block</code> 。
+</p>
+
+<p>
+初始化过程中变量是不能相互引用的，因为它们还没有被绑定，就像 <code>let</code> 一样，不过 cl-lib 也提供了一个叫做 <code>cl-do*</code> 的宏，和 <code>let*</code> 作用效果相似。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-do</span>
+((a '(1 2 3) (cdr a))
+ (b '(4 5 6) (cdr b))
+ (c '(7 8 9) (cdr c))
+ (d))
+((<span style="color: #a020f0;">and</span> (null a) (null b) (null c)) d)
+(<span style="color: #a020f0;">setq</span> d (cons (list (car a) (car b) (car c)) d)))
+=&gt; ((3 6 9) (2 5 8) (1 4 7))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0d38fba" class="outline-3">
+<h3 id="org0d38fba"><span class="section-number-3">3.7</span> cl-loop</h3>
+<div class="outline-text-3" id="text-3-7">
+<p>
+第一次使用这个宏时，我被震惊到了，这简直就是实现了一个小语言一样。cl-lib 文档上其他的宏都是简单的描述一下就完了，而它的文档下还有子文档。
+</p>
+
+<p>
+cl-loop 的语法大致是这样的：
+</p>
+
+<p>
+<code>(cl-loop name-clause var-clause ... action-clause ...)</code>
+</p>
+
+<p>
+其中的 <b>name clause</b> 是可选项，可以赋给 <code>cl-loop</code> 的隐含 block 名字，一般来说就来说这个名字是 nil。 <b>var clause</b> 指定的是在循环过程中需要绑定的变量。 <b>action clause</b> 是在循环过程中需要完成的工作，比如计算，收集或返回值。
+</p>
+
+<p>
+上面的描述是很宽泛的，因为 cl-loop 中可选的 clause 实在是太多了。下面描述几种比较常用的 clause。实际上，clause 里面还可以继续细分。如果按照官方文档的顺序来讲的话，那我应该从 for 语句开始。由于 <code>cl-loop</code> 实在是有点复杂，我还是再写一篇文章来专门介绍它的用法吧，这里只对几种常用语句进行介绍。
+</p>
+</div>
+
+<div id="outline-container-orge524090" class="outline-4">
+<h4 id="orge524090"><span class="section-number-4">3.7.1</span> 简单的 for 循环</h4>
+<div class="outline-text-4" id="text-3-7-1">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">for var from exp1 to exp2 by exp3
+</pre>
+</div>
+
+<p>
+从字面意思上这个语句是很好理解的，从 exp1 到 exp2，步长是 exp3：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x from 0 to 10 by 2
+ sum x)
+=&gt; 30 <span style="color: #b22222;">; </span><span style="color: #b22222;">0 + 2 + 4 + 6 + 8 + 10</span>
+</pre>
+</div>
+
+<p>
+循环可以从小到大，也可以从大到小，还可以限制是小于还是小于等于：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x from 10 downto 1
+ collect x)
+=&gt;
+(10 9 8 7 6 5 4 3 2 1)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for x from 10 above 1
+ collect x)
+=&gt;
+(10 9 8 7 6 5 4 3 2)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for x from 0 below 10
+ collect x)
+=&gt;
+(0 1 2 3 4 5 6 7 8 9)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0c206cc" class="outline-4">
+<h4 id="org0c206cc"><span class="section-number-4">3.7.2</span> 类 foreach 遍历</h4>
+<div class="outline-text-4" id="text-3-7-2">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">for var in list by function
+</pre>
+</div>
+
+<p>
+其中的 <code>by function</code> 部分是可以省略的，它的默认值是 <code>cdr</code> ，表示顺着表完成遍历，通过 <code>by</code> 语句可以改变这个默认行为。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x in '(1 2 () 3)
+ collect (<span style="color: #a020f0;">if</span> (numberp x) x 0))
+=&gt; (1 2 0 3)
+</pre>
+</div>
+
+<p>
+还有一种 <code>in-ref</code> 的用法，var 在这里就是类似于 C++ 中的引用，对 var 进行的修改操作会反应到表上。不过需要使用可以操作 <code>formal</code> 的 cl 函数，比如 <code>setf</code> <code>incf</code> 等。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> x (list 2 3 4 5 6 7))
+(<span style="color: #a020f0;">cl-loop</span>
+for a in-ref x by 'cddr
+do
+(<span style="color: #a020f0;">setf</span> a (+ a 1)))
+x =&gt; (3 3 5 5 7 7)
+</pre>
+</div>
+
+<p>
+还有一个 <code>on</code> 关键字，这时 x 的值就是剩余的表而不是每一个表中的元素：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> for x on '(1 2 3 4) collect x)
+        &#8658; ((1 2 3 4) (2 3 4) (3 4) (4))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1238117" class="outline-4">
+<h4 id="org1238117"><span class="section-number-4">3.7.3</span> 一些迭代语句</h4>
+<div class="outline-text-4" id="text-3-7-3">
+<p>
+<code>repeat integer</code> ，表示重复 n 次：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> repeat 10 sum 1) =&gt; 10
+</pre>
+</div>
+
+<p>
+<code>while condition</code> ，当 condition 为 nil 时循环终止。 <code>until condition</code> 与其相反，当条件为真时循环终止。
+</p>
+
+<p>
+<code>always</code> 和 <code>never</code> 表示全为真或全为假，如果有不满足的项，cl-loop 会停止并返回 nil，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for x to 10
+ always (&gt; x -1))
+=&gt; t
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for x in '(1 3 4 5 7 9)
+ always (cl-oddp x))
+=&gt; nil
+</pre>
+</div>
+
+<p>
+<code>thereis condition</code> 当条件不为 nil 时就退出循环，表示“存在”或“找到了”的意思。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4dbbd57" class="outline-4">
+<h4 id="org4dbbd57"><span class="section-number-4">3.7.4</span> 积累器</h4>
+<div class="outline-text-4" id="text-3-7-4">
+<p>
+上面我们已经使用过一些积累器了，那就是 <code>sum</code> ， <code>collect</code> 。它们的作用是把一些值收集起来，作为 <code>cl-loop</code> 表达式的值。如果没有中途的中断， <code>cl-loop</code> 会使用收集得到的值来作为表达式的值。这里列举一下几个常用的积累器。
+</p>
+
+<ul class="org-ul">
+<li><code>collect</code> 表示将值收入结果中，得到的表的顺序与迭代顺序一致</li>
+
+<li><code>append</code> 表示将表并入结果中</li>
+
+<li><code>sum</code> 表示将数字加入结果中</li>
+
+<li><code>maximize</code> 表示使用最大值作为结果值</li>
+
+<li><code>minimize</code> 表示使用最小值作为结果值</li>
+</ul>
+
+
+<p>
+这里对上面没有使用过的积累器做个介绍：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+for x to 100
+maximize x into a
+minimize x into b
+finally return (list a b))
+=&gt; (100 0)
+
+(<span style="color: #a020f0;">cl-loop</span>
+ for x on '(1 2 3)
+ append x)
+=&gt; (1 2 3 2 3 3)
+</pre>
+</div>
+
+<p>
+上面用到了另一种语句，即 <code>finally return</code> ，如果没有其他的显式 return 的话，就使用它的值作为 <code>cl-loop</code> 的返回值。
+</p>
+
+<p>
+上面介绍的只是 <code>cl-loop</code> 功能的一小部分，更多内容请见于官方文档。
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb44caef" class="outline-2">
+<h2 id="orgb44caef"><span class="section-number-2">4</span> 一些数学函数</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+说来也怪，elisp 没有提供一些非常简单基础的数学函数，比如判断正负，判断奇偶之类的。 <code>cl-lib</code> 中提供了这些函数：
+</p>
+
+<ul class="org-ul">
+<li><code>cl-plusp</code> 判断数字是否为正数</li>
+
+<li><code>cl-minusp</code> 判断数字是否为负数</li>
+
+<li><code>cl-oddp</code> 判断数字是否为奇数</li>
+
+<li><code>cl-evenp</code> 判断数字是否为偶数</li>
+
+<li><code>cl-digit-char-p</code> 判断字符是否为合法的数字符号</li>
+</ul>
+
+
+<p>
+上面的函数都很简单，但 <code>cl-digit-char-p</code> 需要提一下，它在默认情况下仅对十进制数进行判断，但是它还可以接受一个 <code>radix</code> 参数来判断其他进制的数。=radix= 的范围是 2 - 16。
+</p>
+</div>
+
+<div id="outline-container-orge1d2a74" class="outline-3">
+<h3 id="orge1d2a74"><span class="section-number-3">4.1</span> 数值函数</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+一些数学函数，诸如最大公因数和最小公倍数的求取在 elisp 中是没有的，cl-lib 提供了一些数值函数：
+</p>
+
+<ul class="org-ul">
+<li><code>cl-gcd</code> ，求数字中的最大公因数，就像这样： <code>(cl-gcd 1 3 6 60)</code></li>
+
+<li><code>cl-lcm</code> ，求数字中的最小公倍数，就像这样： <code>(cl-lcm 100 200 250)</code></li>
+
+<li><code>cl-isqrt</code> ，它接受一个整数，返回小于它平方根的最大整数， <code>(cl-isqrt 99)</code> 得到 9</li>
+</ul>
+
+
+<p>
+接下来是一系列取整函数，即上取整，下取整，截断，取整等等。这些函数在 elisp 中也没有。
+</p>
+
+<ul class="org-ul">
+<li><code>cl-floor</code> ，即下取整。接受一个数字，返回由整数和小数组成的表。例如： <code>(cl-floor 1.6) =&gt; (1 0.6)</code> ， <code>(cl-floor -1.2) =&gt; (-2 0.8)</code></li>
+
+<li><code>cl-ceiling</code> ，即上取整，得到由整数和小数组成的表。 <code>(cl-ceiling 1.7) =&gt; (2 -0.3)</code> ， <code>(cl-ceiling -1.3) =&gt; (-1 -0.3)</code></li>
+
+<li><code>cl-truncate</code> ，即趋零截断， <code>(cl-truncate 1.5) =&gt; (1 0.5)</code> ， <code>(cl-truncate -1.6) =&gt; (-1 -0.6)</code> 。elisp 中也有 <code>truncate</code> 函数，但它只返回整数部分</li>
+
+<li><code>cl-round</code> ，即四舍五入， <code>(cl-round 1.5) =&gt; (2 -0.5)</code> ， <code>(cl-round 1.4) =&gt; (1 0.4)</code> ， <code>(cl-round -1.6) =&gt; (-2 0.4)</code> ， <code>(cl-round -1.4) =&gt; (-1 0.4)</code></li>
+</ul>
+
+
+<p>
+其实，上面的四个函数还可以接受一个参数作为 <code>divisor</code> ，有点麻烦，这里就不多讲了。
+</p>
+
+<p>
+<code>cl-parse-integer</code> 可以将字符串解析为整数，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(cl-parse-integer <span style="color: #8b2252;">"123"</span>) =&gt; 123
+(cl-parse-integer <span style="color: #8b2252;">"123"</span> <span style="color: #483d8b;">:radix</span> 11) =&gt; 146
+</pre>
+</div>
+
+<p>
+elisp 有一个叫做 <code>string-to-number</code> 的函数，功能与之相似，但提供的选项没有它多。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org176424a" class="outline-3">
+<h3 id="org176424a"><span class="section-number-3">4.2</span> 随机函数</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+elisp 中已经有了一个随机函数，叫做 <code>random</code> 。据文档所说，cl-random 的实现采用了 <a href="https://en.wikipedia.org/wiki/ACORN_(PRNG)">addictive-congruential</a> 算法，可以产生比许多操作系统提供的生成器更好的随机数。
+</p>
+
+<p>
+<code>cl-random</code> 接受一个数字作为随机数的范围，并返回在该范围内的非负数字，如果这个数字是整数，那么随机数也是整数，如果是浮点数那么随机数也是浮点数。
+</p>
+
+<p>
+它还接受一个可选参数 <code>state</code> ，它应该是一个 <code>random-state</code> 对象。 <code>cl-random</code> 会修改这个对象的状态（它用来记录随机数的信息，以得到下一个随机数）。如果 <code>state</code> 参数被忽略了， <code>cl-random</code> 会使用内部的 <code>cl--random-state</code> ，它是默认的 <code>random-state</code> 对象。
+</p>
+
+<p>
+由于 <code>cl--random-state</code> 被所有的 elisp 程序共用，要想得到两个相同的随机数序列的话，仅仅使用 <code>cl-random</code> 是不可能的，这里可以使用 <code>cl-make-random-state</code> 来复制 <code>state</code> ：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> ss1 (cl-make-random-state t))
+(<span style="color: #a020f0;">setq</span> ss2 (cl-make-random-state ss1))
+(cl-random 100 ss1) =&gt; 78
+(cl-random 100 ss2) =&gt; 78
+</pre>
+</div>
+
+<p>
+使用相同的 <code>state object</code> 就会产生相同的随机值。
+</p>
+
+<p>
+如果没有参数的话， <code>cl-make-random-state</code> 会复制 <code>cl--random-state</code> 并返回复制的对象，如果参数是一个 <code>state object</code> 的话，它会复制这个对象并返回。如果参数是 <code>t</code> ，这个函数会以时间和日期作为种子返回一个新的对象。 <code>state</code> 参数也可以是一个整数，函数会以整数作为种子来产生新的对象。
+</p>
+
+<p>
+<code>state object</code> 是一个可打印的对象，也就是说将它保存到文件中的话还可以再次读取，并再次产生和上次相同的随机数序列。这样对于某些工作是很方便的。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga787d42" class="outline-2">
+<h2 id="orga787d42"><span class="section-number-2">5</span> 其他</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+上面我就一些简单常用的控制结构和函数进行了简单的介绍。cl-lib 中还有很多的函数，个人感觉本文内容已经足够了，其他函数我并不是特别熟悉，文章再继续下去的话可能重点就不明确了。剩下的内容在今后的使用中再去摸索吧。
+</p>
+
+<p>
+使用 Emacs 的 occur 功能，我们可以看出 <code>cl-lib</code> 中的函数和宏。在 occur 的 minibuffer 中输入 <code>^(\(defun\|defmacro\) +cl-[^- ]+</code> ，我们就可以找到函数和宏了。以下是各个文件中的函数和宏：
+</p>
+
+<p>
+cl-lib.el (17)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-incf</span> (place <span style="color: #228b22;">&amp;optional</span> x)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-decf</span> (place <span style="color: #228b22;">&amp;optional</span> x)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-pushnew</span> (x place <span style="color: #228b22;">&amp;rest</span> keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-values-list</span> (list)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-proclaim</span> (spec)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-declaim</span> (<span style="color: #228b22;">&amp;rest</span> specs)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-oddp</span> (integer)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-evenp</span> (integer)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-digit-char-p</span> (char <span style="color: #228b22;">&amp;optional</span> radix)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-mapcar</span> (cl-func cl-x <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-list*</span> (arg <span style="color: #228b22;">&amp;rest</span> rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-ldiff</span> (list sublist)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-copy-list</span> (list)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-adjoin</span> (cl-item cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-subst</span> (cl-new cl-old cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-acons</span> (key value alist)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-pairlis</span> (keys values <span style="color: #228b22;">&amp;optional</span> alist)
+</pre>
+</div>
+
+<p>
+cl-extra.el (39)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-coerce</span> (x type)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-equalp</span> (x y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-map</span> (cl-type cl-func cl-seq <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-maplist</span> (cl-func cl-list <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-mapc</span> (cl-func cl-seq <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-mapl</span> (cl-func cl-list <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-mapcan</span> (cl-func cl-seq <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-mapcon</span> (cl-func cl-list <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-some</span> (cl-pred cl-seq <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-every</span> (cl-pred cl-seq <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-notany</span> (cl-pred cl-seq <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-notevery</span> (cl-pred cl-seq <span style="color: #228b22;">&amp;rest</span> cl-rest)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-gcd</span> (<span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-lcm</span> (<span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-isqrt</span> (x)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-floor</span> (x <span style="color: #228b22;">&amp;optional</span> y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-ceiling</span> (x <span style="color: #228b22;">&amp;optional</span> y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-truncate</span> (x <span style="color: #228b22;">&amp;optional</span> y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-round</span> (x <span style="color: #228b22;">&amp;optional</span> y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-mod</span> (x y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-rem</span> (x y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-signum</span> (x)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-random</span> (lim <span style="color: #228b22;">&amp;optional</span> state)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-make-random-state</span> (<span style="color: #228b22;">&amp;optional</span> state)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-float-limits</span> ()
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-subseq</span> (seq start <span style="color: #228b22;">&amp;optional</span> end)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-concatenate</span> (type <span style="color: #228b22;">&amp;rest</span> sequences)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-revappend</span> (x y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nreconc</span> (x y)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-list-length</span> (x)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-tailp</span> (sublist list)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-get</span> (sym tag <span style="color: #228b22;">&amp;optional</span> def)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-getf</span> (plist tag <span style="color: #228b22;">&amp;optional</span> def)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-remprop</span> (sym tag)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-fresh-line</span> (<span style="color: #228b22;">&amp;optional</span> stream)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-prettyprint</span> (form)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-prettyexpand</span> (form <span style="color: #228b22;">&amp;optional</span> _full)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-find-class</span> (type) (<span style="color: #a020f0;">cl--find-class</span> type))
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-describe-type</span> (type)
+</pre>
+</div>
+
+<p>
+cl-seq (58)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-endp</span> (x)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-reduce</span> (cl-func cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-fill</span> (cl-seq cl-item <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-replace</span> (cl-seq1 cl-seq2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-remove</span> (cl-item cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-remove-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-remove-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-delete</span> (cl-item cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-delete-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-delete-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-remove-duplicates</span> (cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-delete-duplicates</span> (cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-substitute</span> (cl-new cl-old cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-substitute-if</span> (cl-new cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-substitute-if-not</span> (cl-new cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nsubstitute</span> (cl-new cl-old cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nsubstitute-if</span> (cl-new cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nsubstitute-if-not</span> (cl-new cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-find</span> (cl-item cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-find-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-find-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-position</span> (cl-item cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-position-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-position-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-count</span> (cl-item cl-seq <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-count-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-count-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-mismatch</span> (cl-seq1 cl-seq2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-search</span> (cl-seq1 cl-seq2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-sort</span> (cl-seq cl-pred <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-stable-sort</span> (cl-seq cl-pred <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-merge</span> (cl-type cl-seq1 cl-seq2 cl-pred <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-member</span> (cl-item cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-member-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-member-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-assoc</span> (cl-item cl-alist <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-assoc-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-assoc-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-rassoc</span> (cl-item cl-alist <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-rassoc-if</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-rassoc-if-not</span> (cl-pred cl-list <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-union</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nunion</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-intersection</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nintersection</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-set-difference</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nset-difference</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-set-exclusive-or</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nset-exclusive-or</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-subsetp</span> (cl-list1 cl-list2 <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-subst-if</span> (cl-new cl-pred cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-subst-if-not</span> (cl-new cl-pred cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nsubst</span> (cl-new cl-old cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nsubst-if</span> (cl-new cl-pred cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nsubst-if-not</span> (cl-new cl-pred cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-sublis</span> (cl-alist cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-nsublis</span> (cl-alist cl-tree <span style="color: #228b22;">&amp;rest</span> cl-keys)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-tree-equal</span> (cl-x cl-y <span style="color: #228b22;">&amp;rest</span> cl-keys)
+</pre>
+</div>
+
+<p>
+cl-macs.el (56)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-gensym</span> (<span style="color: #228b22;">&amp;optional</span> prefix)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-gentemp</span> (<span style="color: #228b22;">&amp;optional</span> prefix)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-defun</span> (name args <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-iter-defun</span> (name args <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-defmacro</span> (name args <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-function</span> (func)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-destructuring-bind</span> (args expr <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-eval-when</span> (<span style="color: #a020f0;">when</span> <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-load-time-value</span> (form <span style="color: #228b22;">&amp;optional</span> _read-only)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-case</span> (expr <span style="color: #228b22;">&amp;rest</span> clauses)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-ecase</span> (expr <span style="color: #228b22;">&amp;rest</span> clauses)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-typecase</span> (expr <span style="color: #228b22;">&amp;rest</span> clauses)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-etypecase</span> (expr <span style="color: #228b22;">&amp;rest</span> clauses)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-block</span> (name <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-return</span> (<span style="color: #228b22;">&amp;optional</span> result)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-return-from</span> (name <span style="color: #228b22;">&amp;optional</span> result)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-loop</span> (<span style="color: #228b22;">&amp;rest</span> loop-args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-do</span> (steps endtest <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-do*</span> (steps endtest <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-dolist</span> (spec <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-dotimes</span> (spec <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-tagbody</span> (<span style="color: #228b22;">&amp;rest</span> labels-or-stmts)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-prog</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-prog*</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-do-symbols</span> (spec <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-do-all-symbols</span> (spec <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-psetq</span> (<span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-progv</span> (symbols values <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-flet</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-flet*</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-labels</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-macrolet</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-symbol-macrolet</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-multiple-value-bind</span> (vars form <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-multiple-value-setq</span> (vars form)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-locally</span> (<span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-the</span> (type form)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-declare</span> (<span style="color: #228b22;">&amp;rest</span> specs)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-psetf</span> (<span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-remf</span> (place tag)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-shiftf</span> (place <span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-rotatef</span> (<span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-letf</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-letf*</span> (bindings <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-callf</span> (func place <span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-callf2</span> (func arg1 place <span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-defsubst</span> (name args <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-defstruct</span> (struct <span style="color: #228b22;">&amp;rest</span> descs)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-struct-sequence-type</span> (struct-type)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-struct-slot-info</span> (struct-type)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-struct-slot-offset</span> (struct-type slot-name)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-check-type</span> (form type <span style="color: #228b22;">&amp;optional</span> string)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-assert</span> (form <span style="color: #228b22;">&amp;optional</span> show-args string <span style="color: #228b22;">&amp;rest</span> args)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-define-compiler-macro</span> (func args <span style="color: #228b22;">&amp;rest</span> body)
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">cl-compiler-macroexpand</span> (form)
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">cl-deftype</span> (name arglist <span style="color: #228b22;">&amp;rest</span> body)
+</pre>
+</div>
+
+<p>
+总计 170 个 函数和宏。这些函数和宏的功能主要包括：
+</p>
+
+<ul class="org-ul">
+<li>提供方便的控制结构</li>
+
+<li>提供处理 symbol 的功能</li>
+
+<li>提供一些方便的数学函数</li>
+
+<li>提供序列操作函数，可以统一地处理表，向量等序列</li>
+
+<li>提供一些表函数，增强表的功能</li>
+
+<li>提供了 <code>cl-defstruct</code> ，可以定义结构体了，比 <code>make-record</code> 更好用</li>
+
+<li>提供了一些和编译、断言有关的功能</li>
+
+<li>&#x2026;&#x2026;</li>
+</ul>
+
+
+<p>
+这 170 个函数本文只介绍了十几个，但是对于目前的我而言是足够了。如果我在接下来的代码实践中发现了一些好用的函数和宏，我再进行总结吧。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd983a48" class="outline-2">
+<h2 id="orgd983a48"><span class="section-number-2">6</span> 后记</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+考虑到处理表的库并不止 cl-lib 一家，比较有名的还有 <code>dash</code> 库，待我都试一试后再回来继续学习 cl-lib。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9237cdd" class="outline-2">
+<h2 id="org9237cdd"><span class="section-number-2">7</span> 参考资料</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+<a id="orgda2abba">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/cl/index.html">https://www.gnu.org/software/emacs/manual/html_node/cl/index.html</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-05-28 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 10:14</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
