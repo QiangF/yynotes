@@ -1,0 +1,784 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-04 Wed 08:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>借学习thunk之机看看delay-evaluation <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">借学习thunk之机看看delay-evaluation <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org339ce01">1. 什么是延时求值</a></li>
+<li><a href="#orgc4f8fab">2. Elisp 中的延时求值</a></li>
+<li><a href="#orgfc7a1f5">3. 使用延时求值的一些例子</a>
+<ul>
+<li><a href="#org886f268">3.1. SICP 中的流</a></li>
+<li><a href="#org8dee23b">3.2. 用流表示级数</a></li>
+<li><a href="#org340936f">3.3. 延时求值与动态规划问题</a></li>
+</ul>
+</li>
+<li><a href="#org051a0a3">4. 总结</a></li>
+<li><a href="#org7540ad9">5. 参考资料</a></li>
+</ul>
+</div>
+</div>
+<p>
+Elisp Mannual 在 Evaluation 一章的最后一小节中对 elisp 中的延时/惰性求值进行了介绍。和延时求值相关的函数也不过四五个，拿来水一篇文章是个不错的选择。但如果我把官方文档的用法和示例抄过来放在这里的话，那除了翻译过来看得通顺点的话，剩下的东西就是脱裤子放屁了。
+</p>
+
+<p>
+因此，这篇文章的重点不是在翻译那几个函数的参数表和返回值规定上，而是具体了解一下它的实现，以及一些好玩的用法。
+</p>
+
+<p>
+本文的内容主要分为三个部分
+</p>
+
+<ul class="org-ul">
+<li>对延时求值的简介</li>
+
+<li>Elisp 中的实现的介绍</li>
+
+<li>使用延时求值的一些例子</li>
+</ul>
+
+
+<p>
+阅读本文需要一定的 Lisp 使用经验，没玩过 Lisp 系语言的话，您可以去学一学。
+</p>
+
+<div id="outline-container-org339ce01" class="outline-2">
+<h2 id="org339ce01"><span class="section-number-2">1</span> 什么是延时求值</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+延时求值，顾名思义就是不立即求值，而是在值不得不被使用的时候再进行求值。在一次求值之后，后面的求值会直接使用第一次求值得到的值，而无需再次对原表达式进行求值。延时求值在不同的语言中有不同的实现，这里只谈 Lisp 系语言。
+</p>
+
+<p>
+对于一个表达式，如果我们不想让它被直接求值，而是等到之后再进行求值，我们应该怎么做呢？一个简单的想法就是把这个表达式包到 <b>thunk</b> 里面去，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(+ 1 2)
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">add a thunk on it</span>
+(<span style="color: #a020f0;">lambda</span> () (+ 1 2))
+</pre>
+</div>
+
+<p>
+因为 <code>(+ 1 2)</code> 被包到 lambda 表达式里面了，如果没有调用 lambda 的话，它是不会被求值的。在想要获取表达式值的时候调用这个匿名函数就可以了。
+</p>
+
+<p>
+除此之外，我们还希望这个表达式只被求取一次，这就需要有一个变量来记录整个表达式是否被求值，以及另一个变量来存储求值结果。利用闭包作用域可以很轻松地做到这一点，而不需要使用全局变量来存储求值状态和结果：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(+ 1 2)
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">add sth on it</span>
+(<span style="color: #a020f0;">let</span> ((fEvaled nil)
+      (theValue nil))
+   (<span style="color: #a020f0;">lambda</span> ()
+      (<span style="color: #a020f0;">if</span> fEvaled theValue
+         (<span style="color: #a020f0;">progn</span>
+            (<span style="color: #a020f0;">setq</span> theValue (+ 1 2))
+            (<span style="color: #a020f0;">setq</span> fEvaled t)
+            theValue))))
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">it is elisp code</span>
+</pre>
+</div>
+
+<p>
+上面的代码中， <code>progn</code> 和 Scheme 中的 <code>begin</code> 是一个东西，t 就是 Scheme 中的 #t。要注意的是，在对上面表达式求值之前，需要将 <code>lexical-bindings</code> 设置为 t，否则是没有闭包作用域的。
+</p>
+
+<p>
+这是一种很一般的做法，有理由专门创建一个函数来产生原表达式的 thunk 的函数。但是使用函数是做不到这一点的，因为它会在调用前对参数求值，所以需要使用宏来完成代码转换。Scheme 提供了 <code>delay/force</code> 来进行惰性求值，其中的 <code>delay</code> 就是宏， <code>force</code> 则是一个简单的过程调用：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">force</span> f) (f))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc4f8fab" class="outline-2">
+<h2 id="orgc4f8fab"><span class="section-number-2">2</span> Elisp 中的延时求值</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+延时求值被作为标准加入 Emacs 的时间并不早，参阅 Github 上 Emacs 镜像的 commit 历史<a href="#org01b0d86">【1】</a>，thunk.el 第一次提交出现在 2015 年，提交者是 NicolasPetton。初期的实现只包括了 <code>thunk-delay</code> ， <code>thunk-force</code> 和 <code>thunk-evaluated-p</code> 。其中 <code>thunk-evaluated-p</code> 用来判断是否已经求过值。
+</p>
+
+<p>
+2015-2017年间，维护者对这个文件进行了小修小补，2017 年 12 月 1 日，在 michael-heeregen 的提交中引入了 <code>thunk-let</code> 和 <code>thunk-let*</code> 两个宏。此后又是一些小修补，到现在（20210326）也没啥大变化了。
+</p>
+
+<p>
+对这段代码的演变过程感兴趣的，可以去 Github 上看看。这里我直接拿过来目前最新的版本，代码如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;;; </span><span style="color: #b22222;">thunk.el --- Lazy form evaluation  -*- lexical-binding: t -*-</span>
+
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Copyright (C) 2015-2020 Free Software Foundation, Inc.</span>
+
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Author: Nicolas Petton <a href="mailto:nicolas%40petton.fr">&lt;nicolas@petton.fr&gt;</a></span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Keywords: sequences</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Version: 1.0</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Package: thunk</span>
+
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Maintainer: emacs-devel@gnu.org</span>
+
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">This file is part of GNU Emacs.</span>
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">thunk-delay</span> (<span style="color: #228b22;">&amp;rest</span> body)
+  <span style="color: #8b2252;">"Delay the evaluation of BODY."</span>
+  (<span style="color: #a020f0;">declare</span> (debug t))
+  (<span style="color: #ff0000; font-weight: bold;">cl-assert</span> lexical-binding)
+  `(<span style="color: #a020f0;">let</span> (forced
+         (val (<span style="color: #a020f0;">lambda</span> () ,@body)))
+     (<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;optional</span> check)
+       (<span style="color: #a020f0;">if</span> check
+           forced
+         (<span style="color: #a020f0;">unless</span> forced
+           (<span style="color: #a020f0;">setf</span> val (funcall val))
+           (<span style="color: #a020f0;">setf</span> forced t))
+         val))))
+
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">thunk-force</span> (delayed)
+  <span style="color: #8b2252;">"Force the evaluation of DELAYED.</span>
+<span style="color: #8b2252;">The result is cached and will be returned on subsequent calls</span>
+<span style="color: #8b2252;">with the same DELAYED argument."</span>
+  (funcall delayed))
+
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">thunk-evaluated-p</span> (delayed)
+  <span style="color: #8b2252;">"Return non-nil if DELAYED has been evaluated."</span>
+  (funcall delayed t))
+</pre>
+</div>
+
+<p>
+和我上面给出的简单实现相比，它添加了一个可选参数 <code>check</code> ，通过它来检查求值是否完成。 <code>thunk-force</code> 的实现就是简单的函数调用， <code>thunk-evaluated-p</code> 就是使 <code>check</code> 为真来查看状态变量 <code>forced</code> 的值。
+</p>
+
+<p>
+<code>thunk-let</code> 就是使用和 <code>let</code> 表达式相似的形式来绑定延时求值表达式，如果没有用到这些绑定的变量就不会对其进行求值。=thunk-let*= 和 <code>thunk-let</code> 的关系就像是 <code>let*</code> 和 <code>let</code> 的关系。关于它们的具体使用我就不作介绍了，文档上有很好的例子。这里只提一点，不要修改 <code>thunk-let</code> 绑定的变量，具体原因请参考文档。
+</p>
+
+<p>
+（兴许有时间的话我会用 Scheme 的 syntax-case 把 <code>thunk-let</code> 来实现一遍，目前我还看不懂它的 elisp 实现）
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfc7a1f5" class="outline-2">
+<h2 id="orgfc7a1f5"><span class="section-number-2">3</span> 使用延时求值的一些例子</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+从这里开始就是本文的主体部分了，延时求值这个概念很好理解，但光是谈谈它的实现那就一点意思也没有了，那么又有哪些好玩的使用例子呢？且看以下内容。
+</p>
+
+<p>
+由于本文的目的在于学习 Elisp，以下代码自然都是用 Elisp 实现。（其实 Lisp 都差不多）
+</p>
+</div>
+
+<div id="outline-container-org886f268" class="outline-3">
+<h3 id="org886f268"><span class="section-number-3">3.1</span> SICP 中的流</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+SICP当然指的是大名鼎鼎的《计算机程序的构造与解释》啦。偶然间聊天的时候突然想到 SICP 在第三章中的流模型中举过一些例子，正好来作为本文的一部分。
+</p>
+
+<p>
+（需要说明的是，要理解无穷流的表示需要一定的递归基础，而且我在文中并未对每个序列的定义都给出足够详细的解释。如果你对递归和一些数学递归定义不太熟悉的话，觉得某些例子难以理解是很正常的。实在看不下去的话可以去读读 SICP，或者直接看下一个例子。这部分只能算作我对于 SICP 知识的一个整理。）
+</p>
+
+<p>
+在 SICP 中这样写道：
+</p>
+
+<blockquote>
+<p>
+从抽象的观点来看，一个流就是一个序列，但是与列表不同的是，它将使我们能够用流去表示非常长（甚至是无穷的）序列。
+</p>
+
+<p>
+流是一种非常巧妙的想法，使我们可以利用各种序列操作，但又不会带来将序列作为表操作而引起的代价。
+</p>
+
+<p>
+利用流结构，我们能同时得到两个世界（指命令式和函数式）上最好的东西：如此形成的程序可以像序列操作那么优雅，同时又能得到递归计算的效率。这里的基本想法是做出一种安排，只是部分地构造出流的结构，并将这样的部分结构送给处理流的程序，如果使用者需要访问这个流的尚未构造出来的那个部分，那么这个流就会自动地继续构造下去，但是只做出满足需要的那部分。这一做法造成了一种假象，就好像整个流都存在着一样。
+</p>
+</blockquote>
+
+<p>
+一言以蔽之，流是这样一种数据结构，它和表一样是一种序列，但是它仅仅在需要的时候才对它的一部分进行求值。表（或者说是 cons cell）有构造函数 <code>cons</code> 和析构函数 <code>car</code> 、 <code>cdr</code> （这里的构造和析构按字面意思理解即可）。对于流自然也应该有相似的函数，这里就叫它们 <code>stream-car</code> 、 <code>stream-cdr</code> 和 <code>stream-cons</code> 吧。下面给出一种实现：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">stream-car</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-car</span> (s) (car s))
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">stream-cdr</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-cdr</span> (s) (thunk-force (cdr s)))
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">stream-cons</span>
+(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">stream-cons</span> (a b) `(cons ,a (thunk-delay ,b)))
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">stream-nullp</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-nullp</span> (s) (null s))
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">stream-null</span>
+(<span style="color: #a020f0;">defvar</span> <span style="color: #a0522d;">stream-null</span> nil)
+</pre>
+</div>
+
+<p>
+上面的实现借助了 Elisp 原生数据类型 cons 来作为骨架，并且使用 nil 来作为流的结尾。如果你想玩的花一点也可以自己实现另一种 cons cell，这里就从简了。
+</p>
+
+<p>
+从上面的定义中可以看出，一个流就是一个 cons cell，它的 car 部分是一个值，而 cdr 部分是一个待求值的 thunk，每当我们对一个流使用 <code>cdr</code> 操作时，流的 cdr 部分被求值得到一个新的 cons cell，或者是 null 值。
+</p>
+
+<p>
+上面的定义看上去也没啥意思，但是就像 SICP 中说的，我们可以构建无穷流！使用上面的函数可以使用有限的代码来表示无穷这一概念，因为延时求值的原因，如果不需要取到某个值的话，是不需要对其进行计算的。使用以下代码我们就可以定义出全为 1 的无穷序列：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> ones (stream-cons 1 ones))
+</pre>
+</div>
+
+<p>
+使用一个辅助函数，我们可以更加清楚地看出这个定义是不是真正起到了作用：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">stream-ref, get the nth value of stream s, 0 based</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">with no tail-call optimism, use loop instead</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-ref</span> (s n)
+  (<span style="color: #a020f0;">if</span> (&lt; n 0) (<span style="color: #ff0000; font-weight: bold;">error</span> <span style="color: #8b2252;">"negative index"</span> n)
+    (<span style="color: #a020f0;">cl-loop</span> for i from 0 to (- n 1)
+         if (stream-nullp s)
+           return stream-null
+         else
+           do (<span style="color: #a020f0;">setq</span> s (stream-cdr s))
+         finally return (stream-car s))))
+
+(stream-ref ones 10000)
+=&gt; 1
+</pre>
+</div>
+
+<p>
+上面的 <code>stream-ref</code> 写法有点不清真，但是没有尾调用优化还是悠着点吧，不过 cl-loop 的可读性很不错，就算没学过也看得懂。可以看到，就算到了 10000，结果也还是 1，再往上加也没问题。
+</p>
+
+<p>
+下面我们再考虑另一个例子，使用流表示正整数序列。正整数序列指 <code>1 2 3 4 5 ...</code> ，若将其记为 N，很显然有 cdr (N - ones) = N（即 cdr(N) - ones = N）。根据这个关系式，我们借用一个辅助函数可以给出正整数序列的表示：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-map</span> (func <span style="color: #228b22;">&amp;rest</span> ss)
+  (<span style="color: #a020f0;">if</span> (stream-nullp (car ss)) stream-null
+    (stream-cons (apply func (mapcar 'stream-car ss))
+         (apply 'stream-map func (mapcar 'stream-cdr ss)))))
+
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-add</span> (sa sb)
+  (stream-map '+ sa sb))
+
+(<span style="color: #a020f0;">setq</span> pos-integer (stream-cons 1 (stream-add ones pos-integer)))
+
+(stream-ref pos-integer 10000)
+=&gt; 10001
+</pre>
+</div>
+
+<p>
+可惜的是，Elisp 的性能还是太贫弱了，我使用 114513 作为索引值会直接爆掉，连提示都不给。
+</p>
+
+<p>
+看了上面的例子，如果感觉有意思的话可以去买一本 SICP 看看（笑），下面以一些数学运算来作为例子，以说明流的灵活与强大。
+</p>
+</div>
+
+<div id="outline-container-orgad6bf18" class="outline-4">
+<h4 id="orgad6bf18"><span class="section-number-4">3.1.1</span> 一些常见的数列</h4>
+<div class="outline-text-4" id="text-3-1-1">
+<p>
+①由 <b>斐波那契数列</b> 的定义 <code>F(n) = F(n - 1) + F(n - 2)</code> ，我们可以这样表示它：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">fibgen</span> (a b)
+   (stream-cons a (fibgen b (+ a b))))
+
+(<span style="color: #a020f0;">setq</span> fib (fibgen 1 1))
+(stream-ref fib 5)
+=&gt; 8
+
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">another approach</span>
+(<span style="color: #a020f0;">setq</span> fib2 (stream-cons 0
+            (stream-cons 1
+              (stream-add (stream-cdr fib2)
+                fib2))))
+(stream-ref fib2 5)
+=&gt; 5
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">this seq is start with zero, so it's 5</span>
+</pre>
+</div>
+
+<p>
+②我们可以添加一个 <code>stream-scale</code> 来对序列中的每个元素乘一个数，来获得一个 <b>常数序列</b> ：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-scale</span> (s n)
+  (stream-map (<span style="color: #a020f0;">lambda</span> (x) (* x n)) s))
+
+(<span style="color: #a020f0;">setq</span> fives (stream-scale ones 5))
+=&gt; 5
+</pre>
+</div>
+
+<p>
+使用 <code>stream-scale</code> 就可以定义各种各样的幂函数了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> double (stream-cons 1 (stream-scale double 2)))
+(stream-ref double 10)
+=&gt; 1024
+
+(<span style="color: #a020f0;">setq</span> three (stream-cons 1 (stream-scale three 3)))
+(stream-ref three 3)
+=&gt; 27
+</pre>
+</div>
+
+<p>
+③通过定义 <code>stream-filter</code> 可对已有序列进行筛选，得到期望的 <b>筛选序列</b> ：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-filter</span> (func s)
+  (<span style="color: #a020f0;">if</span> (stream-nullp s) stream-null
+    (<span style="color: #a020f0;">if</span> (funcall func (stream-car s))
+    (stream-cons (stream-car s) (stream-filter func (stream-cdr s)))
+      (stream-filter func (stream-cdr s)))))
+
+(<span style="color: #a020f0;">setq</span> x5 (stream-filter (<span style="color: #a020f0;">lambda</span> (x) (zerop (mod x 5))) pos-integer))
+
+(stream-ref x5 10)
+=&gt; 55
+
+
+(<span style="color: #a020f0;">setq</span> start100 (stream-filter (<span style="color: #a020f0;">lambda</span> (x) (&gt; x 100)) pos-integer))
+
+(stream-ref start100 0)
+=&gt; 101
+</pre>
+</div>
+
+<p>
+SICP 上用埃氏筛法筛出了一定范围内的素数，可以去上面看看。
+</p>
+
+<p>
+④通过定义使序列对应项相乘的 <code>stream-mul</code> ，可以定义 <b>阶乘序列</b> ：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-mul</span> (s1 s2)
+  (stream-cons (* (stream-car s1) (stream-car s2))
+           (stream-mul (stream-cdr s1) (stream-cdr s2))))
+(<span style="color: #a020f0;">setq</span> factor (stream-cons 1 (stream-mul factor pos-integer)))
+
+(stream-ref factor 3)
+=&gt; 6
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">another approach</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-mul</span> (s1 s2)
+  (stream-map '* s1 s2))
+</pre>
+</div>
+
+<p>
+⑤ <b>部分求和序列</b> ，由 <code>s0, s1, s2, ....</code> 得到 <code>s0, s0 + s1, s0+s1+s2, ...</code> ：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-const</span> (n)
+  (stream-cons n (stream-const n)))
+
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-partial-sums</span> (s)
+  (stream-cons (stream-car s) (stream-add (stream-const (stream-car s))
+                      (stream-partial-sums (stream-cdr s)))))
+
+
+(<span style="color: #a020f0;">setq</span> pos-int (stream-partial-sums pos-integer))
+
+(stream-ref pos-int 3)
+=&gt; 10 <span style="color: #b22222;">; </span><span style="color: #b22222;">1 3 6 10 ...</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8dee23b" class="outline-3">
+<h3 id="org8dee23b"><span class="section-number-3">3.2</span> 用流表示级数</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+这一部分是我觉得最有意思的部分，通过流来表示函数的泰勒级数展开，可以用流来表示各种各样的初等函数。
+</p>
+
+<p>
+①级数的积分序列，对 <code>a0 + a1x + a2x^2 + a3x^3 + ....</code> 的积分为 <code>c + a0x + 1/2*a1x^2 + 1/3*a2^3 ...</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-integrate</span> (s)
+  (stream-mul (stream-map (<span style="color: #a020f0;">lambda</span> (x) (/ 1.0 x)) pos-integer)
+              s))
+
+(<span style="color: #a020f0;">setq</span> one2 (stream-integrate pos-integer))
+(stream-ref one2 200)
+=&gt; 1.0
+</pre>
+</div>
+
+<p>
+② <b>三角函数级数</b> 展开和 <b>指数函数级数</b> 展开，通过它们的定义和相互关系可以这样定义：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> exp-series
+      (stream-cons 1 (stream-integrate exp-series)))
+
+(stream-ref exp-series 3)
+=&gt; 0.16666667
+
+
+(<span style="color: #a020f0;">setq</span> cosine-series
+      (stream-cons 1
+           (stream-scale
+            (stream-integrate sine-series)
+            -1)))
+(<span style="color: #a020f0;">setq</span> sine-series
+      (stream-cons 0
+           (stream-integrate cosine-series)))
+
+(stream-ref cosine-series 4)
+=&gt; 0.041666667 <span style="color: #b22222;">;</span><span style="color: #b22222;">1 0 -1/2 0 1/24 ....</span>
+
+(stream-ref sine-series 3)
+=&gt; -0.1666666666 <span style="color: #b22222;">;</span><span style="color: #b22222;">0 1 0 -1/6 ....</span>
+</pre>
+</div>
+
+<p>
+③ <b>1/S的级数</b> ，也就是说，若f(x)对应级数为 S，要求出 1/f(x)对应的级数。SICP上面给出了对应的解释，这里我直接给出实现：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-mul-series</span> (s1 s2)
+  (stream-cons (* (stream-car s1) (stream-car s2))
+           (stream-add (stream-mul-series s1 (stream-cdr s2))
+               (stream-scale (stream-cdr s1)
+                     (stream-car s2)))))
+
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-div0</span> (s)
+  (stream-cons (/ 1.0 (stream-car s))
+           (stream-mul-series
+        (stream-scale (stream-cdr s) (/ -1.0 (stream-car s)))
+        (stream-div0 s))))
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">stream-div-series</span> (s1 s2)
+  (stream-mul-series s1 (stream-div0 s2)))
+
+(<span style="color: #a020f0;">setq</span> tan-series (stream-div-series sine-series cosine-series))
+(stream-ref tan-series 5)
+=&gt; 0.133333333333 <span style="color: #b22222;">;</span><span style="color: #b22222;">0 1 0 1/3 0 2/15 ......</span>
+</pre>
+</div>
+
+<p>
+上面定义的 mul-series 和 div-series 实现了流的卷积和，由 sinx 和 cosx 的级数可以计算 tanx 的级数。
+</p>
+
+<p>
+以上级数计算的正确性可以去网站<a href="#org9f31eba">【3】</a>进行验证。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org340936f" class="outline-3">
+<h3 id="org340936f"><span class="section-number-3">3.3</span> 延时求值与动态规划问题</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+延时求值与动态规划看上去貌似很难联系到一起，实际上也应该如此。但是某天我在计算斐波那契数列时，偶然想到了一种表达方式，且听我细细道来。
+</p>
+
+<p>
+已知 <code>Fib(n) = Fib(n - 1) + Fib(n - 2)</code> ，最简单的递归解法就是这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">fib</span> (n)
+  (<span style="color: #a020f0;">cond</span>
+   ((= n 0) 0)
+   ((= n 1) 1)
+   (t (+ (fib (- n 1)) (fib (- n 2))))))
+</pre>
+</div>
+
+<p>
+这种解法最为直观，但是由于过多的重复计算导致其效率不高，可以考虑把已经计算过的结果存储下来避免重复计算。这个时候就可以用到延时求值了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">fib2</span> (n)
+  (<span style="color: #a020f0;">let</span> ((table (make-vector (+ n 2) 0)))
+    (<span style="color: #a020f0;">cl-loop</span> for i from 2 to n
+             do (<span style="color: #a020f0;">let</span> ((i i))
+                  (aset table i
+                  (thunk-delay (+ (thunk-force (aref table (- i 1)))
+                                  (thunk-force (aref table (- i 2))))))))
+    (aset table 0 (thunk-delay 0))
+    (aset table 1 (thunk-delay 1))
+    (thunk-force (aref table n))))
+</pre>
+</div>
+
+<p>
+我当然知道你知道迭代的方法怎么写，但是这里我使用了所谓的记忆表方法，把每个 fib 值以 thunk 的形式存储下来，需要时直接在数组中进行访问，以此避免了重复计算。
+</p>
+
+<p>
+那么，这样做相对于没有使用 thunk 的记忆表方法有什么优点呢？如果没有 thunk 的话，我们就需要添加条件语句来判断某个 fib 值是否被求取，使用 thunk 可以让我们直接 force 而省略掉是否求值的判断逻辑。换言之，是否求值的逻辑被 <b>转移到 thunk 里面去了</b> 。
+</p>
+
+<p>
+你也许会对上面代码中的 <code>(let ((i i))</code> 感到迷惑，我一开始没有加上这一行，但是没有它的话不行。由于 thunk-delay 把表达式的求值延后了， <code>(- i 1)</code> 和 <code>(- i 2)</code> 的求值得等到 force 的时候再开始了，但是根据闭包作用域，它们所指向的 i 值并不是 aset 时的值，而是 cl-loop 结束后的 i 值，这个值并不等于它们的 index，由此会导致求值时进入死循环。所以需要在外面包一层 let 来保证 force 时使用的是 index。如果使用递归而不是迭代就不会有这样的问题了（还是 Scheme 好点）。
+</p>
+
+<p>
+斐波那契数列毕竟只是一个非常简单的例子，这里介绍一个稍微复杂点的题目：
+</p>
+
+<p>
+Projecteuler81 <a href="#org75bf825">【4】</a>。题目大意是：给出一个矩阵，要求你从左上角走到右下角，你只能向右或向下运动，要求求出最小路径和（即走过路径上的所有数的和）。
+</p>
+
+<p>
+由于题目数据放在这里占的空间有点大，这里我直接使用题目示例中的数据并定义 thunk 矩阵：（加上一些辅助函数）
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> mat0
+      [[131 673 234 103 18]
+       [201 96 342 965 150]
+       [630 803 746 422 111]
+       [537 699 497 121 956]
+       [805 732 524 37 331]]
+      )
+
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">mat-ref</span> (mat i j)
+  (aref (aref mat i) j))
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">mat-set</span> (mat i j newval)
+  (aset (aref mat i) j newval))
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">make-matrix</span> (i j)
+  (<span style="color: #a020f0;">let</span> ((ret (make-vector i nil)))
+    (<span style="color: #a020f0;">cl-loop</span> for k from 0 to (- j 1)
+         do (aset ret k (make-vector j nil)))
+    ret))
+
+(<span style="color: #a020f0;">setq</span> thunk-mat (make-matrix 5 5))
+</pre>
+</div>
+
+<p>
+thunk 矩阵的含义是：它的 <code>(i, j)</code> 元素的值是从 <code>(0, 0)</code> 到 <code>(i, j)</code> 的最小路径和。
+</p>
+
+<p>
+对于 <code>(i, j)</code> 处的最小路径和，我们只需要知道 thunk 矩阵在 <code>(i, j - 1)</code> 和 <code>(i - 1, j)</code> 处的值就行了，因为 <code>(i, j)</code> 处的最小路径和就是原矩阵在 <code>(i, j)</code> 的值加上它上面和左边的最小路径和中的较小值。因此，我们可以这样定义 thunk-mat 矩阵：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for i from 0 to 4
+ do (<span style="color: #a020f0;">cl-loop</span>
+     for j from 0 to 4
+     do (mat-set thunk-mat i j
+         (<span style="color: #a020f0;">let</span> ((i i)
+               (j j))
+           (thunk-delay
+            (+ (mat-ref mat0 i j)
+               (min (thunk-force (mat-ref thunk-mat i (- j 1)))
+                    (thunk-force (mat-ref thunk-mat (- i 1) j)))))))))
+</pre>
+</div>
+
+<p>
+同时，要考虑到矩阵的第一列左边没有元素，第一列上面没有元素，所以需要对第一行和第一列做特殊处理。因为从 <code>(0, 0)</code> 到 <code>(0, i)</code> 只能一直向右，从 <code>(0, 0)</code> 到 <code>(i, 0)</code> 只能一直向下，所以边界条件的确定是很容易的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+ for i from 0 to 4
+ do (mat-set thunk-mat i 0
+         (<span style="color: #a020f0;">let</span> ((i i))
+           (thunk-delay (+ (thunk-force (mat-ref thunk-mat (- i 1) 0))
+                           (mat-ref mat0 i 0)))))
+ do (mat-set thunk-mat 0 i
+         (<span style="color: #a020f0;">let</span> ((i i))
+           (thunk-delay (+ (thunk-force (mat-ref thunk-mat 0 (- i 1)))
+                           (mat-ref mat0 0 i))))))
+(mat-set thunk-mat 0 0
+     (thunk-delay (mat-ref mat0 0 0)))
+</pre>
+</div>
+
+<p>
+接下来，我们只需要一条简单的表达式就可以了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(thunk-force (mat-ref thunk-mat 4 4))
+=&gt; 2427
+</pre>
+</div>
+
+<p>
+结果与问题页面的答案相同。
+</p>
+
+<p>
+要说的话， thunk 的作用也就是减少一层 if 逻辑，其他的也没啥。用 thunk 来解决这类问题的步骤就是先确定一般的递推式子，然后把握好边界条件就好了。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org051a0a3" class="outline-2">
+<h2 id="org051a0a3"><span class="section-number-2">4</span> 总结</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+网上关于延时求值的内容并不多，当我看完 Elisp 这一部分的文档之后，我也准备直接往下继续学习了。但是 SICP 提醒了我可以用延时求值来构建无穷流，这部分正好来作为文章的主题部分。写完流的部分后，我又突然想到了斐波那契数列的计算其实也可以算作动态规划，稍加扩展就是本文的第二个主体部分。
+</p>
+
+<p>
+同时，通过进一步深入了解，我也发现了 thunk.el 的开发历史，从2015年开始，这个小模块就在一直不断地改进。
+</p>
+
+<p>
+我把上面的无穷流的一些函数整理后放到了 gist <a href="#org1f959a5">【7】</a>上，想试一试的可以下载下来玩玩。由于这些函数没有做任何的错误检查，如果写错了代码，调试起来可能会有点麻烦。这部分代码的实用性很差，因为 thunk 一多就会爆栈。之后我可能会考虑将部分递归改成循环。
+</p>
+
+<p>
+关于延时求值的内容大都和<a href="#orgbb35f87">【5】</a>的深度差不多，也许是我的检索能力不够，但无穷流是我唯一能在网上找到的比较有趣的例子了。
+</p>
+
+<p>
+Elisp 的递归体验实在过于糟糕，thunk 估计在实际编程中用的不是很多。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7540ad9" class="outline-2">
+<h2 id="org7540ad9"><span class="section-number-2">5</span> 参考资料</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+<a id="org01b0d86">【1】</a> <a href="https://github.com/emacs-mirror/emacs/commits/master/lisp/emacs-lisp/thunk.el">History for lisp/emacs-lisp/thunk.el - emacs-mirror/emacs (github.com)</a>
+</p>
+
+<p>
+<a id="org35910bd">【2】</a> <i>Structure and Interpretation of Computer Programs</i>
+</p>
+
+<p>
+<a id="org9f31eba">【3】</a> <a href="https://www.wolframalpha.com/input/?i=expand+tan+to+order+20">expand tan to order 20 - Wolfram|Alpha</a>
+</p>
+
+<p>
+<a id="org75bf825">【4】</a> <a href="https://projecteuler.net/problem=81">Problem 81 - Project Euler</a>
+</p>
+
+<p>
+<a id="orgbb35f87">【5】</a> <a href="https://homepages.inf.ed.ac.uk/stg/NOTES/node73.html">Delaying evaluation (ed.ac.uk)</a>
+</p>
+
+<p>
+<a id="org5ed53b3">【6】</a> <a href="https://sicp.readthedocs.io/en/latest/index.html">SICP 解题集 — SICP 解题集</a>
+</p>
+
+<p>
+<a id="org1f959a5">【7】</a> <a href="https://gist.github.com/include-yy/598c57b63da4b1955291dcfc22d348d4">A stream implemented with elisp (github.com)</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-03-27 Sat 00:00</p> <p>Last modified: 2021-08-04 Wed 08:30</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
