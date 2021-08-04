@@ -1,0 +1,1166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-04 Wed 11:21 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>7-emacs的customization <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vc21pbG9jZy9hcnQvY2lybm8tMTY4OTIzMjgz.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">7-emacs的customization <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vc21pbG9jZy9hcnQvY2lybm8tMTY4OTIzMjgz.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org9c302d4">1. elisp 的 customization</a>
+<ul>
+<li><a href="#org64d5b79">1.1. group</a></li>
+<li><a href="#org9f5047e">1.2. variable（option）</a></li>
+<li><a href="#org598ed0f">1.3. Customization 文档中我没有提到的内容</a></li>
+<li><a href="#orgd3021e7">1.4. 一些项目中使用 Customizaiton 的例子</a></li>
+</ul>
+</li>
+<li><a href="#org064ce2e">2. emacs 的 Easy Customization Interface</a>
+<ul>
+<li><a href="#org9843859">2.1. 选项的设定</a></li>
+<li><a href="#org7515994">2.2. 选项的保存</a></li>
+</ul>
+</li>
+<li><a href="#org9c6cb62">3. 后记</a></li>
+<li><a href="#orgfdc4d09">4. 参考资料</a></li>
+</ul>
+</div>
+</div>
+<p>
+本文的主要内容是对 elisp 文档 中的 <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Customization.html">Customization</a> 一章学习的总结。之所以有总结的必要是因为文档中的示例太少，需要一些例子来对关键字和函数的用法进行补充。同时，本文也对 emacs 中的 easy customization 进行一些介绍，这里主要关注的是使用 <code>customize</code> 命令簇来配置一些选项，以及使用 <code>customization</code> 的代码对这些选项带来的影响。
+</p>
+
+<p>
+本文的目的仅仅是记录一些函数和宏的基本用法，以及简单演示 easy customization 的使用，关于这些函数和宏的具体声明和完整用法请前往官方文档。
+</p>
+
+<p>
+所有的代码及演示都在 emacs on windows 27.2 中完成。
+</p>
+
+<p>
+本文分为两个小节：
+</p>
+
+<ul class="org-ul">
+<li>elisp customization 使用介绍</li>
+
+<li>emacs 中的 customization interface</li>
+</ul>
+
+
+<p>
+（话说先演示 customize 是不是更好一些，或者两者应该混在一起？）
+</p>
+
+<div id="outline-container-org9c302d4" class="outline-2">
+<h2 id="org9c302d4"><span class="section-number-2">1</span> elisp 的 customization</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+关于 Customization Settings，文档上是这样说的： <i>Users of Emacs can customize variables and faces without writing Lisp code, by using the Customize interface</i> 。 换言之，使用 <code>customization</code> 的话可以使用更加方便的 <i>Customize interface</i> 来对 emacs 进行配置。
+</p>
+
+<p>
+可以定义的 <code>customization</code> 项包括
+</p>
+
+<ul class="org-ul">
+<li>变量，它们通过 <code>defcustom</code> 来定义</li>
+
+<li>外观（face），它们通过 <code>defface</code> 定义</li>
+
+<li>组（group），它们通过 <code>defgroup</code> 定义</li>
+</ul>
+
+
+<p>
+其中，组的作用是作为一系列 <code>customization</code> 项的容器。我们首先对它进行介绍。另外，由于外观的文档主要在 Emacs Display 一章，且它与 customization 的关系估计仅有 <code>:group</code> 一项而已，本文就不在这里介绍外观的定义与使用了。
+</p>
+
+<p>
+为了书写（打字）上的方便，下面出现的“自定义”都是指 <i>customization</i> 。
+</p>
+</div>
+
+<div id="outline-container-org64d5b79" class="outline-3">
+<h3 id="org64d5b79"><span class="section-number-3">1.1</span> group</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+上面说过，组作为自定义项的容器而存在，它是一系列自定义变量，自定义外观和自定义组的总和。它的存在和一般程序中功能栏上的主菜单类似，可以在主菜单中找到选项或者子菜单。Emacs 提供了一些标准组，它们基本覆盖了配置的各个方面，如下所示：
+</p>
+
+
+<div id="org326f3c8" class="figure">
+<p><img src="./1.gif" alt="1.gif" />
+</p>
+</div>
+
+<p>
+上面列出的顶级标准组有：
+</p>
+
+<ul class="org-ul">
+<li>Editing，基础的编辑功能选项相关</li>
+
+<li>Convenience，一些偏好特性相关</li>
+
+<li>Files，文件编辑相关</li>
+
+<li>Wp，文本文件编辑相关，不过它已经被弃用了</li>
+
+<li>Text，文本文件编辑相关，和上一项内容一致</li>
+
+<li>Data，二进制文件编辑相关</li>
+
+<li>External，外部组件界面</li>
+
+<li>Communication，通信，网络和远程访问</li>
+
+<li>Programming，编程相关</li>
+
+<li>Application，Emacs 中的应用相关</li>
+
+<li>Development，Emacs 进一步开发支持相关</li>
+
+<li>Environment，Emacs 所在环境相关</li>
+
+<li>Faces，多字体相关</li>
+
+<li>Help，Emacs 帮助系统相关</li>
+
+<li>Multimedia，多媒体相关</li>
+
+<li>Local，你的本地代码相关</li>
+</ul>
+
+
+<p>
+某个组包含的内容可能不能用一个组来概括，这种情况下可以使用一个或多个组来作为它的父组。就像这样：
+</p>
+
+
+<div id="org750bcc1" class="figure">
+<p><img src="./2.gif" alt="2.gif" />
+</p>
+</div>
+
+<p>
+这里使用的是 <code>customize-browse</code> 命令来列出所有的组，它使用的是类似于 Listbox 的显示方式。可以看到，在 Editing 组中的 mouse 组，它的父组除了 Editing 外还有 Environment。
+</p>
+
+<p>
+每个 Emacs Lisp 包都应该有一个包含所有自定义变量、自定义外观和自定义组的主要自定义组。这个组应该是一个或多个标准自定义组的子组（不一定是顶级的标准组）。如果自定义选项很少的话，可以直接把所有东西都塞到包的主组里面。如果有二三十个甚至更多选项的话，可以创建相应的子组来容纳这些选项。
+</p>
+
+<p>
+<code>defgroup</code> 的语法大致如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">defgroup group members doc [keyword value]...
+</pre>
+</div>
+
+<p>
+group 写组的名字；members 是组的成员，可以写一个或多个，也可以不写，一般在 <code>defgroup</code> 外定义 member；doc 就是用作注释的字符串，keyword value 是指关键字参数，这部分可用的关键字可以参考<a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Common-Keywords.html">这里</a>。
+</p>
+
+<p>
+下面是一个简单的组定义，除了它自己之外，它还定义了两个子组，其中一个子组还有两个子组：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incx</span> nil
+<span style="color: #8b2252;">"include-yy's group"</span>
+<span style="color: #483d8b;">:group</span> 'editing)
+
+(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incy</span> nil
+  <span style="color: #8b2252;">"incx's group"</span>
+  <span style="color: #483d8b;">:group</span> 'incx
+  <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"incy_tag"</span>)
+
+(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incz</span> nil
+  <span style="color: #8b2252;">"incy's subgroup"</span>
+  <span style="color: #483d8b;">:group</span> 'incy)
+
+(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">inca</span> nil
+  <span style="color: #8b2252;">"incz's subgroup"</span>
+  <span style="color: #483d8b;">:group</span> 'incz
+  <span style="color: #483d8b;">:link</span> '(url-link <span style="color: #8b2252;">"www.baidu.com"</span>))
+
+(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incb</span> nil
+  <span style="color: #8b2252;">"incz's subgroup"</span>
+  <span style="color: #483d8b;">:group</span> 'incz
+  <span style="color: #483d8b;">:group</span> 'incy)
+</pre>
+</div>
+
+<p>
+可以看到，上面使用了 <code>:group</code> 关键字来指定组的父组。除了 <code>:group</code> 还用到了 <code>tag</code> 和 <code>link</code> ， <code>tag</code> 的作用是在自定义界面显示 <code>tag</code> 指定的字符串， <code>link</code> 可以指定链接。它们的使用方式和其他关键字可以参考上面的官方文档。
+</p>
+
+<p>
+上面代码的效果如下：
+</p>
+
+
+<div id="org46d6543" class="figure">
+<p><img src="./3.gif" alt="3.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9f5047e" class="outline-3">
+<h3 id="org9f5047e"><span class="section-number-3">1.2</span> variable（option）</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+自定义变量也称用户选项，他们是全局的 Lisp 变量，可以通过自定义界面进行设置。与普通的全局变量不同的是，它们通过 <code>defcustom</code> 宏来定义。 <code>defcustom</code> 除了调用 <code>defvar</code> 之外还会包括一些额外的内容。
+</p>
+
+<p>
+<code>defcustom</code> 的语法如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">defcustom option standard doc [keyword value]...
+</pre>
+</div>
+
+<p>
+option 就是用户选项的名字；standard 是这个选项的标准值，在 <code>defcustom</code> 被求值时它会被求值，并将值绑定到 option 上。doc 就是注释文档。
+</p>
+
+<p>
+<code>defcustom</code> 的行为和使用 <code>defvar</code> 定义的变量是一致的：使用 <code>defcustom</code> 定义的变量自然也是动态绑定的。如果 <code>option</code> 已经词法绑定了，在退出作用域之前词法作用域还会存在。 <code>defvar</code> 的行为是：若变量非空，那么 <code>defvar</code> 不会再对其进行初始化，在 <code>defcustom</code> 中也可以指定一些关键字参数来做到这一点。
+</p>
+
+<p>
+如果没有使用 <code>:group</code> 关键字的话，那么 <code>defcustom</code> 会使用最近通过 <code>defgroup</code> 定义的组。这样使得大多数的 <code>defcustom</code> 都不需要显式指定 <code>:group</code> 参数，比较方便。
+</p>
+
+<p>
+以下是一些关键字参数：
+</p>
+
+<ul class="org-ul">
+<li><code>:type</code> 指定选项的类型，具体用法参考官方文档，我后面的一些例子中包含一些“简单”的用法</li>
+
+<li><code>:options</code> 指定选项的可用值。用户并不被这些值限制，它只是提供一些方便的选项而已。它只对 <code>hook</code> ， <code>plist</code> 和 <code>alist</code> 有用</li>
+
+<li><code>:set</code> 指定函数来作为使用自定义界面改变选项时的方法，函数接受两个参数，一个符号和一个新的值。函数应该完成更新变量所需的一切工作（这意味着可能不仅仅是设置一个新的值）。它不应该 <b>修改</b> 第二个参数。没有指定这个关键字的话，set函数默认为 <code>set-default</code></li>
+
+<li><code>:get</code> 指定获取当前选项的值的方法函数。它接受一个符号作为参数，需要返回作为当前自定义符号的值（不必是选项变量中的值），它的默认函数是 <code>default-value</code></li>
+
+<li><code>:initialize</code> 指定一个在 <code>defcustom</code> 求值时调用的函数，它接受两个参数，一个符号和一个值，elisp 中已有的函数有： <code>custom-initialize-set</code> ， <code>custom-initialize-default</code> ， <code>custom-initialize-reset</code> ， <code>custom-initialize-changed</code> ， <code>custom-initialize-delay</code> 。具体定义可以参考文档</li>
+
+<li><code>:local</code> 若指定 <code>t</code> ，那么选项会自动变成 <code>buffer-local</code> 的，如果是 <code>permanent</code> ，那么除选项变为 <code>buffer-local</code> 外，选项的 <code>permanent-local</code> 性质也会设为 <code>t</code></li>
+
+<li><code>:risky</code> 设定选项的 <code>risky-local-variable</code> 属性为指定的值</li>
+
+<li><code>:safe</code> 设定选项的 <code>safe-local-variable</code> 属性为指定值</li>
+
+<li><code>:set-after</code> 接受一个或多个变量，在保存自定义的时候，确保这些变量在选项之前被设定</li>
+</ul>
+
+
+<p>
+老实说，对于简单的情况，上面的关键字参数可能只需要用到两三个而已。必要的估计只有 <code>:type</code> ， <code>options</code> 只是用来帮助选择合适选项而已， <code>:get</code> 和 <code>:set</code> 使用默认的函数大部分时间已经足够了，剩下那几个以我浅薄的见识来看没什么用。但这毕竟是一篇笔记，在这里记录下它们的用法将来可能会用的上。
+</p>
+</div>
+
+<div id="outline-container-orgb81d12d" class="outline-4">
+<h4 id="orgb81d12d"><span class="section-number-4">1.2.1</span> :type 关键字接受的类型</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<p>
+为了方便起见，接下来所有的代码都是在叫做 <code>yyvar</code> 的组中完成的，它的定义是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">yyvar</span> nil
+  <span style="color: #8b2252;">"var test"</span>
+  <span style="color: #483d8b;">:group</span> 'editing)
+</pre>
+</div>
+
+<p>
+这里我没有把所有的类型都列出来，这样做没什么意义，而且等到文档发生变化了我也不一定会更新。这里我会介绍一些看上去比较简单和常用的类型。
+</p>
+
+<p>
+<code>:type</code> 描述了两件事：（1）什么值是合理的（2）如何在自定义界面显示值来进行编辑，这一点通常和组合类型有关。
+</p>
+
+<p>
+<code>:type</code> 接受的参数只会被求值一次，即在 <code>defcustom</code> 被求值时，因此一般使用 <b>quoted</b> 的常值作为它的参数。一般来说，它的参数是一个表，表首元素是一个符号，随后是一些参数。
+</p>
+
+<p>
+首先我们介绍一些简单的类型，以它们作为类型时只需要表首元素来作为 <code>:type</code> 的参数即可，比如这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">one</span> <span style="color: #8b2252;">"123"</span>
+  <span style="color: #8b2252;">"one custom"</span>
+  <span style="color: #483d8b;">:type</span> '(string))
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">the same, without paren</span>
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">one</span> <span style="color: #8b2252;">"123"</span>
+  <span style="color: #8b2252;">"one custom"</span>
+  <span style="color: #483d8b;">:type</span> 'string)
+</pre>
+</div>
+
+<p>
+除了上面的 <code>string</code> 外，简单类型还有： <code>sexp</code> 、 <code>integer</code> 、 <code>number</code> 、 <code>float</code> 、 <code>regexp</code> 、 <code>character</code> 、 <code>file</code> 、 <code>hook</code> 、 <code>symbol</code> 、 <code>function</code> 、 <code>variable</code> 等。
+</p>
+
+<p>
+接下来是一些复合类型，它们的语法是 <code>(constructor arguments ...)</code> ， <code>constructor</code> 用于指示组合的方式， <code>argument</code> 指明具体的类型。比较常见的复合类型有：
+</p>
+
+<ul class="org-ul">
+<li>序对类型： <code>(cons car-type cdr-type)</code> ，它表明选项的值必须是序对， <code>car</code> 部分必须是 <code>car-type</code> 类型， <code>cdr</code> 必须是 <code>cdr-type</code> 类型。在自定义界面上 car 和 cdr 是分开显示的：就像这样：</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yycon</span> '(1 . 2)
+  <span style="color: #8b2252;">"yy's cons"</span>
+  <span style="color: #483d8b;">:type</span> '(cons integer integer))
+
+(<span style="color: #a020f0;">setq</span> yycon '(3 . 4))
+</pre>
+</div>
+
+<p>
+在自定义界面上它的显示方式是这样：
+</p>
+
+
+<div id="org345f1a9" class="figure">
+<p><img src="./4.PNG" alt="4.PNG" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>表类型： <code>(list element-types ...)</code> ，表长和表中各个值的类型必须与类型匹配</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yylst</span> '(1 wo <span style="color: #8b2252;">"123"</span>)
+  <span style="color: #8b2252;">"yy's list"</span>
+  <span style="color: #483d8b;">:type</span> '(list integer symbol string))
+</pre>
+</div>
+
+
+<div id="org906e547" class="figure">
+<p><img src="./5.PNG" alt="5.PNG" />
+</p>
+</div>
+
+<p>
+表示表类型的除了 <code>list</code> 还有 <code>group</code> ，不过 <code>group</code> 不会显示使用 <code>tag</code> 注释的选项名，两者的差别可以通过以下代码体现：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyl1</span> '(3 4)
+  <span style="color: #8b2252;">"yy l1"</span>
+  <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"hao"</span>
+  <span style="color: #483d8b;">:type</span> '(group integer integer))
+
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyl2</span> '(1 2)
+  <span style="color: #8b2252;">"yy l2"</span>
+  <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"le"</span>
+  <span style="color: #483d8b;">:type</span> '(list integer integer))
+</pre>
+</div>
+
+
+<div id="org6df853a" class="figure">
+<p><img src="./6.PNG" alt="6.PNG" />
+</p>
+</div>
+
+
+<div id="org35c3f99" class="figure">
+<p><img src="./7.PNG" alt="7.PNG" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>向量类型： <code>(vector element-types ...)</code> ，除了向量和表不是同种类型，其他各项指标都一样</li>
+
+<li>关联表： <code>(alist :key-type key-type :value-type value-type)</code> ，用户可以添加/删除键值对，并对键和值进行修改。如果忽略了类型，键和值的类型就默认为 <code>sexp</code></li>
+</ul>
+
+
+<p>
+这个时候， <code>:options</code> 的价值就体现出来了，在 <code>:options</code> 中指定的键会在自定义界面中显示，旁边有一个按钮来让它加入关联表或从关联表中删除。用户不能对其进行修改。
+</p>
+
+<p>
+<code>:options</code> 参数格式是 <code>'(key1 key2 key3 ...)</code> ，这是最简单的一种，其他高级玩法见文档。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyal</span> '((1 . 2) (2 . 3))
+<span style="color: #8b2252;">"yy's alist"</span>
+<span style="color: #483d8b;">:type</span> '(alist <span style="color: #483d8b;">:key-type</span> integer <span style="color: #483d8b;">:value-type</span> integer)
+<span style="color: #483d8b;">:options</span> '(4 5 6))
+</pre>
+</div>
+
+
+<div id="org87d00aa" class="figure">
+<p><img src="./8.gif" alt="8.gif" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>属性表： <code>(plist :key-type key-type :value-type value-type)</code> ，和关联表基本一致，但是键值以属性表的形式存储</li>
+
+<li>选择： <code>(choice alternative-types ...)</code> ，它有多种类型可选，值必须是这些类型中的一种，比如 <code>(choice string integer)</code></li>
+</ul>
+
+
+<p>
+如果某个值满足 <code>choice</code> 中的多种类型的话，那么最早出现在 <code>choice</code> 中的类型会被选择，这意味着在列写 <code>choice</code> 时应注意将最特殊的类型放在最前面，最一般的类型放在最后面。
+</p>
+
+<p>
+还有一种类型和 <code>choice</code> 是一样的，它叫做 <code>radio</code> ，但是它使用圆形按钮而不是菜单来显示选择。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyco</span> 123
+<span style="color: #8b2252;">"yy's choice"</span>
+<span style="color: #483d8b;">:type</span> '(choice
+    (string <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"str"</span>)
+    (integer <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"int"</span>)
+    (symbol <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"sym"</span>)))
+</pre>
+</div>
+
+<p>
+choice:
+</p>
+
+
+<div id="orgd0426a9" class="figure">
+<p><img src="./9.gif" alt="9.gif" />
+</p>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyrad</span> 123
+<span style="color: #8b2252;">"yy's radio"</span>
+<span style="color: #483d8b;">:type</span> '(radio string integer symbol))
+</pre>
+</div>
+
+<p>
+radio:
+</p>
+
+
+<div id="orge5aaa5f" class="figure">
+<p><img src="./10.gif" alt="10.gif" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>常值： <code>(const value)</code> ，这里的 <code>value</code> 必须是一个值， <code>const</code> 主要配合 <code>choice</code> 使用，用来作为某个选项。</li>
+</ul>
+
+<p>
+与之相似但很不一样的有 <code>other</code> ，相似是指它们都接受一个值，不同指 <code>ohter</code> 可以接受任意的值，比如一个变量。
+</p>
+
+<ul class="org-ul">
+<li>函数项： <code>(function-item function)</code> ，和 <code>const</code> 很像，但它专门用于函数，它可以在自定义界面中显示函数的各种信息。</li>
+</ul>
+
+<p>
+和函数项相似的还有变量项 <code>variable-item</code> ，它可以显示变量的信息。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">add</span> (x y)
+  <span style="color: #8b2252;">"add two number"</span>
+  (+ x y))
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyfun-val</span> 1
+  <span style="color: #8b2252;">"yy's fun and val item"</span>
+  <span style="color: #483d8b;">:type</span> '(radio (function-item add)
+                (variable-item lexical-binding)
+                integer))
+</pre>
+</div>
+
+
+<div id="org30fb602" class="figure">
+<p><img src="./11.PNG" alt="11.PNG" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>集合： <code>(set types ...)</code> 和重复 ： <code>(repeat elemet-type)</code> ，前者表明值是一张表，表中元素的类型可以是集合中指定的任意一种，后者则要求表中只能由指定的那一种类型。</li>
+
+<li>限制的sexp： <code>(restricted-sexp :match-alternatives criteria)</code> ，这是最通用的一种组合类型，通过指定满足条件即可，例子可见文档</li>
+</ul>
+
+
+<p>
+类型方面的介绍就到这里，你看累了，我也写累了。文档上还有一些辅助关键字以及定义新类型的方法，通俗易懂，意犹未尽的同学可以去看看。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbd35144" class="outline-4">
+<h4 id="orgbd35144"><span class="section-number-4">1.2.2</span> :set 和 :get</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+通过上面的例子也看到了，想要改变一个选项的值，首先在灰色输入框中输入值，然后单击（或Enter键） <code>State</code> 按钮来进行修改。如果我们不设置 <code>:set</code> 的话，Emacs 会使用默认的 <code>set-default</code> 来对选项进行设置，设置 <code>:set</code> 可以改变这一默认行为：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(fset 'yyse (<span style="color: #a020f0;">lambda</span> (sb va) (set sb (+ va 1))))
+
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyset1</span> 1
+<span style="color: #8b2252;">"yy's set1"</span>
+<span style="color: #483d8b;">:type</span> 'integer
+<span style="color: #483d8b;">:set</span> 'yyse)
+</pre>
+</div>
+
+
+<div id="org202fc0f" class="figure">
+<p><img src="./12.gif" alt="12.gif" />
+</p>
+</div>
+
+<p>
+这段代码就比较有意思了，变量的初始化值为 1，但是在自定义界面显示的值却是 2，将变量设置为 3，最后得到的却是 4。这就是 <code>:set</code> 的作用。当使用自定义界面来设置选项的值时，set 函数会接受这个输入的值，对其进行处理后再更新选项。
+</p>
+
+<p>
+至于 <code>:get</code> 关键字，它的作用是返回一个值以便显示：（这里使用了 <code>dash</code> 库的 <code>-map</code> 函数，和 <code>mapcar</code> 一个意思）
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">b</span> '(1 2 3)
+<span style="color: #8b2252;">"yy's b"</span>
+<span style="color: #483d8b;">:type</span> '(repeat integer)
+<span style="color: #483d8b;">:get</span> (<span style="color: #a020f0;">lambda</span> (s) (-map  (<span style="color: #a020f0;">lambda</span> (x) (+ x 1)) (symbol-value s))))
+</pre>
+</div>
+
+<p>
+这是对定义求值后得到的自定义界面：
+</p>
+
+
+<div id="orgb20e43f" class="figure">
+<p><img src="./13.PNG" alt="13.PNG" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd9437fe" class="outline-4">
+<h4 id="orgd9437fe"><span class="section-number-4">1.2.3</span> :initialize</h4>
+<div class="outline-text-4" id="text-1-2-3">
+<p>
+这个关键字参数指定在初始化时一些行为，这里我主要对 Emacs 提供的五个函数进行一些分析。
+</p>
+
+<p>
+<code>custom-initialize-set</code> 在初始化时使用 <code>:set</code> 提供的函数来进行初始化。如果变量已经非空了就不进行初始化。
+</p>
+
+<p>
+<code>custom-initialize-default</code> 则使用 <code>set-default</code> 来作为初始化函数。变量非空则不初始化。
+</p>
+
+<p>
+<code>custom-initialize-reset</code> 总是使用 <code>:set</code> 函数来初始化选项。如果变量在初始化之前已被绑定，则使用由 <code>:get</code> 函数得到的值来调用 <code>:set</code> 函数，这是默认的 <code>:initialize</code> 函数。
+</p>
+
+<p>
+<code>custom-initialize-changed</code> ，如果变量非空，则使用 <code>:set</code> 函数对选项初始化，否则使用 <code>set-default</code> 。
+</p>
+
+<p>
+<code>custom-initialize-delay</code> ，它的行为和第一个函数很像，但是它延迟到下一个 Emacs 启动时才进行实际的初始化。它一般用在预载入（Preload）文件中。
+</p>
+
+<p>
+对前四个函数可以写出一些代码来验证其特性：
+</p>
+
+<p>
+<code>set</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">custom-initialize-set</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s1</span> 1 <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:type</span> 'number
+  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-set
+  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+s1 =&gt; 2
+
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
+(<span style="color: #a020f0;">setq</span> s1 1)
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s1</span> 1 <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:type</span> 'number
+  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-set
+  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+s1 =&gt; 1
+</pre>
+</div>
+
+<p>
+<code>default</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s2</span> 1 <span style="color: #8b2252;">""</span>
+<span style="color: #483d8b;">:type</span> 'number
+<span style="color: #483d8b;">:initialize</span> 'custom-initialize-default)
+s2 =&gt; 1
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
+(<span style="color: #a020f0;">setq</span> s2 2)
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s2</span> 1 <span style="color: #8b2252;">""</span>
+<span style="color: #483d8b;">:type</span> 'number
+<span style="color: #483d8b;">:initialize</span> 'custom-initialize-default)
+s2 =&gt; 2
+</pre>
+</div>
+
+<p>
+<code>reset</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s3</span> 1 <span style="color: #8b2252;">""</span>
+<span style="color: #483d8b;">:type</span> 'number
+<span style="color: #483d8b;">:initialize</span> 'custom-initialize-reset
+<span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+s3 =&gt; 2
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
+(<span style="color: #a020f0;">setq</span> s3 2)
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s3</span> 1 <span style="color: #8b2252;">""</span>
+<span style="color: #483d8b;">:type</span> 'number
+<span style="color: #483d8b;">:initialize</span> 'custom-initialize-reset
+<span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+s3 =&gt; 3
+</pre>
+</div>
+
+<p>
+<code>changed</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s4</span> 1 <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:type</span> 'number
+  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-changed
+  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+s4 =&gt; 1
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
+(<span style="color: #a020f0;">setq</span> s4 2)
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s4</span> 1 <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:type</span> 'number
+  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-changed
+  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+s4 =&gt; 3
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2f2391c" class="outline-4">
+<h4 id="org2f2391c"><span class="section-number-4">1.2.4</span> :set-after</h4>
+<div class="outline-text-4" id="text-1-2-4">
+<p>
+<code>:local</code> ， <code>:risky</code> ， <code>:safe</code> 这几个关键字我直接过了，因为它们都是用来设置属性值的，但是我现在还不太清楚设置了到底有什么用。
+</p>
+
+<p>
+<code>:set-after</code> 可以保证选项在其他变量被设定完毕后再进行设定，它应该被用在某些要求顺序设定的场合：
+</p>
+
+<p>
+要验证这一点需要两个文件（当然一个也行，在文件内对 <code>custom-set-variable</code> 求值即可），一个存放 <code>defcustom</code> 叫做 2.el， 另一个存放 custom-set 叫做 my.el，两文件在同一目录下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">my.el</span>
+(custom-set-variables
+ '(w3 1)
+ '(w2 1)
+ '(w1 1))
+</pre>
+</div>
+
+<p>
+首先我们看看不加 <code>:set-after</code> 会有什么后果：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">2.el</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">wrong</span>
+(<span style="color: #a020f0;">setq</span> cnt 0)
+(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">wcd</span> nil <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:group</span> 'wp)
+
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">w1</span> 2 <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:type</span> 'number
+  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s v) (<span style="color: #a020f0;">progn</span> (<span style="color: #a020f0;">cl-incf</span> cnt) (set s cnt)))
+  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-default)
+
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">w2</span> 3 <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:type</span> 'number
+  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s v) (<span style="color: #a020f0;">progn</span> (<span style="color: #a020f0;">cl-incf</span> cnt) (set s cnt)))
+  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-default
+  <span style="color: #b22222;">;;</span><span style="color: #b22222;">:set-after '(w1)</span>
+  )
+
+(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">w3</span> 4 <span style="color: #8b2252;">""</span>
+  <span style="color: #483d8b;">:type</span> 'number
+  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s v) (<span style="color: #a020f0;">progn</span> (<span style="color: #a020f0;">cl-incf</span> cnt) (set s cnt)))
+  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-default
+  <span style="color: #b22222;">;;</span><span style="color: #b22222;">:set-after '(w2)</span>
+  )
+
+(load-file  <span style="color: #8b2252;">"./my.el"</span>)load-file  <span style="color: #8b2252;">"./my.el"</span>)
+</pre>
+</div>
+
+
+<div id="orgd811b2d" class="figure">
+<p><img src="./14.gif" alt="14.gif" />
+</p>
+</div>
+
+<p>
+可以看到， <code>w3</code> 为 1， <code>w2</code> 为 2， <code>w1</code> 为 3。这是它们在 my.el 文件中出现的顺序，如果我们要求按照 <code>w1, w2, w3</code> 的顺序来初始化呢？这个时候就需要用到 <code>:set-after</code> 了。让我们删掉 <code>:set-after</code> 上面的注释再试一次：
+</p>
+
+
+<div id="org2e9acc7" class="figure">
+<p><img src="./15.gif" alt="15.gif" />
+</p>
+</div>
+
+<p>
+这样就完成了顺序初始化。
+</p>
+
+<p>
+另：如果将上面的 <code>mysel.el</code> 中的内容改成：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(custom-set-variables
+ '(w3 1))
+(custom-set-variables
+ '(w2 1))
+(custom-set-variables
+ '(w1 1))
+</pre>
+</div>
+
+<p>
+即使在指定了顺序的情况下，得到的结果仍然是 <code>w3</code> 为 1， <code>w2</code> 为 2， <code>w1</code> 为 3。这一点我还不明所以。或许和 <code>custom-set-variables</code> 的内部机制有关。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbef55d0" class="outline-4">
+<h4 id="orgbef55d0"><span class="section-number-4">1.2.5</span> 和 customization variable 相关的一些函数</h4>
+<div class="outline-text-4" id="text-1-2-5">
+<p>
+在文档中提到的函数有：
+</p>
+
+<ul class="org-ul">
+<li>custom-add-frequent-value</li>
+
+<li>custom-reevaluate-setting</li>
+
+<li>custom-variable-p</li>
+
+<li>custom-set-variables</li>
+
+<li>custom-set-faces</li>
+</ul>
+
+
+<p>
+这些函数中，用的最多的应该是第四个，即 <code>custom-set-variables</code> ，这里我只对它进行介绍，因为其他的函数我似乎找不到具体的应用方法。
+</p>
+
+<p>
+<code>custom-set-variables</code> 用于安装自定义变量，它接受可变个数参数，每个参数的格式是：
+</p>
+
+<p>
+<code>(var expression [now [request [comment]]])</code> ，上面的例子中我给出了简单的使用方法。
+</p>
+
+<p>
+其中，var 是变量名，expression 是作为变量值的待求值表达式，now, request 和 comment 仅在内部使用，它们应该被忽略。
+</p>
+
+<p>
+使用 <code>custom-set-variables</code> 相当于调用 <code>:set</code> 函数，如果直接使用 <code>setq</code> 的话则不会调用 <code>:set</code> 函数。
+</p>
+
+<p>
+如果 <code>defcustom</code> 在 <code>custom-set-variables</code> 调用之前就被求值过，那么变量的值会被设置为 <code>custom-set-variables</code> 求值得到的结果。如果 <code>defcustom</code> 在 <code>custom-set-variables</code> 求值之后的话，expression 会被存放在变量的 <code>saved-value</code> 属性中，当对应的 <code>defcustom</code> 被求值时 expression 才会被求值。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org598ed0f" class="outline-3">
+<h3 id="org598ed0f"><span class="section-number-3">1.3</span> Customization 文档中我没有提到的内容</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+可以说，这一章的主要内容是 <code>defcustom</code> 这个宏以及相应的函数，其他部分的话文档只是一笔带过。这些部分我也不是很熟，因为关于它们的主要文档还在这一章的后面，或者是在 Emacs Mannual 中。
+</p>
+
+<p>
+这一章介绍了如何定义主题（theme），但是也仅仅介绍了主题的定义方法和一些简单的函数，文档内容很少，不需要多加说明就可以读明白。
+</p>
+
+<p>
+这一章提到了外观（face）的定义，但只是提及而已，所以我也没有做过多的陈述。
+</p>
+
+<p>
+还有一些 <code>defcustom</code> 的选项我没有提到， <code>:type</code> 部分我只介绍了一些基础选项。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd3021e7" class="outline-3">
+<h3 id="orgd3021e7"><span class="section-number-3">1.4</span> 一些项目中使用 Customizaiton 的例子</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+以下就是一些在实际项目中使用的例子了，它们的来源主要是 github，我会给出相关的链接，数量大概在 10 个左右。为了避免因为包更新导致的行数对不上，这里我取时间最近的 commit 作为依据：
+</p>
+
+<ul class="org-ul">
+<li>powerline <a href="https://github.com/milkypostman/powerline/blob/cfba2aa9cfa190e7720900f01a946e1e78aac7e2/powerline.el#L149">powerline/powerline.el</a>，从 39 行至 149 行</li>
+
+<li>cnfonts <a href="https://github.com/tumashu/cnfonts/blob/b967605d571d827c1cb041c174fb363985758729/cnfonts.el">cnfonts/cnfonts.el</a>，从 325 行至 432 行</li>
+
+<li>minions <a href="https://github.com/tarsius/minions/blob/1be68e8571336672d6cbec86246d1bf7844976be/minions.el">minions/minions.el</a>，从 51 行至 112 行</li>
+
+<li>haskell-mode <a href="https://github.com/haskell/haskell-mode/blob/3a019e65b504861d7ea23afbfecd14e5ef63e846/haskell-customize.el">haskell-mode/haskell-customize.el</a>，几乎整个文件</li>
+
+<li>curx <a href="https://github.com/bbatsov/crux/blob/20c07848049716a0e1aa2560e23b5f4149f2a74f/crux.el#L44">crux/crux.el</a>，从 44 行至 143 行</li>
+
+<li>helpful <a href="https://github.com/Wilfred/helpful/blob/7e4b1f0d5572a4e2b8ee7a9b084ef863d0315a73/helpful.el#L75">helpful/helpful.el</a>，从 75 行至 94 行</li>
+
+<li>avy <a href="https://github.com/abo-abo/avy/blob/e92cb37457b43336b765630dbfbea8ba4be601fa/avy.el">avy/avy.el</a>，从 61 行至 292 行</li>
+
+<li>find-file-in-project <a href="https://github.com/redguardtoo/find-file-in-project/blob/2f44af320b4e62053c5b6b523f69a8f16eaaa1c9/find-file-in-project.el#L162">find-file-in-project/find-file-in-project.el</a>，从 162 行至 199 行</li>
+
+<li>smex <a href="https://github.com/nonsequitur/smex/blob/55aaebe3d793c2c990b39a302eb26c184281c42c/smex.el#L32">smex/smex.el</a>，从 32 行至 67 行</li>
+
+<li>gkroam <a href="https://github.com/Kinneyzhang/gkroam/blob/2552444f1037240cce4f459bff3ac2b1f331bbb6/gkroam.el">gkroam/gkroam.el</a>，从 132 行至 171 行</li>
+</ul>
+
+
+<p>
+上面的 customization 代码我都过了一遍，大部分都只使用了 <code>:type</code> 类型，而且大部分 <code>:type</code> 都比较简单。这也许说明 customization 一般用于较简单的配置。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org064ce2e" class="outline-2">
+<h2 id="org064ce2e"><span class="section-number-2">2</span> emacs 的 Easy Customization Interface</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+<b>Easy Customization Interface</b> 即 简单自定义界面 的意思。通过 emacs 提供的这一界面可以相对简单地对 emacs 进行配置。
+</p>
+
+<p>
+上面我们也看到了，通过 <code>customize</code> 和 <code>customize-browse</code> 命令可以直接访问顶级的标准组。但除了从顶级组一层一层向下找，我们还有更加简单的命令。如果我们已经知道了需要配置的组的名字，我们可以使用 <code>customize-group</code> 命令：
+</p>
+
+
+<div id="org6638051" class="figure">
+<p><img src="./16.gif" alt="16.gif" />
+</p>
+</div>
+
+<p>
+如果已经知道了选项的名字，还可以直接使用 <code>customize-option</code> ：
+</p>
+
+
+<div id="org300fdd8" class="figure">
+<p><img src="./17.gif" alt="17.gif" />
+</p>
+</div>
+
+<p>
+如果变量很简单的话，还可以不用打开自定义界面，使用 <code>customize-set-varible</code> 或 <code>customize-set-value</code> 直接在 echo-area 的地方使用 mini-buffer 进行设定：
+</p>
+
+
+<div id="orgf004604" class="figure">
+<p><img src="./18.gif" alt="18.gif" />
+</p>
+</div>
+
+<p>
+还用其他的配置命令，可以参考<a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Specific-Customization.html">这里</a>。
+</p>
+</div>
+
+<div id="outline-container-org9843859" class="outline-3">
+<h3 id="org9843859"><span class="section-number-3">2.1</span> 选项的设定</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+上面我们展示了各种各样打开自定义界面的方法，但是对于如何设定选项没有说明。这里就设定的各个方面做一些简单的介绍。
+</p>
+
+<p>
+在自定义界面中，设定选项的按钮名字叫做 <code>STATE</code> 。就是下图所示的按钮：
+</p>
+
+
+<div id="org1a8efda" class="figure">
+<p><img src="./19.PNG" alt="19.PNG" />
+</p>
+</div>
+
+<p>
+<code>STATE</code> 的后面还有绿色的文字，它用来表示当前选项的状态。
+</p>
+
+<p>
+当我们在 <code>STATE</code> 按钮上使用 <code>Enter</code> 键时，可以看到一个弹出的 minibuffer（在图形界面使用鼠标点击的话会出现一个小悬浮窗）：
+</p>
+
+
+<div id="orgbe38cae" class="figure">
+<p><img src="./20.PNG" alt="20.PNG" />
+</p>
+</div>
+
+
+<div id="org31368ef" class="figure">
+<p><img src="./21.PNG" alt="21.PNG" />
+</p>
+</div>
+
+<p>
+由小悬浮窗的内容我们可以知道 <code>STATE</code> 按钮应该提供了 9 种操作：
+</p>
+
+<ol class="org-ol">
+<li>为当前 <code>session</code> 设置</li>
+
+<li>为以后的 <code>session</code> 设置，即保存</li>
+
+<li>撤销编辑。如果编辑了值但是还没有设定，使用这个操作会撤销掉你的编辑并显示当前值</li>
+
+<li>还原 <code>session</code> 自定义。该操作使用最近一次 <b>保存</b> 的值来作为选项的值，如果没有最近的保存值则使用标准值。</li>
+
+<li>擦除自定义。该操作将选项恢复至标准值</li>
+
+<li>设定为备用值。该操作将选项设定为先前设定的值，如果存在的话。</li>
+
+<li>添加注释。</li>
+
+<li>显示当前值。</li>
+
+<li>显示保存的 Lisp 表达式</li>
+</ol>
+
+
+<p>
+下面是针对 4 种设定操作（3，4，5，6）的演示：
+</p>
+
+
+<div id="org5abf723" class="figure">
+<p><img src="./22.gif" alt="22.gif" />
+</p>
+</div>
+
+<p>
+上面第二次保存的时候我调用了操作 5，但是由于向配置文件写入数据，所以 <code>echo-area</code> 没有操作回显。
+</p>
+
+<p>
+（如果你在你的 emacs 中使用了这样的测试，请通过编辑配置文件将多余设置的选项删除掉，也就是上面的 <code>yy-test</code> 变量）
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7515994" class="outline-3">
+<h3 id="org7515994"><span class="section-number-3">2.2</span> 选项的保存</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+在上面的设定展示 gif 中可以看到，emacs 向我的配置文件中写入了数据，那么它写入的是什么呢？请看以下截图：
+</p>
+
+
+<div id="org9f2d9fa" class="figure">
+<p><img src="./23.PNG" alt="23.PNG" />
+</p>
+</div>
+
+<p>
+在 <code>custom-set-variables</code> 的最后一行，可以看到 <code>'(yy-test 1.24)</code> 。也就是说，通过 Save for future session 操作，我将选项保存在了我的配置文件中。
+</p>
+
+<p>
+上图中的注释很有意思，“初始化文件中只能有一个这样的实例，否则不能正常工作”，这就可以解释我上面的 <code>w1, w2, w3</code> 设定问题了，它们必须在同一条 <code>custom-set-variables</code> 表达式中。
+</p>
+
+<p>
+除了通过自定义界面来完成保存，还可以通过 <code>customize-save-variable</code> 或 <code>customize-save-customized</code> 来保存：
+</p>
+
+
+<div id="orgf6b9d91" class="figure">
+<p><img src="./24.gif" alt="24.gif" />
+</p>
+</div>
+
+<p>
+结果如下：
+</p>
+
+
+<div id="org8c1bee2" class="figure">
+<p><img src="./25.PNG" alt="25.PNG" />
+</p>
+</div>
+
+<p>
+可能你不希望你的配置文件因为这些 <code>customize</code> 配置而显得乱糟糟，那可以通过在初始化文件中加入对 <code>custom-file</code> 变量的配置来设置选项的存放位置：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> custom-file <span style="color: #8b2252;">"~/.config/emacs-custom.el"</span>)
+(load custom-file)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9c6cb62" class="outline-2">
+<h2 id="org9c6cb62"><span class="section-number-2">3</span> 后记</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+应该说，自从我使用 emacs 以来，我基本上就没有碰过和 <code>customizaiton</code> 相关的东西，一来初学的时候只知道安装各种包，看着配置文件里面 emacs 自动生成的那一坨 <code>custom-set-variables</code> 和 <code>custom-set-faces</code> 就不是太敢动，二来学习其他人的配置的时候都是抄配置，毕竟 <code>customization</code> 配置是通过界面的，代码根本展现不出来。
+</p>
+
+<p>
+Elisp Mannual 的 <code>customization</code> 这一章我也没有想读的欲望，变量繁多，几乎没有什么示例。但借着期末后的这一段空闲时间我还是硬着头皮把它读完了。现在看来它的功能就是提供简单的配置方式罢了，也难怪我在搜索 emacs 相关资料时很少找到它的身影。
+</p>
+
+<p>
+开源软件 <a href="https://github.com/NickeManarin/ScreenToGif">NickeManarin/ScreenToGif</a> 对本文的完成提供了很大的帮助，没有 gif 图片的话是没办法体现动态的过程的。
+</p>
+
+<p>
+希望本文能对你的 Elisp Mannual 之旅有所帮助，如果你也读的话。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfdc4d09" class="outline-2">
+<h2 id="orgfdc4d09"><span class="section-number-2">4</span> 参考资料</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<a id="orgb6d4b9c">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html">Easy Customization Interface</a>
+</p>
+
+<p>
+<a id="orgb8d9784">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Customization.html">Customization Settings</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-06-18 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 11:20</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
