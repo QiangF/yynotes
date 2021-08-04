@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 13:53 -->
+<!-- 2021-08-04 Wed 13:07 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>写个C库-part4 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,14 +51,14 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org13db99e">1. 辅助设施（Helper）和守护进程</a>
+<li><a href="#orgfd36d0a">1. 辅助设施（Helper）和守护进程</a>
 <ul>
-<li><a href="#orgcf41a2b">1.1. 清单</a></li>
+<li><a href="#orgecb6fe4">1.1. 清单</a></li>
 </ul>
 </li>
-<li><a href="#org4d27c50">2. 测试</a>
+<li><a href="#org26c250a">2. 测试</a>
 <ul>
-<li><a href="#org0f0c982">2.1. 清单</a></li>
+<li><a href="#orga554437">2.1. 清单</a></li>
 </ul>
 </li>
 </ul>
@@ -84,8 +84,8 @@
 前篇：<a href="http://davidz25.blogspot.com/2011/06/writing-c-library-part-1.html">part one</a> <a href="http://davidz25.blogspot.com/2011/06/writing-c-library-part-2.html">part two</a> <a href="http://davidz25.blogspot.com/2011/06/writing-c-library-part-3.html">part three</a>
 </p>
 
-<div id="outline-container-org13db99e" class="outline-2">
-<h2 id="org13db99e"><span class="section-number-2">1</span> 辅助设施（Helper）和守护进程</h2>
+<div id="outline-container-orgfd36d0a" class="outline-2">
+<h2 id="orgfd36d0a"><span class="section-number-2">1</span> 辅助设施（Helper）和守护进程</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 有时，程序或库调用外部进程完成工作是非常有用的。这样做的原因有很多 —— 例如，你想要使用的代码：
@@ -138,8 +138,8 @@
 </p>
 </div>
 
-<div id="outline-container-orgcf41a2b" class="outline-3">
-<h3 id="orgcf41a2b"><span class="section-number-3">1.1</span> 清单</h3>
+<div id="outline-container-orgecb6fe4" class="outline-3">
+<h3 id="orgecb6fe4"><span class="section-number-3">1.1</span> 清单</h3>
 <div class="outline-text-3" id="text-1-1">
 <ul class="org-ul">
 <li>确认是否需要一个辅助程序</li>
@@ -158,8 +158,8 @@
 </div>
 </div>
 
-<div id="outline-container-org4d27c50" class="outline-2">
-<h2 id="org4d27c50"><span class="section-number-2">2</span> 测试</h2>
+<div id="outline-container-org26c250a" class="outline-2">
+<h2 id="org26c250a"><span class="section-number-2">2</span> 测试</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 当库和应用带着测试套件（<a href="http://en.wikipedia.org/wiki/Test_suite">test suite</a>）发布时，这通常是一个成熟的标志。一个好的测试套件对于确保发行内容大部分无 bug 是很有用的，更重要的，确保维护人员可以放心地发布发行版，而不会丧失睡眠或理智。对测试细节的讨论超出了这个 C 库系列的讨论范围，不过指出 <a href="http://developer.gnome.org/glib/unstable/glib-Testing.html#glib-Testing.description">GLib test framework</a> 的用法 (<a href="http://git.gnome.org/browse/glib/tree/glib/tests/gvariant.c?id=2.29.8#n4040">example</a>,<a href="http://git.gnome.org/browse/glib/tree/gio/tests/gdbus-connection.c?id=2.29.8#n120">example</a> and <a href="http://git.gnome.org/browse/glib/tree/glib/tests/bitlock.c?id=2.29.8">example</a>) 和它是如何被 <a href="http://build.gnome.org/">GNOME buildbots</a> 使用的是很有价值的。
@@ -174,8 +174,8 @@
 </p>
 </div>
 
-<div id="outline-container-org0f0c982" class="outline-3">
-<h3 id="org0f0c982"><span class="section-number-3">2.1</span> 清单</h3>
+<div id="outline-container-orga554437" class="outline-3">
+<h3 id="orga554437"><span class="section-number-3">2.1</span> 清单</h3>
 <div class="outline-text-3" id="text-2-1">
 <ul class="org-ul">
 <li>尽早开始编写测试套件</li>
@@ -190,7 +190,7 @@
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-06-14 Sun 00:00</p> <p>Last modified: 2021-08-03 Tue 13:52</p>
+<p>Create Date: 2020-06-14 Sun 00:00</p> <p>Last modified: 2021-08-04 Wed 13:07</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

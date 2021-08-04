@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 18:11 -->
+<!-- 2021-08-04 Wed 13:09 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Scheme的callcc <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,28 +51,28 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd4c1b96">1. 什么是 continuation</a></li>
-<li><a href="#org66a4f2e">2. 什么是 call/cc</a></li>
-<li><a href="#orga1239f2">3. call/cc 的使用</a>
+<li><a href="#org60ac3a6">1. 什么是 continuation</a></li>
+<li><a href="#orgb9f71b7">2. 什么是 call/cc</a></li>
+<li><a href="#orgb6bfad6">3. call/cc 的使用</a>
 <ul>
-<li><a href="#org4f21a70">3.1. nonlocal exits</a></li>
-<li><a href="#orgfe0eb02">3.2. backtracking</a></li>
-<li><a href="#org4e112bf">3.3. coroutine</a></li>
-<li><a href="#org501ddec">3.4. 添加控制结构</a></li>
+<li><a href="#org2fc4d44">3.1. nonlocal exits</a></li>
+<li><a href="#org7f8ad85">3.2. backtracking</a></li>
+<li><a href="#org71e8823">3.3. coroutine</a></li>
+<li><a href="#org7228803">3.4. 添加控制结构</a></li>
 </ul>
 </li>
-<li><a href="#org637a110">4. 什么是 CPS</a>
+<li><a href="#orgf421121">4. 什么是 CPS</a>
 <ul>
-<li><a href="#org9666fae">4.1. 例子：斐波拉契函数的 CPS</a></li>
+<li><a href="#org6c44c39">4.1. 例子：斐波拉契函数的 CPS</a></li>
 </ul>
 </li>
-<li><a href="#org731dbd5">5. 其他的一些有趣的问题</a>
+<li><a href="#org0852964">5. 其他的一些有趣的问题</a>
 <ul>
-<li><a href="#org4561759">5.1. (call/cc call/cc)</a></li>
-<li><a href="#orgba6aae0">5.2. 阴阳谜题（yin-yang puzzle）</a></li>
+<li><a href="#orgb7931f4">5.1. (call/cc call/cc)</a></li>
+<li><a href="#org6bac6f9">5.2. 阴阳谜题（yin-yang puzzle）</a></li>
 </ul>
 </li>
-<li><a href="#orga113bed">6. 参考资料</a></li>
+<li><a href="#org11bf5d3">6. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -84,11 +84,11 @@
 那么，先从 continuation 的概念开始吧。
 </p>
 
-<div id="outline-container-orgd4c1b96" class="outline-2">
-<h2 id="orgd4c1b96"><span class="section-number-2">1</span> 什么是 continuation</h2>
+<div id="outline-container-org60ac3a6" class="outline-2">
+<h2 id="org60ac3a6"><span class="section-number-2">1</span> 什么是 continuation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-根据维基百科上<a href="#org0018ea2">【1】</a>的介绍，continuation 是计算机程序控制状态的一种抽象表示，它实现了程序的控制状态。换句话说，continuation 可以是一种数据结构，它表现了程序在运行过程中某一点的状态。在某些编程语言中（比如 scheme），该数据结构可以访问而不是被运行时环境隐藏（比如 C）。continuation 也可以用来表示 first-class continuation，它允许编程语言存储程序执行过程中任何一点的执行状态，并一次或多次向这个点返回。
+根据维基百科上<a href="#org1c36964">【1】</a>的介绍，continuation 是计算机程序控制状态的一种抽象表示，它实现了程序的控制状态。换句话说，continuation 可以是一种数据结构，它表现了程序在运行过程中某一点的状态。在某些编程语言中（比如 scheme），该数据结构可以访问而不是被运行时环境隐藏（比如 C）。continuation 也可以用来表示 first-class continuation，它允许编程语言存储程序执行过程中任何一点的执行状态，并一次或多次向这个点返回。
 </p>
 
 <p>
@@ -96,7 +96,7 @@ current continuation 是这样一种 continuation，它从当前程序执行点�
 </p>
 
 <p>
-维基百科上的介绍看上去可能有些生涩难懂， <i>The Scheme Programming Language</i> <a href="#org605ba27">【2】</a>上有着更好的解释。Kent 在该书的第 3 章第 3 小节这样写到：
+维基百科上的介绍看上去可能有些生涩难懂， <i>The Scheme Programming Language</i> <a href="#orgc85797a">【2】</a>上有着更好的解释。Kent 在该书的第 3 章第 3 小节这样写到：
 </p>
 
 <blockquote>
@@ -180,13 +180,13 @@ continuation 的概念并不限于 scheme，它是一个普遍的概念，只不
 </div>
 
 <p>
-同时，将某个表达式的 continuation 记为 <code>k@[a-zA-Z]</code> ，即上面的 if 表达式和判断表达式的 continuation 分别记为 k@a和 k@b。此处的记号借鉴于文章<a href="#org14753ad">【3】</a>。
+同时，将某个表达式的 continuation 记为 <code>k@[a-zA-Z]</code> ，即上面的 if 表达式和判断表达式的 continuation 分别记为 k@a和 k@b。此处的记号借鉴于文章<a href="#orge481ff5">【3】</a>。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org66a4f2e" class="outline-2">
-<h2 id="org66a4f2e"><span class="section-number-2">2</span> 什么是 call/cc</h2>
+<div id="outline-container-orgb9f71b7" class="outline-2">
+<h2 id="orgb9f71b7"><span class="section-number-2">2</span> 什么是 call/cc</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 scheme 允许任意表达式的 continuation 通过 call/cc 过程来进行捕获。call/cc 接收一个单参数过程 p，并将 current continuation 的具体表示传递给过程 p，continuation 本身使用过程来表示，这里记作 k。每当 k 被应用到一个值时，它会将这个值返回到调用 call/cc 处的 continuation，这个值就成为了调用 call/cc 的结果值。如果 k 没有被调用，过程 p 的返回值将作为 call/cc 表达式的值。
@@ -306,16 +306,16 @@ scheme 允许任意表达式的 continuation 通过 call/cc 过程来进行捕�
 </div>
 </div>
 
-<div id="outline-container-orga1239f2" class="outline-2">
-<h2 id="orga1239f2"><span class="section-number-2">3</span> call/cc 的使用</h2>
+<div id="outline-container-orgb6bfad6" class="outline-2">
+<h2 id="orgb6bfad6"><span class="section-number-2">3</span> call/cc 的使用</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <i>the Scheme Programming Language</i> 上面写到：call/cc 可以用来实现非本地退出（nonlocal exits），回溯（backtracking），协程（coroutines）和多任务（multitasking）。它还可以配合宏来创造新的控制结构，比如 return 语句之类的东西。
 </p>
 </div>
 
-<div id="outline-container-org4f21a70" class="outline-3">
-<h3 id="org4f21a70"><span class="section-number-3">3.1</span> nonlocal exits</h3>
+<div id="outline-container-org2fc4d44" class="outline-3">
+<h3 id="org2fc4d44"><span class="section-number-3">3.1</span> nonlocal exits</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 scheme 标准库中有一个 member 过程，它接收一个元素和一个列表，判断元素是否属于列表。若是则返回包含该元素的表，否则返回 #f。它的一个简单实现如下：
@@ -353,15 +353,15 @@ scheme 标准库中有一个 member 过程，它接收一个元素和一个列�
 </div>
 </div>
 
-<div id="outline-container-orgfe0eb02" class="outline-3">
-<h3 id="orgfe0eb02"><span class="section-number-3">3.2</span> backtracking</h3>
+<div id="outline-container-org7f8ad85" class="outline-3">
+<h3 id="org7f8ad85"><span class="section-number-3">3.2</span> backtracking</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 说到回溯，有一个运算符与它有着紧密的联系，那就是 <code>amb</code> 。amb 是 ambiguous 的一个缩写，它用于非确定性计算。
 </p>
 
 <p>
-参考资料<a href="#org4fc6ecc">【7】</a>对 amb 进行了描述： <code>amb</code> 接收一个或多个表达式，并在它们中进行一次非确定选择，这个选择使得程序趋向于有意义。不带参数调用 <code>amb</code> 不会有返回值并会出错。
+参考资料<a href="#org176c95b">【7】</a>对 amb 进行了描述： <code>amb</code> 接收一个或多个表达式，并在它们中进行一次非确定选择，这个选择使得程序趋向于有意义。不带参数调用 <code>amb</code> 不会有返回值并会出错。
 </p>
 
 <p>
@@ -369,7 +369,7 @@ scheme 标准库中有一个 member 过程，它接收一个元素和一个列�
 </p>
 
 <p>
-参考资料<a href="#org029f36c">【6】</a>给出了 amb 的一个实现，这里直接拿过来了：
+参考资料<a href="#orgce4d6c2">【6】</a>给出了 amb 的一个实现，这里直接拿过来了：
 </p>
 
 <div class="org-src-container">
@@ -490,8 +490,8 @@ scheme 标准库中有一个 member 过程，它接收一个元素和一个列�
 </div>
 </div>
 
-<div id="outline-container-org4e112bf" class="outline-3">
-<h3 id="org4e112bf"><span class="section-number-3">3.3</span> coroutine</h3>
+<div id="outline-container-org71e8823" class="outline-3">
+<h3 id="org71e8823"><span class="section-number-3">3.3</span> coroutine</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 协程是一般化的子函数。一个协程可以在某个执行点挂起并在之后从挂起点恢复。与子函数不同的是，协程不需要在它返回前完成整个执行过程。
@@ -531,15 +531,15 @@ scheme 标准库中有一个 member 过程，它接收一个元素和一个列�
 </p>
 </div>
 
-<div id="outline-container-org3898148" class="outline-4">
-<h4 id="org3898148"><span class="section-number-4">3.3.1</span> 在 Scheme 中使用 generator</h4>
+<div id="outline-container-org2470937" class="outline-4">
+<h4 id="org2470937"><span class="section-number-4">3.3.1</span> 在 Scheme 中使用 generator</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
-维基百科<a href="#org206990f">【10】</a>对 generator 的定义是：generator 是一种特殊的子程序，它类似于返回数组的函数，但是它不是一次性构造出所有值并一次性返回，而是每次调用都产生一个值。
+维基百科<a href="#org4db3fa1">【10】</a>对 generator 的定义是：generator 是一种特殊的子程序，它类似于返回数组的函数，但是它不是一次性构造出所有值并一次性返回，而是每次调用都产生一个值。
 </p>
 
 <p>
-使用 call/cc 捕获并存储当前 continuation，使得下一次运行从这一点开始即可。参考资料<a href="#org6db5eda">【11】</a>给出了一种实现：
+使用 call/cc 捕获并存储当前 continuation，使得下一次运行从这一点开始即可。参考资料<a href="#org789c619">【11】</a>给出了一种实现：
 </p>
 
 <div class="org-src-container">
@@ -586,8 +586,8 @@ scheme 标准库中有一个 member 过程，它接收一个元素和一个列�
 </div>
 </div>
 
-<div id="outline-container-org501ddec" class="outline-3">
-<h3 id="org501ddec"><span class="section-number-3">3.4</span> 添加控制结构</h3>
+<div id="outline-container-org7228803" class="outline-3">
+<h3 id="org7228803"><span class="section-number-3">3.4</span> 添加控制结构</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 call/cc 配合宏使用，可以在 scheme 中添加一些自定义的控制结构。
@@ -633,8 +633,8 @@ call/cc 配合宏使用，可以在 scheme 中添加一些自定义的控制结�
 </div>
 </div>
 
-<div id="outline-container-org637a110" class="outline-2">
-<h2 id="org637a110"><span class="section-number-2">4</span> 什么是 CPS</h2>
+<div id="outline-container-orgf421121" class="outline-2">
+<h2 id="orgf421121"><span class="section-number-2">4</span> 什么是 CPS</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 CPS，全称 continuation-passing style，中文意思为延续传递风格。
@@ -726,8 +726,8 @@ CPS，全称 continuation-passing style，中文意思为延续传递风格。
 </div>
 </div>
 
-<div id="outline-container-org9666fae" class="outline-3">
-<h3 id="org9666fae"><span class="section-number-3">4.1</span> 例子：斐波拉契函数的 CPS</h3>
+<div id="outline-container-org6c44c39" class="outline-3">
+<h3 id="org6c44c39"><span class="section-number-3">4.1</span> 例子：斐波拉契函数的 CPS</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 使用斐波拉契函数作为 CPS 例子有两个好处：第一，它足够简单；第二，它不是太简单。
@@ -790,15 +790,15 @@ CPS，全称 continuation-passing style，中文意思为延续传递风格。
 </div>
 </div>
 
-<div id="outline-container-org731dbd5" class="outline-2">
-<h2 id="org731dbd5"><span class="section-number-2">5</span> 其他的一些有趣的问题</h2>
+<div id="outline-container-org0852964" class="outline-2">
+<h2 id="org0852964"><span class="section-number-2">5</span> 其他的一些有趣的问题</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-org4561759" class="outline-3">
-<h3 id="org4561759"><span class="section-number-3">5.1</span> (call/cc call/cc)</h3>
+<div id="outline-container-orgb7931f4" class="outline-3">
+<h3 id="orgb7931f4"><span class="section-number-3">5.1</span> (call/cc call/cc)</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
-玩了这么久的 call/cc，不知道你有没有想过将它应用于自身是什么结果。在 chez-scheme 的 REPL 中输入 <code>(call/cc call/cc)</code> ，你会得到 <code>#&lt;system continuation in new-cafe&gt;</code> 。在 racket 中输入 <code>(call/cc call/cc)</code> ，你会得到 <code>#&lt;continuation&gt;</code> 。不管怎么说，结果还是个 continuation。参考资料<a href="#org14753ad">【3】</a>给出了对它的分析。我在这里简单地说明一下。
+玩了这么久的 call/cc，不知道你有没有想过将它应用于自身是什么结果。在 chez-scheme 的 REPL 中输入 <code>(call/cc call/cc)</code> ，你会得到 <code>#&lt;system continuation in new-cafe&gt;</code> 。在 racket 中输入 <code>(call/cc call/cc)</code> ，你会得到 <code>#&lt;continuation&gt;</code> 。不管怎么说，结果还是个 continuation。参考资料<a href="#orge481ff5">【3】</a>给出了对它的分析。我在这里简单地说明一下。
 </p>
 
 <p>
@@ -882,8 +882,8 @@ CPS，全称 continuation-passing style，中文意思为延续传递风格。
 </div>
 </div>
 
-<div id="outline-container-orgba6aae0" class="outline-3">
-<h3 id="orgba6aae0"><span class="section-number-3">5.2</span> 阴阳谜题（yin-yang puzzle）</h3>
+<div id="outline-container-org6bac6f9" class="outline-3">
+<h3 id="org6bac6f9"><span class="section-number-3">5.2</span> 阴阳谜题（yin-yang puzzle）</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 通过以下的代码：
@@ -905,7 +905,7 @@ CPS，全称 continuation-passing style，中文意思为延续传递风格。
 </p>
 
 <p>
-参考<a href="#orga8a8b87">【13】</a>，我们可以一步一步地推出整个式子的来龙去脉。
+参考<a href="#org74d44f4">【13】</a>，我们可以一步一步地推出整个式子的来龙去脉。
 </p>
 
 <p>
@@ -962,72 +962,72 @@ CPS，全称 continuation-passing style，中文意思为延续传递风格。
 </p>
 
 <p>
-关于这个结论的证明可以参考<a href="#orga8a8b87">【13】</a>。
+关于这个结论的证明可以参考<a href="#org74d44f4">【13】</a>。
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orga113bed" class="outline-2">
-<h2 id="orga113bed"><span class="section-number-2">6</span> 参考资料</h2>
+<div id="outline-container-org11bf5d3" class="outline-2">
+<h2 id="org11bf5d3"><span class="section-number-2">6</span> 参考资料</h2>
 <div class="outline-text-2" id="text-6">
 <p>
-<a id="org0018ea2">【1】</a> Wikipedia:Continuation： <a href="https://en.wikipedia.org/wiki/Continuation">https://en.wikipedia.org/wiki/Continuation</a>
+<a id="org1c36964">【1】</a> Wikipedia:Continuation： <a href="https://en.wikipedia.org/wiki/Continuation">https://en.wikipedia.org/wiki/Continuation</a>
 </p>
 
 <p>
-<a id="org605ba27">【2】</a> <i>The Scheme Programming Language</i>, R.Kent Dybvig
+<a id="orgc85797a">【2】</a> <i>The Scheme Programming Language</i>, R.Kent Dybvig
 </p>
 
 <p>
-<a id="org14753ad">【3】</a> (call/cc call/cc) and friends, Pavel Panchekha： <a href="https://pavpanchekha.com/blog/callcc-trees.html">https://pavpanchekha.com/blog/callcc-trees.html</a>
+<a id="orge481ff5">【3】</a> (call/cc call/cc) and friends, Pavel Panchekha： <a href="https://pavpanchekha.com/blog/callcc-trees.html">https://pavpanchekha.com/blog/callcc-trees.html</a>
 </p>
 
 <p>
-<a id="org40c6c79">【4】</a> Undelimited continuations are not functions： <a href="http://okmij.org/ftp/continuations/undelimited.html">http://okmij.org/ftp/continuations/undelimited.html</a>
+<a id="org88f73c7">【4】</a> Undelimited continuations are not functions： <a href="http://okmij.org/ftp/continuations/undelimited.html">http://okmij.org/ftp/continuations/undelimited.html</a>
 </p>
 
 <p>
-<a id="org15a7e24">【5】</a> Coroutines, exceptions, time-traveling search, generators and threads: Continuations by example： <a href="http://matt.might.net/articles/programming-with-continuations--exceptions-backtracking-search-threads-generators-coroutines/">http://matt.might.net/articles/programming-with-continuations--exceptions-backtracking-search-threads-generators-coroutines/</a>
+<a id="orgd4775e6">【5】</a> Coroutines, exceptions, time-traveling search, generators and threads: Continuations by example： <a href="http://matt.might.net/articles/programming-with-continuations--exceptions-backtracking-search-threads-generators-coroutines/">http://matt.might.net/articles/programming-with-continuations--exceptions-backtracking-search-threads-generators-coroutines/</a>
 </p>
 
 <p>
-<a id="org029f36c">【6】</a> amb： <a href="http://community.schemewiki.org/?amb">http://community.schemewiki.org/?amb</a>
+<a id="orgce4d6c2">【6】</a> amb： <a href="http://community.schemewiki.org/?amb">http://community.schemewiki.org/?amb</a>
 </p>
 
 <p>
-<a id="org4fc6ecc">【7】</a> Scheme 语言简明教程： <a href="https://wizardforcel.gitbooks.io/teach-yourself-scheme/content/140-nondeterminism.html">https://wizardforcel.gitbooks.io/teach-yourself-scheme/content/140-nondeterminism.html</a>
+<a id="org176c95b">【7】</a> Scheme 语言简明教程： <a href="https://wizardforcel.gitbooks.io/teach-yourself-scheme/content/140-nondeterminism.html">https://wizardforcel.gitbooks.io/teach-yourself-scheme/content/140-nondeterminism.html</a>
 </p>
 
 <p>
-<a id="org1f24cdb">【8】</a> Scheme Coroutine Example： <a href="https://wiki.c2.com/?SchemeCoroutineExample">https://wiki.c2.com/?SchemeCoroutineExample</a>
+<a id="org49cb7cd">【8】</a> Scheme Coroutine Example： <a href="https://wiki.c2.com/?SchemeCoroutineExample">https://wiki.c2.com/?SchemeCoroutineExample</a>
 </p>
 
 <p>
-<a id="org393920f">【9】</a> Implementing Coroutines with call/cc： <a href="http://pages.cs.wisc.edu/~fischer/cs538.s08/lectures/Lecture20.pdf">http://pages.cs.wisc.edu/~fischer/cs538.s08/lectures/Lecture20.pdf</a>
+<a id="org01e1515">【9】</a> Implementing Coroutines with call/cc： <a href="http://pages.cs.wisc.edu/~fischer/cs538.s08/lectures/Lecture20.pdf">http://pages.cs.wisc.edu/~fischer/cs538.s08/lectures/Lecture20.pdf</a>
 </p>
 
 <p>
-<a id="org206990f">【10】</a> Generator (computer programming) - Wikipedia： <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)">https://en.wikipedia.org/wiki/Generator_(computer_programming)</a>
+<a id="org4db3fa1">【10】</a> Generator (computer programming) - Wikipedia： <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)">https://en.wikipedia.org/wiki/Generator_(computer_programming)</a>
 </p>
 
 <p>
-<a id="org6db5eda">【11】</a> generator - Does call/cc in Scheme the same thing with yield in Python and JavaScript? - Stack Overflow： <a href="https://stackoverflow.com/questions/44514890/does-call-cc-in-scheme-the-same-thing-with-yield-in-python-and-javascript">https://stackoverflow.com/questions/44514890/does-call-cc-in-scheme-the-same-thing-with-yield-in-python-and-javascript</a>
+<a id="org789c619">【11】</a> generator - Does call/cc in Scheme the same thing with yield in Python and JavaScript? - Stack Overflow： <a href="https://stackoverflow.com/questions/44514890/does-call-cc-in-scheme-the-same-thing-with-yield-in-python-and-javascript">https://stackoverflow.com/questions/44514890/does-call-cc-in-scheme-the-same-thing-with-yield-in-python-and-javascript</a>
 </p>
 
 <p>
-<a id="org8e825b0">【12】</a> Continuation-passing style - Wikipedia： <a href="https://en.wikipedia.org/wiki/Continuation-passing_style">https://en.wikipedia.org/wiki/Continuation-passing_style</a>
+<a id="orgc71b806">【12】</a> Continuation-passing style - Wikipedia： <a href="https://en.wikipedia.org/wiki/Continuation-passing_style">https://en.wikipedia.org/wiki/Continuation-passing_style</a>
 </p>
 
 <p>
-<a id="orga8a8b87">【13】</a> scheme - How does the yin-yang puzzle work? - Stack Overflow： <a href="https://stackoverflow.com/questions/2694679/how-does-the-yin-yang-puzzle-work">https://stackoverflow.com/questions/2694679/how-does-the-yin-yang-puzzle-work</a>
+<a id="org74d44f4">【13】</a> scheme - How does the yin-yang puzzle work? - Stack Overflow： <a href="https://stackoverflow.com/questions/2694679/how-does-the-yin-yang-puzzle-work">https://stackoverflow.com/questions/2694679/how-does-the-yin-yang-puzzle-work</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-08-11 Tue 00:00</p> <p>Last modified: 2021-08-03 Tue 18:08</p>
+<p>Create Date: 2020-08-11 Tue 00:00</p> <p>Last modified: 2021-08-04 Wed 13:09</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

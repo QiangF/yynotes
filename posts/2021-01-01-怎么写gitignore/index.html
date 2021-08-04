@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 23:06 -->
+<!-- 2021-08-04 Wed 13:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>怎么写gitignore <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNDM0NTA1.jpg" alt="load failed"></div></title>
@@ -51,35 +51,35 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org618b719">1. 什么是 .gitignore</a></li>
-<li><a href="#orgc9a6069">2. pattern 的格式</a></li>
-<li><a href="#orgaa65168">3. 一个例子，emacs 配置文件的 .gitignore</a></li>
-<li><a href="#orga04c9d4">4. 使用 .gitignore 的一些常见问题</a>
+<li><a href="#orgedd46e1">1. 什么是 .gitignore</a></li>
+<li><a href="#org0d3c910">2. pattern 的格式</a></li>
+<li><a href="#org0cf8fa3">3. 一个例子，emacs 配置文件的 .gitignore</a></li>
+<li><a href="#orgc7b9e5d">4. 使用 .gitignore 的一些常见问题</a>
 <ul>
-<li><a href="#org7b80c18">4.1. 文件被跟踪，但需要加入到 .gitignore中</a></li>
+<li><a href="#orgc3858cd">4.1. 文件被跟踪，但需要加入到 .gitignore中</a></li>
 </ul>
 </li>
-<li><a href="#org478ac0f">5. 延申阅读</a></li>
-<li><a href="#orge5a6987">6. 参考资料</a></li>
+<li><a href="#orgca04f44">5. 延申阅读</a></li>
+<li><a href="#org0e249e7">6. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org618b719" class="outline-2">
-<h2 id="org618b719"><span class="section-number-2">1</span> 什么是 .gitignore</h2>
+<div id="outline-container-orgedd46e1" class="outline-2">
+<h2 id="orgedd46e1"><span class="section-number-2">1</span> 什么是 .gitignore</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 .gitignore 是一个文件，它用来指定 git 需要忽略的文件。它对已经被 git 跟踪的文件是不起作用的。
 </p>
 
 <p>
-在 <code>gitignore</code> 文件中的每一行都指定了一个 pattern，在判断是否要忽略一个路径时，git 一般会检查 <code>gitignore</code> 的 pattern。pattern 的来源可以不仅仅是 <code>.gitignore</code> 文件，详细情况可以参考<a href="#orgcf5d02a">【1】</a>。
+在 <code>gitignore</code> 文件中的每一行都指定了一个 pattern，在判断是否要忽略一个路径时，git 一般会检查 <code>gitignore</code> 的 pattern。pattern 的来源可以不仅仅是 <code>.gitignore</code> 文件，详细情况可以参考<a href="#org93785ad">【1】</a>。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgc9a6069" class="outline-2">
-<h2 id="orgc9a6069"><span class="section-number-2">2</span> pattern 的格式</h2>
+<div id="outline-container-org0d3c910" class="outline-2">
+<h2 id="org0d3c910"><span class="section-number-2">2</span> pattern 的格式</h2>
 <div class="outline-text-2" id="text-2">
 <ul class="org-ul">
 <li>一个空行不会匹配任何文件，它可以用来提高可读性</li>
@@ -115,13 +115,13 @@
 
 
 <p>
-以上内容翻译自参考资料<a href="#orgcf5d02a">【1】</a>，参考时间是2021.1.1, utc+8。文档网页可能随时间发生改动，如实践过程中发现了与上述内容不符的事件，可以前往官方页面参考。
+以上内容翻译自参考资料<a href="#org93785ad">【1】</a>，参考时间是2021.1.1, utc+8。文档网页可能随时间发生改动，如实践过程中发现了与上述内容不符的事件，可以前往官方页面参考。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgaa65168" class="outline-2">
-<h2 id="orgaa65168"><span class="section-number-2">3</span> 一个例子，emacs 配置文件的 .gitignore</h2>
+<div id="outline-container-org0cf8fa3" class="outline-2">
+<h2 id="org0cf8fa3"><span class="section-number-2">3</span> 一个例子，emacs 配置文件的 .gitignore</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 在 github 上随手一搜，就可以看到一堆的 emacs.d，目前看到的最多 star 的就是<a href="https://github.com/purcell/emacs.d">purcell/emacs.d</a>，在他下面的还有 <a href="https://github.com/redguardtoo/emacs.d">redguardtoo/emacs.d</a>，<a href="https://github.com/seagle0128/.emacs.d">seagle0128/.emacs.d</a> 等等。
@@ -166,19 +166,19 @@ elpa/
 </div>
 </div>
 
-<div id="outline-container-orga04c9d4" class="outline-2">
-<h2 id="orga04c9d4"><span class="section-number-2">4</span> 使用 .gitignore 的一些常见问题</h2>
+<div id="outline-container-orgc7b9e5d" class="outline-2">
+<h2 id="orgc7b9e5d"><span class="section-number-2">4</span> 使用 .gitignore 的一些常见问题</h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org7b80c18" class="outline-3">
-<h3 id="org7b80c18"><span class="section-number-3">4.1</span> 文件被跟踪，但需要加入到 .gitignore中</h3>
+<div id="outline-container-orgc3858cd" class="outline-3">
+<h3 id="orgc3858cd"><span class="section-number-3">4.1</span> 文件被跟踪，但需要加入到 .gitignore中</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 就像我在开头说的那样，gitignore 对已被跟踪的文件是不起作用的。那么这时候应该如何处理呢？
 </p>
 
 <p>
-参考<a href="#orgb297d11">【2】</a>给出了解决方式
+参考<a href="#org6a0d5c4">【2】</a>给出了解决方式
 </p>
 
 <p>
@@ -217,11 +217,11 @@ git commit -m <span style="color: #8b2252;">"fixed untracked files"</span>
 </div>
 </div>
 
-<div id="outline-container-org478ac0f" class="outline-2">
-<h2 id="org478ac0f"><span class="section-number-2">5</span> 延申阅读</h2>
+<div id="outline-container-orgca04f44" class="outline-2">
+<h2 id="orgca04f44"><span class="section-number-2">5</span> 延申阅读</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-github 上有个叫做 gitignore 的项目<a href="#org1ff9701">【3】</a>，里面列举了许多语言的 .gitignore，可以利用它来进一步了解更多的例子。
+github 上有个叫做 gitignore 的项目<a href="#org97193c4">【3】</a>，里面列举了许多语言的 .gitignore，可以利用它来进一步了解更多的例子。
 </p>
 
 <p>
@@ -241,26 +241,26 @@ github 上有个叫做 gitignore 的项目<a href="#org1ff9701">【3】</a>，�
 </div>
 </div>
 
-<div id="outline-container-orge5a6987" class="outline-2">
-<h2 id="orge5a6987"><span class="section-number-2">6</span> 参考资料</h2>
+<div id="outline-container-org0e249e7" class="outline-2">
+<h2 id="org0e249e7"><span class="section-number-2">6</span> 参考资料</h2>
 <div class="outline-text-2" id="text-6">
 <p>
-<a id="orgcf5d02a">【1】</a> Git - gitignore Documentation (git-scm.com)： <a href="https://git-scm.com/docs/gitignore">https://git-scm.com/docs/gitignore</a>
+<a id="org93785ad">【1】</a> Git - gitignore Documentation (git-scm.com)： <a href="https://git-scm.com/docs/gitignore">https://git-scm.com/docs/gitignore</a>
 </p>
 
 <p>
-<a id="orgb297d11">【2】</a> How to make Git "forget" about a file that was tracked but is now in .gitignore? - Stack Overflow： <a href="https://stackoverflow.com/questions/1274057/how-to-make-git-forget-about-a-file-that-was-tracked-but-is-now-in-gitignore">https://stackoverflow.com/questions/1274057/how-to-make-git-forget-about-a-file-that-was-tracked-but-is-now-in-gitignore</a>
+<a id="org6a0d5c4">【2】</a> How to make Git "forget" about a file that was tracked but is now in .gitignore? - Stack Overflow： <a href="https://stackoverflow.com/questions/1274057/how-to-make-git-forget-about-a-file-that-was-tracked-but-is-now-in-gitignore">https://stackoverflow.com/questions/1274057/how-to-make-git-forget-about-a-file-that-was-tracked-but-is-now-in-gitignore</a>
 </p>
 
 <p>
-<a id="org1ff9701">【3】</a> github/gitignore: A collection of useful .gitignore templates： <a href="https://github.com/github/gitignore">https://github.com/github/gitignore</a>
+<a id="org97193c4">【3】</a> github/gitignore: A collection of useful .gitignore templates： <a href="https://github.com/github/gitignore">https://github.com/github/gitignore</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-01-01 Fri 00:00</p> <p>Last modified: 2021-08-03 Tue 23:06</p>
+<p>Create Date: 2021-01-01 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 13:10</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

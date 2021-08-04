@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 13:10 -->
+<!-- 2021-08-04 Wed 13:06 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>什么是base64编码 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,32 +51,32 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb8cf267">1. 什么是 Base64</a></li>
-<li><a href="#org0f97851">2. Base64 编码表</a></li>
-<li><a href="#org511fabb">3. 缀词（padding） =</a></li>
-<li><a href="#org4fdb7f5">4. Base64 的解码</a></li>
-<li><a href="#org2c07838">5. 一个简单的 C 实现</a>
+<li><a href="#org8446173">1. 什么是 Base64</a></li>
+<li><a href="#org5facccb">2. Base64 编码表</a></li>
+<li><a href="#org08c6674">3. 缀词（padding） =</a></li>
+<li><a href="#org19ba622">4. Base64 的解码</a></li>
+<li><a href="#orgeb8e7e2">5. 一个简单的 C 实现</a>
 <ul>
-<li><a href="#org9638505">5.1. 编码</a></li>
-<li><a href="#org4667c14">5.2. 解码</a></li>
-<li><a href="#orga613a6c">5.3. 测试</a></li>
+<li><a href="#org0d3b84f">5.1. 编码</a></li>
+<li><a href="#orgf8fa733">5.2. 解码</a></li>
+<li><a href="#org2606a80">5.3. 测试</a></li>
 </ul>
 </li>
-<li><a href="#orgf16e6e3">6. 在 Python 中使用 Base64</a>
+<li><a href="#orgc2d0eee">6. 在 Python 中使用 Base64</a>
 <ul>
-<li><a href="#org9b3f7b7">6.1. Python 的 base64 模块</a></li>
-<li><a href="#orge1720d4">6.2. 接口函数</a></li>
-<li><a href="#orgfae18b6">6.3. 具体用法</a></li>
+<li><a href="#org92f7f1d">6.1. Python 的 base64 模块</a></li>
+<li><a href="#org751e620">6.2. 接口函数</a></li>
+<li><a href="#org69abfd2">6.3. 具体用法</a></li>
 </ul>
 </li>
-<li><a href="#org4daa14e">7. 参考资料</a></li>
+<li><a href="#orged0bfee">7. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
 
-<div id="outline-container-orgb8cf267" class="outline-2">
-<h2 id="orgb8cf267"><span class="section-number-2">1</span> 什么是 Base64</h2>
+<div id="outline-container-org8446173" class="outline-2">
+<h2 id="org8446173"><span class="section-number-2">1</span> 什么是 Base64</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Base64 是二进制到字符编码的一种方案，将二进制数据使用 ASCII 字符串格式表示，即翻译为基数为 64 的一种表示。每个 Base64 数字表示一个 6 比特的数据。三个字节（共 24 个比特）因此可以被表示为 4 个 Base64 数字。
@@ -88,8 +88,8 @@ Base64 常用于处理文本数据的场合，表示、传输、存储一些二�
 </div>
 </div>
 
-<div id="outline-container-org0f97851" class="outline-2">
-<h2 id="org0f97851"><span class="section-number-2">2</span> Base64 编码表</h2>
+<div id="outline-container-org5facccb" class="outline-2">
+<h2 id="org5facccb"><span class="section-number-2">2</span> Base64 编码表</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 从 0 到 25 ，也就是从 000000 到 011001，是 ASCII 字符 A - Z
@@ -113,8 +113,8 @@ Base64 常用于处理文本数据的场合，表示、传输、存储一些二�
 </div>
 </div>
 
-<div id="outline-container-org511fabb" class="outline-2">
-<h2 id="org511fabb"><span class="section-number-2">3</span> 缀词（padding） =</h2>
+<div id="outline-container-org08c6674" class="outline-2">
+<h2 id="org08c6674"><span class="section-number-2">3</span> 缀词（padding） =</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 因为 Base64 是每 6 个比特进行一次编码，而现代电脑上的编码值被分为了一个个 8 比特的字节，因此，在 Base64 编码的文本中，每 4 个字符表示三个字节的未编码的文本或数据。这就意味着，当未编码的输入的字节数不是 3 的倍数时，编码输出必须加上缀词来使得输出的长度是 4 的倍数。这个缀词便是 <code>=</code> ，它表明：不再需要更多的比特来进行解码。
@@ -155,8 +155,8 @@ Base64 常用于处理文本数据的场合，表示、传输、存储一些二�
 </div>
 </div>
 
-<div id="outline-container-org4fdb7f5" class="outline-2">
-<h2 id="org4fdb7f5"><span class="section-number-2">4</span> Base64 的解码</h2>
+<div id="outline-container-org19ba622" class="outline-2">
+<h2 id="org19ba622"><span class="section-number-2">4</span> Base64 的解码</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 当对 Base64 进行解码时，四个字符通常会被转化为三个字节。当存在缀词时则可能是两个或一个，一个 <code>=</code> 表明四个字符会被转化为两个字节，两个 <code>=</code> 表明四字符会被转为一个字节。上面的例子便是如此。
@@ -168,8 +168,8 @@ Base64 常用于处理文本数据的场合，表示、传输、存储一些二�
 </div>
 </div>
 
-<div id="outline-container-org2c07838" class="outline-2">
-<h2 id="org2c07838"><span class="section-number-2">5</span> 一个简单的 C 实现</h2>
+<div id="outline-container-orgeb8e7e2" class="outline-2">
+<h2 id="orgeb8e7e2"><span class="section-number-2">5</span> 一个简单的 C 实现</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 以下代码在 MINGW 下通过编译并通过了下面的测试。
@@ -180,8 +180,8 @@ Base64 常用于处理文本数据的场合，表示、传输、存储一些二�
 </p>
 </div>
 
-<div id="outline-container-org9638505" class="outline-3">
-<h3 id="org9638505"><span class="section-number-3">5.1</span> 编码</h3>
+<div id="outline-container-org0d3b84f" class="outline-3">
+<h3 id="org0d3b84f"><span class="section-number-3">5.1</span> 编码</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 要想将一个个字节编码为 Base64，首先需要一张二进制码（000000 - 111111）到 64 个字符的映射表：
@@ -293,8 +293,8 @@ Base64 常用于处理文本数据的场合，表示、传输、存储一些二�
 </div>
 </div>
 
-<div id="outline-container-org4667c14" class="outline-3">
-<h3 id="org4667c14"><span class="section-number-3">5.2</span> 解码</h3>
+<div id="outline-container-orgf8fa733" class="outline-3">
+<h3 id="orgf8fa733"><span class="section-number-3">5.2</span> 解码</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 与编码相似，解码也需要一张映射表，不过 Base64 只规定了从二进制到字符进行编码，而没有规定字符的编码，至于字符编码是 ASCII 还是其他的比如 UTF-8，EBCDEC 。为了简便起见，这里使用 ASCII。可以使用一个一个 if else 来去掉字符集依赖性，不过也太麻烦了点：
@@ -427,8 +427,8 @@ Base64 常用于处理文本数据的场合，表示、传输、存储一些二�
 </div>
 </div>
 
-<div id="outline-container-orga613a6c" class="outline-3">
-<h3 id="orga613a6c"><span class="section-number-3">5.3</span> 测试</h3>
+<div id="outline-container-org2606a80" class="outline-3">
+<h3 id="org2606a80"><span class="section-number-3">5.3</span> 测试</h3>
 <div class="outline-text-3" id="text-5-3">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">main</span>(<span style="color: #228b22;">void</span>)
@@ -502,16 +502,16 @@ include-yy
 </div>
 </div>
 
-<div id="outline-container-orgf16e6e3" class="outline-2">
-<h2 id="orgf16e6e3"><span class="section-number-2">6</span> 在 Python 中使用 Base64</h2>
+<div id="outline-container-orgc2d0eee" class="outline-2">
+<h2 id="orgc2d0eee"><span class="section-number-2">6</span> 在 Python 中使用 Base64</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 Python 随处可见，用起来也比 C 方便的多，故学习 Python 的用法肯定还是有用的。
 </p>
 </div>
 
-<div id="outline-container-org9b3f7b7" class="outline-3">
-<h3 id="org9b3f7b7"><span class="section-number-3">6.1</span> Python 的 base64 模块</h3>
+<div id="outline-container-org92f7f1d" class="outline-3">
+<h3 id="org92f7f1d"><span class="section-number-3">6.1</span> Python 的 base64 模块</h3>
 <div class="outline-text-3" id="text-6-1">
 <p>
 base64 模块提供了将二进制数据编码为可打印 ASCII 字符和将编码解码为二进制数据的函数。
@@ -523,8 +523,8 @@ base64 模块提供的函数不限于操作 base64，还有 base16，base32 等�
 </div>
 </div>
 
-<div id="outline-container-orge1720d4" class="outline-3">
-<h3 id="orge1720d4"><span class="section-number-3">6.2</span> 接口函数</h3>
+<div id="outline-container-org751e620" class="outline-3">
+<h3 id="org751e620"><span class="section-number-3">6.2</span> 接口函数</h3>
 <div class="outline-text-3" id="text-6-2">
 <div class="org-src-container">
 <pre class="src src-python">base64.b64encode(s, altchars=<span style="color: #008b8b;">None</span>)
@@ -558,8 +558,8 @@ base64 模块提供的函数不限于操作 base64，还有 base16，base32 等�
 </div>
 </div>
 
-<div id="outline-container-orgfae18b6" class="outline-3">
-<h3 id="orgfae18b6"><span class="section-number-3">6.3</span> 具体用法</h3>
+<div id="outline-container-org69abfd2" class="outline-3">
+<h3 id="org69abfd2"><span class="section-number-3">6.3</span> 具体用法</h3>
 <div class="outline-text-3" id="text-6-3">
 <p>
 首先，导入 python 的 base64 模块
@@ -606,8 +606,8 @@ base64.b64decode(s2.encode());
 </div>
 </div>
 
-<div id="outline-container-org4daa14e" class="outline-2">
-<h2 id="org4daa14e"><span class="section-number-2">7</span> 参考资料</h2>
+<div id="outline-container-orged0bfee" class="outline-2">
+<h2 id="orged0bfee"><span class="section-number-2">7</span> 参考资料</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 <a href="https://en.wikipedia.org/wiki/Base64">https://en.wikipedia.org/wiki/Base64</a>
@@ -621,7 +621,7 @@ base64.b64decode(s2.encode());
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-05-06 Wed 00:00</p> <p>Last modified: 2021-08-03 Tue 13:09</p>
+<p>Create Date: 2020-05-06 Wed 00:00</p> <p>Last modified: 2021-08-04 Wed 13:06</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

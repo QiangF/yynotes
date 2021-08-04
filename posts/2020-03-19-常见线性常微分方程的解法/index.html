@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 10:22 -->
+<!-- 2021-08-04 Wed 13:05 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>常见线性常微分方程的解法</title>
@@ -73,24 +73,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org8eb09c0">1. 定义</a></li>
-<li><a href="#org7b648e4">2. 常系数线性齐次方程</a></li>
-<li><a href="#org4563ea7">3. 常系数非齐次线性方程</a>
+<li><a href="#orgb572dd5">1. 定义</a></li>
+<li><a href="#org0241fa4">2. 常系数线性齐次方程</a></li>
+<li><a href="#org76b7e27">3. 常系数非齐次线性方程</a>
 <ul>
-<li><a href="#org2e93f38">3.1. 指数响应公式（ERF）</a></li>
-<li><a href="#org5c68e39">3.2. 待定系数法</a></li>
-<li><a href="#org8ef7582">3.3. 常数变易法</a></li>
-<li><a href="#org59f3ec6">3.4. 一阶变系数线性常微分方程</a></li>
+<li><a href="#orgab7c6ae">3.1. 指数响应公式（ERF）</a></li>
+<li><a href="#orgefcdf01">3.2. 待定系数法</a></li>
+<li><a href="#org3e5ff1a">3.3. 常数变易法</a></li>
+<li><a href="#org445b8fd">3.4. 一阶变系数线性常微分方程</a></li>
 </ul>
 </li>
-<li><a href="#org1b53d92">4. 柯西-欧拉方程</a></li>
-<li><a href="#orgdee6bf3">5. 参考资料</a></li>
+<li><a href="#org49ef4d1">4. 柯西-欧拉方程</a></li>
+<li><a href="#org1b3b0c8">5. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org8eb09c0" class="outline-2">
-<h2 id="org8eb09c0"><span class="section-number-2">1</span> 定义</h2>
+<div id="outline-container-orgb572dd5" class="outline-2">
+<h2 id="orgb572dd5"><span class="section-number-2">1</span> 定义</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 在数学中，线性微分方程由一个未知函数及其导数的线性多项式组成，方程形式为：
@@ -118,8 +118,8 @@
 </div>
 </div>
 
-<div id="outline-container-org7b648e4" class="outline-2">
-<h2 id="org7b648e4"><span class="section-number-2">2</span> 常系数线性齐次方程</h2>
+<div id="outline-container-org0241fa4" class="outline-2">
+<h2 id="org0241fa4"><span class="section-number-2">2</span> 常系数线性齐次方程</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 常系数线性齐次方程的形式为
@@ -175,8 +175,8 @@
 </div>
 </div>
 
-<div id="outline-container-org4563ea7" class="outline-2">
-<h2 id="org4563ea7"><span class="section-number-2">3</span> 常系数非齐次线性方程</h2>
+<div id="outline-container-org76b7e27" class="outline-2">
+<h2 id="org76b7e27"><span class="section-number-2">3</span> 常系数非齐次线性方程</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 常系数 n 阶非齐次方程的形式为：
@@ -199,16 +199,16 @@
 </p>
 </div>
 
-<div id="outline-container-org2e93f38" class="outline-3">
-<h3 id="org2e93f38"><span class="section-number-3">3.1</span> 指数响应公式（ERF）</h3>
+<div id="outline-container-orgab7c6ae" class="outline-3">
+<h3 id="orgab7c6ae"><span class="section-number-3">3.1</span> 指数响应公式（ERF）</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 ERF 适应于求解常系数非齐次线性常微分方程，方程的常数项为正弦函数，指数函数或二者之线性组合。
 </p>
 </div>
 
-<div id="outline-container-org0f86662" class="outline-4">
-<h4 id="org0f86662"><span class="section-number-4">3.1.1</span> 适用性</h4>
+<div id="outline-container-orgc5cf93b" class="outline-4">
+<h4 id="orgc5cf93b"><span class="section-number-4">3.1.1</span> 适用性</h4>
 <div class="outline-text-4" id="text-3-1-1">
 <p>
 如果非齐次方程的常数项可以写成 \(f(t) = B_{1}e^{\gamma _{1}t} + B_{2}e^{\gamma _{2}t} + ... + B_{n}e^{\gamma _{n}t}\) ，其中 \(B, \gamma\) 是实数或复数，那么 ERF 就是适用的。
@@ -220,8 +220,8 @@ ERF 适应于求解常系数非齐次线性常微分方程，方程的常数项�
 </div>
 </div>
 
-<div id="outline-container-org7f011ba" class="outline-4">
-<h4 id="org7f011ba"><span class="section-number-4">3.1.2</span> LTI 算子</h4>
+<div id="outline-container-orgc72f478" class="outline-4">
+<h4 id="orgc72f478"><span class="section-number-4">3.1.2</span> LTI 算子</h4>
 <div class="outline-text-4" id="text-3-1-2">
 <p>
 当时不变（time-invariant）系统是线性的，那么它就叫做线性时不变系统（LTI system）。
@@ -269,8 +269,8 @@ ERF 适应于求解常系数非齐次线性常微分方程，方程的常数项�
 </div>
 </div>
 
-<div id="outline-container-org97b628b" class="outline-4">
-<h4 id="org97b628b"><span class="section-number-4">3.1.3</span> ERF 方法</h4>
+<div id="outline-container-org9eda225" class="outline-4">
+<h4 id="org9eda225"><span class="section-number-4">3.1.3</span> ERF 方法</h4>
 <div class="outline-text-4" id="text-3-1-3">
 <p>
 考虑上面的 LTI 微分方程，当输入为 \(f(t) = Be^{\gamma t}\) 时，可以得到一个特解：
@@ -331,8 +331,8 @@ ERF 的一般形式：
 </div>
 </div>
 
-<div id="outline-container-org5c68e39" class="outline-3">
-<h3 id="org5c68e39"><span class="section-number-3">3.2</span> 待定系数法</h3>
+<div id="outline-container-orgefcdf01" class="outline-3">
+<h3 id="orgefcdf01"><span class="section-number-3">3.2</span> 待定系数法</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 待定系数法（method of undetermined coefficients）是一种求某些种类非齐次常微分方程和差分方程（recurrence relation）的方法。它不如常数变易法普遍，因为它只能求取几种特定形式的微分方程。
@@ -343,8 +343,8 @@ ERF 的一般形式：
 </p>
 </div>
 
-<div id="outline-container-org162ab3e" class="outline-4">
-<h4 id="org162ab3e"><span class="section-number-4">3.2.1</span> 方法描述</h4>
+<div id="outline-container-orge82e753" class="outline-4">
+<h4 id="orge82e753"><span class="section-number-4">3.2.1</span> 方法描述</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <p>
 考虑下面形式的非齐次常微分方程
@@ -420,8 +420,8 @@ ERF 的一般形式：
 </div>
 </div>
 
-<div id="outline-container-org8ef7582" class="outline-3">
-<h3 id="org8ef7582"><span class="section-number-3">3.3</span> 常数变易法</h3>
+<div id="outline-container-org3e5ff1a" class="outline-3">
+<h3 id="org3e5ff1a"><span class="section-number-3">3.3</span> 常数变易法</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 常数变易法（variation of parameters）（variation of constants）是一种求解非齐次线性常微分方程的普遍方法。
@@ -505,8 +505,8 @@ ERF 的一般形式：
 </div>
 </div>
 
-<div id="outline-container-org59f3ec6" class="outline-3">
-<h3 id="org59f3ec6"><span class="section-number-3">3.4</span> 一阶变系数线性常微分方程</h3>
+<div id="outline-container-org445b8fd" class="outline-3">
+<h3 id="org445b8fd"><span class="section-number-3">3.4</span> 一阶变系数线性常微分方程</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 一阶线性常微分方程的一般形式为
@@ -557,8 +557,8 @@ ERF 的一般形式：
 </p>
 </div>
 
-<div id="outline-container-org6e3ace9" class="outline-4">
-<h4 id="org6e3ace9"><span class="section-number-4">3.4.1</span> 常数变易法推导</h4>
+<div id="outline-container-org2b00fe3" class="outline-4">
+<h4 id="org2b00fe3"><span class="section-number-4">3.4.1</span> 常数变易法推导</h4>
 <div class="outline-text-4" id="text-3-4-1">
 <p>
 设方程为 \(y^{'} + p(x)y = q(x)\)
@@ -632,8 +632,8 @@ ERF 的一般形式：
 </div>
 </div>
 
-<div id="outline-container-org1b53d92" class="outline-2">
-<h2 id="org1b53d92"><span class="section-number-2">4</span> 柯西-欧拉方程</h2>
+<div id="outline-container-org49ef4d1" class="outline-2">
+<h2 id="org49ef4d1"><span class="section-number-2">4</span> 柯西-欧拉方程</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 柯西-欧拉方程（Cauchy-Eular equation）也叫欧拉-柯西方程（Euler-Cauchy equation），或直接称为欧拉方程。它是一个线性齐次常微分方程。具有以下形式
@@ -649,8 +649,8 @@ ERF 的一般形式：
 </div>
 </div>
 
-<div id="outline-container-orgdee6bf3" class="outline-2">
-<h2 id="orgdee6bf3"><span class="section-number-2">5</span> 参考资料</h2>
+<div id="outline-container-org1b3b0c8" class="outline-2">
+<h2 id="org1b3b0c8"><span class="section-number-2">5</span> 参考资料</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 《信号分析与处理》—— 马立玲 沈伟
@@ -684,7 +684,7 @@ ERF 的一般形式：
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-03-19 Thu 00:00</p> <p>Last modified: 2021-08-03 Tue 10:21</p>
+<p>Create Date: 2020-03-19 Thu 00:00</p> <p>Last modified: 2021-08-04 Wed 13:05</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

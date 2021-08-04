@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 16:51 -->
+<!-- 2021-08-04 Wed 13:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Win32编程基础之键盘输入 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,27 +51,27 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgfc28c97">1. 键盘的输入模式</a></li>
-<li><a href="#orgcc611ca">2. 键盘焦点与活跃窗口</a></li>
-<li><a href="#org0c96d68">3. 击键消息</a>
+<li><a href="#org5f11d9d">1. 键盘的输入模式</a></li>
+<li><a href="#org023ef79">2. 键盘焦点与活跃窗口</a></li>
+<li><a href="#orgbcdc31e">3. 击键消息</a>
 <ul>
-<li><a href="#org6cf3205">3.1. 系统和非系统击键</a></li>
-<li><a href="#orgfb78b7b">3.2. 虚拟键码</a></li>
-<li><a href="#org312fcb7">3.3. 击键消息标志</a></li>
+<li><a href="#orgb2ba6ec">3.1. 系统和非系统击键</a></li>
+<li><a href="#org1e9226b">3.2. 虚拟键码</a></li>
+<li><a href="#orge02d859">3.3. 击键消息标志</a></li>
 </ul>
 </li>
-<li><a href="#org7ccd9ee">4. 字符消息</a>
+<li><a href="#org9712a2e">4. 字符消息</a>
 <ul>
-<li><a href="#orgf0ca864">4.1. 非系统字符消息</a></li>
-<li><a href="#org55ec4f2">4.2. 死字符消息</a></li>
+<li><a href="#org2cca5be">4.1. 非系统字符消息</a></li>
+<li><a href="#orgbc33977">4.2. 死字符消息</a></li>
 </ul>
 </li>
-<li><a href="#orgfb51644">5. 按键状态</a></li>
-<li><a href="#orgbe22bee">6. 击键与字符翻译</a></li>
-<li><a href="#org7fef06b">7. 热键支持</a></li>
-<li><a href="#org831f78f">8. 模拟输入</a></li>
-<li><a href="#org5219cc5">9. 语言，地区和键盘布局</a></li>
-<li><a href="#org1c8ad5a">10. 参考资料</a></li>
+<li><a href="#orgd4c9dad">5. 按键状态</a></li>
+<li><a href="#org366373b">6. 击键与字符翻译</a></li>
+<li><a href="#org03594de">7. 热键支持</a></li>
+<li><a href="#org13da499">8. 模拟输入</a></li>
+<li><a href="#org1b8432b">9. 语言，地区和键盘布局</a></li>
+<li><a href="#org08102be">10. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -79,8 +79,8 @@
 应用应该能够接收来自用户的键盘输入。键盘输入以投递的方式让应用进行接收。
 </p>
 
-<div id="outline-container-orgfc28c97" class="outline-2">
-<h2 id="orgfc28c97"><span class="section-number-2">1</span> 键盘的输入模式</h2>
+<div id="outline-container-org5f11d9d" class="outline-2">
+<h2 id="org5f11d9d"><span class="section-number-2">1</span> 键盘的输入模式</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 通过为当前键盘安装合适的键盘设备驱动，系统提供了设备独立的键盘支持。通过使用语言特定的键盘布局，系统提供了语言独立的键盘布局（keyboard layout）支持，这个可以由用户或应用设置。键盘设备驱动从键盘接收扫描码，它被发送到键盘布局，在那里它被翻译为消息并投递到应用合适的窗口中。
@@ -96,8 +96,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgcc611ca" class="outline-2">
-<h2 id="orgcc611ca"><span class="section-number-2">2</span> 键盘焦点与活跃窗口</h2>
+<div id="outline-container-org023ef79" class="outline-2">
+<h2 id="org023ef79"><span class="section-number-2">2</span> 键盘焦点与活跃窗口</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 系统将键盘消息投递到创建了窗口且窗口带有键盘焦点的线程的消息队列中。 <b>键盘焦点</b> 是窗口的一个暂时属性。系统通过移动键盘焦点来让所有显示的窗口共享键盘，它根据用户的指令，从一个窗口移动到另一个。拥有键盘焦点的窗口接收所有的键盘消息（从创建它的线程的消息队列中）直到焦点移动到了另一个窗口。
@@ -125,8 +125,8 @@
 </div>
 </div>
 
-<div id="outline-container-org0c96d68" class="outline-2">
-<h2 id="org0c96d68"><span class="section-number-2">3</span> 击键消息</h2>
+<div id="outline-container-orgbcdc31e" class="outline-2">
+<h2 id="orgbcdc31e"><span class="section-number-2">3</span> 击键消息</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 按下一个键会导致 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown">WM_KEYDOWN</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown">WM_SYSKEYDOWN</a> 消息被放在拥有键盘焦点的窗口所在线程的消息队列中。释放是个键会导致 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keyup">WM_KEYUP</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeyup">WM_SYSKEYUP</a> 消息放在队列中。
@@ -137,8 +137,8 @@
 </p>
 </div>
 
-<div id="outline-container-org6cf3205" class="outline-3">
-<h3 id="org6cf3205"><span class="section-number-3">3.1</span> 系统和非系统击键</h3>
+<div id="outline-container-orgb2ba6ec" class="outline-3">
+<h3 id="orgb2ba6ec"><span class="section-number-3">3.1</span> 系统和非系统击键</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 系统区分系统和非系统击键。系统击键会产生系统击键消息，<a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown">WM_SYSKEYDOWN</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeyup">WM_SYSKEYUP</a>。非系统击键会产生非系统击键消息， <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown">WM_KEYDOWN</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keyup">WM_KEYUP</a>。
@@ -158,8 +158,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgfb78b7b" class="outline-3">
-<h3 id="orgfb78b7b"><span class="section-number-3">3.2</span> 虚拟键码</h3>
+<div id="outline-container-org1e9226b" class="outline-3">
+<h3 id="org1e9226b"><span class="section-number-3">3.2</span> 虚拟键码</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 击键消息的 <b>wParam</b> 参数包含着一个被按压或释放的按键的虚拟键码。窗口过程可以根据虚拟键码的值来处理或忽略击键消息。
@@ -175,15 +175,15 @@
 </div>
 </div>
 
-<div id="outline-container-org312fcb7" class="outline-3">
-<h3 id="org312fcb7"><span class="section-number-3">3.3</span> 击键消息标志</h3>
+<div id="outline-container-orge02d859" class="outline-3">
+<h3 id="orge02d859"><span class="section-number-3">3.3</span> 击键消息标志</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 击键消息的 <b>lParam</b> 参数包含生成消息的击键的额外信息。这个信息包括重复计数（repeat count），扫描码（scan code），拓展键标志（extended-key flag），内容码（context code），之前的键状态标志（previous key-state flag），和过渡状态标志（transition-state flag）。下面的插图展示了这些标志的在 <b>lParam</b> 中的位置。
 </p>
 
 
-<div id="org2b4b727" class="figure">
+<div id="orgd65bdb3" class="figure">
 <p><img src="./1.png" alt="1.png" />
 </p>
 </div>
@@ -208,8 +208,8 @@
 </div>
 
 
-<div id="outline-container-org077be79" class="outline-4">
-<h4 id="org077be79"><span class="section-number-4">3.3.1</span> 重复计数</h4>
+<div id="outline-container-org5ea657f" class="outline-4">
+<h4 id="org5ea657f"><span class="section-number-4">3.3.1</span> 重复计数</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 你可以检查重复计数来判断击键消息是否表示多于一个击键。系统在键盘生成 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown">WM_KEYDOWN</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown">WM_SYSKEYDOWN</a> 消息快于应用处理速度时会增加这个计数。这通常发生在用户按住一个键足够长的事件开启键盘自动重复特性时。系统不会将生成的按键消息填满系统消息队列，而是将消息组合成一个按键消息并增加重复计数。对按键释放不会启动自动重复特性，因此 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keyup">WM_KEYUP</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeyup">WM_SYSKEYUP</a> 消息的重复计数值总是 1。
@@ -217,8 +217,8 @@
 </div>
 </div>
 
-<div id="outline-container-org6e59c8d" class="outline-4">
-<h4 id="org6e59c8d"><span class="section-number-4">3.3.2</span> 扫描码</h4>
+<div id="outline-container-org1bbe12a" class="outline-4">
+<h4 id="org1bbe12a"><span class="section-number-4">3.3.2</span> 扫描码</h4>
 <div class="outline-text-4" id="text-3-3-2">
 <p>
 扫描码是键盘硬件在用户按下键时生成的值。它是与设备相关的值，用于标识按下的键，而不是键所代表的字符。应用一般忽略扫描码，使用设备独立的虚拟键代码来解释击键消息。
@@ -226,8 +226,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgaf4d55d" class="outline-4">
-<h4 id="orgaf4d55d"><span class="section-number-4">3.3.3</span> 拓展键标志</h4>
+<div id="outline-container-org58b07a3" class="outline-4">
+<h4 id="org58b07a3"><span class="section-number-4">3.3.3</span> 拓展键标志</h4>
 <div class="outline-text-4" id="text-3-3-3">
 <p>
 拓展键标志指明了击键消息是否来自增强键盘上额外的键。拓展键包括：键盘右手边的 ALT 和 CTRL 键；INS，DEL，HOME，END，PAGE UP，PAGE DOWN，数字小键盘中的箭头键；NUM LOCK；BREAK 键；PRINT SCAN 键；以及在数字小键盘上的除号键（/）和 ENTER 键。如果按键是一个拓展键的话，拓展键标志会被设置。
@@ -235,8 +235,8 @@
 </div>
 </div>
 
-<div id="outline-container-org01e2db4" class="outline-4">
-<h4 id="org01e2db4"><span class="section-number-4">3.3.4</span> 内容码</h4>
+<div id="outline-container-org11414d9" class="outline-4">
+<h4 id="org11414d9"><span class="section-number-4">3.3.4</span> 内容码</h4>
 <div class="outline-text-4" id="text-3-3-4">
 <p>
 内容码指明在击键消息生成时是否按下了 ALT 键。如果按下了则内容码为 1，否则为 0。
@@ -244,8 +244,8 @@
 </div>
 </div>
 
-<div id="outline-container-org786d528" class="outline-4">
-<h4 id="org786d528"><span class="section-number-4">3.3.5</span> 先前键状态标志</h4>
+<div id="outline-container-org09582d6" class="outline-4">
+<h4 id="org09582d6"><span class="section-number-4">3.3.5</span> 先前键状态标志</h4>
 <div class="outline-text-4" id="text-3-3-5">
 <p>
 先前键状态标志指明生成击键消息的按钮之前是按下还是放起的状态。如果它的值是 1 则说明之前是按下状态，是 0 则说明是放起状态。你可以使用这个标志来判断消息是否是由键盘自动重复特性生成的击键消息。对由自动重复特性生成的 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown">WM_KEYDOWN</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown">WM_SYSKEYDOWN</a>，这个标志被设为 1。对于 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keyup">WM_KEYUP</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeyup">WM_SYSKEYUP</a> 消息，它总是被设为 0。
@@ -253,8 +253,8 @@
 </div>
 </div>
 
-<div id="outline-container-org6d5f048" class="outline-4">
-<h4 id="org6d5f048"><span class="section-number-4">3.3.6</span> 过渡状态标志</h4>
+<div id="outline-container-orgcbd1862" class="outline-4">
+<h4 id="orgcbd1862"><span class="section-number-4">3.3.6</span> 过渡状态标志</h4>
 <div class="outline-text-4" id="text-3-3-6">
 <p>
 过渡状态标志指明是按下或释放一个键生成了击键消息。对于 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown">WM_KEYDOWN</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown">WM_SYSKEYDOWN</a> 消息它总是 0；对于 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keyup">WM_KEYUP</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeyup">WM_SYSKEYUP</a> 消息，它总是 1。
@@ -264,16 +264,16 @@
 </div>
 </div>
 
-<div id="outline-container-org7ccd9ee" class="outline-2">
-<h2 id="org7ccd9ee"><span class="section-number-2">4</span> 字符消息</h2>
+<div id="outline-container-org9712a2e" class="outline-2">
+<h2 id="org9712a2e"><span class="section-number-2">4</span> 字符消息</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 击键消息提供了许多关于击键的消息，但是它们没有提供字符击键的字符代码。要想得到字符码，应用必须使用 <b>TranslateMessage</b> 函数。 <b>TranslateMessage</b> 将 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown">WM_KEYDOWN</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown">WM_SYSKEYDOWN</a> 消息传递给键盘布局。键盘布局会测试消息的虚拟键代码，如果它对应与一个字符键的话，则提供等效的字符码（它会考虑按下 SHIFT 和 CAPS LOCK 按键的情况）。它随后生成一个包括字符码的字符消息，并放在消息队列的最前面。下一次的消息循环迭代会从队列移除字符消息并将消息分派到合适的窗口过程。
 </p>
 </div>
 
-<div id="outline-container-orgf0ca864" class="outline-3">
-<h3 id="orgf0ca864"><span class="section-number-3">4.1</span> 非系统字符消息</h3>
+<div id="outline-container-org2cca5be" class="outline-3">
+<h3 id="org2cca5be"><span class="section-number-3">4.1</span> 非系统字符消息</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 窗口过程可以接收这些字符消息：<a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-char">WM_CHAR</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-deadchar">WM_DEADCHAR</a>，<a href="https://docs.microsoft.com/en-us/windows/desktop/menurc/wm-syschar">WM_SYSCHAR</a>, <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-sysdeadchar">WM_SYSDEADCHAR</a>，和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-unichar">WM_UNICHAR</a>。 <b>TranslateMessage</b> 函数在处理 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-keydown">WM_KEYDOWN</a> 消息时会生成 <b>WM_CHAR</b> 或 <b>WM_DEADCHAR</b> 消息。类似地，他会在处理 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown">WM_SYSKEYDOWN</a> 消息时生成 <b>WM_SYSCHAR</b> 或 <b>WM_SYSDEADCHAR</b> 消息。
@@ -293,8 +293,8 @@
 </div>
 </div>
 
-<div id="outline-container-org55ec4f2" class="outline-3">
-<h3 id="org55ec4f2"><span class="section-number-3">4.2</span> 死字符消息</h3>
+<div id="outline-container-orgbc33977" class="outline-3">
+<h3 id="orgbc33977"><span class="section-number-3">4.2</span> 死字符消息</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 一些非英语键盘包含一些不被期望产生字符的键，它们被用于为后续击键的字符添加变音符号。这些键被叫做 *死键*。德语键盘上的抑扬琴键（circumflex）是一个例子。要想输入一个由 "o" 和抑扬符组成的字符，德国用户会按一次抑扬键，并随后按一次 "o" 键。拥有键盘焦点的窗口会收到以下字符序列：
@@ -320,8 +320,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgfb51644" class="outline-2">
-<h2 id="orgfb51644"><span class="section-number-2">5</span> 按键状态</h2>
+<div id="outline-container-orgd4c9dad" class="outline-2">
+<h2 id="orgd4c9dad"><span class="section-number-2">5</span> 按键状态</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 当处理键盘消息时，除了当前生成消息的键外，应用可能需要判断其他键的状态。例如，文字处理应用允许用户使用 <code>SHIFT+END</code> 来选取一块文本，只要它从 END 键接收到击键消息，就必须检查 SHIFT 键的状态。应用可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getkeystate">GetKeyState</a> 函数来判断一个虚拟键在当前消息生成时的状态；它也可以使用<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate">GetAsyncKeyState</a> 函数来判断虚拟键的当前状态。（两者的区别在于键盘消息生成时的状态与当前调用函数时的按键状态）
@@ -333,8 +333,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgbe22bee" class="outline-2">
-<h2 id="orgbe22bee"><span class="section-number-2">6</span> 击键与字符翻译</h2>
+<div id="outline-container-org366373b" class="outline-2">
+<h2 id="org366373b"><span class="section-number-2">6</span> 击键与字符翻译</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 系统包括了几个翻译由各种击键消息生成的扫描码、字符码和虚拟键码的特殊目的函数。这些函数包括 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mapvirtualkeya">MapVirtualKeyA</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-toascii">ToAscii</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-tounicode">ToUnicode</a>，<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-vkkeyscana">VkKeyScanA</a>。
@@ -346,8 +346,8 @@
 </div>
 </div>
 
-<div id="outline-container-org7fef06b" class="outline-2">
-<h2 id="org7fef06b"><span class="section-number-2">7</span> 热键支持</h2>
+<div id="outline-container-org03594de" class="outline-2">
+<h2 id="org03594de"><span class="section-number-2">7</span> 热键支持</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 <b>热键</b> 是一个生成 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-hotkey">WM_HOTKEY</a> 消息的键组合，系统将它放在线程消息队列的最前面。使用使用热键来从用户处获得高优先级的键盘输入。例如，通过定义 <code>CTRL + C</code> 的组合键为热键，应用允许用户取消一个冗长的操作。
@@ -363,8 +363,8 @@
 </div>
 </div>
 
-<div id="outline-container-org831f78f" class="outline-2">
-<h2 id="org831f78f"><span class="section-number-2">8</span> 模拟输入</h2>
+<div id="outline-container-org13da499" class="outline-2">
+<h2 id="org13da499"><span class="section-number-2">8</span> 模拟输入</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 想要模拟一系列不间断用户输入事件，可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput">SendInput</a> 函数。这个函数接受三个参数。第一个参数 <b>cInputs</b> 指明将要模拟的输入的数量。第二个参数 <b>rgInputs</b> 是一个 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-input">INPUT</a> 结构数组，其中的元素描述了输入事件类型以及额外的事件信息。最后一个参数 <b>cbSize</b> ，接收 <b>INPUT</b> 结构的大小，以字节为单位。
@@ -380,8 +380,8 @@
 </div>
 </div>
 
-<div id="outline-container-org5219cc5" class="outline-2">
-<h2 id="org5219cc5"><span class="section-number-2">9</span> 语言，地区和键盘布局</h2>
+<div id="outline-container-org1b8432b" class="outline-2">
+<h2 id="org1b8432b"><span class="section-number-2">9</span> 语言，地区和键盘布局</h2>
 <div class="outline-text-2" id="text-9">
 <p>
 <b>语言</b> 指一种自然语言，比如英语，法语和日语。 <b>子语言</b> 是一种自然语言的一种变种，指特定地理区域使用的语言，比如在英国的英语和美国的英语。应用可以使用叫做语言标识符（<a href="https://docs.microsoft.com/en-us/windows/desktop/Intl/language-identifiers">language identifiers</a>）的值来唯一地确定语言和子语言。
@@ -417,22 +417,22 @@
 </div>
 </div>
 
-<div id="outline-container-org1c8ad5a" class="outline-2">
-<h2 id="org1c8ad5a"><span class="section-number-2">10</span> 参考资料</h2>
+<div id="outline-container-org08102be" class="outline-2">
+<h2 id="org08102be"><span class="section-number-2">10</span> 参考资料</h2>
 <div class="outline-text-2" id="text-10">
 <p>
-<a id="org48a506d">【1】</a> About Keyboard Input： <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/about-keyboard-input">https://docs.microsoft.com/en-us/windows/win32/inputdev/about-keyboard-input</a>
+<a id="org6e24b6d">【1】</a> About Keyboard Input： <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/about-keyboard-input">https://docs.microsoft.com/en-us/windows/win32/inputdev/about-keyboard-input</a>
 </p>
 
 <p>
-<a id="org02a3f71">【2】</a>  <i>Programming Windows</i> , Charles Petzold
+<a id="org65882b2">【2】</a>  <i>Programming Windows</i> , Charles Petzold
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-07-13 Mon 00:00</p> <p>Last modified: 2021-08-03 Tue 16:48</p>
+<p>Create Date: 2020-07-13 Mon 00:00</p> <p>Last modified: 2021-08-04 Wed 13:08</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

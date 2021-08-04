@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 12:50 -->
+<!-- 2021-08-04 Wed 13:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>使用emacs作为app启动器 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMzYyMjUy.jpg" alt="load failed"></div></title>
@@ -51,15 +51,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgacfad25">1. 桌面的效率问题</a></li>
-<li><a href="#org9939360">2. app-launcher 拓展</a>
+<li><a href="#orge1a5cb6">1. 桌面的效率问题</a></li>
+<li><a href="#orgcf731dd">2. app-launcher 拓展</a>
 <ul>
-<li><a href="#org34567bf">2.1. app-launcher 的实现</a></li>
-<li><a href="#orgb889bd6">2.2. app-launcher 的使用</a></li>
+<li><a href="#org5713b8c">2.1. app-launcher 的实现</a></li>
+<li><a href="#org49b1acc">2.2. app-launcher 的使用</a></li>
 </ul>
 </li>
-<li><a href="#org7ee2800">3. 后记</a></li>
-<li><a href="#orgff5b668">4. 参考资料</a></li>
+<li><a href="#org8ad5996">3. 后记</a></li>
+<li><a href="#org4eba6f7">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -79,15 +79,15 @@
 由于我常用的系统是 Windows，以下演示均在 emacs on windows 27.2 下进行。app-launcher 这个插件是跨平台的，linux 下应该也能很好的使用。
 </p>
 
-<div id="outline-container-orgacfad25" class="outline-2">
-<h2 id="orgacfad25"><span class="section-number-2">1</span> 桌面的效率问题</h2>
+<div id="outline-container-orge1a5cb6" class="outline-2">
+<h2 id="orge1a5cb6"><span class="section-number-2">1</span> 桌面的效率问题</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 事先声明：我对于怎么打开应用和如何使用桌面并没有偏见，下面的文字仅代表我认为有一定道理的观点，如果您不认同，那就是我的问题。
 </p>
 
 <p>
-一般来说，在 Windows 上安装完某个软件后，软件会自动在桌面添加一个快捷方式，通过双击它或者右键选择”打开“就可以运行该应用了。但是，应用的打开方式放在桌面上就会有一个问题，那就是如果你正在使用其他应用又想要打开新应用的话，你就必须先回到桌面才能打开。知乎用户 pansz 在他的一个回答<a href="#orga7e6a68">【1】</a>中这样写到：
+一般来说，在 Windows 上安装完某个软件后，软件会自动在桌面添加一个快捷方式，通过双击它或者右键选择”打开“就可以运行该应用了。但是，应用的打开方式放在桌面上就会有一个问题，那就是如果你正在使用其他应用又想要打开新应用的话，你就必须先回到桌面才能打开。知乎用户 pansz 在他的一个回答<a href="#orgb4c355d">【1】</a>中这样写到：
 </p>
 
 <blockquote>
@@ -105,7 +105,7 @@
 </p>
 
 <p>
-更好的方式是使用开始菜单中的图标和使用搜索功能。<a href="#orga7e6a68">【1】</a>中是这样描述的：
+更好的方式是使用开始菜单中的图标和使用搜索功能。<a href="#orgb4c355d">【1】</a>中是这样描述的：
 </p>
 
 <blockquote>
@@ -124,7 +124,7 @@
 </p>
 
 
-<div id="orgdf5f7cf" class="figure">
+<div id="orge7d30dc" class="figure">
 <p><img src="./1.png" alt="1.png" />
 </p>
 </div>
@@ -134,7 +134,7 @@
 </p>
 
 
-<div id="org67013fa" class="figure">
+<div id="orgb6b4abc" class="figure">
 <p><img src="./2.png" alt="2.png" />
 </p>
 </div>
@@ -160,11 +160,11 @@
 </div>
 </div>
 
-<div id="outline-container-org9939360" class="outline-2">
-<h2 id="org9939360"><span class="section-number-2">2</span> app-launcher 拓展</h2>
+<div id="outline-container-orgcf731dd" class="outline-2">
+<h2 id="orgcf731dd"><span class="section-number-2">2</span> app-launcher 拓展</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-使用 <code>use emacs as app launcher</code> 来作为搜索关键词并 google 就可以看到这个 emacs 包<a href="#org2f620fd">【2】</a>了。顺带还可以看到两篇与此有关的文章，但是它们主要是在 Linux 上使用 emacs，某些操作可能并不适用于 Windows，所以只能作为参考。
+使用 <code>use emacs as app launcher</code> 来作为搜索关键词并 google 就可以看到这个 emacs 包<a href="#org9733ca0">【2】</a>了。顺带还可以看到两篇与此有关的文章，但是它们主要是在 Linux 上使用 emacs，某些操作可能并不适用于 Windows，所以只能作为参考。
 </p>
 
 <ul class="org-ul">
@@ -175,15 +175,15 @@
 
 
 <p>
-打开<a href="#org2f620fd">【2】</a>的主页面就可以看到 elisp 源代码文件了。整个文件只有 200 行不到，代码读起来比较轻松且容易理解作者意图。这一节下面会分为两个小节，一节介绍代码的实现，另一节介绍插件的安装和使用。
+打开<a href="#org9733ca0">【2】</a>的主页面就可以看到 elisp 源代码文件了。整个文件只有 200 行不到，代码读起来比较轻松且容易理解作者意图。这一节下面会分为两个小节，一节介绍代码的实现，另一节介绍插件的安装和使用。
 </p>
 </div>
 
-<div id="outline-container-org34567bf" class="outline-3">
-<h3 id="org34567bf"><span class="section-number-3">2.1</span> app-launcher 的实现</h3>
+<div id="outline-container-org5713b8c" class="outline-3">
+<h3 id="org5713b8c"><span class="section-number-3">2.1</span> app-launcher 的实现</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
-在正式开始前，我们首先介绍一下 xdg 是个什么东西，以下内容参考自<a href="#orgfc6abd2">【3】</a>。这里要感谢强大的 arch 文档。
+在正式开始前，我们首先介绍一下 xdg 是个什么东西，以下内容参考自<a href="#org63d113c">【3】</a>。这里要感谢强大的 arch 文档。
 </p>
 
 <p>
@@ -208,7 +208,7 @@ XDG 桌面配置规范（XDG Desktop Entry specification）为应用程序和桌
 </p>
 
 <p>
-也就是说，在 linux 中，按照规则编写了 .desktop 文件并放入某个特定文件夹中的话，就可以在菜单中显示文件中描述的应用了。关于 xdg 的标准介绍就到这里，可以在<a href="#orgfc6abd2">【3】</a>中了解更多信息。.desktop 文件的编写我会在下一小节中介绍。以下就是对 app-launcher.el 文件中各个变量和函数的逐个分析过程了，觉得没意思可以不看。
+也就是说，在 linux 中，按照规则编写了 .desktop 文件并放入某个特定文件夹中的话，就可以在菜单中显示文件中描述的应用了。关于 xdg 的标准介绍就到这里，可以在<a href="#org63d113c">【3】</a>中了解更多信息。.desktop 文件的编写我会在下一小节中介绍。以下就是对 app-launcher.el 文件中各个变量和函数的逐个分析过程了，觉得没意思可以不看。
 </p>
 
 <ul class="org-ul">
@@ -238,16 +238,16 @@ XDG 桌面配置规范（XDG Desktop Entry specification）为应用程序和桌
 </div>
 </div>
 
-<div id="outline-container-orgb889bd6" class="outline-3">
-<h3 id="orgb889bd6"><span class="section-number-3">2.2</span> app-launcher 的使用</h3>
+<div id="outline-container-org49b1acc" class="outline-3">
+<h3 id="org49b1acc"><span class="section-number-3">2.2</span> app-launcher 的使用</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 这一节就是 app-launcher 使用的全流程教学，我把我的使用方法记录在这里，希望对你有所帮助。
 </p>
 </div>
 
-<div id="outline-container-org762bdbb" class="outline-4">
-<h4 id="org762bdbb"><span class="section-number-4">2.2.1</span> 下载和”安装“ app-launcher</h4>
+<div id="outline-container-org6b67907" class="outline-4">
+<h4 id="org6b67907"><span class="section-number-4">2.2.1</span> 下载和”安装“ app-launcher</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 第一步自然是下载了，下载的话可以有很多方法，最简单的是：
@@ -263,7 +263,7 @@ XDG 桌面配置规范（XDG Desktop Entry specification）为应用程序和桌
 </p>
 
 
-<div id="org6af42c4" class="figure">
+<div id="org29a711d" class="figure">
 <p><img src="./3.png" alt="3.png" />
 </p>
 </div>
@@ -283,8 +283,8 @@ XDG 桌面配置规范（XDG Desktop Entry specification）为应用程序和桌
 </div>
 </div>
 
-<div id="outline-container-org06dc89c" class="outline-4">
-<h4 id="org06dc89c"><span class="section-number-4">2.2.2</span> 配置 app-launcher</h4>
+<div id="outline-container-org92cd0d8" class="outline-4">
+<h4 id="org92cd0d8"><span class="section-number-4">2.2.2</span> 配置 app-launcher</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 通过源代码可知， <code>app-launcher-run-app</code> 是一个被标记为 <code>autoload</code> 的函数，也就是说你可以使用 <code>autoload</code> 来将其动态加载，不过不动态加载也没问题就是了。这里我将它绑定到 <code>C-c y</code> 上并写入 init.el 文件中：
@@ -303,8 +303,8 @@ XDG 桌面配置规范（XDG Desktop Entry specification）为应用程序和桌
 </div>
 </div>
 
-<div id="outline-container-org4a98174" class="outline-4">
-<h4 id="org4a98174"><span class="section-number-4">2.2.3</span> 编写 .desktop 文件</h4>
+<div id="outline-container-orgc5d119e" class="outline-4">
+<h4 id="orgc5d119e"><span class="section-number-4">2.2.3</span> 编写 .desktop 文件</h4>
 <div class="outline-text-4" id="text-2-2-3">
 <p>
 上面我已经说到，xdg 的默认目录是 <code>~/.local/share/applications</code> （Windows 下另外两个没用），也就是说你要把你的 .desktop 文件全都放在该目录下。Windows 中用户目录就是 HOME 目录（不过我一般习惯自己加 HOME 环境变量），在用户目录下创建 <code>.local/share/application</code> 即可。（也可以修改 <code>app-launcher-apps-directories</code> 的值让它更简单一点）
@@ -331,7 +331,7 @@ Exec=notepad.exe
 </p>
 
 
-<div id="org2aa292e" class="figure">
+<div id="org3f133cc" class="figure">
 <p><img src="./4.gif" alt="4.gif" />
 </p>
 </div>
@@ -345,7 +345,7 @@ Exec=notepad.exe
 </p>
 
 
-<div id="org6fb1a48" class="figure">
+<div id="org7d24bba" class="figure">
 <p><img src="./5.gif" alt="5.gif" />
 </p>
 </div>
@@ -355,7 +355,7 @@ Exec=notepad.exe
 </p>
 
 
-<div id="org3cfb89b" class="figure">
+<div id="org45d8e99" class="figure">
 <p><img src="./6.gif" alt="6.gif" />
 </p>
 </div>
@@ -372,8 +372,8 @@ Exec=notepad.exe
 </div>
 </div>
 
-<div id="outline-container-org7ee2800" class="outline-2">
-<h2 id="org7ee2800"><span class="section-number-2">3</span> 后记</h2>
+<div id="outline-container-org8ad5996" class="outline-2">
+<h2 id="org8ad5996"><span class="section-number-2">3</span> 后记</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 app-launcher 只提供了运行方法，没有提供修改 .desktop 文件的函数或命令，如果要对这个包进行一定的拓展的话可以考虑使用 minbuffer 提供简单的增删查改。
@@ -396,33 +396,33 @@ app-launcher 只提供了运行方法，没有提供修改 .desktop 文件的函
 </p>
 
 
-<div id="org511fda5" class="figure">
+<div id="org4511d89" class="figure">
 <p><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzY0NTI5MDA4.jpg" alt="aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzY0NTI5MDA4.jpg" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgff5b668" class="outline-2">
-<h2 id="orgff5b668"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-org4eba6f7" class="outline-2">
+<h2 id="org4eba6f7"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="orga7e6a68">【1】</a> <a href="https://www.zhihu.com/question/358547747/answer/1155809347">https://www.zhihu.com/question/358547747/answer/1155809347</a>
+<a id="orgb4c355d">【1】</a> <a href="https://www.zhihu.com/question/358547747/answer/1155809347">https://www.zhihu.com/question/358547747/answer/1155809347</a>
 </p>
 
 <p>
-<a id="org2f620fd">【2】</a> <a href="https://github.com/SebastienWae/app-launcher">SebastienWae/app-launcher: Launch application from Emacs</a>
+<a id="org9733ca0">【2】</a> <a href="https://github.com/SebastienWae/app-launcher">SebastienWae/app-launcher: Launch application from Emacs</a>
 </p>
 
 <p>
-<a id="orgfc6abd2">【3】</a> <a href="https://wiki.archlinux.org/title/Desktop_entries_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)">Desktop entries (简体中文) - ArchWiki (archlinux.org)</a>
+<a id="org63d113c">【3】</a> <a href="https://wiki.archlinux.org/title/Desktop_entries_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)">Desktop entries (简体中文) - ArchWiki (archlinux.org)</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-07-29 Thu 00:00</p> <p>Last modified: 2021-08-04 Wed 12:49</p>
+<p>Create Date: 2021-07-29 Thu 00:00</p> <p>Last modified: 2021-08-04 Wed 13:11</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

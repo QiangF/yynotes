@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 11:57 -->
+<!-- 2021-08-04 Wed 13:05 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>傅里叶级数与傅里叶变换</title>
@@ -73,25 +73,25 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4704813">1. 正交函数</a></li>
-<li><a href="#orga3c82d7">2. 傅里叶级数</a>
+<li><a href="#orgfc21c8b">1. 正交函数</a></li>
+<li><a href="#orge9d6902">2. 傅里叶级数</a>
 <ul>
-<li><a href="#orga4b9bee">2.1. 定义</a></li>
-<li><a href="#org1f3ba4f">2.2. 收敛性</a></li>
-<li><a href="#org0f8be6b">2.3. 性质</a></li>
-<li><a href="#orgdf36a1e">2.4. 基本运算性质</a></li>
+<li><a href="#org3ebff9e">2.1. 定义</a></li>
+<li><a href="#org024481d">2.2. 收敛性</a></li>
+<li><a href="#org6eabe86">2.3. 性质</a></li>
+<li><a href="#org680899d">2.4. 基本运算性质</a></li>
 </ul>
 </li>
-<li><a href="#org05abc88">3. 傅里叶变换</a>
+<li><a href="#org31bd7b4">3. 傅里叶变换</a>
 <ul>
-<li><a href="#orge00ac26">3.1. 定义</a></li>
-<li><a href="#orgea57350">3.2. 傅里叶级数与傅里叶变换的关系</a></li>
-<li><a href="#org05234c3">3.3. 性质</a></li>
-<li><a href="#org178c86c">3.4. 常用函数的傅里叶变换</a></li>
+<li><a href="#org2bf0801">3.1. 定义</a></li>
+<li><a href="#org0267444">3.2. 傅里叶级数与傅里叶变换的关系</a></li>
+<li><a href="#orgab26448">3.3. 性质</a></li>
+<li><a href="#orgc65b8a2">3.4. 常用函数的傅里叶变换</a></li>
 </ul>
 </li>
-<li><a href="#org6fbf101">4. 友情链接</a></li>
-<li><a href="#org6437303">5. 参考资料</a></li>
+<li><a href="#orge6bd49c">4. 友情链接</a></li>
+<li><a href="#org66568a3">5. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -107,8 +107,8 @@
 在正式开始对傅里叶级数和傅里叶变换的介绍之前，首先介绍下正交函数的概念。
 </p>
 
-<div id="outline-container-org4704813" class="outline-2">
-<h2 id="org4704813"><span class="section-number-2">1</span> 正交函数</h2>
+<div id="outline-container-orgfc21c8b" class="outline-2">
+<h2 id="orgfc21c8b"><span class="section-number-2">1</span> 正交函数</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 在数学上，正交函数属于一个函数空间，该向量空间具有双线性形式。当函数空间以一个区间作为定义域时，双线性形式可以是两函数之积在区间上的积分：
@@ -164,12 +164,12 @@
 </div>
 </div>
 
-<div id="outline-container-orga3c82d7" class="outline-2">
-<h2 id="orga3c82d7"><span class="section-number-2">2</span> 傅里叶级数</h2>
+<div id="outline-container-orge9d6902" class="outline-2">
+<h2 id="orge9d6902"><span class="section-number-2">2</span> 傅里叶级数</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-orga4b9bee" class="outline-3">
-<h3 id="orga4b9bee"><span class="section-number-3">2.1</span> 定义</h3>
+<div id="outline-container-org3ebff9e" class="outline-3">
+<h3 id="org3ebff9e"><span class="section-number-3">2.1</span> 定义</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 考虑一个实值函数 \(s(x)\) ，它在一个长为 \(P\) 的区间上可积， \(P\) 将会作为傅里叶级数的周期。作为例子，一般选用 \(x \in [0, 1] , P = 1\) 或 \(x \in [- \pi, \pi] , P = 2\pi\) 。
@@ -288,8 +288,8 @@
 </div>
 </div>
 
-<div id="outline-container-org1f3ba4f" class="outline-3">
-<h3 id="org1f3ba4f"><span class="section-number-3">2.2</span> 收敛性</h3>
+<div id="outline-container-org024481d" class="outline-3">
+<h3 id="org024481d"><span class="section-number-3">2.2</span> 收敛性</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 在工程应用中，傅里叶级数被认为在除了不连续点的所有地方收敛，因为工程中遇到的函数的性质一般都很好。特别地，如果 \(s\) 是连续的而且 \(s(x)\) 的导数（不一定处处存在）在 \([x_0, x_0 +P]\) 是平方可积的（ \(\int_{x_0}^{x_0+P}|f(x)|^{2}dx < \infty\) ） ，那么 \(s\) 的傅里叶级数将完全收敛于 \(s(x)\) 。如果函数在区间 \([x_0, x_0 +P]\) 上平方可积，那么傅里叶级数几乎收敛于每一点。
@@ -314,8 +314,8 @@
 </div>
 </div>
 
-<div id="outline-container-org0f8be6b" class="outline-3">
-<h3 id="org0f8be6b"><span class="section-number-3">2.3</span> 性质</h3>
+<div id="outline-container-org6eabe86" class="outline-3">
+<h3 id="org6eabe86"><span class="section-number-3">2.3</span> 性质</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 记：
@@ -331,8 +331,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgdf36a1e" class="outline-3">
-<h3 id="orgdf36a1e"><span class="section-number-3">2.4</span> 基本运算性质</h3>
+<div id="outline-container-org680899d" class="outline-3">
+<h3 id="org680899d"><span class="section-number-3">2.4</span> 基本运算性质</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 下表给出了傅里叶级数的一些运算性质，它的性质与傅里叶变换极其相似，故大部分证明留到傅里叶变换时在加以说明。
@@ -447,8 +447,8 @@
 </table>
 </div>
 
-<div id="outline-container-org201f9ab" class="outline-4">
-<h4 id="org201f9ab"><span class="section-number-4">2.4.1</span> 黎曼-勒贝格定理<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>（Riemann–Lebesgue lemma）</h4>
+<div id="outline-container-org146ccaa" class="outline-4">
+<h4 id="org146ccaa"><span class="section-number-4">2.4.1</span> 黎曼-勒贝格定理<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>（Riemann–Lebesgue lemma）</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <p>
 如果 \(f(x)\) 是可积的，则
@@ -460,8 +460,8 @@
 </div>
 </div>
 
-<div id="outline-container-org1bca2b3" class="outline-4">
-<h4 id="org1bca2b3"><span class="section-number-4">2.4.2</span> 帕塞瓦尔定理<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>（Parseval's theorem）</h4>
+<div id="outline-container-org1f80e38" class="outline-4">
+<h4 id="org1f80e38"><span class="section-number-4">2.4.2</span> 帕塞瓦尔定理<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>（Parseval's theorem）</h4>
 <div class="outline-text-4" id="text-2-4-2">
 <p>
 假定 \(f(x), g(x)\) 都是可积的，则有（Plancherel theorem<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup>）
@@ -483,8 +483,8 @@
 </div>
 </div>
 
-<div id="outline-container-org05abc88" class="outline-2">
-<h2 id="org05abc88"><span class="section-number-2">3</span> 傅里叶变换</h2>
+<div id="outline-container-org31bd7b4" class="outline-2">
+<h2 id="org31bd7b4"><span class="section-number-2">3</span> 傅里叶变换</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 傅里叶变换来自于对傅里叶级数的研究。在对傅里叶级数的研究中发现，复杂的周期函数可以被写成简单的正弦函数的和。傅里叶变换是对傅里叶级数的一个拓展，它允许函数的周期拉长并达到无穷。
@@ -496,8 +496,8 @@
 </div>
 
 
-<div id="outline-container-orge00ac26" class="outline-3">
-<h3 id="orge00ac26"><span class="section-number-3">3.1</span> 定义</h3>
+<div id="outline-container-org2bf0801" class="outline-3">
+<h3 id="org2bf0801"><span class="section-number-3">3.1</span> 定义</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 函数 \(f\) 的傅里叶变换一般记作 \(\hat{f}\) ，即在函数符号上加帽。定义可积函数 \(f: R \rightarrow C\) 的傅里叶变换有着多种形式。
@@ -537,8 +537,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgea57350" class="outline-3">
-<h3 id="orgea57350"><span class="section-number-3">3.2</span> 傅里叶级数与傅里叶变换的关系</h3>
+<div id="outline-container-org0267444" class="outline-3">
+<h3 id="org0267444"><span class="section-number-3">3.2</span> 傅里叶级数与傅里叶变换的关系</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 对于在一段区间上之外全为 0 的函数 \(f\) ，它的傅里叶级数和傅里叶变换之间有着紧密联系。对这样一个函数，我们可以任意选择包含它所有非零点的区间来求取它的傅里叶级数，它的傅里叶变换也易于求取。随着我们增大我们选择的区间，傅里叶级数的系数变得越来越像傅里叶变换，对傅里叶级数的求和也越来越像傅里叶逆变换。
@@ -586,12 +586,12 @@
 </div>
 </div>
 
-<div id="outline-container-org05234c3" class="outline-3">
-<h3 id="org05234c3"><span class="section-number-3">3.3</span> 性质</h3>
+<div id="outline-container-orgab26448" class="outline-3">
+<h3 id="orgab26448"><span class="section-number-3">3.3</span> 性质</h3>
 <div class="outline-text-3" id="text-3-3">
 </div>
-<div id="outline-container-org1fd7e6c" class="outline-4">
-<h4 id="org1fd7e6c"><span class="section-number-4">3.3.1</span> 基本性质</h4>
+<div id="outline-container-orgd879f8b" class="outline-4">
+<h4 id="orgd879f8b"><span class="section-number-4">3.3.1</span> 基本性质</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 在下面的性质介绍中用到的函数 \(f(x), g(x), h(x)\) 都是可积函数，并满足
@@ -607,7 +607,7 @@
 </div>
 
 <ol class="org-ol">
-<li><a id="orga5ffe0a"></a><b>线性性</b><br />
+<li><a id="org6379dd9"></a><b>线性性</b><br />
 <div class="outline-text-5" id="text-3-3-1-1">
 <p>
 对任意复数 \(a, b\) ，设 \(h(x) = af(x) + bg(x)\) ，则有
@@ -619,7 +619,7 @@
 </div>
 </li>
 
-<li><a id="orgbabd17c"></a><b>时移性</b><br />
+<li><a id="orgbc7128b"></a><b>时移性</b><br />
 <div class="outline-text-5" id="text-3-3-1-2">
 <p>
 对任意实数 \(x_0\) ，若 \(h(x) = f(x - x_0)\) ，则
@@ -651,7 +651,7 @@
 </div>
 </li>
 
-<li><a id="org0f54f16"></a><b>频移性</b><br />
+<li><a id="orge11b7d5"></a><b>频移性</b><br />
 <div class="outline-text-5" id="text-3-3-1-3">
 <p>
 对任意实数 \(\xi_0\) ，若 \(h(x) = e^{2 \pi i x \xi_0}f(x)\) ，则
@@ -675,7 +675,7 @@
 </div>
 </li>
 
-<li><a id="org6822711"></a><b>时域伸缩</b><br />
+<li><a id="orgd65c5bd"></a><b>时域伸缩</b><br />
 <div class="outline-text-5" id="text-3-3-1-4">
 <p>
 对非零实数 \(a\) ，若 \(h(x) = f(ax)\) ，则
@@ -707,7 +707,7 @@
 </div>
 </li>
 
-<li><a id="org9688475"></a><b>共轭性</b><br />
+<li><a id="org7093833"></a><b>共轭性</b><br />
 <div class="outline-text-5" id="text-3-3-1-5">
 <p>
 若 \(h(x) = \overline{f(x)}\) ，则
@@ -735,7 +735,7 @@
 </div>
 </li>
 
-<li><a id="org41cce9c"></a><b>取实部和虚部</b><br />
+<li><a id="org3f6487c"></a><b>取实部和虚部</b><br />
 <div class="outline-text-5" id="text-3-3-1-6">
 <p>
 若 \(h(x) = Re(f(x))\) ,则
@@ -759,7 +759,7 @@
 </div>
 </li>
 
-<li><a id="org1ddfece"></a><b>时域微分</b><br />
+<li><a id="orgd30c875"></a><b>时域微分</b><br />
 <div class="outline-text-5" id="text-3-3-1-7">
 <p>
 假设 \(f(x)\) 是绝对连续可导函数，\(f, f^{'}\) 都是可积的，则有
@@ -799,7 +799,7 @@
 </div>
 </li>
 
-<li><a id="org2f20591"></a><b>频域微分</b><br />
+<li><a id="org91dbe3e"></a><b>频域微分</b><br />
 <div class="outline-text-5" id="text-3-3-1-8">
 <p>
 \((\hat{f})^{'}(\xi) = \widehat{(-2 \pi i x f(x))}\)
@@ -835,7 +835,7 @@
 </div>
 </li>
 
-<li><a id="orgb128842"></a><b>时域积分</b><br />
+<li><a id="orge8fcc86"></a><b>时域积分</b><br />
 <div class="outline-text-5" id="text-3-3-1-9">
 <p>
 \(\widehat{\int_{-\infty}^{x}{f}(t)dt} = \frac{1}{2} \hat{f}(\xi)(\delta(\xi) + \frac{1}{i \pi \xi})\)
@@ -855,7 +855,7 @@
 </div>
 </li>
 
-<li><a id="org36dc6ed"></a><b>频域积分</b><br />
+<li><a id="org0bf4d97"></a><b>频域积分</b><br />
 <div class="outline-text-5" id="text-3-3-1-10">
 <p>
 \(\int_{-\infty}^{\xi}\hat{f}(t)dt = \widehat{\frac{1}{2}f(x)(\delta(x) - \frac{1}{i \pi x})}\)
@@ -863,7 +863,7 @@
 </div>
 </li>
 
-<li><a id="org13b6774"></a><b>函数下的面积</b><br />
+<li><a id="org018f6c9"></a><b>函数下的面积</b><br />
 <div class="outline-text-5" id="text-3-3-1-11">
 <p>
 \(\hat{f}(0) = \int_{-\infty}^{\infty}f(x)dx\)
@@ -873,8 +873,8 @@
 </ol>
 </div>
 
-<div id="outline-container-orgdf750f5" class="outline-4">
-<h4 id="orgdf750f5"><span class="section-number-4">3.3.2</span> 变换的可逆性和周期性</h4>
+<div id="outline-container-orgc77cca7" class="outline-4">
+<h4 id="orgc77cca7"><span class="section-number-4">3.3.2</span> 变换的可逆性和周期性</h4>
 <div class="outline-text-4" id="text-3-3-2">
 <p>
 在适当条件下，函数 \(f\) 可由它的傅里叶变换 \(\hat{f}\) 恢复。记傅里叶变换算符为 \(F\) ，即 \(F(f) = \hat{f}\) 。对合适的函数，将傅里叶变换两次应用于该函数相当于反转该函数，即 \(F^{2}(f)(x) = \hat{f}(-x)\) ，也就是“时域反转”。因为反转的周期为 2，则有 \(F^{4}(f)(x) = f(x)\) 。因此傅里叶变换算符的周期为 4，傅里叶反变换也可由应用 3 次傅里叶变换得到，即 \(F^3 (\hat{f}) = f\)
@@ -898,8 +898,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgde2a727" class="outline-4">
-<h4 id="orgde2a727"><span class="section-number-4">3.3.3</span> 黎曼-勒贝格定理</h4>
+<div id="outline-container-org9c20346" class="outline-4">
+<h4 id="org9c20346"><span class="section-number-4">3.3.3</span> 黎曼-勒贝格定理</h4>
 <div class="outline-text-4" id="text-3-3-3">
 <p>
 傅里叶变换可以在某些情况下用于不可积的函数，但傅里叶变换对可积函数有几条非常强的性质。
@@ -923,8 +923,8 @@
 </div>
 </div>
 
-<div id="outline-container-org5405eb0" class="outline-4">
-<h4 id="org5405eb0"><span class="section-number-4">3.3.4</span> 帕塞瓦尔定理</h4>
+<div id="outline-container-orga0445bc" class="outline-4">
+<h4 id="orga0445bc"><span class="section-number-4">3.3.4</span> 帕塞瓦尔定理</h4>
 <div class="outline-text-4" id="text-3-3-4">
 <p>
 记 \(f(x), g(x)\) 是可积的，\(\hat{f}(\xi), \hat{g}(\xi)\) 是它们的傅里叶变换，若 \(f(x), g(x)\) 同时还是平方可积的，则：
@@ -944,8 +944,8 @@ Plancherel theorm 表明：
 </div>
 </div>
 
-<div id="outline-container-org537c879" class="outline-4">
-<h4 id="org537c879"><span class="section-number-4">3.3.5</span> 卷积定理</h4>
+<div id="outline-container-orgc1ff18c" class="outline-4">
+<h4 id="orgc1ff18c"><span class="section-number-4">3.3.5</span> 卷积定理</h4>
 <div class="outline-text-4" id="text-3-3-5">
 <p>
 傅里叶变换可以将一个域中的卷积变为另一个域中的乘积。如果 \(f(x), g(x)\) 是可积函数，它们的傅里叶变换是 \(\hat{f}(\xi), \hat{g}(\xi)\) ，那么卷积的傅里叶变换可由 \(\hat{f}(\xi), \hat{g}(\xi)\) 的乘积给出。一句话：函数卷积的傅里叶变换是函数傅里叶变换的乘积<sup><a id="fnr.7" class="footref" href="#fn.7">7</a></sup>。
@@ -1056,8 +1056,8 @@ Plancherel theorm 表明：
 </div>
 </div>
 
-<div id="outline-container-org178c86c" class="outline-3">
-<h3 id="org178c86c"><span class="section-number-3">3.4</span> 常用函数的傅里叶变换</h3>
+<div id="outline-container-orgc65b8a2" class="outline-3">
+<h3 id="orgc65b8a2"><span class="section-number-3">3.4</span> 常用函数的傅里叶变换</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 下表中，绝对值记为 \(abs\) 。使用 \(rect(x)\) 来代表门函数<sup><a id="fnr.8" class="footref" href="#fn.8">8</a></sup>（矩形函数），使用 \(tri(x)\) 代表三角形函数<sup><a id="fnr.9" class="footref" href="#fn.9">9</a></sup>，使用 \(sgn(x)\) 表示符号函数，它们分别为：
@@ -1296,8 +1296,8 @@ Plancherel theorm 表明：
 </div>
 </div>
 
-<div id="outline-container-org6fbf101" class="outline-2">
-<h2 id="org6fbf101"><span class="section-number-2">4</span> 友情链接</h2>
+<div id="outline-container-orge6bd49c" class="outline-2">
+<h2 id="orge6bd49c"><span class="section-number-2">4</span> 友情链接</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 对于如何形象地描述什么是傅里叶变换，笔者实属无能，读者可以参考一些生动的科普文章和科普视频，我在此列出一些，以供参考：
@@ -1314,8 +1314,8 @@ Plancherel theorm 表明：
 </div>
 
 
-<div id="outline-container-org6437303" class="outline-2">
-<h2 id="org6437303"><span class="section-number-2">5</span> 参考资料</h2>
+<div id="outline-container-org66568a3" class="outline-2">
+<h2 id="org66568a3"><span class="section-number-2">5</span> 参考资料</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 《信号分析与处理》 —— 马立玲， 沈伟
@@ -1363,7 +1363,7 @@ Fourier transform：<a href="https://en.wikipedia.org/wiki/Fourier_transform">ht
 </div></div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-03-29 Sun 00:00</p> <p>Last modified: 2021-08-03 Tue 11:56</p>
+<p>Create Date: 2020-03-29 Sun 00:00</p> <p>Last modified: 2021-08-04 Wed 13:05</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

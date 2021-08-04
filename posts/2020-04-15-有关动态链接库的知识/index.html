@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 12:32 -->
+<!-- 2021-08-04 Wed 13:05 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>有关动态链接库的知识 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,40 +51,40 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd531e21">1. 什么是动态链接库</a></li>
-<li><a href="#orgc40bac3">2. 动态链接</a>
+<li><a href="#org83093ce">1. 什么是动态链接库</a></li>
+<li><a href="#org1c0e1b8">2. 动态链接</a>
 <ul>
-<li><a href="#orgeaeceea">2.1. 动态链接的种类</a></li>
-<li><a href="#org799e878">2.2. 动态链接库的搜索顺序</a></li>
-<li><a href="#orgcd0799a">2.3. DLL 中的数据</a></li>
+<li><a href="#org5abc4a9">2.1. 动态链接的种类</a></li>
+<li><a href="#orgdc98f0c">2.2. 动态链接库的搜索顺序</a></li>
+<li><a href="#orgeb11427">2.3. DLL 中的数据</a></li>
 </ul>
 </li>
-<li><a href="#org4a0755b">3. 动态链接库的优缺点</a>
+<li><a href="#orge5b8ef9">3. 动态链接库的优缺点</a>
 <ul>
-<li><a href="#orgb20b05c">3.1. 优点</a></li>
-<li><a href="#org6e209bd">3.2. 缺点</a></li>
+<li><a href="#org89e0299">3.1. 优点</a></li>
+<li><a href="#org4567fc6">3.2. 缺点</a></li>
 </ul>
 </li>
-<li><a href="#orgc7d11e1">4. Windows 下创建和使用动态函数库</a>
+<li><a href="#orgc39293f">4. Windows 下创建和使用动态函数库</a>
 <ul>
-<li><a href="#org2cfd83d">4.1. 入口点函数（Entry-Point Funciton)</a></li>
-<li><a href="#org44a7cb9">4.2. 库的导出</a></li>
-<li><a href="#orgb5d597c">4.3. 库的导入</a></li>
+<li><a href="#org579e236">4.1. 入口点函数（Entry-Point Funciton)</a></li>
+<li><a href="#orga324457">4.2. 库的导出</a></li>
+<li><a href="#orgc17dee0">4.3. 库的导入</a></li>
 </ul>
 </li>
-<li><a href="#orgb60ef42">5. 实例：一个简单的 DLL</a></li>
-<li><a href="#org2a05554">6. 补充：什么是调用约定</a>
+<li><a href="#orga8caa54">5. 实例：一个简单的 DLL</a></li>
+<li><a href="#orgd7b4874">6. 补充：什么是调用约定</a>
 <ul>
-<li><a href="#org1a0cb02">6.1. 部分MSVC 提供的调用约定</a></li>
+<li><a href="#org5421054">6.1. 部分MSVC 提供的调用约定</a></li>
 </ul>
 </li>
-<li><a href="#org730227e">7. 参考资料</a></li>
+<li><a href="#orge845484">7. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd531e21" class="outline-2">
-<h2 id="orgd531e21"><span class="section-number-2">1</span> 什么是动态链接库</h2>
+<div id="outline-container-org83093ce" class="outline-2">
+<h2 id="org83093ce"><span class="section-number-2">1</span> 什么是动态链接库</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 动态链接库（dynamic-link library）(DLL) 是一个包含函数和数据的模块，它可以被其他模块（应用或 DLL）使用。
@@ -100,20 +100,20 @@ DLL 提供了一种模块化应用程序的方法，以便它们的功能能够�
 </div>
 </div>
 
-<div id="outline-container-orgc40bac3" class="outline-2">
-<h2 id="orgc40bac3"><span class="section-number-2">2</span> 动态链接</h2>
+<div id="outline-container-org1c0e1b8" class="outline-2">
+<h2 id="org1c0e1b8"><span class="section-number-2">2</span> 动态链接</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 动态链接允许在 <b>载入时</b> 或 <b>运行时</b> 确定 DLL 导出函数。这与静态链接不同，静态链接在链接时会将函数库的代码拷贝到调用它的模块中。
 </p>
 </div>
 
-<div id="outline-container-orgeaeceea" class="outline-3">
-<h3 id="orgeaeceea"><span class="section-number-3">2.1</span> 动态链接的种类</h3>
+<div id="outline-container-org5abc4a9" class="outline-3">
+<h3 id="org5abc4a9"><span class="section-number-3">2.1</span> 动态链接的种类</h3>
 <div class="outline-text-3" id="text-2-1">
 </div>
-<div id="outline-container-org55be1a6" class="outline-4">
-<h4 id="org55be1a6"><span class="section-number-4">2.1.1</span> 载入时(load-time)的动态链接</h4>
+<div id="outline-container-orga999797" class="outline-4">
+<h4 id="orga999797"><span class="section-number-4">2.1.1</span> 载入时(load-time)的动态链接</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <p>
 模块直接将 DLL 导出函数当作本地函数（local function）进行调用。这需要你在对模块进行链接时链接该 DLL 的导入库。导入库为系统提供了载入 DLL 所需要的信息，并提供了在应用载入时找到导出函数的信息。
@@ -137,8 +137,8 @@ DLL 提供了一种模块化应用程序的方法，以便它们的功能能够�
 </div>
 </div>
 
-<div id="outline-container-org537c26b" class="outline-4">
-<h4 id="org537c26b"><span class="section-number-4">2.1.2</span> 运行时(run-time)的动态链接</h4>
+<div id="outline-container-orgcb93557" class="outline-4">
+<h4 id="orgcb93557"><span class="section-number-4">2.1.2</span> 运行时(run-time)的动态链接</h4>
 <div class="outline-text-4" id="text-2-1-2">
 <p>
 <b>使用运行时链接的方式进行调用不需要提供头文件和导入库</b>
@@ -183,12 +183,12 @@ DLL 提供了一种模块化应用程序的方法，以便它们的功能能够�
 </div>
 </div>
 
-<div id="outline-container-org799e878" class="outline-3">
-<h3 id="org799e878"><span class="section-number-3">2.2</span> 动态链接库的搜索顺序</h3>
+<div id="outline-container-orgdc98f0c" class="outline-3">
+<h3 id="orgdc98f0c"><span class="section-number-3">2.2</span> 动态链接库的搜索顺序</h3>
 <div class="outline-text-3" id="text-2-2">
 </div>
-<div id="outline-container-orgd8fee28" class="outline-4">
-<h4 id="orgd8fee28"><span class="section-number-4">2.2.1</span> 影响搜索的因素</h4>
+<div id="outline-container-org74da571" class="outline-4">
+<h4 id="org74da571"><span class="section-number-4">2.2.1</span> 影响搜索的因素</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <ul class="org-ul">
 <li>如果同名的 DLL 已经载入到内存中，不论它在哪个目录，系统只会在检查已载入的 DLL 之前检查重定向。系统不会搜索该 DLL。</li>
@@ -201,8 +201,8 @@ DLL 提供了一种模块化应用程序的方法，以便它们的功能能够�
 </div>
 
 
-<div id="outline-container-orgb31b7a5" class="outline-4">
-<h4 id="orgb31b7a5"><span class="section-number-4">2.2.2</span> 桌面应用的搜索顺序</h4>
+<div id="outline-container-orgb444f76" class="outline-4">
+<h4 id="orgb444f76"><span class="section-number-4">2.2.2</span> 桌面应用的搜索顺序</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 桌面应用可以通过指定绝对路径，使用 DLL 重定向或使用 <a href="https://docs.microsoft.com/en-us/windows/win32/sbscs/manifests">Manifests</a> 来控制 DLL 的载入位置。如果这些方法都没有被使用，系统在载入时的 DLL 搜索操作如下所示。
@@ -249,16 +249,16 @@ DLL 提供了一种模块化应用程序的方法，以便它们的功能能够�
 </div>
 </div>
 
-<div id="outline-container-orgcd0799a" class="outline-3">
-<h3 id="orgcd0799a"><span class="section-number-3">2.3</span> DLL 中的数据</h3>
+<div id="outline-container-orgeb11427" class="outline-3">
+<h3 id="orgeb11427"><span class="section-number-3">2.3</span> DLL 中的数据</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 DLL 中可以包含全局数据和局部数据。
 </p>
 </div>
 
-<div id="outline-container-org7819d71" class="outline-4">
-<h4 id="org7819d71"><span class="section-number-4">2.3.1</span> 变量作用域</h4>
+<div id="outline-container-org30315d2" class="outline-4">
+<h4 id="org30315d2"><span class="section-number-4">2.3.1</span> 变量作用域</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <p>
 在 DLL 中定义为全局变量的变量会被编译器和链接器作为全局变量对待，每个载入给定 DLL 的进程都会有属于它自己的 DLL 全局变量。静态变量被限制在定义它的区域内。
@@ -272,12 +272,12 @@ DLL 中可以包含全局数据和局部数据。
 </div>
 </div>
 
-<div id="outline-container-org4a0755b" class="outline-2">
-<h2 id="org4a0755b"><span class="section-number-2">3</span> 动态链接库的优缺点</h2>
+<div id="outline-container-orge5b8ef9" class="outline-2">
+<h2 id="orge5b8ef9"><span class="section-number-2">3</span> 动态链接库的优缺点</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orgb20b05c" class="outline-3">
-<h3 id="orgb20b05c"><span class="section-number-3">3.1</span> 优点</h3>
+<div id="outline-container-org89e0299" class="outline-3">
+<h3 id="org89e0299"><span class="section-number-3">3.1</span> 优点</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li>DLL 减少了代码的重复并节约了存储空间，一个 DLL 可以被多个应用程序使用，这些程序共享一个 DLL，不像静态库那样存在于每个应用程序内。</li>
@@ -292,8 +292,8 @@ DLL 中可以包含全局数据和局部数据。
 </div>
 
 
-<div id="outline-container-org6e209bd" class="outline-3">
-<h3 id="org6e209bd"><span class="section-number-3">3.2</span> 缺点</h3>
+<div id="outline-container-org4567fc6" class="outline-3">
+<h3 id="org4567fc6"><span class="section-number-3">3.2</span> 缺点</h3>
 <div class="outline-text-3" id="text-3-2">
 <ul class="org-ul">
 <li>使用 DLL 的程序不是自洽（self-contained）的，它对与它本身分离的 DLL 模块存在依赖。如果载入时的动态链接没有找到它所需要的 DLL，系统会终止进程，并向用户发送错误信息。系统不会终止运行时的动态链接时的情况（没有在载入时检查 DLL 是否载入），但缺失 DLL 的导出函数对使用它的程序是不可用的。</li>
@@ -305,20 +305,20 @@ DLL 中可以包含全局数据和局部数据。
 </div>
 
 
-<div id="outline-container-orgc7d11e1" class="outline-2">
-<h2 id="orgc7d11e1"><span class="section-number-2">4</span> Windows 下创建和使用动态函数库</h2>
+<div id="outline-container-orgc39293f" class="outline-2">
+<h2 id="orgc39293f"><span class="section-number-2">4</span> Windows 下创建和使用动态函数库</h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org2cfd83d" class="outline-3">
-<h3 id="org2cfd83d"><span class="section-number-3">4.1</span> 入口点函数（Entry-Point Funciton)</h3>
+<div id="outline-container-org579e236" class="outline-3">
+<h3 id="org579e236"><span class="section-number-3">4.1</span> 入口点函数（Entry-Point Funciton)</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 一个 DLL 可以指定一个入口点函数。如果这个函数存在，那么每当一个进程或线程载入或卸载 DLL 时，系统会调用该函数。它可以用作简单的初始化和清理任务。例如，在线程被创建时，它可以建立起线程的局部存储，并在线程结束时进行清理。
 </p>
 </div>
 
-<div id="outline-container-org3208a7f" class="outline-4">
-<h4 id="org3208a7f"><span class="section-number-4">4.1.1</span> 入口点函数的调用</h4>
+<div id="outline-container-orgb51bf07" class="outline-4">
+<h4 id="orgb51bf07"><span class="section-number-4">4.1.1</span> 入口点函数的调用</h4>
 <div class="outline-text-4" id="text-4-1-1">
 <p>
 在如下事件发生时，系统会调用入口点函数：
@@ -341,8 +341,8 @@ DLL 中可以包含全局数据和局部数据。
 </div>
 </div>
 
-<div id="outline-container-org37f1951" class="outline-4">
-<h4 id="org37f1951"><span class="section-number-4">4.1.2</span> 入口点函数的定义</h4>
+<div id="outline-container-org5086769" class="outline-4">
+<h4 id="org5086769"><span class="section-number-4">4.1.2</span> 入口点函数的定义</h4>
 <div class="outline-text-4" id="text-4-1-2">
 <p>
 入口点函数的函数原型为：
@@ -382,8 +382,8 @@ DLL 中可以包含全局数据和局部数据。
 </div>
 
 
-<div id="outline-container-org44a7cb9" class="outline-3">
-<h3 id="org44a7cb9"><span class="section-number-3">4.2</span> 库的导出</h3>
+<div id="outline-container-orga324457" class="outline-3">
+<h3 id="orga324457"><span class="section-number-3">4.2</span> 库的导出</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 DLL 文件的结构与可执行文件（.exe）非常相似，但它们有一个很大的不同 —— DLL 文件包含一张导出函数表。导出表包含了所有的 DLL 导出函数的名字。这些函数是进入 DLL 的入口点函数，只有名字在导出表中的函数才能被其他可执行文件访问。其它任意非出口函数是 DLL 私有。DLL 的导出函数表可以使用工具 dumpbin 进行查看（加上 /EXPORTS 选项）。
@@ -394,8 +394,8 @@ DLL 文件的结构与可执行文件（.exe）非常相似，但它们有一个
 </p>
 </div>
 
-<div id="outline-container-org6334cff" class="outline-4">
-<h4 id="org6334cff"><span class="section-number-4">4.2.1</span> 使用 __declspec(dllexport) 指定导出函数</h4>
+<div id="outline-container-org88b99f7" class="outline-4">
+<h4 id="org88b99f7"><span class="section-number-4">4.2.1</span> 使用 __declspec(dllexport) 指定导出函数</h4>
 <div class="outline-text-4" id="text-4-2-1">
 <p>
 可以通过使用 <code>__declspec(dllexport)</code> 关键字来从 DLL 中导出数据，函数，类，或类成员函数。 <code>__declspec(dllexport)</code> 将导出指令添加到目标文件中。使用了 <code>__declspec(dllexport)</code> 则无需使用 DEF 文件。
@@ -435,7 +435,7 @@ DLL 文件的结构与可执行文件（.exe）非常相似，但它们有一个
 </div>
 
 <ol class="org-ol">
-<li><a id="org8a78443"></a>导出 C++ 函数供 C 程序使用<br />
+<li><a id="orgf084268"></a>导出 C++ 函数供 C 程序使用<br />
 <div class="outline-text-5" id="text-4-2-1-1">
 <p>
 如果你想在 C 代码中使用由 C++ 编写的 DLL，你就应该将这些函数声明为 C 的链接（linkage）而不是 C++ 的。如果没有指定的话，C++ 编译器会使用 C++ 的类型安全命名（也叫做名字修饰）和 C++ 的调用约定，这使得 C 很难对其进行调用。
@@ -452,7 +452,7 @@ DLL 文件的结构与可执行文件（.exe）非常相似，但它们有一个
 </div>
 </li>
 
-<li><a id="org3291f1c"></a>导出 C 函数供 C/C++ 程序使用<br />
+<li><a id="orgc4eb9ee"></a>导出 C 函数供 C/C++ 程序使用<br />
 <div class="outline-text-5" id="text-4-2-1-2">
 <p>
 如果你想要在 C 或 C++ 中调用由 C 编写的 DLL，你需要使用 <code>__cpluscplus</code> 预处理宏来确定在使用哪种语言。如果正在使用 C++ 语言，应该将这些函数声明为 C 链接。如果你这样做了并为你的 DLL 提供了客户程序使用的头文件，这些函数可以不加改变地在 C 和 C++ 中使用。
@@ -497,8 +497,8 @@ DLL 文件的结构与可执行文件（.exe）非常相似，但它们有一个
 </ol>
 </div>
 
-<div id="outline-container-org1728ad2" class="outline-4">
-<h4 id="org1728ad2"><span class="section-number-4">4.2.2</span> 使用 DEF 文件指定导出函数</h4>
+<div id="outline-container-org6a325b8" class="outline-4">
+<h4 id="org6a325b8"><span class="section-number-4">4.2.2</span> 使用 DEF 文件指定导出函数</h4>
 <div class="outline-text-4" id="text-4-2-2">
 <p>
 DEF 文件（*.def）是一个包含一个或多个模块语句的文本文件，这些语句描述了 DLL 的多种性质。如果没有使用 <code>__declspec(dllexport)</code> 来导出 DLL 的函数，那么 DLL 就需要一个 DEF 文件进行相关说明。
@@ -536,8 +536,8 @@ DEF 文件（*.def）是一个包含一个或多个模块语句的文本文件�
 </div>
 </div>
 
-<div id="outline-container-orgb5d597c" class="outline-3">
-<h3 id="orgb5d597c"><span class="section-number-3">4.3</span> 库的导入</h3>
+<div id="outline-container-orgc17dee0" class="outline-3">
+<h3 id="orgc17dee0"><span class="section-number-3">4.3</span> 库的导入</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
 使用了由 DLL 定义的公共符号的程序被看作导入了 DLL。当你为你的应用程序创建用于使用 DLL 的头文件时，对公共符号使用 <code>__declspec(dllimport)</code> 。（公共符号即 DLL 导出的函数、对象和数据）
@@ -575,8 +575,8 @@ class <span style="color: #228b22;">CLASS_DECLSPEC</span> <span style="color: #a
 </div>
 </div>
 
-<div id="outline-container-orga8dcd70" class="outline-4">
-<h4 id="orga8dcd70"><span class="section-number-4">4.3.1</span> __decpspec(dllimport) 对函数调用的影响</h4>
+<div id="outline-container-org095e1c4" class="outline-4">
+<h4 id="org095e1c4"><span class="section-number-4">4.3.1</span> __decpspec(dllimport) 对函数调用的影响</h4>
 <div class="outline-text-4" id="text-4-3-1">
 <p>
 假设 <code>func1</code> 是一个 DLL 中的函数，与包含 main 函数的 .exe 文件分离。
@@ -658,8 +658,8 @@ call DWORD PTR __imp_func1
 </div>
 </div>
 
-<div id="outline-container-org3c88cdc" class="outline-4">
-<h4 id="org3c88cdc"><span class="section-number-4">4.3.2</span> 使用 __declspec(dllimport) 导入数据</h4>
+<div id="outline-container-org04616fc" class="outline-4">
+<h4 id="org04616fc"><span class="section-number-4">4.3.2</span> 使用 __declspec(dllimport) 导入数据</h4>
 <div class="outline-text-4" id="text-4-3-2">
 <p>
 对数据而言，使用 <code>_declspec(dllimport)</code> 可以消除一层间接。当你从 DLL 中导出数据时，你仍然需要浏览整个导入地址表，这意味着你当你访问 DLL 导出的数据时，你不得不记住额外的间接层，执行额外的间接寻址，就像这样：
@@ -686,8 +686,8 @@ call DWORD PTR __imp_func1
 </div>
 </div>
 
-<div id="outline-container-orgb60ef42" class="outline-2">
-<h2 id="orgb60ef42"><span class="section-number-2">5</span> 实例：一个简单的 DLL</h2>
+<div id="outline-container-orga8caa54" class="outline-2">
+<h2 id="orga8caa54"><span class="section-number-2">5</span> 实例：一个简单的 DLL</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 接下来，我用一个 C 语言的例子来展示如何使用 DLL，作为对上文的总结。
@@ -933,8 +933,8 @@ gcc -o main.exe main.c
 </div>
 </div>
 
-<div id="outline-container-org2a05554" class="outline-2">
-<h2 id="org2a05554"><span class="section-number-2">6</span> 补充：什么是调用约定</h2>
+<div id="outline-container-orgd7b4874" class="outline-2">
+<h2 id="orgd7b4874"><span class="section-number-2">6</span> 补充：什么是调用约定</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 调用约定规定了函数如何接受调用者的参数和它们如何返回函数值。不同调用约定的区别在于：
@@ -950,12 +950,12 @@ gcc -o main.exe main.c
 </div>
 
 
-<div id="outline-container-org1a0cb02" class="outline-3">
-<h3 id="org1a0cb02"><span class="section-number-3">6.1</span> 部分MSVC 提供的调用约定</h3>
+<div id="outline-container-org5421054" class="outline-3">
+<h3 id="org5421054"><span class="section-number-3">6.1</span> 部分MSVC 提供的调用约定</h3>
 <div class="outline-text-3" id="text-6-1">
 </div>
-<div id="outline-container-org92b3e83" class="outline-4">
-<h4 id="org92b3e83"><span class="section-number-4">6.1.1</span> __cdecl</h4>
+<div id="outline-container-org554ea83" class="outline-4">
+<h4 id="org554ea83"><span class="section-number-4">6.1.1</span> __cdecl</h4>
 <div class="outline-text-4" id="text-6-1-1">
 <p>
 <code>__cdecl</code> 是 C 和 C++ 的默认调用约定。因为栈的清理工作由调用者完成，它可以用作 <code>vararg</code> 函数。=__cdecl= 调用生成会创建比使用 <code>__stdcall</code> 更大的可执行程序，因为它需要为每个函数调用包含清理栈的代码。
@@ -963,8 +963,8 @@ gcc -o main.exe main.c
 </div>
 </div>
 
-<div id="outline-container-org315e23e" class="outline-4">
-<h4 id="org315e23e"><span class="section-number-4">6.1.2</span> __stdcall</h4>
+<div id="outline-container-org4c22d0c" class="outline-4">
+<h4 id="org4c22d0c"><span class="section-number-4">6.1.2</span> __stdcall</h4>
 <div class="outline-text-4" id="text-6-1-2">
 <p>
 <code>__stdcall</code> 调用约定用于 Win32 API 函数。被调函数负责栈的清理，因此编译器会将 <code>vararg</code> 函数变成 <code>__cdecl</code> 的调用约定。使用该约定的函数需要一个函数原型。
@@ -978,8 +978,8 @@ gcc -o main.exe main.c
 </div>
 </div>
 
-<div id="outline-container-org730227e" class="outline-2">
-<h2 id="org730227e"><span class="section-number-2">7</span> 参考资料</h2>
+<div id="outline-container-orge845484" class="outline-2">
+<h2 id="orge845484"><span class="section-number-2">7</span> 参考资料</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 <i>Programming Windows</i> —— Charles Petzold （Windows 程序设计）
@@ -997,7 +997,7 @@ Building C/C++ DLLs in Visual Studio：<a href="https://docs.microsoft.com/en-us
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-04-15 Wed 00:00</p> <p>Last modified: 2021-08-03 Tue 12:32</p>
+<p>Create Date: 2020-04-15 Wed 00:00</p> <p>Last modified: 2021-08-04 Wed 13:05</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

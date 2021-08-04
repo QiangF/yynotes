@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 17:12 -->
+<!-- 2021-08-04 Wed 13:09 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Win32变成基础之控件 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMzM5NTE4.jpg" alt="load failed"></div></title>
@@ -51,22 +51,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org9cb8433">1. 一些窗口函数</a>
+<li><a href="#orgc08f5ce">1. 一些窗口函数</a>
 <ul>
-<li><a href="#orgf3cc0ac">1.1. CreateWinodwEx</a></li>
-<li><a href="#org8f3f9f5">1.2. DestroyWindow</a></li>
-<li><a href="#orgbec51aa">1.3. MoveWindow</a></li>
-<li><a href="#org6d52288">1.4. UpdateWindow</a></li>
-<li><a href="#orgcae6f75">1.5. ShowWindow</a></li>
-<li><a href="#org95efb07">1.6. EnableWindow</a></li>
-<li><a href="#org052cec0">1.7. GetDlgItem</a></li>
-<li><a href="#org3a45f4c">1.8. GetDlgCtrLID</a></li>
+<li><a href="#org1109cab">1.1. CreateWinodwEx</a></li>
+<li><a href="#orgd1fad0f">1.2. DestroyWindow</a></li>
+<li><a href="#org87c8634">1.3. MoveWindow</a></li>
+<li><a href="#org5c44f16">1.4. UpdateWindow</a></li>
+<li><a href="#orgc9eaff6">1.5. ShowWindow</a></li>
+<li><a href="#org53f5ff6">1.6. EnableWindow</a></li>
+<li><a href="#orga2d1741">1.7. GetDlgItem</a></li>
+<li><a href="#org3ab27f3">1.8. GetDlgCtrLID</a></li>
 </ul>
 </li>
-<li><a href="#org23d3e6d">2. WM_COMMAND 消息</a></li>
-<li><a href="#orgbf0f969">3. 控件库</a></li>
-<li><a href="#org3d36b43">4. 通用控件</a></li>
-<li><a href="#org9f8f7c7">5. 参考资料</a></li>
+<li><a href="#orgda68d54">2. WM_COMMAND 消息</a></li>
+<li><a href="#org93161bf">3. 控件库</a></li>
+<li><a href="#orgf738a02">4. 通用控件</a></li>
+<li><a href="#org9a9a91d">5. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -74,16 +74,16 @@
 控件是子窗口，应用将它与其他的窗口结合使用来与用户进行交互。控件多数时候都用在对话框中，但它们也可以用在其他窗口中。对话框内的控件为用户提供了文本输入、选项选择和初始化等功能。其他窗口中的控制台可以提供一系列的服务，比如让用户选择命令、观察状态以及编辑和阅读文本。
 </p>
 
-<div id="outline-container-org9cb8433" class="outline-2">
-<h2 id="org9cb8433"><span class="section-number-2">1</span> 一些窗口函数</h2>
+<div id="outline-container-orgc08f5ce" class="outline-2">
+<h2 id="orgc08f5ce"><span class="section-number-2">1</span> 一些窗口函数</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 既然控件是子窗口，那么有必要介绍一些对窗口进行操作的函数。除了 <b>CreateWindow</b> 函数用来创建窗口外，其他的一些窗口函数可以移动窗口、隐藏或显示窗口、禁用或启用窗口、更新窗口，等等。
 </p>
 </div>
 
-<div id="outline-container-orgf3cc0ac" class="outline-3">
-<h3 id="orgf3cc0ac"><span class="section-number-3">1.1</span> CreateWinodwEx</h3>
+<div id="outline-container-org1109cab" class="outline-3">
+<h3 id="org1109cab"><span class="section-number-3">1.1</span> CreateWinodwEx</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexa">CreateWindowEx</a> 函数创建一个带有拓展窗口风格的窗口。除了拓展风格这一点，它的功能与 <b>CreateWindow</b> 是一样的。
@@ -169,8 +169,8 @@
 </div>
 </div>
 
-<div id="outline-container-org8f3f9f5" class="outline-3">
-<h3 id="org8f3f9f5"><span class="section-number-3">1.2</span> DestroyWindow</h3>
+<div id="outline-container-orgd1fad0f" class="outline-3">
+<h3 id="orgd1fad0f"><span class="section-number-3">1.2</span> DestroyWindow</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 该函数会销毁指定的窗口。它向窗口发送 <a href="https://docs.microsoft.com/en-us/windows/desktop/winmsg/wm-destroy">WM_DESTROY</a> 和 <a href="https://docs.microsoft.com/en-us/windows/desktop/winmsg/wm-ncdestroy">WM_NCDESTROY</a> 消息来停用并移出它的键盘焦点。该函数也会销毁菜单，刷新线程的消息队列，销毁计时器，移除剪切板所有权，并中断剪切版查看链。（如果窗口在查看链的最前面的话）
@@ -209,8 +209,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgbec51aa" class="outline-3">
-<h3 id="orgbec51aa"><span class="section-number-3">1.3</span> MoveWindow</h3>
+<div id="outline-container-org87c8634" class="outline-3">
+<h3 id="org87c8634"><span class="section-number-3">1.3</span> MoveWindow</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 该函数可以改变窗口的位置和尺寸。对于顶级窗口，窗口的位置和尺寸是关于屏幕左上角的。对于子窗口，它们是与父窗口的客户区左上角相关的。
@@ -250,8 +250,8 @@
 </div>
 </div>
 
-<div id="outline-container-org6d52288" class="outline-3">
-<h3 id="org6d52288"><span class="section-number-3">1.4</span> UpdateWindow</h3>
+<div id="outline-container-org5c44f16" class="outline-3">
+<h3 id="org5c44f16"><span class="section-number-3">1.4</span> UpdateWindow</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 如果指定窗口的更新区域非空的话，该函数会向窗口发送 <a href="https://docs.microsoft.com/en-us/windows/desktop/gdi/wm-paint">WM_PAINT</a> 消息来更新指定窗口用户区。该函数绕过消息队列直接向窗口国创发送 <b>WM_PAINT</b> 消息。如果更新区域是空的则不会发送消息。
@@ -278,8 +278,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgcae6f75" class="outline-3">
-<h3 id="orgcae6f75"><span class="section-number-3">1.5</span> ShowWindow</h3>
+<div id="outline-container-orgc9eaff6" class="outline-3">
+<h3 id="orgc9eaff6"><span class="section-number-3">1.5</span> ShowWindow</h3>
 <div class="outline-text-3" id="text-1-5">
 <p>
 该函数设置窗口的显示方式
@@ -340,8 +340,8 @@
 </div>
 </div>
 
-<div id="outline-container-org95efb07" class="outline-3">
-<h3 id="org95efb07"><span class="section-number-3">1.6</span> EnableWindow</h3>
+<div id="outline-container-org53f5ff6" class="outline-3">
+<h3 id="org53f5ff6"><span class="section-number-3">1.6</span> EnableWindow</h3>
 <div class="outline-text-3" id="text-1-6">
 <p>
 该函数可以启用或禁用指定窗口的鼠标和键盘输入。当输入被禁止时，窗口不能接收到像是鼠标点击或击键的输入。当输入被启用时，窗口可以接受所有输入。
@@ -369,8 +369,8 @@
 </div>
 </div>
 
-<div id="outline-container-org052cec0" class="outline-3">
-<h3 id="org052cec0"><span class="section-number-3">1.7</span> GetDlgItem</h3>
+<div id="outline-container-orga2d1741" class="outline-3">
+<h3 id="orga2d1741"><span class="section-number-3">1.7</span> GetDlgItem</h3>
 <div class="outline-text-3" id="text-1-7">
 <p>
 检索一个指定控件的窗口句柄
@@ -398,8 +398,8 @@
 </div>
 </div>
 
-<div id="outline-container-org3a45f4c" class="outline-3">
-<h3 id="org3a45f4c"><span class="section-number-3">1.8</span> GetDlgCtrLID</h3>
+<div id="outline-container-org3ab27f3" class="outline-3">
+<h3 id="org3ab27f3"><span class="section-number-3">1.8</span> GetDlgCtrLID</h3>
 <div class="outline-text-3" id="text-1-8">
 <p>
 返回指定控件的标识符
@@ -423,8 +423,8 @@
 </div>
 </div>
 
-<div id="outline-container-org23d3e6d" class="outline-2">
-<h2 id="org23d3e6d"><span class="section-number-2">2</span> WM_COMMAND 消息</h2>
+<div id="outline-container-orgda68d54" class="outline-2">
+<h2 id="orgda68d54"><span class="section-number-2">2</span> WM_COMMAND 消息</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 对于控件，这是一个至关重要的消息，通过 WM_COMMAND，控件能够将事件传递给父窗口进行处理。
@@ -448,8 +448,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgbf0f969" class="outline-2">
-<h2 id="orgbf0f969"><span class="section-number-2">3</span> 控件库</h2>
+<div id="outline-container-org93161bf" class="outline-2">
+<h2 id="org93161bf"><span class="section-number-2">3</span> 控件库</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Windows 预定义了许多的控件，不需要注册即可使用。
@@ -474,8 +474,8 @@ Windows 预定义了许多的控件，不需要注册即可使用。
 </div>
 
 
-<div id="outline-container-org3d36b43" class="outline-2">
-<h2 id="org3d36b43"><span class="section-number-2">4</span> 通用控件</h2>
+<div id="outline-container-orgf738a02" class="outline-2">
+<h2 id="orgf738a02"><span class="section-number-2">4</span> 通用控件</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 通用控件是在通用控件库 Comctl32.dll 中实现的控件。
@@ -491,22 +491,22 @@ Windows 预定义了许多的控件，不需要注册即可使用。
 </div>
 </div>
 
-<div id="outline-container-org9f8f7c7" class="outline-2">
-<h2 id="org9f8f7c7"><span class="section-number-2">5</span> 参考资料</h2>
+<div id="outline-container-org9a9a91d" class="outline-2">
+<h2 id="org9a9a91d"><span class="section-number-2">5</span> 参考资料</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-<a id="orgef80025">【1】</a> Windows Controls： <a href="https://docs.microsoft.com/en-us/windows/win32/controls/window-controls">https://docs.microsoft.com/en-us/windows/win32/controls/window-controls</a>
+<a id="org1f3eefd">【1】</a> Windows Controls： <a href="https://docs.microsoft.com/en-us/windows/win32/controls/window-controls">https://docs.microsoft.com/en-us/windows/win32/controls/window-controls</a>
 </p>
 
 <p>
-<a id="orgd8acb22">【2】</a> <i>Programming Windows</i>, Charles Petzold
+<a id="org036c7c1">【2】</a> <i>Programming Windows</i>, Charles Petzold
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-07-14 Tue 00:00</p> <p>Last modified: 2021-08-03 Tue 17:12</p>
+<p>Create Date: 2020-07-14 Tue 00:00</p> <p>Last modified: 2021-08-04 Wed 13:09</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

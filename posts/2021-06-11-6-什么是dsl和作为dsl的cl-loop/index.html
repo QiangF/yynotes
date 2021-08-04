@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 10:50 -->
+<!-- 2021-08-04 Wed 13:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>6-什么是dsl和作为dsl的cl-loop <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzMxOTEy.jpg" alt="load failed"></div></title>
@@ -51,23 +51,23 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org8d9e47c">1. 什么是 DSL（domain-specific language）</a>
+<li><a href="#orgd800afb">1. 什么是 DSL（domain-specific language）</a>
 <ul>
-<li><a href="#org03efd4b">1.1. 内部 DSL 与 外部 DSL</a></li>
-<li><a href="#org3c1cc67">1.2. DSL 的优点和缺点</a></li>
+<li><a href="#org33fbae5">1.1. 内部 DSL 与 外部 DSL</a></li>
+<li><a href="#org426ef3c">1.2. DSL 的优点和缺点</a></li>
 </ul>
 </li>
-<li><a href="#orge8c1467">2. elisp 中的 cl-loop</a>
+<li><a href="#org1ed2f31">2. elisp 中的 cl-loop</a>
 <ul>
-<li><a href="#org0be2383">2.1. the Basic</a></li>
-<li><a href="#org916b9b7">2.2. cl-loop 中的顺序执行</a></li>
-<li><a href="#org3756148">2.3. cl-loop 中的选择结构</a></li>
-<li><a href="#org194e8d3">2.4. cl-loop 的循环结构</a></li>
-<li><a href="#org3e7e0f4">2.5. 总结</a></li>
+<li><a href="#org6de0270">2.1. the Basic</a></li>
+<li><a href="#org1caf209">2.2. cl-loop 中的顺序执行</a></li>
+<li><a href="#org2e4df9c">2.3. cl-loop 中的选择结构</a></li>
+<li><a href="#org01fa0c2">2.4. cl-loop 的循环结构</a></li>
+<li><a href="#org12c2d9a">2.5. 总结</a></li>
 </ul>
 </li>
-<li><a href="#orgdaab4e9">3. 延申阅读</a></li>
-<li><a href="#org44b6d36">4. 参考资料</a></li>
+<li><a href="#orgaa600c1">3. 延申阅读</a></li>
+<li><a href="#orge909690">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -90,8 +90,8 @@
 </ul>
 
 
-<div id="outline-container-org8d9e47c" class="outline-2">
-<h2 id="org8d9e47c"><span class="section-number-2">1</span> 什么是 DSL（domain-specific language）</h2>
+<div id="outline-container-orgd800afb" class="outline-2">
+<h2 id="orgd800afb"><span class="section-number-2">1</span> 什么是 DSL（domain-specific language）</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 DSL 是一种用于特殊应用领域的编程语言。DSL 与 GPL（通用目的语言，即 general-purose language）相对，通用语言可用于多个领域。在《代码的未来》一书中作者这样写道：
@@ -124,8 +124,8 @@ DSL 这个对特定目的的小规模语言的称呼，是最近才出现的比�
 </p>
 </div>
 
-<div id="outline-container-org03efd4b" class="outline-3">
-<h3 id="org03efd4b"><span class="section-number-3">1.1</span> 内部 DSL 与 外部 DSL</h3>
+<div id="outline-container-org33fbae5" class="outline-3">
+<h3 id="org33fbae5"><span class="section-number-3">1.1</span> 内部 DSL 与 外部 DSL</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 使用独立的解释器或编译器实现的 DSL 被称为外部 DSL（External Domain Specific Language），比较有名的例子有 LaTex 或 AWK。
@@ -149,8 +149,8 @@ DSL 这个对特定目的的小规模语言的称呼，是最近才出现的比�
 </div>
 </div>
 
-<div id="outline-container-org3c1cc67" class="outline-3">
-<h3 id="org3c1cc67"><span class="section-number-3">1.2</span> DSL 的优点和缺点</h3>
+<div id="outline-container-org426ef3c" class="outline-3">
+<h3 id="org426ef3c"><span class="section-number-3">1.2</span> DSL 的优点和缺点</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 中文的维基百科居然没有英文对应的翻译（汗），这里我自己翻译一下：
@@ -189,8 +189,8 @@ DSL 的缺点
 </div>
 
 
-<div id="outline-container-orge8c1467" class="outline-2">
-<h2 id="orge8c1467"><span class="section-number-2">2</span> elisp 中的 cl-loop</h2>
+<div id="outline-container-org1ed2f31" class="outline-2">
+<h2 id="org1ed2f31"><span class="section-number-2">2</span> elisp 中的 cl-loop</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 我在上一篇文章中简单介绍了 <code>cl-loop</code> 的用法，我感觉日常是够用了，但是还不够全面。这篇文章里我会把参考文档里面所有的内容做一个总结，并给出足够详细的例子。
@@ -205,8 +205,8 @@ DSL 的缺点
 </p>
 </div>
 
-<div id="outline-container-org0be2383" class="outline-3">
-<h3 id="org0be2383"><span class="section-number-3">2.1</span> the Basic</h3>
+<div id="outline-container-org6de0270" class="outline-3">
+<h3 id="org6de0270"><span class="section-number-3">2.1</span> the Basic</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 首先，让我们看看如果没有任何语句的话 <code>cl-loop</code> 会给出怎样的结果：
@@ -222,7 +222,7 @@ DSL 的缺点
 </p>
 
 
-<div id="orgce59222" class="figure">
+<div id="orgb140c0d" class="figure">
 <p><img src="./1.gif" alt="1.gif" />
 </p>
 </div>
@@ -232,7 +232,7 @@ DSL 的缺点
 </p>
 
 
-<div id="org2ceebef" class="figure">
+<div id="org4ec8406" class="figure">
 <p><img src="./2.gif" alt="2.gif" />
 </p>
 </div>
@@ -250,7 +250,7 @@ DSL 的缺点
 </p>
 
 
-<div id="org31ce4f9" class="figure">
+<div id="org4a2437d" class="figure">
 <p><img src="./3.gif" alt="3.gif" />
 </p>
 </div>
@@ -260,7 +260,7 @@ DSL 的缺点
 </p>
 
 
-<div id="org57e296c" class="figure">
+<div id="org6d3ea70" class="figure">
 <p><img src="./4.gif" alt="4.gif" />
 </p>
 </div>
@@ -286,8 +286,8 @@ DSL 的缺点
 </div>
 </div>
 
-<div id="outline-container-org916b9b7" class="outline-3">
-<h3 id="org916b9b7"><span class="section-number-3">2.2</span> cl-loop 中的顺序执行</h3>
+<div id="outline-container-org1caf209" class="outline-3">
+<h3 id="org1caf209"><span class="section-number-3">2.2</span> cl-loop 中的顺序执行</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 首先需要提到的就是 elisp 表达式在 <code>cl-loop</code> 中的执行，这样的表达式在 <code>cl-loop</code> 里是合法的： <code>(cl-loop (setq x 0))</code> ， <code>(cl-loop (print 1) (print 2) (print 3))</code> 。但是下面是不行的，需要使用错误示例的下面的代码：
@@ -311,7 +311,7 @@ DSL 的缺点
 </p>
 
 
-<div id="org26d08db" class="figure">
+<div id="orgf9ade4c" class="figure">
 <p><img src="./5.gif" alt="5.gif" />
 </p>
 </div>
@@ -456,8 +456,8 @@ collec t x)
 </div>
 </div>
 
-<div id="outline-container-org3756148" class="outline-3">
-<h3 id="org3756148"><span class="section-number-3">2.3</span> cl-loop 中的选择结构</h3>
+<div id="outline-container-org2e4df9c" class="outline-3">
+<h3 id="org2e4df9c"><span class="section-number-3">2.3</span> cl-loop 中的选择结构</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 选择结构非常简单，就是通常语言里面的 <code>if-else</code> 语句，不过它没有 <code>elseif</code> 之类的语句。它的语法是 <code>if condition clause else clause</code> ，其中 <code>else</code> 语句是可选的。可以看到它只接受一条 clause，不过可以通过 <code>and</code> 来将多条语句连接在一起作为一条语句，就像 C 中的复合语句一样。此外，为了避免悬挂 <code>if</code> 的问题，还可以在某个不完整 <code>if</code> 语句后面加上 <code>end</code> 来结束 <code>if</code> 的作用范围：
@@ -524,8 +524,8 @@ collec t x)
 </div>
 </div>
 
-<div id="outline-container-org194e8d3" class="outline-3">
-<h3 id="org194e8d3"><span class="section-number-3">2.4</span> cl-loop 的循环结构</h3>
+<div id="outline-container-org01fa0c2" class="outline-3">
+<h3 id="org01fa0c2"><span class="section-number-3">2.4</span> cl-loop 的循环结构</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 这里就到了最重要的部分了，毕竟我们使用 <code>cl-loop</code> 就是冲着循环来的。通过使用循环语句，我们就可以正常地退出 <code>cl-loop</code> 表达式了。
@@ -588,8 +588,8 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </p>
 </div>
 
-<div id="outline-container-org95d3874" class="outline-4">
-<h4 id="org95d3874"><span class="section-number-4">2.4.1</span> 简单的迭代语句</h4>
+<div id="outline-container-org09f778b" class="outline-4">
+<h4 id="org09f778b"><span class="section-number-4">2.4.1</span> 简单的迭代语句</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <p>
 除了 <code>for</code> 语句之外，还有更简单的迭代语句，所以这里我们先从它们开始。
@@ -659,8 +659,8 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </div>
 </div>
 
-<div id="outline-container-orgdaf8027" class="outline-4">
-<h4 id="orgdaf8027"><span class="section-number-4">2.4.2</span> for 语句</h4>
+<div id="outline-container-org2cf0921" class="outline-4">
+<h4 id="org2cf0921"><span class="section-number-4">2.4.2</span> for 语句</h4>
 <div class="outline-text-4" id="text-2-4-2">
 <p>
 可以说 <code>cl-loop</code> 的大部分精华都在 <code>for</code> 语句上面了， <code>for</code> 语句提供了相当多的选项来面对多种多样的循环方法。要分类的话大致可以分为这几类：
@@ -668,7 +668,7 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </div>
 
 <ol class="org-ol">
-<li><a id="orgf84c98d"></a>from to 类型<br />
+<li><a id="org77afb0a"></a>from to 类型<br />
 <div class="outline-text-5" id="text-2-4-2-1">
 <p>
 这一类的 <code>for</code> 语句的典型形式拿 C 来举例的话就是 <code>for (int i = 0; i &lt; N; i++)</code> 这样的。前面我们一直在用的 <code>for i from 0 to 10</code> 就是这一种。
@@ -816,7 +816,7 @@ collect i)
 </div>
 </li>
 
-<li><a id="orgf2ac169"></a>遍历语句<br />
+<li><a id="orga2b83d0"></a>遍历语句<br />
 <div class="outline-text-5" id="text-2-4-2-2">
 <p>
 准确地说，这应该是和 <code>map</code> 和 <code>foreach</code> 比较相近的迭代方法。
@@ -960,7 +960,7 @@ for var being the elements of-ref sequence
 </li>
 
 
-<li><a id="orgce50042"></a>通用 <code>for</code> 语句<br />
+<li><a id="org4a04672"></a>通用 <code>for</code> 语句<br />
 <div class="outline-text-5" id="text-2-4-2-3">
 <p>
 它的语法如下： <code>for var = expr1 then expr2</code> 。
@@ -1001,8 +1001,8 @@ collect x into y)
 </ol>
 </div>
 
-<div id="outline-container-org2d34b19" class="outline-4">
-<h4 id="org2d34b19"><span class="section-number-4">2.4.3</span> cl-loop 多循环语句与多重循环</h4>
+<div id="outline-container-org2a186ff" class="outline-4">
+<h4 id="org2a186ff"><span class="section-number-4">2.4.3</span> cl-loop 多循环语句与多重循环</h4>
 <div class="outline-text-4" id="text-2-4-3">
 <p>
 自然，某些时候一重循环是不够的，比如遍历二阶矩阵就需要二重循环。现在假设我要对如下的二阶矩阵所有元素求和，这样做可以吗：
@@ -1119,11 +1119,11 @@ collect (list x y))
 </div>
 </div>
 
-<div id="outline-container-org3e7e0f4" class="outline-3">
-<h3 id="org3e7e0f4"><span class="section-number-3">2.5</span> 总结</h3>
+<div id="outline-container-org12c2d9a" class="outline-3">
+<h3 id="org12c2d9a"><span class="section-number-3">2.5</span> 总结</h3>
 <div class="outline-text-3" id="text-2-5">
 <p>
-<a href="#orgd69cea4">【6】</a>中总结了 cl-loop 的所有语法，这里直接拿过来：
+<a href="#orgcffdd64">【6】</a>中总结了 cl-loop 的所有语法，这里直接拿过来：
 </p>
 
 <pre class="example">
@@ -1166,8 +1166,8 @@ For more details, see Info node `(cl)Loop Facility'.
 </div>
 </div>
 
-<div id="outline-container-orgdaab4e9" class="outline-2">
-<h2 id="orgdaab4e9"><span class="section-number-2">3</span> 延申阅读</h2>
+<div id="outline-container-orgaa600c1" class="outline-2">
+<h2 id="orgaa600c1"><span class="section-number-2">3</span> 延申阅读</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <code>cl-loop</code> 是源于 <code>cl</code> 的 <code>loop</code> 的，更多内容可以参考参考资料。
@@ -1175,42 +1175,42 @@ For more details, see Info node `(cl)Loop Facility'.
 </div>
 </div>
 
-<div id="outline-container-org44b6d36" class="outline-2">
-<h2 id="org44b6d36"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-orge909690" class="outline-2">
+<h2 id="orge909690"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="org0174b37">【1】</a> 《代码的未来》松本行宏
+<a id="orgdbdfb63">【1】</a> 《代码的未来》松本行宏
 </p>
 
 <p>
-<a id="org56c0178">【2】</a> <a href="https://en.wikipedia.org/wiki/Domain-specific_language">Domain-specific language - Wikipedia</a>
+<a id="org4dadc80">【2】</a> <a href="https://en.wikipedia.org/wiki/Domain-specific_language">Domain-specific language - Wikipedia</a>
 </p>
 
 <p>
-<a id="orgd5d704c">【3】</a> <a href="http://www.ai.sri.com/pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
+<a id="orge2ca179">【3】</a> <a href="http://www.ai.sri.com/pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
 </p>
 
 <p>
-<a id="orgbc67418">【4】</a> <a href="https://gigamonkeys.com/book/loop-for-black-belts.html">LOOP for Black Belts (gigamonkeys.com)</a>
+<a id="orgeb95885">【4】</a> <a href="https://gigamonkeys.com/book/loop-for-black-belts.html">LOOP for Black Belts (gigamonkeys.com)</a>
 </p>
 
 <p>
-<a id="org8728607">【5】</a> <a href="http://www.ai.sri.com/~pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
+<a id="orgf3cb231">【5】</a> <a href="http://www.ai.sri.com/~pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
 </p>
 
 <p>
-<a id="orgd69cea4">【6】</a> <a href="https://kitchingroup.cheme.cmu.edu/blog/2014/11/20/The-loop-macro-in-emacs-lisp/">The loop macro in emacs lisp (cmu.edu)</a>
+<a id="orgcffdd64">【6】</a> <a href="https://kitchingroup.cheme.cmu.edu/blog/2014/11/20/The-loop-macro-in-emacs-lisp/">The loop macro in emacs lisp (cmu.edu)</a>
 </p>
 
 <p>
-<a id="org4c5dbf1">【7】</a> Loop Facility： <a href="https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html">https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html</a>
+<a id="org720fbfa">【7】</a> Loop Facility： <a href="https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html">https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-06-11 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 10:49</p>
+<p>Create Date: 2021-06-11 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 13:11</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

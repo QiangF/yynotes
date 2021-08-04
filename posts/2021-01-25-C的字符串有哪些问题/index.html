@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 23:34 -->
+<!-- 2021-08-04 Wed 13:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C的字符串有哪些问题 <div class="yyheadimg"><img src="./aHR0cHM6Ly9jaGFuLnNhbmtha3Vjb21wbGV4LmNvbS9wb3N0L3Nob3cvMjI5ODYyNTc=.jpg" alt="load failed"></div></title>
@@ -73,24 +73,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgfefd5f9">1. C 语言字符串基础知识</a>
+<li><a href="#org309cdda">1. C 语言字符串基础知识</a>
 <ul>
-<li><a href="#orgb171ac9">1.1. 汇编和 C 字符串定义方式的对比</a></li>
-<li><a href="#org4e4546e">1.2. C 字符串的表示方式</a></li>
-<li><a href="#org1d65b93">1.3. 操控 C 字符串的方法</a></li>
-<li><a href="#org08392b1">1.4. 字符串与 I/O</a></li>
-<li><a href="#org12bd287">1.5. 宽字符和宽字符串</a></li>
+<li><a href="#org29e1138">1.1. 汇编和 C 字符串定义方式的对比</a></li>
+<li><a href="#org5e3bc90">1.2. C 字符串的表示方式</a></li>
+<li><a href="#org5c9c4e3">1.3. 操控 C 字符串的方法</a></li>
+<li><a href="#orgd43c972">1.4. 字符串与 I/O</a></li>
+<li><a href="#org0614251">1.5. 宽字符和宽字符串</a></li>
 </ul>
 </li>
-<li><a href="#org2971d5d">2. C 字符串的问题和陷阱</a>
+<li><a href="#org3192905">2. C 字符串的问题和陷阱</a>
 <ul>
-<li><a href="#org91de76c">2.1. C 字符串本身的问题</a></li>
-<li><a href="#orgd0d3df2">2.2. 与字符串相关的函数的问题</a></li>
-<li><a href="#org9b0976e">2.3. 杂七杂八的问题</a></li>
+<li><a href="#org6cd0070">2.1. C 字符串本身的问题</a></li>
+<li><a href="#org22689b2">2.2. 与字符串相关的函数的问题</a></li>
+<li><a href="#orgdb76087">2.3. 杂七杂八的问题</a></li>
 </ul>
 </li>
-<li><a href="#orga5acb74">3. 总结</a></li>
-<li><a href="#orgf3664cc">4. 参考资料</a></li>
+<li><a href="#org656f87a">3. 总结</a></li>
+<li><a href="#org0475e69">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -102,12 +102,12 @@
 本文分为两个部分，第一部分对 C 语言字符串的基本知识做一个简单的介绍，第二部分对 C 语言字符串的问题和缺陷进行一定的分析。如果你对 C 语言很熟悉了，可以直接去看第二部分，又或者你觉得你的 C 语言用耍的出神入化，也大可直接关闭此页面，而不至于浪费宝贵光阴。
 </p>
 
-<div id="outline-container-orgfefd5f9" class="outline-2">
-<h2 id="orgfefd5f9"><span class="section-number-2">1</span> C 语言字符串基础知识</h2>
+<div id="outline-container-org309cdda" class="outline-2">
+<h2 id="org309cdda"><span class="section-number-2">1</span> C 语言字符串基础知识</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-orgb171ac9" class="outline-3">
-<h3 id="orgb171ac9"><span class="section-number-3">1.1</span> 汇编和 C 字符串定义方式的对比</h3>
+<div id="outline-container-org29e1138" class="outline-3">
+<h3 id="org29e1138"><span class="section-number-3">1.1</span> 汇编和 C 字符串定义方式的对比</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 在讨论 C 语言中的字符串之前，我们先看看汇编（8086）中的字符变量定义和字符串定义的形式：
@@ -156,15 +156,15 @@ wocao BYTE <span style="color: #8b2252;">"abcde"</span>
 </div>
 </div>
 
-<div id="outline-container-org4e4546e" class="outline-3">
-<h3 id="org4e4546e"><span class="section-number-3">1.2</span> C 字符串的表示方式</h3>
+<div id="outline-container-org5e3bc90" class="outline-3">
+<h3 id="org5e3bc90"><span class="section-number-3">1.2</span> C 字符串的表示方式</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 我想你应该知道，在 C 语言中是没有真正的字符串类型的。C 语言使用约定来表示字符串，即字符串是以空字符结尾的字符数组。有 n 个字符的字符串可以使用长为 n + 1 的数组表示，数组的最后一个元素放置 <code>NUL</code> 字符。
 </p>
 
 <p>
-在 C 语言中存在字符串字面量，它们是使用双引号括起来的字符串，比如 <code>"Hello"</code> 。编译器会把这样的常量转变为 <code>NUL</code> 结尾的字符串。维基百科<a href="#orgb9dd68b">【1】</a>这样描述到： <i>The only support for strings in the programming language proper is that the compiler translates quoted string constants into null-terminated strings.</i> 听起来怪简陋的。
+在 C 语言中存在字符串字面量，它们是使用双引号括起来的字符串，比如 <code>"Hello"</code> 。编译器会把这样的常量转变为 <code>NUL</code> 结尾的字符串。维基百科<a href="#org8f3ff9b">【1】</a>这样描述到： <i>The only support for strings in the programming language proper is that the compiler translates quoted string constants into null-terminated strings.</i> 听起来怪简陋的。
 </p>
 
 <p>
@@ -188,13 +188,13 @@ wocao BYTE <span style="color: #8b2252;">"abcde"</span>
 </p>
 
 <p>
-此处的内容参考的是<a href="#orgda0140d">【3】</a>。
+此处的内容参考的是<a href="#org6ffbe9a">【3】</a>。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1d65b93" class="outline-3">
-<h3 id="org1d65b93"><span class="section-number-3">1.3</span> 操控 C 字符串的方法</h3>
+<div id="outline-container-org5c9c4e3" class="outline-3">
+<h3 id="org5c9c4e3"><span class="section-number-3">1.3</span> 操控 C 字符串的方法</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 既然 C 中的字符串本质上就是字符数组，那自然就可以使用操控数组的方式来对字符串进行处理。比如这样获取字符串的长度：
@@ -213,7 +213,7 @@ wocao BYTE <span style="color: #8b2252;">"abcde"</span>
 </p>
 
 <p>
-自然，我们还可以通过调用标准库中的函数来操控字符串。C 标准库中的 string.h 声明了一系列的字符串，来实现一系列功能，比如获得字符串长度，拼接字符串，复制字符串，拆分字符串，等等。实际上，string.h 库中的函数远不止操控字符串，它还提供了一些对内存的操作函数。根据参考资料<a href="#org5d8166c">【2】</a>，我们可以将其中的一些函数做一下简单的分类，具体如下;
+自然，我们还可以通过调用标准库中的函数来操控字符串。C 标准库中的 string.h 声明了一系列的字符串，来实现一系列功能，比如获得字符串长度，拼接字符串，复制字符串，拆分字符串，等等。实际上，string.h 库中的函数远不止操控字符串，它还提供了一些对内存的操作函数。根据参考资料<a href="#org39185ca">【2】</a>，我们可以将其中的一些函数做一下简单的分类，具体如下;
 </p>
 
 <ul class="org-ul">
@@ -256,7 +256,7 @@ wocao BYTE <span style="color: #8b2252;">"abcde"</span>
 
 
 <p>
-上面列出函数的数量是 19，具体用法可参考<a href="#org5d8166c">【2】</a>。
+上面列出函数的数量是 19，具体用法可参考<a href="#org39185ca">【2】</a>。
 </p>
 
 <p>
@@ -272,8 +272,8 @@ wocao BYTE <span style="color: #8b2252;">"abcde"</span>
 </div>
 
 
-<div id="outline-container-org08392b1" class="outline-3">
-<h3 id="org08392b1"><span class="section-number-3">1.4</span> 字符串与 I/O</h3>
+<div id="outline-container-orgd43c972" class="outline-3">
+<h3 id="orgd43c972"><span class="section-number-3">1.4</span> 字符串与 I/O</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 这方面可说的多了去了，由于个人水平所限，只对和 stdio.h 相关的一些函数做一些简单的介绍。
@@ -289,8 +289,8 @@ puts，gets，fputs，fgets 等函数用于字符串 I/O。
 </div>
 </div>
 
-<div id="outline-container-org12bd287" class="outline-3">
-<h3 id="org12bd287"><span class="section-number-3">1.5</span> 宽字符和宽字符串</h3>
+<div id="outline-container-org0614251" class="outline-3">
+<h3 id="org0614251"><span class="section-number-3">1.5</span> 宽字符和宽字符串</h3>
 <div class="outline-text-3" id="text-1-5">
 <p>
 上面所有的内容都是针对 C 语言的 <code>char</code> 型字符串的，也就是单字节字符。1995年，wchar.h 被引入了，用来处理宽字符。
@@ -309,7 +309,7 @@ wchar.h 包括的内容非常多，几乎凡是和字符串处理有关的函数
 </p>
 
 <p>
-虽然使用 wchar.h 后可以表示 ASCII 表示不了的字符，但是 C 标准中并未规定具体的编码。对于单字节的 <code>char</code> ，编码理所当然应该是 ASCII，但是对于多字节的 <code>wchar_t</code> ，这个问题还真不好说。wchar_t 是依赖于实现的，以下内容摘自<a href="#org09e4fb8">【5】</a>;
+虽然使用 wchar.h 后可以表示 ASCII 表示不了的字符，但是 C 标准中并未规定具体的编码。对于单字节的 <code>char</code> ，编码理所当然应该是 ASCII，但是对于多字节的 <code>wchar_t</code> ，这个问题还真不好说。wchar_t 是依赖于实现的，以下内容摘自<a href="#org040ba94">【5】</a>;
 </p>
 
 <blockquote>
@@ -329,20 +329,20 @@ Type wchar_t is a distinct type whose values can represent distinct codes for al
 </div>
 </div>
 
-<div id="outline-container-org2971d5d" class="outline-2">
-<h2 id="org2971d5d"><span class="section-number-2">2</span> C 字符串的问题和陷阱</h2>
+<div id="outline-container-org3192905" class="outline-2">
+<h2 id="org3192905"><span class="section-number-2">2</span> C 字符串的问题和陷阱</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 这里让我们来谈谈 C 字符串本身的问题和它的配套函数的问题。其中的一些问题也可看做是某种 “特性”，如果您的观点与我的不一致，欢迎与我讨论。
 </p>
 </div>
 
-<div id="outline-container-org91de76c" class="outline-3">
-<h3 id="org91de76c"><span class="section-number-3">2.1</span> C 字符串本身的问题</h3>
+<div id="outline-container-org6cd0070" class="outline-3">
+<h3 id="org6cd0070"><span class="section-number-3">2.1</span> C 字符串本身的问题</h3>
 <div class="outline-text-3" id="text-2-1">
 </div>
-<div id="outline-container-orgeb3387d" class="outline-4">
-<h4 id="orgeb3387d"><span class="section-number-4">2.1.1</span> 1.没有显式给出长度</h4>
+<div id="outline-container-org9ae6946" class="outline-4">
+<h4 id="org9ae6946"><span class="section-number-4">2.1.1</span> 1.没有显式给出长度</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <p>
 C 字符串没有保存自己的长度，而是选择在以一个特殊的值 <code>NUL</code> 标记在字符串的尾部。这样做带来的比较直观的问题便是：需要获得字符串长度时必须遍历字符串直到找到空字符。也就是说，strlen 函数的时间复杂度是 O(n)，n 是字符串的长度。每调用一次 strlen 都需要从头到尾遍历一次字符串。下面的代码的时间复杂度可是 O(n^2)：
@@ -361,7 +361,7 @@ C 字符串没有保存自己的长度，而是选择在以一个特殊的值 <c
 </p>
 
 <p>
-另一个问题在于，我们是没有办法来判断一个 C 字符串是不是合法的。<a href="#org1ab71fd">【7】</a>中这样写到：
+另一个问题在于，我们是没有办法来判断一个 C 字符串是不是合法的。<a href="#org24d5ab0">【7】</a>中这样写到：
 </p>
 
 <blockquote>
@@ -388,8 +388,8 @@ C 字符串没有保存自己的长度，而是选择在以一个特殊的值 <c
 </div>
 </div>
 
-<div id="outline-container-orgee664a7" class="outline-4">
-<h4 id="orgee664a7"><span class="section-number-4">2.1.2</span> 2.没有自动的内存管理</h4>
+<div id="outline-container-orgbae1f56" class="outline-4">
+<h4 id="orgbae1f56"><span class="section-number-4">2.1.2</span> 2.没有自动的内存管理</h4>
 <div class="outline-text-4" id="text-2-1-2">
 <p>
 如果已知字符串长度在一定范围内，可以使用固定长度的字节数组来用于存储字符串。但是需要动态改变字符串长度时，就必须处理内存块的分配，改变大小和释放，对字符串的手动内存管理会带来不小的心智负担，很容易出现缓冲区溢出等其他内存管理问题。
@@ -398,16 +398,16 @@ C 字符串没有保存自己的长度，而是选择在以一个特殊的值 <c
 </div>
 </div>
 
-<div id="outline-container-orgd0d3df2" class="outline-3">
-<h3 id="orgd0d3df2"><span class="section-number-3">2.2</span> 与字符串相关的函数的问题</h3>
+<div id="outline-container-org22689b2" class="outline-3">
+<h3 id="org22689b2"><span class="section-number-3">2.2</span> 与字符串相关的函数的问题</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 这样的问题实在是多的数不胜数，这里列出几个比较典型的。
 </p>
 </div>
 
-<div id="outline-container-orge1fe3aa" class="outline-4">
-<h4 id="orge1fe3aa"><span class="section-number-4">2.2.1</span> 1.gets 函数</h4>
+<div id="outline-container-org9917b5c" class="outline-4">
+<h4 id="org9917b5c"><span class="section-number-4">2.2.1</span> 1.gets 函数</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #228b22;">char</span> * <span style="color: #0000ff;">gets</span>(<span style="color: #228b22;">char</span> *);
@@ -434,8 +434,8 @@ scanf(<span style="color: #8b2252;">"%32s"</span>, a);
 </div>
 </div>
 
-<div id="outline-container-orgea63527" class="outline-4">
-<h4 id="orgea63527"><span class="section-number-4">2.2.2</span> 2.fgets 函数</h4>
+<div id="outline-container-org6c76abc" class="outline-4">
+<h4 id="org6c76abc"><span class="section-number-4">2.2.2</span> 2.fgets 函数</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #228b22;">char</span> * <span style="color: #0000ff;">fgets</span>(<span style="color: #228b22;">char</span> *<span style="color: #a0522d;">str</span>, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>, <span style="color: #228b22;">FILE</span> *<span style="color: #a0522d;">stream</span>);
@@ -461,7 +461,7 @@ scanf(<span style="color: #8b2252;">"%32s"</span>, a);
 </div>
 
 <p>
-另一个问题我是从<a href="#orgcc1c69e">【8】</a>中了解到的，原文如下：
+另一个问题我是从<a href="#org4eb3ecd">【8】</a>中了解到的，原文如下：
 </p>
 
 <blockquote>
@@ -515,8 +515,8 @@ fgets has the unusual semantic of ignoring '\0's that occur before '\n's are con
 </div>
 </div>
 
-<div id="outline-container-org3783c71" class="outline-4">
-<h4 id="org3783c71"><span class="section-number-4">2.2.3</span> 3.strcat 函数</h4>
+<div id="outline-container-org46b819f" class="outline-4">
+<h4 id="org46b819f"><span class="section-number-4">2.2.3</span> 3.strcat 函数</h4>
 <div class="outline-text-4" id="text-2-2-3">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #228b22;">char</span> * <span style="color: #0000ff;">strcat</span> ( <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">destination</span>, <span style="color: #a020f0;">const</span> <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">source</span> );
@@ -539,7 +539,7 @@ fgets has the unusual semantic of ignoring '\0's that occur before '\n's are con
 </p>
 
 <p>
-在<a href="#org5d8166c">【2】</a>的 strcat 子页面中有这样的函数描述：
+在<a href="#org39185ca">【2】</a>的 strcat 子页面中有这样的函数描述：
 </p>
 
 <blockquote>
@@ -553,7 +553,7 @@ source：C string to be appended. This should not overlap <b>destination</b>.
 </p>
 
 <p>
-上面的示例代码中，我的 source 和 destination 字符串重叠了，这样会导致什么问题呢？首先，函数执行时是需要保证源字符串不变的，因为需要使用到它的值。但是，由于目标字符串的值是需要改变的，又由于源字符串和目标字符串是同一字符串，所以它既需要改变，又不能被改变，这会带来一个矛盾。内存重叠是一种未定义行为，会带来不可预知的后果。此处的解释部分参考了<a href="#org8152242">【9】</a>
+上面的示例代码中，我的 source 和 destination 字符串重叠了，这样会导致什么问题呢？首先，函数执行时是需要保证源字符串不变的，因为需要使用到它的值。但是，由于目标字符串的值是需要改变的，又由于源字符串和目标字符串是同一字符串，所以它既需要改变，又不能被改变，这会带来一个矛盾。内存重叠是一种未定义行为，会带来不可预知的后果。此处的解释部分参考了<a href="#org2613760">【9】</a>
 </p>
 
 <p>
@@ -566,8 +566,8 @@ source：C string to be appended. This should not overlap <b>destination</b>.
 </div>
 </div>
 
-<div id="outline-container-org1e9b9a8" class="outline-4">
-<h4 id="org1e9b9a8"><span class="section-number-4">2.2.4</span> 4.strncpy</h4>
+<div id="outline-container-org6d97b65" class="outline-4">
+<h4 id="org6d97b65"><span class="section-number-4">2.2.4</span> 4.strncpy</h4>
 <div class="outline-text-4" id="text-2-2-4">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #228b22;">char</span> * <span style="color: #0000ff;">strncpy</span> ( <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">destination</span>, <span style="color: #a020f0;">const</span> <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">source</span>, <span style="color: #228b22;">size_t</span> <span style="color: #a0522d;">num</span> );
@@ -635,7 +635,7 @@ No null-character is implicitly appended at the end of <b>destination</b> if <b>
 运行结果为：
 </p>
 
-<pre class="example" id="orgf84fae3">
+<pre class="example" id="orge45ab79">
 72 101 108 108 1 1 1 1 1 1
 72 101 108 108 111 1 1 1 1 1
 72 101 108 108 111 0 1 1 1 1
@@ -647,8 +647,8 @@ No null-character is implicitly appended at the end of <b>destination</b> if <b>
 </div>
 </div>
 
-<div id="outline-container-orge2c0dc5" class="outline-4">
-<h4 id="orge2c0dc5"><span class="section-number-4">2.2.5</span> 5.strtok 函数</h4>
+<div id="outline-container-org11c6303" class="outline-4">
+<h4 id="org11c6303"><span class="section-number-4">2.2.5</span> 5.strtok 函数</h4>
 <div class="outline-text-4" id="text-2-2-5">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #228b22;">char</span> * <span style="color: #0000ff;">strtok</span> ( <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">str</span>, <span style="color: #a020f0;">const</span> <span style="color: #228b22;">char</span> * <span style="color: #a0522d;">delimiters</span> );
@@ -656,7 +656,7 @@ No null-character is implicitly appended at the end of <b>destination</b> if <b>
 </div>
 
 <p>
-这里我认为有必要详细地介绍一下这个函数的工作过程。以下内容来自<a href="#org5d8166c">【2】</a>的 strtok 子页面。
+这里我认为有必要详细地介绍一下这个函数的工作过程。以下内容来自<a href="#org39185ca">【2】</a>的 strtok 子页面。
 </p>
 
 <blockquote>
@@ -743,7 +743,7 @@ hhhhh
 </p>
 
 <p>
-实际上，我几乎没有用到过这个函数，关于它的问题，我是通过搜索引擎得到的，下面我会对某个回答<a href="#orgf4c4e52">【11】</a>进行一些翻译：
+实际上，我几乎没有用到过这个函数，关于它的问题，我是通过搜索引擎得到的，下面我会对某个回答<a href="#orgf1ddbe5">【11】</a>进行一些翻译：
 </p>
 
 <blockquote>
@@ -801,18 +801,18 @@ tokenization 的根本问题是：给定一个字符串，要求得到从某个�
 
 <blockquote>
 <p>
-Each function uses a thread-local static variable for parsing the string into tokens. Therefore, multiple threads can simultaneously call these functions without undesirable effects.<a href="#org19a11ec">【13】</a>
+Each function uses a thread-local static variable for parsing the string into tokens. Therefore, multiple threads can simultaneously call these functions without undesirable effects.<a href="#org8d377d2">【13】</a>
 </p>
 </blockquote>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org9b0976e" class="outline-3">
-<h3 id="org9b0976e"><span class="section-number-3">2.3</span> 杂七杂八的问题</h3>
+<div id="outline-container-orgdb76087" class="outline-3">
+<h3 id="orgdb76087"><span class="section-number-3">2.3</span> 杂七杂八的问题</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
-这部分在内容上可能和上一小节有些重合，但是这里是以整体而不是单个函数的视角来看待字符串函数。对于 string.h 中的某些函数，<a href="#org564ef6f">【6】</a>中称呼它们为 <i>idiotic API design</i> 。我们在下面一一分析。
+这部分在内容上可能和上一小节有些重合，但是这里是以整体而不是单个函数的视角来看待字符串函数。对于 string.h 中的某些函数，<a href="#org8bf8967">【6】</a>中称呼它们为 <i>idiotic API design</i> 。我们在下面一一分析。
 </p>
 
 <ul class="org-ul">
@@ -839,8 +839,8 @@ Each function uses a thread-local static variable for parsing the string into to
 </div>
 </div>
 
-<div id="outline-container-orga5acb74" class="outline-2">
-<h2 id="orga5acb74"><span class="section-number-2">3</span> 总结</h2>
+<div id="outline-container-org656f87a" class="outline-2">
+<h2 id="org656f87a"><span class="section-number-2">3</span> 总结</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 不管怎么说，C 语言的字符串机制在现在看来已经很落后了。
@@ -877,66 +877,66 @@ Each function uses a thread-local static variable for parsing the string into to
 </div>
 
 
-<div id="outline-container-orgf3664cc" class="outline-2">
-<h2 id="orgf3664cc"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-org0475e69" class="outline-2">
+<h2 id="org0475e69"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="orgb9dd68b">【1】</a> <a href="https://en.wikipedia.org/wiki/C_string_handling">C string handling - Wikipedia</a>
+<a id="org8f3ff9b">【1】</a> <a href="https://en.wikipedia.org/wiki/C_string_handling">C string handling - Wikipedia</a>
 </p>
 
 <p>
-<a id="org5d8166c">【2】</a> <a href="http://www.cplusplus.com/reference/cstring/">&lt;cstring&gt; (string.h) - C++ Reference (cplusplus.com)</a>
+<a id="org39185ca">【2】</a> <a href="http://www.cplusplus.com/reference/cstring/">&lt;cstring&gt; (string.h) - C++ Reference (cplusplus.com)</a>
 </p>
 
 <p>
-<a id="orgda0140d">【3】</a> <a href="https://en.wikipedia.org/wiki/Escape_sequences_in_C">Escape sequences in C - Wikipedia</a>
+<a id="org6ffbe9a">【3】</a> <a href="https://en.wikipedia.org/wiki/Escape_sequences_in_C">Escape sequences in C - Wikipedia</a>
 </p>
 
 <p>
-<a id="org64698f7">【4】</a> <a href="https://en.wikibooks.org/wiki/C_Programming/wchar.h#:~:text=h%20is%20a%20header%20file,multibyte%20and%20wide%20character%20utilities.">C Programming/wchar.h - Wikibooks, open books for an open world</a>
+<a id="orgf4daf59">【4】</a> <a href="https://en.wikibooks.org/wiki/C_Programming/wchar.h#:~:text=h%20is%20a%20header%20file,multibyte%20and%20wide%20character%20utilities.">C Programming/wchar.h - Wikibooks, open books for an open world</a>
 </p>
 
 <p>
-<a id="org09e4fb8">【5】</a> <a href="https://stackoverflow.com/questions/10439680/wchar-t-and-encoding">c++ - wchar_t and encoding - Stack Overflow</a>
+<a id="org040ba94">【5】</a> <a href="https://stackoverflow.com/questions/10439680/wchar-t-and-encoding">c++ - wchar_t and encoding - Stack Overflow</a>
 </p>
 
 <p>
-<a id="org564ef6f">【6】</a> <a href="https://symas.com/the-sad-state-of-c-strings/">The Sad State of C Strings | Symas Corporation</a>
+<a id="org8bf8967">【6】</a> <a href="https://symas.com/the-sad-state-of-c-strings/">The Sad State of C Strings | Symas Corporation</a>
 </p>
 
 <p>
-<a id="org1ab71fd">【7】</a> <a href="http://c.learncodethehardway.org/book/">Learn C the Hard Way</a>
+<a id="org24d5ab0">【7】</a> <a href="http://c.learncodethehardway.org/book/">Learn C the Hard Way</a>
 </p>
 
 <p>
-<a id="orgcc1c69e">【8】</a> <a href="http://bstring.sourceforge.net/">The Better String Library (sourceforge.net)</a>
+<a id="org4eb3ecd">【8】</a> <a href="http://bstring.sourceforge.net/">The Better String Library (sourceforge.net)</a>
 </p>
 
 <p>
-<a id="org8152242">【9】</a> <a href="https://bbs.bccn.net/thread-499485-1-1.html">编程论坛 - strcat(p, p) 不能正常运行的问题 (bccn.net)</a>
+<a id="org2613760">【9】</a> <a href="https://bbs.bccn.net/thread-499485-1-1.html">编程论坛 - strcat(p, p) 不能正常运行的问题 (bccn.net)</a>
 </p>
 
 <p>
-<a id="org22cc5e4">【10】</a> <a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1173.pdf">TR 24731 Rationale (open-std.org)</a>
+<a id="org73b0f0b">【10】</a> <a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1173.pdf">TR 24731 Rationale (open-std.org)</a>
 </p>
 
 <p>
-<a id="orgf4c4e52">【11】</a> <a href="https://stackoverflow.com/questions/44336831/why-should-strtok-be-deprecated#:~:text=strtok%27s%20behaviour%20works%20directly%20against,token%20beginning%20at%20that%20position.">c - Why should strtok() be deprecated? - Stack Overflow</a>
+<a id="orgf1ddbe5">【11】</a> <a href="https://stackoverflow.com/questions/44336831/why-should-strtok-be-deprecated#:~:text=strtok%27s%20behaviour%20works%20directly%20against,token%20beginning%20at%20that%20position.">c - Why should strtok() be deprecated? - Stack Overflow</a>
 </p>
 
 <p>
-<a id="org71a08ee">【12】</a> <a href="https://en.wikipedia.org/wiki/Joel_Spolsky#Schlemiel_the_Painter.27s_algorithm">Joel Spolsky - Wikipedia</a>
+<a id="org591df0f">【12】</a> <a href="https://en.wikipedia.org/wiki/Joel_Spolsky#Schlemiel_the_Painter.27s_algorithm">Joel Spolsky - Wikipedia</a>
 </p>
 
 <p>
-<a id="org19a11ec">【13】</a> <a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/strtok-strtok-l-wcstok-wcstok-l-mbstok-mbstok-l?view=msvc-160">strtok, _strtok_l, wcstok, _wcstok_l, _mbstok, _mbstok_l | Microsoft Docs</a>
+<a id="org8d377d2">【13】</a> <a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/strtok-strtok-l-wcstok-wcstok-l-mbstok-mbstok-l?view=msvc-160">strtok, _strtok_l, wcstok, _wcstok_l, _mbstok, _mbstok_l | Microsoft Docs</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-01-25 Mon 00:00</p> <p>Last modified: 2021-08-03 Tue 23:33</p>
+<p>Create Date: 2021-01-25 Mon 00:00</p> <p>Last modified: 2021-08-04 Wed 13:10</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

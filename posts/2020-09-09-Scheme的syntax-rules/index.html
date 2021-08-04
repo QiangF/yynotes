@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 18:32 -->
+<!-- 2021-08-04 Wed 13:09 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Scheme的syntax-rules <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNjA4MTkw.jpg" alt="load failed"></div></title>
@@ -73,22 +73,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc28442c">1. 什么是宏</a>
+<li><a href="#orga0650d8">1. 什么是宏</a>
 <ul>
-<li><a href="#org8d7784c">1.1. 宏的分类</a></li>
-<li><a href="#org3bacb17">1.2. 卫生宏和非卫生宏</a></li>
+<li><a href="#org281fa4b">1.1. 宏的分类</a></li>
+<li><a href="#orgc85db13">1.2. 卫生宏和非卫生宏</a></li>
 </ul>
 </li>
-<li><a href="#orgff9d935">2. syntax-rules 宏</a>
+<li><a href="#org3fcc9a2">2. syntax-rules 宏</a>
 <ul>
-<li><a href="#org0bacd25">2.1. 什么是语法扩展（syntax extension)</a></li>
-<li><a href="#org425bc4c">2.2. 宏的定义语法</a></li>
-<li><a href="#org90ceaae">2.3. syntax-rules 转换器</a></li>
-<li><a href="#org3956493">2.4. 展开器的行为</a></li>
+<li><a href="#org1337f61">2.1. 什么是语法扩展（syntax extension)</a></li>
+<li><a href="#orgce9c940">2.2. 宏的定义语法</a></li>
+<li><a href="#org8b874fd">2.3. syntax-rules 转换器</a></li>
+<li><a href="#org04ad262">2.4. 展开器的行为</a></li>
 </ul>
 </li>
-<li><a href="#orgcdfa82a">3. 一点补充</a></li>
-<li><a href="#org58a427e">4. 参考资料</a></li>
+<li><a href="#orge7ca1e0">3. 一点补充</a></li>
+<li><a href="#orgf4fd21f">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -108,11 +108,11 @@
 让我们从对宏的基本认识开始这篇文章吧。
 </p>
 
-<div id="outline-container-orgc28442c" class="outline-2">
-<h2 id="orgc28442c"><span class="section-number-2">1</span> 什么是宏</h2>
+<div id="outline-container-orga0650d8" class="outline-2">
+<h2 id="orga0650d8"><span class="section-number-2">1</span> 什么是宏</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-参考维基百科<a href="#orgda1311d">【2】</a>，宏的定义如下：
+参考维基百科<a href="#org1d1ddd2">【2】</a>，宏的定义如下：
 </p>
 
 <p>
@@ -124,19 +124,19 @@
 </p>
 </div>
 
-<div id="outline-container-org8d7784c" class="outline-3">
-<h3 id="org8d7784c"><span class="section-number-3">1.1</span> 宏的分类</h3>
+<div id="outline-container-org281fa4b" class="outline-3">
+<h3 id="org281fa4b"><span class="section-number-3">1.1</span> 宏的分类</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
-维基百科上的分类略有些繁杂，有键盘宏，脚本宏，参数宏，过程宏，词法宏等等。这里采用参考资料<a href="#org12877c2">【3】</a>的分类方法，根据是否使用模式匹配将宏分为过程宏和高级宏，根据宏的卫生性将宏分为卫生宏（hygienic macro）和非卫生宏。
+维基百科上的分类略有些繁杂，有键盘宏，脚本宏，参数宏，过程宏，词法宏等等。这里采用参考资料<a href="#orga7189cc">【3】</a>的分类方法，根据是否使用模式匹配将宏分为过程宏和高级宏，根据宏的卫生性将宏分为卫生宏（hygienic macro）和非卫生宏。
 </p>
 </div>
 
-<div id="outline-container-orgda0a84f" class="outline-4">
-<h4 id="orgda0a84f"><span class="section-number-4">1.1.1</span> 过程宏与高级宏</h4>
+<div id="outline-container-orgfb90d78" class="outline-4">
+<h4 id="orgfb90d78"><span class="section-number-4">1.1.1</span> 过程宏与高级宏</h4>
 <div class="outline-text-4" id="text-1-1-1">
 <p>
-过程宏，根据<a href="#org12877c2">【3】</a>的定义，类似于一个普通的函数，输入一个表达式并输出一个表达式，比如交换两个变量的值，在 C 中使用宏可以这样做：（这里当然可以用 <code>do while(0)</code> ）
+过程宏，根据<a href="#orga7189cc">【3】</a>的定义，类似于一个普通的函数，输入一个表达式并输出一个表达式，比如交换两个变量的值，在 C 中使用宏可以这样做：（这里当然可以用 <code>do while(0)</code> ）
 </p>
 
 <div class="org-src-container">
@@ -197,12 +197,12 @@
 </div>
 </div>
 
-<div id="outline-container-org3bacb17" class="outline-3">
-<h3 id="org3bacb17"><span class="section-number-3">1.2</span> 卫生宏和非卫生宏</h3>
+<div id="outline-container-orgc85db13" class="outline-3">
+<h3 id="orgc85db13"><span class="section-number-3">1.2</span> 卫生宏和非卫生宏</h3>
 <div class="outline-text-3" id="text-1-2">
 <blockquote>
 <p>
-卫生和非卫生的本质问题是作用域问题 —— 摘自参考资料<a href="#org12877c2">【3】</a>
+卫生和非卫生的本质问题是作用域问题 —— 摘自参考资料<a href="#orga7189cc">【3】</a>
 </p>
 </blockquote>
 
@@ -251,16 +251,16 @@
 </div>
 </div>
 
-<div id="outline-container-orgff9d935" class="outline-2">
-<h2 id="orgff9d935"><span class="section-number-2">2</span> syntax-rules 宏</h2>
+<div id="outline-container-org3fcc9a2" class="outline-2">
+<h2 id="org3fcc9a2"><span class="section-number-2">2</span> syntax-rules 宏</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 以下内容参考的标准是 <i>The Scheme Programming Language</i> 章节 <b>Syntax Extension</b> 中描述的 \(r^6rs\) ，虽然现在（2020 年） \(r^7rs\) small 早已发布（2013 年），但两者的差别并不是很大。本小节的部分内容也参考了 \(r^7rs\) 。
 </p>
 </div>
 
-<div id="outline-container-org0bacd25" class="outline-3">
-<h3 id="org0bacd25"><span class="section-number-3">2.1</span> 什么是语法扩展（syntax extension)</h3>
+<div id="outline-container-org1337f61" class="outline-3">
+<h3 id="org1337f61"><span class="section-number-3">2.1</span> 什么是语法扩展（syntax extension)</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 语法扩展被用来简化和常规化在变成中重复出现的模式。
@@ -283,7 +283,7 @@
 </p>
 
 
-<div id="org3dc5efa" class="figure">
+<div id="orga0193ce" class="figure">
 <p><img src="./1.png" alt="1.png" />
 </p>
 </div>
@@ -294,16 +294,16 @@ C 语言的宏替换作用对象是 program text，即程序文本。而 Scheme 
 </div>
 </div>
 
-<div id="outline-container-org425bc4c" class="outline-3">
-<h3 id="org425bc4c"><span class="section-number-3">2.2</span> 宏的定义语法</h3>
+<div id="outline-container-orgce9c940" class="outline-3">
+<h3 id="orgce9c940"><span class="section-number-3">2.2</span> 宏的定义语法</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 要建立关键字与转换器之间的关联，可以使用 <code>define-syntax=，=let-syntax</code> 或 <code>letrec-syntax=。=define-syntax</code> 可用于 top-level，另外两个可用于局部。
 </p>
 </div>
 
-<div id="outline-container-org6d2dfe5" class="outline-4">
-<h4 id="org6d2dfe5"><span class="section-number-4">2.2.1</span> define-syntax</h4>
+<div id="outline-container-orged825b3" class="outline-4">
+<h4 id="orged825b3"><span class="section-number-4">2.2.1</span> define-syntax</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 <code>define-syntax</code> 的语法如下：
@@ -336,8 +336,8 @@ C 语言的宏替换作用对象是 program text，即程序文本。而 Scheme 
 </div>
 </div>
 
-<div id="outline-container-org8b5a5b1" class="outline-4">
-<h4 id="org8b5a5b1"><span class="section-number-4">2.2.2</span> let-syntax 和 letrec-syntax</h4>
+<div id="outline-container-org11af0bf" class="outline-4">
+<h4 id="org11af0bf"><span class="section-number-4">2.2.2</span> let-syntax 和 letrec-syntax</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 两者的语法如下：
@@ -378,8 +378,8 @@ C 语言的宏替换作用对象是 program text，即程序文本。而 Scheme 
 </div>
 </div>
 
-<div id="outline-container-org90ceaae" class="outline-3">
-<h3 id="org90ceaae"><span class="section-number-3">2.3</span> syntax-rules 转换器</h3>
+<div id="outline-container-org8b874fd" class="outline-3">
+<h3 id="org8b874fd"><span class="section-number-3">2.3</span> syntax-rules 转换器</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 它的语法如下：
@@ -427,13 +427,13 @@ syntax-rules Pattern 的最外层必须是表结构，且该表结构的第一�
 </p>
 
 <p>
-关于 syntax-rules 宏的一些例子这里就不列举了，参考资料<a href="#orgf878cd0">【5】</a>中的 \(r^7rs\) 的的第七节 <b>Formal syntax and semantics</b> 中有很多通俗易懂的例子。
+关于 syntax-rules 宏的一些例子这里就不列举了，参考资料<a href="#orga57c118">【5】</a>中的 \(r^7rs\) 的的第七节 <b>Formal syntax and semantics</b> 中有很多通俗易懂的例子。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org3956493" class="outline-3">
-<h3 id="org3956493"><span class="section-number-3">2.4</span> 展开器的行为</h3>
+<div id="outline-container-org04ad262" class="outline-3">
+<h3 id="org04ad262"><span class="section-number-3">2.4</span> 展开器的行为</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 展开器的处理顺序是从左到右的。如果展开器遇到了一个变量定义，它会记录下这个定义的标识符是一个变量，并在所有定义被处理之前抑制右边表达式的展开。如果它遇到了关键字绑定，它会对右边表达式进行展开并求值，并将转换器与关键字绑定。如果它遇到了一个表达式，它会展开所有被抑制的右边表达式，以及当前和剩余的表达式。
@@ -515,8 +515,8 @@ syntax-rules Pattern 的最外层必须是表结构，且该表结构的第一�
 </div>
 </div>
 
-<div id="outline-container-orgcdfa82a" class="outline-2">
-<h2 id="orgcdfa82a"><span class="section-number-2">3</span> 一点补充</h2>
+<div id="outline-container-orge7ca1e0" class="outline-2">
+<h2 id="orge7ca1e0"><span class="section-number-2">3</span> 一点补充</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 对于 syntax-rules()， <i>The Scheme Programming Language</i> 上面是这样描述的：While it is <b>much</b> less expressive than syntax-case, it is sufficient for defining many common syntactic extension。也就是说，它的表达能力是远弱于 syntax-case 的。syntax-case 在 r6rs 是标准实现所要求的，但是在 r7rs small 中被废除了，因为实现复杂。
@@ -548,34 +548,34 @@ syntax-rules Pattern 的最外层必须是表结构，且该表结构的第一�
 </div>
 </div>
 
-<div id="outline-container-org58a427e" class="outline-2">
-<h2 id="org58a427e"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-orgf4fd21f" class="outline-2">
+<h2 id="orgf4fd21f"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="org58c4323">【1】</a> 为什么Lisp语言如此先进？（译文）： <a href="https://www.ruanyifeng.com/blog/2010/10/why_lisp_is_superior.html">https://www.ruanyifeng.com/blog/2010/10/why_lisp_is_superior.html</a>
+<a id="orgf17ad5c">【1】</a> 为什么Lisp语言如此先进？（译文）： <a href="https://www.ruanyifeng.com/blog/2010/10/why_lisp_is_superior.html">https://www.ruanyifeng.com/blog/2010/10/why_lisp_is_superior.html</a>
 </p>
 
 <p>
-<a id="orgda1311d">【2】</a> Macro (computer science) From Wikipedia, the free encyclopedia： <a href="https://en.wikipedia.org/wiki/Macro_(computer_science)">https://en.wikipedia.org/wiki/Macro_(computer_science)</a>
+<a id="org1d1ddd2">【2】</a> Macro (computer science) From Wikipedia, the free encyclopedia： <a href="https://en.wikipedia.org/wiki/Macro_(computer_science)">https://en.wikipedia.org/wiki/Macro_(computer_science)</a>
 </p>
 
 <p>
-<a id="org12877c2">【3】</a> scheme 卫生宏实现介绍： <a href="http://www.zenlife.tk/scheme-hygiene-macro.md">http://www.zenlife.tk/scheme-hygiene-macro.md</a>
+<a id="orga7189cc">【3】</a> scheme 卫生宏实现介绍： <a href="http://www.zenlife.tk/scheme-hygiene-macro.md">http://www.zenlife.tk/scheme-hygiene-macro.md</a>
 </p>
 
 <p>
-<a id="orgdb58716">【4】</a> <i>The Scheme Programming Language</i> , R.Kent Dybvig
+<a id="org5eda8c9">【4】</a> <i>The Scheme Programming Language</i> , R.Kent Dybvig
 </p>
 
 <p>
-<a id="orgf878cd0">【5】</a> r7rs org： <a href="https://small.r7rs.org">https://small.r7rs.org</a>
+<a id="orga57c118">【5】</a> r7rs org： <a href="https://small.r7rs.org">https://small.r7rs.org</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-09-09 Wed 00:00</p> <p>Last modified: 2021-08-03 Tue 18:31</p>
+<p>Create Date: 2020-09-09 Wed 00:00</p> <p>Last modified: 2021-08-04 Wed 13:09</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

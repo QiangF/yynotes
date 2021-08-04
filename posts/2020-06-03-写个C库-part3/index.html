@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 13:45 -->
+<!-- 2021-08-04 Wed 13:07 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>2020-06-03-写个C库-part3 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,19 +51,19 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4b49a7b">1. 模块化和名字空间</a>
+<li><a href="#orge6f1b7a">1. 模块化和名字空间</a>
 <ul>
-<li><a href="#org45ff423">1.1. 清单</a></li>
+<li><a href="#org3f0f804">1.1. 清单</a></li>
 </ul>
 </li>
-<li><a href="#org0eea15f">2. 错误处理</a>
+<li><a href="#org9a81059">2. 错误处理</a>
 <ul>
-<li><a href="#org43118ce">2.1. 清单</a></li>
+<li><a href="#orgb764e47">2.1. 清单</a></li>
 </ul>
 </li>
-<li><a href="#org3c83d28">3. 封装和面向对象设计</a>
+<li><a href="#org469f5fc">3. 封装和面向对象设计</a>
 <ul>
-<li><a href="#orga4408cb">3.1. 清单</a></li>
+<li><a href="#orgfc65fc1">3.1. 清单</a></li>
 </ul>
 </li>
 </ul>
@@ -89,8 +89,8 @@
 前篇：<a href="http://davidz25.blogspot.com/2011/06/writing-c-library-part-1.html">part one</a> <a href="http://davidz25.blogspot.com/2011/06/writing-c-library-part-2.html">part two</a>
 </p>
 
-<div id="outline-container-org4b49a7b" class="outline-2">
-<h2 id="org4b49a7b"><span class="section-number-2">1</span> 模块化和名字空间</h2>
+<div id="outline-container-orge6f1b7a" class="outline-2">
+<h2 id="orge6f1b7a"><span class="section-number-2">1</span> 模块化和名字空间</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 C 语言没有提供名字空间（<a href="https://en.wikipedia.org/wiki/Namespace#In_programming_languages">namespace</a>）的概念（像在 C++ 或 Python 中那样的），因此通常使用命名约定进行模拟。使用名字空间的主要原因是避免名字碰撞（<a href="http://en.wikipedia.org/wiki/Naming_collision">naming collisions</a> ）—— libwoot 和 libkool 都提供了叫做 get_all_objects() 的函数，如果程序链接了这两个库，该使用哪一个函数呢？名字空间的使用是命名策略的重要组成部分，它用于变量名，函数名，类型名（包括 structs，unions，enums 和 typedefs）和宏。
@@ -117,8 +117,8 @@ C 语言没有提供名字空间（<a href="https://en.wikipedia.org/wiki/Namesp
 </p>
 </div>
 
-<div id="outline-container-org45ff423" class="outline-3">
-<h3 id="org45ff423"><span class="section-number-3">1.1</span> 清单</h3>
+<div id="outline-container-org3f0f804" class="outline-3">
+<h3 id="org3f0f804"><span class="section-number-3">1.1</span> 清单</h3>
 <div class="outline-text-3" id="text-1-1">
 <ul class="org-ul">
 <li>选择一个命名约定 —— 并坚持使用它</li>
@@ -129,8 +129,8 @@ C 语言没有提供名字空间（<a href="https://en.wikipedia.org/wiki/Namesp
 </div>
 </div>
 
-<div id="outline-container-org0eea15f" class="outline-2">
-<h2 id="org0eea15f"><span class="section-number-2">2</span> 错误处理</h2>
+<div id="outline-container-org9a81059" class="outline-2">
+<h2 id="org9a81059"><span class="section-number-2">2</span> 错误处理</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 如果有一个充分描述了 C 语言错误处理的陈述，那人们和可能难以就其达成共识。然而，大多数程序员会同意这一点：错误可以被分为两类 1) 程序员错误（programmmer error）；2) 运行时错误（run-time error）。
@@ -165,8 +165,8 @@ C 语言没有提供名字空间（<a href="https://en.wikipedia.org/wiki/Namesp
 </p>
 </div>
 
-<div id="outline-container-org43118ce" class="outline-3">
-<h3 id="org43118ce"><span class="section-number-3">2.1</span> 清单</h3>
+<div id="outline-container-orgb764e47" class="outline-3">
+<h3 id="orgb764e47"><span class="section-number-3">2.1</span> 清单</h3>
 <div class="outline-text-3" id="text-2-1">
 <ul class="org-ul">
 <li>将合法和不合法（如果有的话）的参数范围在文档中说明，并为程序员提供验证参数合法性的功能（除非实在是微不足道）。</li>
@@ -183,8 +183,8 @@ C 语言没有提供名字空间（<a href="https://en.wikipedia.org/wiki/Namesp
 </div>
 </div>
 
-<div id="outline-container-org3c83d28" class="outline-2">
-<h2 id="org3c83d28"><span class="section-number-2">3</span> 封装和面向对象设计</h2>
+<div id="outline-container-org469f5fc" class="outline-2">
+<h2 id="org469f5fc"><span class="section-number-2">3</span> 封装和面向对象设计</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 虽然 C 语言没有内置面向对象编程（<a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented programming</a>）支持，许都 C 程序员却是这么做的 —— 在很多方面，几乎很难不这么做。事实上，许多 C 程序员将 C 的简单性（和 C++ 相比）视作一个特性，这样你就不会与任何一个对象模型（<a href="http://en.wikipedia.org/wiki/Object_model">object model</a>）绑定。—— 例如，Linux 内核使用了<a href="http://lwn.net/Articles/444910/">various</a> <a href="http://lwn.net/Articles/446317/">OO techniques</a>，而 GLib/GTK+ 有它自己的动态类型系统，叫做 <a href="http://developer.gnome.org/gobject/unstable/pt01.html">GType</a>，<a href="http://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#gobject-The-Base-Object-Type.description">GObject base class</a> （许多类的派生源） 就是在它之上建立的。
@@ -207,8 +207,8 @@ C 中的面向对象设计的一个重要特性是，它通常通过使用不透
 </p>
 </div>
 
-<div id="outline-container-orga4408cb" class="outline-3">
-<h3 id="orga4408cb"><span class="section-number-3">3.1</span> 清单</h3>
+<div id="outline-container-orgfc65fc1" class="outline-3">
+<h3 id="orgfc65fc1"><span class="section-number-3">3.1</span> 清单</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li>为你的库建立一个对象模型（如果适用的话）</li>
@@ -225,7 +225,7 @@ C 中的面向对象设计的一个重要特性是，它通常通过使用不透
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-06-03 Wed 00:00</p> <p>Last modified: 2021-08-03 Tue 13:44</p>
+<p>Create Date: 2020-06-03 Wed 00:00</p> <p>Last modified: 2021-08-04 Wed 13:06</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

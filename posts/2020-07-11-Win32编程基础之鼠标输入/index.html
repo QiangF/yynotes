@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 16:30 -->
+<!-- 2021-08-04 Wed 13:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Win32编程基础之鼠标输入 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMjk1ODQw.jpg" alt="load failed"></div></title>
@@ -51,33 +51,33 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc40339d">1. 鼠标光标</a></li>
-<li><a href="#org1a0cbec">2. 鼠标捕获</a></li>
-<li><a href="#orgbf40f38">3. 鼠标配置</a></li>
-<li><a href="#orgd821854">4. X 按钮</a></li>
-<li><a href="#orgf09bee8">5. 鼠标消息</a>
+<li><a href="#org7c29357">1. 鼠标光标</a></li>
+<li><a href="#org46cabe3">2. 鼠标捕获</a></li>
+<li><a href="#orga4b0c83">3. 鼠标配置</a></li>
+<li><a href="#orgf2bec27">4. X 按钮</a></li>
+<li><a href="#orga73551e">5. 鼠标消息</a>
 <ul>
-<li><a href="#org1c1aed9">5.1. 客户区鼠标消息</a></li>
-<li><a href="#org6e41cde">5.2. 非客户区鼠标消息</a></li>
+<li><a href="#org32fe0fe">5.1. 客户区鼠标消息</a></li>
+<li><a href="#orgb3c673a">5.2. 非客户区鼠标消息</a></li>
 </ul>
 </li>
-<li><a href="#org8cdec61">6. 鼠标滚轮</a>
+<li><a href="#org2b78128">6. 鼠标滚轮</a>
 <ul>
-<li><a href="#org0468b5c">6.1. 判断滚动的行数</a></li>
+<li><a href="#orgbc2a9b0">6.1. 判断滚动的行数</a></li>
 </ul>
 </li>
-<li><a href="#org682da0c">7. 鼠标点击锁</a></li>
-<li><a href="#org2e7081a">8. 鼠标声呐</a></li>
-<li><a href="#org3eb5af8">9. 鼠标消失（vanish）</a></li>
-<li><a href="#orgf96ba38">10. 窗口激活</a></li>
-<li><a href="#org2033797">11. 代码示例</a>
+<li><a href="#org8376739">7. 鼠标点击锁</a></li>
+<li><a href="#orgdb0cbe1">8. 鼠标声呐</a></li>
+<li><a href="#org4a7ffbb">9. 鼠标消失（vanish）</a></li>
+<li><a href="#org00a5c39">10. 窗口激活</a></li>
+<li><a href="#org861ce5c">11. 代码示例</a>
 <ul>
-<li><a href="#orge73dadc">11.1. 鼠标滚轮的使用</a></li>
-<li><a href="#orgbaa3383">11.2. 悬停与离开消息</a></li>
+<li><a href="#orgf7f3010">11.1. 鼠标滚轮的使用</a></li>
+<li><a href="#org209ad3e">11.2. 悬停与离开消息</a></li>
 </ul>
 </li>
-<li><a href="#orgf530a5f">12. 补充：Programming Windows 上的要点</a></li>
-<li><a href="#orgf072d4b">13. 参考资料</a></li>
+<li><a href="#org8c45eae">12. 补充：Programming Windows 上的要点</a></li>
+<li><a href="#org99eae24">13. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -85,8 +85,8 @@
 鼠标是一个重要的输入来源。应用应该为鼠标输入提供良好的支持，但是它也不应该完全依赖于鼠标来让用户进行输入。应用应该提供完备的键盘支持。
 </p>
 
-<div id="outline-container-orgc40339d" class="outline-2">
-<h2 id="orgc40339d"><span class="section-number-2">1</span> 鼠标光标</h2>
+<div id="outline-container-org7c29357" class="outline-2">
+<h2 id="org7c29357"><span class="section-number-2">1</span> 鼠标光标</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 当用户移动鼠标时，系统会移动在屏幕上显示的，叫做 <b>鼠标光标</b> 的位图。光标包括一个叫做热点（hot spot）的单个像素的点，系统对其进行追踪，并将它的位置作为光标的位置·。当鼠标事件发生时，包含热点的窗口一般会接受到事件导致的鼠标消息。窗口不需要是活跃的或拥有键盘焦点就可以接受鼠标消息。
@@ -98,8 +98,8 @@
 </div>
 </div>
 
-<div id="outline-container-org1a0cbec" class="outline-2">
-<h2 id="org1a0cbec"><span class="section-number-2">2</span> 鼠标捕获</h2>
+<div id="outline-container-org46cabe3" class="outline-2">
+<h2 id="org46cabe3"><span class="section-number-2">2</span> 鼠标捕获</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 当鼠标事件发生时，系统一般会将鼠标消息投递到包含鼠标热点的窗口中。应用可以通过使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setcapture">SetCapture</a> 函数将鼠标消息路由到指定的窗口。窗口会接收所有的鼠标消息，直到应用调用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-releasecapture">ReleaseCapture</a> 函数或指定其他的捕获窗口，或直到用户点击了由其他线程创建的窗口。
@@ -123,8 +123,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgbf40f38" class="outline-2">
-<h2 id="orgbf40f38"><span class="section-number-2">3</span> 鼠标配置</h2>
+<div id="outline-container-orga4b0c83" class="outline-2">
+<h2 id="orga4b0c83"><span class="section-number-2">3</span> 鼠标配置</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 即便鼠标是一种重要的应用输入设备，并不是所有的用户都必须使用鼠标。应用可以通过使用 <b>SM_MOUSEPRESENT</b> 标志调用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-getsystemmetrics">GetSystemMetrics</a> 函数来判断系统是否包括了一个鼠标。
@@ -148,8 +148,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 </div>
 
-<div id="outline-container-orgd821854" class="outline-2">
-<h2 id="orgd821854"><span class="section-number-2">4</span> X 按钮</h2>
+<div id="outline-container-orgf2bec27" class="outline-2">
+<h2 id="orgf2bec27"><span class="section-number-2">4</span> X 按钮</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 当 Windows 支持五键鼠标时，除了左中右之外，还有 XBUTTON1 和 XBUTTON2，它们在你使用浏览器的时候提供了向前和向后导航的功能。
@@ -192,8 +192,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 </div>
 
-<div id="outline-container-orgf09bee8" class="outline-2">
-<h2 id="orgf09bee8"><span class="section-number-2">5</span> 鼠标消息</h2>
+<div id="outline-container-orga73551e" class="outline-2">
+<h2 id="orga73551e"><span class="section-number-2">5</span> 鼠标消息</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 当用户移动鼠标或是按下和释放鼠标按钮时，鼠标会生成一个输入事件。系统会将鼠标输入事件转化为消息并将它们投递到合适的线程消息队列中。当鼠标消息消息投递速度快于线程的处理速度时，系统会将除了最近的鼠标消息撤销。
@@ -204,8 +204,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </p>
 </div>
 
-<div id="outline-container-org1c1aed9" class="outline-3">
-<h3 id="org1c1aed9"><span class="section-number-3">5.1</span> 客户区鼠标消息</h3>
+<div id="outline-container-org32fe0fe" class="outline-3">
+<h3 id="org32fe0fe"><span class="section-number-3">5.1</span> 客户区鼠标消息</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 鼠标在窗口内时，鼠标事件发生时窗口会收到客户区消息。当鼠标在客户区内移动鼠标时系统会向窗口投递 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove">WM_MOUSEMOVE</a> 消息。当用户按下或释放鼠标按键时，它会投递以下消息之一。
@@ -243,8 +243,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </p>
 </div>
 
-<div id="outline-container-org4ac93a2" class="outline-4">
-<h4 id="org4ac93a2"><span class="section-number-4">5.1.1</span> 消息参数</h4>
+<div id="outline-container-org30bb601" class="outline-4">
+<h4 id="org30bb601"><span class="section-number-4">5.1.1</span> 消息参数</h4>
 <div class="outline-text-4" id="text-5-1-1">
 <p>
 客户区鼠标消息的 <b>lParam</b> 参数指明了光标热点的位置。低位的字指定了热点的 x 坐标，高位字指定了 y 坐标。坐标使用的是客户区坐标。在客户区坐标系统中，原点是客户区左上角的顶点。
@@ -273,8 +273,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 
 
-<div id="outline-container-org91f976c" class="outline-4">
-<h4 id="org91f976c"><span class="section-number-4">5.1.2</span> 双击消息</h4>
+<div id="outline-container-org6523584" class="outline-4">
+<h4 id="org6523584"><span class="section-number-4">5.1.2</span> 双击消息</h4>
 <div class="outline-text-4" id="text-5-1-2">
 <p>
 当用户连续单击两次鼠标按钮时，系统会生成双击消息。当用户单击按钮时，系统会建立一个以光标热点为中心的矩形，它也会对鼠标单击发生的时间进行标记。当用户第二次按下同样的按钮时，系统会判断热点是否仍在矩形中，并计算第一次单击后过去的时间。如果热点仍在矩形中且过去的时间没有超过双击的时间界限值，系统会生成一个双击消息。
@@ -306,8 +306,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 </div>
 
-<div id="outline-container-org6e41cde" class="outline-3">
-<h3 id="org6e41cde"><span class="section-number-3">5.2</span> 非客户区鼠标消息</h3>
+<div id="outline-container-orgb3c673a" class="outline-3">
+<h3 id="orgb3c673a"><span class="section-number-3">5.2</span> 非客户区鼠标消息</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 当鼠标事件发生在窗口除了客户区的部分时，窗口会收到一个非客户区鼠标消息。窗口的非客户区由边框、菜单栏、标题栏、滚动条栏、窗口菜单、最小化按钮和最大化按钮组成。
@@ -330,8 +330,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </p>
 </div>
 
-<div id="outline-container-orga585763" class="outline-4">
-<h4 id="orga585763"><span class="section-number-4">5.2.1</span> WM_NCHITTEST 消息</h4>
+<div id="outline-container-org3c0bb6f" class="outline-4">
+<h4 id="org3c0bb6f"><span class="section-number-4">5.2.1</span> WM_NCHITTEST 消息</h4>
 <div class="outline-text-4" id="text-5-2-1">
 <p>
 当鼠标事件发生时，系统会向包含鼠标光标热点或捕捉了鼠标的窗口发送 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-nchittest">WM_NCHITTEST</a> 消息。系统使用这个消息来判断是发送客户区消息还是非客户区消息。接收鼠标移动消息和鼠标按钮消息的应用必须将它传递给 <b>DefWindowProc</b> 函数。
@@ -408,8 +408,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 </div>
 
-<div id="outline-container-org8cdec61" class="outline-2">
-<h2 id="org8cdec61"><span class="section-number-2">6</span> 鼠标滚轮</h2>
+<div id="outline-container-org2b78128" class="outline-2">
+<h2 id="org2b78128"><span class="section-number-2">6</span> 鼠标滚轮</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 鼠标的滚轮结合了按键和滚轮。滚轮上有不连续的，均匀分布的凹口。当你滚动滚轮时，每当滚过一个凹口，滚轮消息会被发送到你的应用。滚轮按键也可以作为通常 Windows 的中键按钮。按压和释放鼠标滚轮会发送标准 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-mbuttonup">WM_MBUTTONUP</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-mbuttondown">WM_MBUTTONDOWN</a> 消息。双击滚轮会发送标准 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-mbuttondblclk">WM_MBUTTONDBLCLK</a> 消息。
@@ -424,8 +424,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </p>
 </div>
 
-<div id="outline-container-org0468b5c" class="outline-3">
-<h3 id="org0468b5c"><span class="section-number-3">6.1</span> 判断滚动的行数</h3>
+<div id="outline-container-orgbc2a9b0" class="outline-3">
+<h3 id="orgbc2a9b0"><span class="section-number-3">6.1</span> 判断滚动的行数</h3>
 <div class="outline-text-3" id="text-6-1">
 <p>
 应用应该使用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-systemparametersinfoa">SystemParametersInfo</a> 函数来检索每个滚动操作（每个凹口）所造成的滚动行数。要检索行数，应用可以这样调用：
@@ -465,8 +465,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 </div>
 
-<div id="outline-container-org682da0c" class="outline-2">
-<h2 id="org682da0c"><span class="section-number-2">7</span> 鼠标点击锁</h2>
+<div id="outline-container-org8376739" class="outline-2">
+<h2 id="org8376739"><span class="section-number-2">7</span> 鼠标点击锁</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 鼠标的点击锁（ClickLock）特性允许用户在一次点击后锁定鼠标按钮。在应用看来，按钮仍然是处于按压状态。要对按钮解锁，应用可以发送任意的鼠标消息，用户可以单击任何鼠标按钮。这使得用户可以更简单的做一些复杂的鼠标操作组合。关于更多的消息，可以对 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-systemparametersinfoa">SystemParametersInfo</a> 函数使用以下标志：
@@ -485,8 +485,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 
 
-<div id="outline-container-org2e7081a" class="outline-2">
-<h2 id="org2e7081a"><span class="section-number-2">8</span> 鼠标声呐</h2>
+<div id="outline-container-orgdb0cbe1" class="outline-2">
+<h2 id="orgdb0cbe1"><span class="section-number-2">8</span> 鼠标声呐</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 鼠标声呐特性可以在用户按下并释放 CTRL 键时，围绕鼠标指针短暂显示多个同心圆。这个特性帮助用户在混乱的屏幕上、高分辨率的屏幕上、劣质的显示器上定位鼠标指针。
@@ -505,8 +505,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 
 
-<div id="outline-container-org3eb5af8" class="outline-2">
-<h2 id="org3eb5af8"><span class="section-number-2">9</span> 鼠标消失（vanish）</h2>
+<div id="outline-container-org4a7ffbb" class="outline-2">
+<h2 id="org4a7ffbb"><span class="section-number-2">9</span> 鼠标消失（vanish）</h2>
 <div class="outline-text-2" id="text-9">
 <p>
 鼠标消失功能允许用户在打字的时候隐藏指针。在用户移动鼠标时，鼠标指针会重新出现。这个特性避免了鼠标指针对输入的文本造成干扰，例如，在 e-mail 或其他文档中。更多消息可以使用以下标志调用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-systemparametersinfoa">SystemParametersInfoA</a>
@@ -521,8 +521,8 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 
 
-<div id="outline-container-orgf96ba38" class="outline-2">
-<h2 id="orgf96ba38"><span class="section-number-2">10</span> 窗口激活</h2>
+<div id="outline-container-org00a5c39" class="outline-2">
+<h2 id="org00a5c39"><span class="section-number-2">10</span> 窗口激活</h2>
 <div class="outline-text-2" id="text-10">
 <p>
 当用户点击一个不活跃的顶级窗口或它的子窗口时，系统会向这个顶级窗口或子窗口发送 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-mouseactivate">WM_MOUSEACTIVATE</a> 消息。系统在投递 <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-nchittest">WM_NCHITTEST</a> 消息后向窗口发送这个消息，但是它是在按钮按下消息之前的。当 <b>WM_MOUSEACTIVATE</b> 消息被传递给 <b>DefWindowProc</b> 函数时，系统会激活顶级窗口并将按钮按下的消息发给顶级窗口或子窗口。
@@ -545,16 +545,16 @@ Windows 最多支持三个按键的鼠标。在一个三键鼠标上，按钮被
 </div>
 
 
-<div id="outline-container-org2033797" class="outline-2">
-<h2 id="org2033797"><span class="section-number-2">11</span> 代码示例</h2>
+<div id="outline-container-org861ce5c" class="outline-2">
+<h2 id="org861ce5c"><span class="section-number-2">11</span> 代码示例</h2>
 <div class="outline-text-2" id="text-11">
 <p>
 关于鼠标使用的一些例子，可见于微软的文档：<a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/using-mouse-input">Using Mouse Input</a>，它上面详细介绍了一般鼠标功能的使用。这里我对鼠标滚轮的使用和鼠标悬停与离开消息的使用给出两个简单的例子。
 </p>
 </div>
 
-<div id="outline-container-orge73dadc" class="outline-3">
-<h3 id="orge73dadc"><span class="section-number-3">11.1</span> 鼠标滚轮的使用</h3>
+<div id="outline-container-orgf7f3010" class="outline-3">
+<h3 id="orgf7f3010"><span class="section-number-3">11.1</span> 鼠标滚轮的使用</h3>
 <div class="outline-text-3" id="text-11-1">
 <p>
 鼠标滚轮的消息是 <b>WM_MOUSEWHEEL</b> ，它的 <b>wParam</b> 高位字是滚轮滚动的距离，以 <b>WHEEL_DELTA</b> 的整数倍表示，它的值是 120。这个值是正数说明滚轮向前滚动，远离用户；是负数则说明滚轮向后滚动，朝向用户。（负值向下滚，正值向上滚）
@@ -724,8 +724,8 @@ yPos = GET_Y_LPARAM(lParam)
 </div>
 </div>
 
-<div id="outline-container-orgbaa3383" class="outline-3">
-<h3 id="orgbaa3383"><span class="section-number-3">11.2</span> 悬停与离开消息</h3>
+<div id="outline-container-org209ad3e" class="outline-3">
+<h3 id="org209ad3e"><span class="section-number-3">11.2</span> 悬停与离开消息</h3>
 <div class="outline-text-3" id="text-11-2">
 <p>
 悬停消息，顾名思义，当鼠标在窗口区域停留一段事件后会触发该事件。离开消息即是鼠标离开某个窗口时触发的事件。
@@ -853,8 +853,8 @@ yPos = GET_Y_LPARAM(lParam)
 </div>
 </div>
 
-<div id="outline-container-orgf530a5f" class="outline-2">
-<h2 id="orgf530a5f"><span class="section-number-2">12</span> 补充：Programming Windows 上的要点</h2>
+<div id="outline-container-org8c45eae" class="outline-2">
+<h2 id="org8c45eae"><span class="section-number-2">12</span> 补充：Programming Windows 上的要点</h2>
 <div class="outline-text-2" id="text-12">
 <ul class="org-ul">
 <li>GetCursorPos 和 SetCursorPos 函数可以获得和设置鼠标的位置（坐标是屏幕坐标）</li>
@@ -862,26 +862,26 @@ yPos = GET_Y_LPARAM(lParam)
 </div>
 </div>
 
-<div id="outline-container-orgf072d4b" class="outline-2">
-<h2 id="orgf072d4b"><span class="section-number-2">13</span> 参考资料</h2>
+<div id="outline-container-org99eae24" class="outline-2">
+<h2 id="org99eae24"><span class="section-number-2">13</span> 参考资料</h2>
 <div class="outline-text-2" id="text-13">
 <p>
-<a id="org6eb9179">【1】</a> About Mouse Input： <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/about-mouse-input">https://docs.microsoft.com/en-us/windows/win32/inputdev/about-mouse-input</a>
+<a id="orgcd2faba">【1】</a> About Mouse Input： <a href="https://docs.microsoft.com/en-us/windows/win32/inputdev/about-mouse-input">https://docs.microsoft.com/en-us/windows/win32/inputdev/about-mouse-input</a>
 </p>
 
 <p>
-<a id="orgecf280f">【2】</a> TrackMouseEvent function： <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-trackmouseevent">https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-trackmouseevent</a>
+<a id="org66dbdf8">【2】</a> TrackMouseEvent function： <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-trackmouseevent">https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-trackmouseevent</a>
 </p>
 
 <p>
-<a id="org50d0f10">【3】</a> <i>Programming Windows</i> , Charles Petzold
+<a id="org685fb71">【3】</a> <i>Programming Windows</i> , Charles Petzold
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-07-11 Sat 00:00</p> <p>Last modified: 2021-08-03 Tue 16:29</p>
+<p>Create Date: 2020-07-11 Sat 00:00</p> <p>Last modified: 2021-08-04 Wed 13:08</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

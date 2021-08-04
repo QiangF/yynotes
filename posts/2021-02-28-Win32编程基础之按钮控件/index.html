@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 23:55 -->
+<!-- 2021-08-04 Wed 13:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Win32编程基础之按钮控件 <div class="yyheadimg"><img src="./aHR0cHM6Ly9jaGFuLnNhbmtha3Vjb21wbGV4LmNvbS9wb3N0L3Nob3cvMjI4MjY2MjY=.jpg" alt="load failed"></div></title>
@@ -51,32 +51,32 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org5d9c2ac">1. 按钮消息</a>
+<li><a href="#orgf1f11d2">1. 按钮消息</a>
 <ul>
-<li><a href="#org2361dd0">1.1. 向按钮发送消息</a></li>
-<li><a href="#org99dc4df">1.2. 从按钮接收消息</a></li>
-<li><a href="#org2d489fb">1.3. 颜色消息</a></li>
+<li><a href="#org495cbcd">1.1. 向按钮发送消息</a></li>
+<li><a href="#orgf244cda">1.2. 从按钮接收消息</a></li>
+<li><a href="#org2f80bc1">1.3. 颜色消息</a></li>
 </ul>
 </li>
-<li><a href="#org8b370f0">2. 按钮状态</a>
+<li><a href="#org9d6c197">2. 按钮状态</a>
 <ul>
-<li><a href="#orgb4c5197">2.1. 焦点状态</a></li>
-<li><a href="#orgee5de76">2.2. 按压状态</a></li>
-<li><a href="#org49c1b3b">2.3. 选择状态</a></li>
-<li><a href="#org8bd8df4">2.4. 改变按钮状态</a></li>
+<li><a href="#orga135061">2.1. 焦点状态</a></li>
+<li><a href="#orgc2e443a">2.2. 按压状态</a></li>
+<li><a href="#orga549e20">2.3. 选择状态</a></li>
+<li><a href="#orgbd8a894">2.4. 改变按钮状态</a></li>
 </ul>
 </li>
-<li><a href="#org944d3a4">3. 按钮的种类和样式</a>
+<li><a href="#org7616bb3">3. 按钮的种类和样式</a>
 <ul>
-<li><a href="#org23b69ea">3.1. 复选框（Check Box）</a></li>
-<li><a href="#org7a2333e">3.2. 组合框（Group Box）</a></li>
-<li><a href="#orgfbca5d8">3.3. 按键按钮（Push Button）</a></li>
-<li><a href="#org4b521e1">3.4. 单选按钮（Radio Button）</a></li>
-<li><a href="#org508855c">3.5. 其他样式</a></li>
+<li><a href="#orgdf3fe65">3.1. 复选框（Check Box）</a></li>
+<li><a href="#org383c0a7">3.2. 组合框（Group Box）</a></li>
+<li><a href="#orgab10c82">3.3. 按键按钮（Push Button）</a></li>
+<li><a href="#orgb7c832a">3.4. 单选按钮（Radio Button）</a></li>
+<li><a href="#orga0a4686">3.5. 其他样式</a></li>
 </ul>
 </li>
-<li><a href="#orge398635">4. 代码示例</a></li>
-<li><a href="#orgfb6ea7c">5. 参考资料</a></li>
+<li><a href="#org2a16b1d">4. 代码示例</a></li>
+<li><a href="#orgbb0d90f">5. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -88,12 +88,12 @@
 按钮有几种不同的类型，而且有一种或多种可用来区分相同类型按钮的样式。用户通过鼠标或键盘点击按钮，对按钮的点击一般会改变它的外观和状态。按钮可以向它的父窗口发送消息，父窗口也可以向它发送消息。有些按钮是由系统绘制的，有些则是由应用绘制的。
 </p>
 
-<div id="outline-container-org5d9c2ac" class="outline-2">
-<h2 id="org5d9c2ac"><span class="section-number-2">1</span> 按钮消息</h2>
+<div id="outline-container-orgf1f11d2" class="outline-2">
+<h2 id="orgf1f11d2"><span class="section-number-2">1</span> 按钮消息</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org2361dd0" class="outline-3">
-<h3 id="org2361dd0"><span class="section-number-3">1.1</span> 向按钮发送消息</h3>
+<div id="outline-container-org495cbcd" class="outline-3">
+<h3 id="org495cbcd"><span class="section-number-3">1.1</span> 向按钮发送消息</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 父窗口可以使用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-sendmessage">SendMessage</a> 或 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-sendmessage">SendMessage</a>、<a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-checkdlgbutton">CheckDlgButton</a>、<a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-checkradiobutton">CheckRadioButton</a>、<a href="https://docs.microsoft.com/en-us/windows/desktop/api/Winuser/nf-winuser-isdlgbuttonchecked">IsDlgButtonChecked</a> 函数来向按钮发送消息。
@@ -128,8 +128,8 @@
 </div>
 
 
-<div id="outline-container-org99dc4df" class="outline-3">
-<h3 id="org99dc4df"><span class="section-number-3">1.2</span> 从按钮接收消息</h3>
+<div id="outline-container-orgf244cda" class="outline-3">
+<h3 id="orgf244cda"><span class="section-number-3">1.2</span> 从按钮接收消息</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 从按钮发送的消息是 <a href="https://docs.microsoft.com/en-us/windows/desktop/menurc/wm-command">WM_COMMAND</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/controls/wm-notify">WM_NOTIFY</a> 消息。当用户点击按钮时，它的状态会发生改变，按钮会以 <a href="https://docs.microsoft.com/en-us/windows/desktop/menurc/wm-command">WM_COMMAND</a> 消息的形式向父窗口发送通知码。例如，在用户点击按钮时，按键按钮会向父窗口发送 <a href="https://docs.microsoft.com/en-us/windows/win32/controls/bn-clicked">BN_CLICKED</a> 通知码。
@@ -184,8 +184,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-org2d489fb" class="outline-3">
-<h3 id="org2d489fb"><span class="section-number-3">1.3</span> 颜色消息</h3>
+<div id="outline-container-org2f80bc1" class="outline-3">
+<h3 id="org2f80bc1"><span class="section-number-3">1.3</span> 颜色消息</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 系统为按钮提供了默认的颜色值。应用可以通过调用 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-getsyscolor">GetSysColor</a> 来获取默认值，或通过 <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-setsyscolors">SetSysColors</a> 来设置这些值。
@@ -221,8 +221,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-org8b370f0" class="outline-2">
-<h2 id="org8b370f0"><span class="section-number-2">2</span> 按钮状态</h2>
+<div id="outline-container-org9d6c197" class="outline-2">
+<h2 id="org9d6c197"><span class="section-number-2">2</span> 按钮状态</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 用户可以通过三种方法来选择一个按钮：使用鼠标点击、使用 TAB 键移动到它并按下 Enter 键，或（如果按钮使用 WS_GROUP 归入一个组的话）使用 TAB 移动到一个组并使用方向键在组中移动。
@@ -244,8 +244,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 
 
-<div id="outline-container-orgb4c5197" class="outline-3">
-<h3 id="orgb4c5197"><span class="section-number-3">2.1</span> 焦点状态</h3>
+<div id="outline-container-orga135061" class="outline-3">
+<h3 id="orga135061"><span class="section-number-3">2.1</span> 焦点状态</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 焦点状态适用于复选框，单选按钮，按键按钮，或自绘按钮。按钮在用户选择它时获得键盘焦点，并在用户选择其他控件时丢失焦点。在某一时间只有一个控件能拥有焦点。
@@ -257,8 +257,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-orgee5de76" class="outline-3">
-<h3 id="orgee5de76"><span class="section-number-3">2.2</span> 按压状态</h3>
+<div id="outline-container-orgc2e443a" class="outline-3">
+<h3 id="orgc2e443a"><span class="section-number-3">2.2</span> 按压状态</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 按压状态适用于按键按钮，复选框，单选按钮或三选框，但不适用于其他按钮。按钮的按压状态可以是按下或没有按下。当按键按钮（使用 <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-styles">BS_PUSHLIKE</a> 样式的任一按钮）被按下时，按钮会被绘制为按下的样子，当不被按压时，它会被绘制为原状。当复选框、单选按钮或三选按钮被点击时，它们的背景会变灰，当不被点击时，按钮背景会复原。
@@ -266,8 +266,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-org49c1b3b" class="outline-3">
-<h3 id="org49c1b3b"><span class="section-number-3">2.3</span> 选择状态</h3>
+<div id="outline-container-orga549e20" class="outline-3">
+<h3 id="orga549e20"><span class="section-number-3">2.3</span> 选择状态</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 选择状态适用于复选框、单选按钮或三选按钮，不适用于其他按钮。这个状态可以是选中、清除（cleared）或（对于三选框）不确定。复选框在它拥有选择标记时是被选择状态，没有则是清除状态。单选按钮在它拥有黑点时是选择状态，没有则是清除状态。三选框在有选择标记时是选择状态，没有则是清除状态，当它包含灰色框时则是不确定状态。系统会自动改变自动按钮的选择状态，应用需要改变非自动按钮的选择状态。
@@ -275,8 +275,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-org8bd8df4" class="outline-3">
-<h3 id="org8bd8df4"><span class="section-number-3">2.4</span> 改变按钮状态</h3>
+<div id="outline-container-orgbd8a894" class="outline-3">
+<h3 id="orgbd8a894"><span class="section-number-3">2.4</span> 改变按钮状态</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 当用户选中按钮时，一般而言是需要改变按钮的某个状态的。系统会自动改变所有按钮的焦点状态，按键按钮的按压状态，以及所有自动按钮的选择状态。应用必须做出其他的状态改变，考虑按钮的类型，样式和当前状态。下面列出了对各个按钮类型必须要做出的改变：
@@ -298,12 +298,12 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-org944d3a4" class="outline-2">
-<h2 id="org944d3a4"><span class="section-number-2">3</span> 按钮的种类和样式</h2>
+<div id="outline-container-org7616bb3" class="outline-2">
+<h2 id="org7616bb3"><span class="section-number-2">3</span> 按钮的种类和样式</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org23b69ea" class="outline-3">
-<h3 id="org23b69ea"><span class="section-number-3">3.1</span> 复选框（Check Box）</h3>
+<div id="outline-container-orgdf3fe65" class="outline-3">
+<h3 id="orgdf3fe65"><span class="section-number-3">3.1</span> 复选框（Check Box）</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 复选框由方框和表明选项的内容组成，它可以是标签、图标或位图。应用一般使用复选框来允许用户选择一个或多个并不互斥的选项。
@@ -323,8 +323,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-org7a2333e" class="outline-3">
-<h3 id="org7a2333e"><span class="section-number-3">3.2</span> 组合框（Group Box）</h3>
+<div id="outline-container-org383c0a7" class="outline-3">
+<h3 id="org383c0a7"><span class="section-number-3">3.2</span> 组合框（Group Box）</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 组合框是一个包含一系列控件的矩形，它的左上角有一个应用定义的文字标签。使用它的唯一目的是将目的相关的一组控件框起来。组合框只有一个样式，那就是 <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-styles">BS_GROUPBOX</a>。因为它不能被选中，它没有选择状态、焦点状态和按压状态。
@@ -332,8 +332,8 @@ WM_COMMAND 消息的 <b>wParam</b> 参数的低位字是控件的标识符，高
 </div>
 </div>
 
-<div id="outline-container-orgfbca5d8" class="outline-3">
-<h3 id="orgfbca5d8"><span class="section-number-3">3.3</span> 按键按钮（Push Button）</h3>
+<div id="outline-container-orgab10c82" class="outline-3">
+<h3 id="orgab10c82"><span class="section-number-3">3.3</span> 按键按钮（Push Button）</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 按键按钮是一个含有应用定义内容的矩形，内容可是是文本，图标或位图。
@@ -352,13 +352,13 @@ Windows 程序设计中还提到：按键按钮的最佳视觉高度是字符高
 </p>
 
 <p>
-在微软的文档中，还介绍了 split button 和 command link 两种特殊的按键按钮，详情可见于参考资料<a href="#org6e3b47d">【5】</a>。
+在微软的文档中，还介绍了 split button 和 command link 两种特殊的按键按钮，详情可见于参考资料<a href="#org81dfea1">【5】</a>。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org4b521e1" class="outline-3">
-<h3 id="org4b521e1"><span class="section-number-3">3.4</span> 单选按钮（Radio Button）</h3>
+<div id="outline-container-orgb7c832a" class="outline-3">
+<h3 id="orgb7c832a"><span class="section-number-3">3.4</span> 单选按钮（Radio Button）</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 单选按钮由一个圆形按钮和表明按钮作用的应用定义内容组成。应用一般在一个组合框中使用单选按钮来让用户选择一系列相关但互斥的选项。
@@ -382,8 +382,8 @@ Windows 程序设计中还提到：按键按钮的最佳视觉高度是字符高
 </div>
 </div>
 
-<div id="outline-container-org508855c" class="outline-3">
-<h3 id="org508855c"><span class="section-number-3">3.5</span> 其他样式</h3>
+<div id="outline-container-orga0a4686" class="outline-3">
+<h3 id="orga0a4686"><span class="section-number-3">3.5</span> 其他样式</h3>
 <div class="outline-text-3" id="text-3-5">
 <p>
 显示图标或位图：
@@ -443,8 +443,8 @@ Windows 程序设计中还提到：按键按钮的最佳视觉高度是字符高
 </div>
 
 
-<div id="outline-container-orge398635" class="outline-2">
-<h2 id="orge398635"><span class="section-number-2">4</span> 代码示例</h2>
+<div id="outline-container-org2a16b1d" class="outline-2">
+<h2 id="org2a16b1d"><span class="section-number-2">4</span> 代码示例</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 鉴于按钮比较简单，这里感觉没必要给出很多的代码，故直接使用官方的教程链接：
@@ -456,42 +456,42 @@ Windows 程序设计中还提到：按键按钮的最佳视觉高度是字符高
 </div>
 </div>
 
-<div id="outline-container-orgfb6ea7c" class="outline-2">
-<h2 id="orgfb6ea7c"><span class="section-number-2">5</span> 参考资料</h2>
+<div id="outline-container-orgbb0d90f" class="outline-2">
+<h2 id="orgbb0d90f"><span class="section-number-2">5</span> 参考资料</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-<a id="org4ccc668">【1】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-messages#handling-messages-from-a-button">Button Messages - Win32 apps | Microsoft Docs</a>
+<a id="orge8658c2">【1】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-messages#handling-messages-from-a-button">Button Messages - Win32 apps | Microsoft Docs</a>
 </p>
 
 <p>
-<a id="org91806a9">【2】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/control-messages">Control Messages - Win32 apps | Microsoft Docs</a>
+<a id="orga446854">【2】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/control-messages">Control Messages - Win32 apps | Microsoft Docs</a>
 </p>
 
 <p>
-<a id="orgdd991c8">【3】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/bumper-button-control-reference-messages">Button Control Messages - Win32 apps | Microsoft Docs</a>
+<a id="org513a0e0">【3】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/bumper-button-control-reference-messages">Button Control Messages - Win32 apps | Microsoft Docs</a>
 </p>
 
 <p>
-<a id="org6fc47f0">【4】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-states">Button States - Win32 apps | Microsoft Docs</a>
+<a id="org085a53b">【4】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-states">Button States - Win32 apps | Microsoft Docs</a>
 </p>
 
 <p>
-<a id="org6e3b47d">【5】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-types-and-styles">Button Types - Win32 apps | Microsoft Docs</a>
+<a id="org81dfea1">【5】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-types-and-styles">Button Types - Win32 apps | Microsoft Docs</a>
 </p>
 
 <p>
-<a id="org140bf03">【6】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-styles">Button Styles (Winuser.h) - Win32 apps | Microsoft Docs</a>
+<a id="org6460fbf">【6】</a> <a href="https://docs.microsoft.com/en-us/windows/win32/controls/button-styles">Button Styles (Winuser.h) - Win32 apps | Microsoft Docs</a>
 </p>
 
 <p>
-<a id="org2c166ab">【7】</a> <i>Programming Windows</i> —— Charles Petzold
+<a id="orgea56661">【7】</a> <i>Programming Windows</i> —— Charles Petzold
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-02-28 Sun 00:00</p> <p>Last modified: 2021-08-03 Tue 23:55</p>
+<p>Create Date: 2021-02-28 Sun 00:00</p> <p>Last modified: 2021-08-04 Wed 13:10</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

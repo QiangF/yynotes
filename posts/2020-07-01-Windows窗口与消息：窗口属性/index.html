@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 15:53 -->
+<!-- 2021-08-04 Wed 13:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Windows窗口与消息：窗口属性 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNTAxODg5.jpg" alt="load failed"></div></title>
@@ -51,22 +51,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgeece1d5">1. 什么是窗口属性</a></li>
-<li><a href="#org46f48be">2. 使用窗口属性的好处</a></li>
-<li><a href="#org23ebaa0">3. 分配窗口属性</a></li>
-<li><a href="#org50489a7">4. 枚举窗口属性</a></li>
-<li><a href="#org5392950">5. 代码示例</a>
+<li><a href="#org1423608">1. 什么是窗口属性</a></li>
+<li><a href="#orgf76791e">2. 使用窗口属性的好处</a></li>
+<li><a href="#orgd43b542">3. 分配窗口属性</a></li>
+<li><a href="#orge2916ca">4. 枚举窗口属性</a></li>
+<li><a href="#org44de865">5. 代码示例</a>
 <ul>
-<li><a href="#orgb9b3914">5.1. 窗口属性的枚举</a></li>
+<li><a href="#orgdc539a3">5.1. 窗口属性的枚举</a></li>
 </ul>
 </li>
-<li><a href="#orgff37b83">6. 参考资料</a></li>
+<li><a href="#org0cfbe68">6. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgeece1d5" class="outline-2">
-<h2 id="orgeece1d5"><span class="section-number-2">1</span> 什么是窗口属性</h2>
+<div id="outline-container-org1423608" class="outline-2">
+<h2 id="org1423608"><span class="section-number-2">1</span> 什么是窗口属性</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 窗口属性是分配给窗口的任意数据。窗口属性通常是窗口特定数据的句柄，但它也可为任何的值。每个窗口属性由一个字符串名字标识。
@@ -74,8 +74,8 @@
 </div>
 </div>
 
-<div id="outline-container-org46f48be" class="outline-2">
-<h2 id="org46f48be"><span class="section-number-2">2</span> 使用窗口属性的好处</h2>
+<div id="outline-container-orgf76791e" class="outline-2">
+<h2 id="orgf76791e"><span class="section-number-2">2</span> 使用窗口属性的好处</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 窗口属性一般用来将数据与子类化的窗口联系起来，或是用在多文档界面（MDI）应用中。不论哪种情况，使用额外的窗口字节或类字节都是不太方便的，原因如下：
@@ -90,8 +90,8 @@
 </div>
 
 
-<div id="outline-container-org23ebaa0" class="outline-2">
-<h2 id="org23ebaa0"><span class="section-number-2">3</span> 分配窗口属性</h2>
+<div id="outline-container-orgd43b542" class="outline-2">
+<h2 id="orgd43b542"><span class="section-number-2">3</span> 分配窗口属性</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setpropa">SetProp</a> 函数将一个窗口属性和它的字符串标识符分配给一个窗口。<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getpropa">GetProp</a> 函数通过指定字符串来检索窗口属性。<a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-removepropa">RemoveProp</a> 函数会销毁窗口与窗口属性之间的关联，但不会销毁数据。要销毁数据，需要使用合适的函数来释放由 RemoveProp 返回的句柄。
@@ -99,8 +99,8 @@
 </div>
 </div>
 
-<div id="outline-container-org50489a7" class="outline-2">
-<h2 id="org50489a7"><span class="section-number-2">4</span> 枚举窗口属性</h2>
+<div id="outline-container-orge2916ca" class="outline-2">
+<h2 id="orge2916ca"><span class="section-number-2">4</span> 枚举窗口属性</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumpropsa">EnumProps</a> 和 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumpropsexa">EnumPropsEx</a> 函数通过使用应用定义的回调函数来枚举所有的窗口属性。关于枚举回调函数的信息，可见于 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-propenumproca">PropEnumProc</a> 。
@@ -108,8 +108,8 @@
 </div>
 </div>
 
-<div id="outline-container-org5392950" class="outline-2">
-<h2 id="org5392950"><span class="section-number-2">5</span> 代码示例</h2>
+<div id="outline-container-org44de865" class="outline-2">
+<h2 id="org44de865"><span class="section-number-2">5</span> 代码示例</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 从官方文档上面列出的使用原因来看，这大概是对 <b>wndextrabytes</b> 的改进，使用额外字节不如使用字符串来进行索引。
@@ -283,8 +283,8 @@
 </p>
 </div>
 
-<div id="outline-container-orgb9b3914" class="outline-3">
-<h3 id="orgb9b3914"><span class="section-number-3">5.1</span> 窗口属性的枚举</h3>
+<div id="outline-container-orgdc539a3" class="outline-3">
+<h3 id="orgdc539a3"><span class="section-number-3">5.1</span> 窗口属性的枚举</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 在上面的代码中，我将窗口的宽度和高度以及窗口的点击状态设置为了窗口属性。如果要枚举当前全部的窗口属性，可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumpropsa">EnumProps</a> 或 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumpropsexa">EnumPropsEx</a> 函数。枚举操作由用户定义的回调函数完成。
@@ -363,22 +363,22 @@
 </div>
 </div>
 
-<div id="outline-container-orgff37b83" class="outline-2">
-<h2 id="orgff37b83"><span class="section-number-2">6</span> 参考资料</h2>
+<div id="outline-container-org0cfbe68" class="outline-2">
+<h2 id="org0cfbe68"><span class="section-number-2">6</span> 参考资料</h2>
 <div class="outline-text-2" id="text-6">
 <p>
-<a id="org9961df7">【1】</a> About Window Properties：<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-properties">https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-properties</a>
+<a id="org330b455">【1】</a> About Window Properties：<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-properties">https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-properties</a>
 </p>
 
 <p>
-<a id="org19ff755">【2】</a> <i>Programming Windows</i> , Charles Petzold
+<a id="org62f184e">【2】</a> <i>Programming Windows</i> , Charles Petzold
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-07-01 Wed 00:00</p> <p>Last modified: 2021-08-03 Tue 15:53</p>
+<p>Create Date: 2020-07-01 Wed 00:00</p> <p>Last modified: 2021-08-04 Wed 13:08</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

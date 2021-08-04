@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 16:11 -->
+<!-- 2021-08-04 Wed 13:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Windows窗口与消息：钩子 <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNTEzNTQ5.jpg" alt="load failed"></div></title>
@@ -51,39 +51,39 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7be0f55">1. 什么是钩子（hook）</a></li>
-<li><a href="#org948700d">2. 钩子链</a></li>
-<li><a href="#orge1ed06f">3. 钩子过程</a></li>
-<li><a href="#org31f7e9a">4. 钩子类型</a>
+<li><a href="#org2fe56d7">1. 什么是钩子（hook）</a></li>
+<li><a href="#org13f87a0">2. 钩子链</a></li>
+<li><a href="#org520f290">3. 钩子过程</a></li>
+<li><a href="#orge0a68d9">4. 钩子类型</a>
 <ul>
-<li><a href="#orgf9e2015">4.1. WH_CALLWNDPROC 和 WH_CALLWNDPROCRET</a></li>
-<li><a href="#org58c6161">4.2. WH_CBT</a></li>
-<li><a href="#orgedc92b5">4.3. WH_DEBUG</a></li>
-<li><a href="#orga448180">4.4. WH_FOREGROUNDIDLE</a></li>
-<li><a href="#org1a91851">4.5. WH_GETMESSAGE</a></li>
-<li><a href="#org25ba9df">4.6. WH_JOURNALPLAYBACK</a></li>
-<li><a href="#orgc15a42c">4.7. WH_JOURNALRECORD</a></li>
-<li><a href="#orgc06868d">4.8. WH_KEYBOARD_LL</a></li>
-<li><a href="#org3ee2204">4.9. WH_KEYBOARD</a></li>
-<li><a href="#org16f69bc">4.10. WH_MOUSE_LL</a></li>
-<li><a href="#org072dd7c">4.11. WH_MOUSE</a></li>
-<li><a href="#orgdccd5c7">4.12. WH_MSGFILTER 和 WH_SYSMSGFILTER</a></li>
-<li><a href="#org5da5081">4.13. WH_SHELL</a></li>
+<li><a href="#org67a09a9">4.1. WH_CALLWNDPROC 和 WH_CALLWNDPROCRET</a></li>
+<li><a href="#orgae2235a">4.2. WH_CBT</a></li>
+<li><a href="#org967fa6d">4.3. WH_DEBUG</a></li>
+<li><a href="#orgcd4a24a">4.4. WH_FOREGROUNDIDLE</a></li>
+<li><a href="#orgd73083a">4.5. WH_GETMESSAGE</a></li>
+<li><a href="#org57d22db">4.6. WH_JOURNALPLAYBACK</a></li>
+<li><a href="#org42a3e26">4.7. WH_JOURNALRECORD</a></li>
+<li><a href="#orgd198ebd">4.8. WH_KEYBOARD_LL</a></li>
+<li><a href="#org3764d77">4.9. WH_KEYBOARD</a></li>
+<li><a href="#orgf05f71f">4.10. WH_MOUSE_LL</a></li>
+<li><a href="#orgea962cf">4.11. WH_MOUSE</a></li>
+<li><a href="#orgc8380e1">4.12. WH_MSGFILTER 和 WH_SYSMSGFILTER</a></li>
+<li><a href="#org34ea147">4.13. WH_SHELL</a></li>
 </ul>
 </li>
-<li><a href="#orge467b97">5. 钩子的使用</a></li>
-<li><a href="#orgcd63c20">6. 代码示例</a>
+<li><a href="#org47cc6f7">5. 钩子的使用</a></li>
+<li><a href="#orgc43153f">6. 代码示例</a>
 <ul>
-<li><a href="#org6d81a22">6.1. 使用钩子的代码</a></li>
+<li><a href="#org7d5e68a">6.1. 使用钩子的代码</a></li>
 </ul>
 </li>
-<li><a href="#org29784e0">7. 参考资料</a></li>
+<li><a href="#orgd341fc4">7. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org7be0f55" class="outline-2">
-<h2 id="org7be0f55"><span class="section-number-2">1</span> 什么是钩子（hook）</h2>
+<div id="outline-container-org2fe56d7" class="outline-2">
+<h2 id="org2fe56d7"><span class="section-number-2">1</span> 什么是钩子（hook）</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 钩子是系统消息处理机制中的一个点，应用可以安装一个子函数（subroutine）来监视系统的消息交通（message traffic），并在消息到达目标窗口过程之前处理某些类型的消息。
@@ -99,8 +99,8 @@
 </div>
 </div>
 
-<div id="outline-container-org948700d" class="outline-2">
-<h2 id="org948700d"><span class="section-number-2">2</span> 钩子链</h2>
+<div id="outline-container-org13f87a0" class="outline-2">
+<h2 id="org13f87a0"><span class="section-number-2">2</span> 钩子链</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 系统支持许多种不同类型的钩子；每种钩子提供了访问不同方面的消息处理机制的能力。例如，应用可以使用 <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-hooks#wh_mouse">WH_MOUSE</a> 钩子来监视鼠标消息的消息交通。
@@ -112,8 +112,8 @@
 </div>
 </div>
 
-<div id="outline-container-orge1ed06f" class="outline-2">
-<h2 id="orge1ed06f"><span class="section-number-2">3</span> 钩子过程</h2>
+<div id="outline-container-org520f290" class="outline-2">
+<h2 id="org520f290"><span class="section-number-2">3</span> 钩子过程</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 要想利用一种特定类型的钩子，需要提供相应的钩子函数并使用 <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexa">SetWindowsHookEx</a> 函数将它安装到相应的钩子链中。
@@ -160,8 +160,8 @@
 </div>
 </div>
 
-<div id="outline-container-org31f7e9a" class="outline-2">
-<h2 id="org31f7e9a"><span class="section-number-2">4</span> 钩子类型</h2>
+<div id="outline-container-orge0a68d9" class="outline-2">
+<h2 id="orge0a68d9"><span class="section-number-2">4</span> 钩子类型</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 在微软的文档中，可使用的钩子种类有 15 种，它们分别是：
@@ -184,8 +184,8 @@
 </ul>
 </div>
 
-<div id="outline-container-orgf9e2015" class="outline-3">
-<h3 id="orgf9e2015"><span class="section-number-3">4.1</span> WH_CALLWNDPROC 和 WH_CALLWNDPROCRET</h3>
+<div id="outline-container-org67a09a9" class="outline-3">
+<h3 id="org67a09a9"><span class="section-number-3">4.1</span> WH_CALLWNDPROC 和 WH_CALLWNDPROCRET</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 <b>WH_CALLWNDPROC</b> 和 <b>WH_CALLWNDPROCRET</b> 钩子能够让你监视发送到窗口过程的消息。系统在将消息传递到接收消息的窗口过程前会调用一个 <b>WH_CALLWNDPROC</b> 钩子过程，并在窗口过程处理消息后调用 <b>WH_CALLWNDPROCRET</b> 钩子过程。
@@ -201,8 +201,8 @@
 </div>
 </div>
 
-<div id="outline-container-org58c6161" class="outline-3">
-<h3 id="org58c6161"><span class="section-number-3">4.2</span> WH_CBT</h3>
+<div id="outline-container-orgae2235a" class="outline-3">
+<h3 id="orgae2235a"><span class="section-number-3">4.2</span> WH_CBT</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 在窗口激活、创建、销毁、最小化、最大化、移动或改变尺寸的前一刻；在完成系统命令的前一刻；在从系统消息队列移除鼠标或键盘事件的前一刻；在设置输入焦点的前一刻；或在与系统消息队列同步的前一刻，系统会调用 <b>WH_CBT</b> 钩子过程；钩子过程的返回值决定了系统是允许或阻止这些操作。 <b>WB_CBT</b> 钩子主要用于基于计算机的教学应用。（computer-based training (CBT)）
@@ -214,8 +214,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgedc92b5" class="outline-3">
-<h3 id="orgedc92b5"><span class="section-number-3">4.3</span> WH_DEBUG</h3>
+<div id="outline-container-org967fa6d" class="outline-3">
+<h3 id="org967fa6d"><span class="section-number-3">4.3</span> WH_DEBUG</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
 在调用与系统中的其他钩子关联的钩子过程前，系统会调用 <b>WH_DEBUG</b> 钩子过程。你可以用这个钩子来决定是否允许系统调用其他类型钩子的钩子函数。
@@ -227,8 +227,8 @@
 </div>
 </div>
 
-<div id="outline-container-orga448180" class="outline-3">
-<h3 id="orga448180"><span class="section-number-3">4.4</span> WH_FOREGROUNDIDLE</h3>
+<div id="outline-container-orgcd4a24a" class="outline-3">
+<h3 id="orgcd4a24a"><span class="section-number-3">4.4</span> WH_FOREGROUNDIDLE</h3>
 <div class="outline-text-3" id="text-4-4">
 <p>
 <b>WH_FOREGROUNDIDLE</b> 钩子允许你在前台线程闲置（idle）时处理低优先级的任务。当前台线程将要闲置时，系统会调用 <b>WH_FOREGROUNDIDLE</b> 钩子过程。
@@ -240,8 +240,8 @@
 </div>
 </div>
 
-<div id="outline-container-org1a91851" class="outline-3">
-<h3 id="org1a91851"><span class="section-number-3">4.5</span> WH_GETMESSAGE</h3>
+<div id="outline-container-orgd73083a" class="outline-3">
+<h3 id="orgd73083a"><span class="section-number-3">4.5</span> WH_GETMESSAGE</h3>
 <div class="outline-text-3" id="text-4-5">
 <p>
 <b>WH_GETMESSAGE</b> 钩子让应用能够监视将要被 <b>GetMessage</b> 或 <b>PeekMessage</b> 函数返回的消息。你可以使用 <b>WH_GETMESSAGE</b> 钩子来监视鼠标键盘输入，以及其他投递到消息队列的消息。
@@ -253,8 +253,8 @@
 </div>
 </div>
 
-<div id="outline-container-org25ba9df" class="outline-3">
-<h3 id="org25ba9df"><span class="section-number-3">4.6</span> WH_JOURNALPLAYBACK</h3>
+<div id="outline-container-org57d22db" class="outline-3">
+<h3 id="org57d22db"><span class="section-number-3">4.6</span> WH_JOURNALPLAYBACK</h3>
 <div class="outline-text-3" id="text-4-6">
 <p>
 <b>WH_JOURNALPLAYBACK</b> 钩子让应用能够在系统消息队列中插入消息。你可以使用这个钩子来回放之前使用 <b>WH_JOURNALRECORD</b> 钩子记录的一系列鼠标和键盘事件。在安装了 <b>WH_JOURNALPLAYBACK</b> 钩子后，鼠标和键盘输入一般会被禁用。 <b>WH_JOURNALPLAYBACK</b> 钩子是全局钩子 —— 它不能作为线程特定钩子使用。
@@ -270,8 +270,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgc15a42c" class="outline-3">
-<h3 id="orgc15a42c"><span class="section-number-3">4.7</span> WH_JOURNALRECORD</h3>
+<div id="outline-container-org42a3e26" class="outline-3">
+<h3 id="org42a3e26"><span class="section-number-3">4.7</span> WH_JOURNALRECORD</h3>
 <div class="outline-text-3" id="text-4-7">
 <p>
 <b>WH_JOURNALRECORD</b> 钩子让你能够监视输入事件。一般来说，你会使用这个钩子来记录一系列的鼠标和键盘事件，并使用 <b>WH_JOURNALPLAYBACK</b> 钩子来对这些消息进行回放。 <b>WH_JOURNALRECORD</b> 钩子是一个全局钩子 —— 它不能作为线程特定钩子使用。
@@ -283,8 +283,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgc06868d" class="outline-3">
-<h3 id="orgc06868d"><span class="section-number-3">4.8</span> WH_KEYBOARD_LL</h3>
+<div id="outline-container-orgd198ebd" class="outline-3">
+<h3 id="orgd198ebd"><span class="section-number-3">4.8</span> WH_KEYBOARD_LL</h3>
 <div class="outline-text-3" id="text-4-8">
 <p>
 <b>WH_KEYBOARD_LL</b> 钩子让你能够监视将要投递到一个线程的输入队列中的键盘输入事件。
@@ -296,8 +296,8 @@
 </div>
 </div>
 
-<div id="outline-container-org3ee2204" class="outline-3">
-<h3 id="org3ee2204"><span class="section-number-3">4.9</span> WH_KEYBOARD</h3>
+<div id="outline-container-org3764d77" class="outline-3">
+<h3 id="org3764d77"><span class="section-number-3">4.9</span> WH_KEYBOARD</h3>
 <div class="outline-text-3" id="text-4-9">
 <p>
 <b>WH_KEYBOARD</b> 钩子允许应用监视将要由 <b>GetMessage</b> 和 <b>PeekMessage</b> 返回的 <b>WM_KEYDOWN</b> 和 <b>WM_KEYUP</b> 消息。你可以使用 <b>WH_KEYBOARD</b> 钩子来监视投递到消息队列的键盘输入。
@@ -309,8 +309,8 @@
 </div>
 </div>
 
-<div id="outline-container-org16f69bc" class="outline-3">
-<h3 id="org16f69bc"><span class="section-number-3">4.10</span> WH_MOUSE_LL</h3>
+<div id="outline-container-orgf05f71f" class="outline-3">
+<h3 id="orgf05f71f"><span class="section-number-3">4.10</span> WH_MOUSE_LL</h3>
 <div class="outline-text-3" id="text-4-10">
 <p>
 <b>WH_MOUSE_LL</b> 钩子允许你监视将要投递到线程消息队列的鼠标输入事件。
@@ -322,8 +322,8 @@
 </div>
 </div>
 
-<div id="outline-container-org072dd7c" class="outline-3">
-<h3 id="org072dd7c"><span class="section-number-3">4.11</span> WH_MOUSE</h3>
+<div id="outline-container-orgea962cf" class="outline-3">
+<h3 id="orgea962cf"><span class="section-number-3">4.11</span> WH_MOUSE</h3>
 <div class="outline-text-3" id="text-4-11">
 <p>
 <b>WH_MOUSE</b> 钩子允许你监视将要由 <b>GetMessage</b> 或 <b>PeekMessage</b> 返回的鼠标消息。你可以使用它来监视投递到消息队列的鼠标输入。
@@ -335,8 +335,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgdccd5c7" class="outline-3">
-<h3 id="orgdccd5c7"><span class="section-number-3">4.12</span> WH_MSGFILTER 和 WH_SYSMSGFILTER</h3>
+<div id="outline-container-orgc8380e1" class="outline-3">
+<h3 id="orgc8380e1"><span class="section-number-3">4.12</span> WH_MSGFILTER 和 WH_SYSMSGFILTER</h3>
 <div class="outline-text-3" id="text-4-12">
 <p>
 <b>WH_MSGFILTER</b> 和 <b>WH_SYSMSGFILTER</b> 钩子允许你监视将由菜单，滚动条，消息框或对话框处理的消息，对用户使用 <code>ALT+TAB</code> 或 <code>ALT+ESC</code> 组合键来激活另一个窗口的行为进行监视。*WH_MSGFILTER* 钩子只能监视传递由应用创建的菜单，滚动条，消息框或对话框消息。*WH_SYSMSGFILTER* 钩子可以监视所有应用的消息。
@@ -356,8 +356,8 @@
 </div>
 </div>
 
-<div id="outline-container-org5da5081" class="outline-3">
-<h3 id="org5da5081"><span class="section-number-3">4.13</span> WH_SHELL</h3>
+<div id="outline-container-org34ea147" class="outline-3">
+<h3 id="org34ea147"><span class="section-number-3">4.13</span> WH_SHELL</h3>
 <div class="outline-text-3" id="text-4-13">
 <p>
 shell 应用可以使用 <b>WH_SHELL</b> 钩子来检索重要的通知。系统在 shell 应用将要被激活以及顶级窗口被创建或销毁时调用 <b>WH_SHELL</b> 钩子过程。
@@ -374,8 +374,8 @@ shell 应用可以使用 <b>WH_SHELL</b> 钩子来检索重要的通知。系统
 </div>
 </div>
 
-<div id="outline-container-orge467b97" class="outline-2">
-<h2 id="orge467b97"><span class="section-number-2">5</span> 钩子的使用</h2>
+<div id="outline-container-org47cc6f7" class="outline-2">
+<h2 id="org47cc6f7"><span class="section-number-2">5</span> 钩子的使用</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 你可以通过调用 <b>SetWindowsHookEx</b> 函数来安装一个钩子过程，并在其中指定钩子过程类型、过程入口点以及钩子是否与在主调线程桌面的所有线程相关联。
@@ -395,8 +395,8 @@ shell 应用可以使用 <b>WH_SHELL</b> 钩子来检索重要的通知。系统
 </div>
 </div>
 
-<div id="outline-container-orgcd63c20" class="outline-2">
-<h2 id="orgcd63c20"><span class="section-number-2">6</span> 代码示例</h2>
+<div id="outline-container-orgc43153f" class="outline-2">
+<h2 id="orgc43153f"><span class="section-number-2">6</span> 代码示例</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 微软的官方文档给出了一个例子，<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/using-hooks">Using Hooks</a> 。可以参考参考。
@@ -526,8 +526,8 @@ shell 应用可以使用 <b>WH_SHELL</b> 钩子来检索重要的通知。系统
 </p>
 </div>
 
-<div id="outline-container-org6d81a22" class="outline-3">
-<h3 id="org6d81a22"><span class="section-number-3">6.1</span> 使用钩子的代码</h3>
+<div id="outline-container-org7d5e68a" class="outline-3">
+<h3 id="org7d5e68a"><span class="section-number-3">6.1</span> 使用钩子的代码</h3>
 <div class="outline-text-3" id="text-6-1">
 <p>
 通过使用钩子，可以检测到所有线程的鼠标消息。需要使用和鼠标消息相关的钩子。
@@ -708,7 +708,7 @@ LRESULT <span style="color: #228b22;">CALLBACK</span> <span style="color: #0000f
 </p>
 
 <p>
-注意，这里使用的是 <b>WH_MOUSE_LL</b> 钩子，而不是 <b>WH_MOUSE</b> 。若调用 <b>SetWindowsHookEx</b> 时指定的是 <b>WH_MOUSE</b> ，将鼠标移出窗口并松开左键并没有反应，必须再按下松开一次。根据参考资料<a href="#org11a1c06">【3】</a>， <b>WH_MOUSE_LL</b> 的钩子过程并没有注入其他进程中。消息产生时，上下文会切换到安装钩子的进程并在原始上下文调用钩子过程，随后上下文回到生成时间的应用。而 <b>WH_MOUSE</b> 的钩子过程需要注入。
+注意，这里使用的是 <b>WH_MOUSE_LL</b> 钩子，而不是 <b>WH_MOUSE</b> 。若调用 <b>SetWindowsHookEx</b> 时指定的是 <b>WH_MOUSE</b> ，将鼠标移出窗口并松开左键并没有反应，必须再按下松开一次。根据参考资料<a href="#org71bbd43">【3】</a>， <b>WH_MOUSE_LL</b> 的钩子过程并没有注入其他进程中。消息产生时，上下文会切换到安装钩子的进程并在原始上下文调用钩子过程，随后上下文回到生成时间的应用。而 <b>WH_MOUSE</b> 的钩子过程需要注入。
 </p>
 
 <p>
@@ -716,32 +716,32 @@ LRESULT <span style="color: #228b22;">CALLBACK</span> <span style="color: #0000f
 </p>
 
 <p>
-网上关于这两种钩子区别的内容寥寥无几，参考资料<a href="#org11a1c06">【3】</a>已经是 11 年前的内容了，由于能力不足，这个猜想也只能作为猜想留在这里，待以后再解决。
+网上关于这两种钩子区别的内容寥寥无几，参考资料<a href="#org71bbd43">【3】</a>已经是 11 年前的内容了，由于能力不足，这个猜想也只能作为猜想留在这里，待以后再解决。
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org29784e0" class="outline-2">
-<h2 id="org29784e0"><span class="section-number-2">7</span> 参考资料</h2>
+<div id="outline-container-orgd341fc4" class="outline-2">
+<h2 id="orgd341fc4"><span class="section-number-2">7</span> 参考资料</h2>
 <div class="outline-text-2" id="text-7">
 <p>
-<a id="org2aa954d">【1】</a> Hooks Overview： <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-hooks">https://docs.microsoft.com/en-us/windows/win32/winmsg/about-hooks</a>
+<a id="org46191bb">【1】</a> Hooks Overview： <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-hooks">https://docs.microsoft.com/en-us/windows/win32/winmsg/about-hooks</a>
 </p>
 
 <p>
-<a id="org24e7f2f">【2】</a> <i>Programming Windows</i>, Charles Petzold
+<a id="org5b9f751">【2】</a> <i>Programming Windows</i>, Charles Petzold
 </p>
 
 <p>
-<a id="org11a1c06">【3】</a> What are all the differences between WH_MOUSE and WH_MOUSE_LL hooks? - Stack Overflow <a href="https://stackoverflow.com/questions/872677/what-are-all-the-differences-between-wh-mouse-and-wh-mouse-ll-hooks">https://stackoverflow.com/questions/872677/what-are-all-the-differences-between-wh-mouse-and-wh-mouse-ll-hooks</a>
+<a id="org71bbd43">【3】</a> What are all the differences between WH_MOUSE and WH_MOUSE_LL hooks? - Stack Overflow <a href="https://stackoverflow.com/questions/872677/what-are-all-the-differences-between-wh-mouse-and-wh-mouse-ll-hooks">https://stackoverflow.com/questions/872677/what-are-all-the-differences-between-wh-mouse-and-wh-mouse-ll-hooks</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-07-09 Thu 00:00</p> <p>Last modified: 2021-08-03 Tue 16:11</p>
+<p>Create Date: 2020-07-09 Thu 00:00</p> <p>Last modified: 2021-08-04 Wed 13:08</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

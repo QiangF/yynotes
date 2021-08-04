@@ -3,13 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 09:37 -->
+<!-- 2021-08-04 Wed 13:04 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>布尔函数的表示与化简</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="include-yy" />
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
 // @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
 <!--/*--><![CDATA[/*><!--*/
@@ -72,30 +73,30 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org56d47c3">1. 布尔代数简介</a>
+<li><a href="#org6c1114b">1. 布尔代数简介</a>
 <ul>
-<li><a href="#org04771d3">1.1. 变量取值范围</a></li>
-<li><a href="#orgff0a8e9">1.2. 基本运算</a></li>
-<li><a href="#org01a10d4">1.3. 运算律</a></li>
+<li><a href="#orgeeb182a">1.1. 变量取值范围</a></li>
+<li><a href="#org8fc98f6">1.2. 基本运算</a></li>
+<li><a href="#org519863d">1.3. 运算律</a></li>
 </ul>
 </li>
-<li><a href="#orge55aa63">2. 布尔函数的表示方法</a>
+<li><a href="#org19168c3">2. 布尔函数的表示方法</a>
 <ul>
-<li><a href="#orgc88951d">2.1. 表达式表示</a></li>
-<li><a href="#orgf6de0d8">2.2. 真值表表示</a></li>
-<li><a href="#org22fb954">2.3. 卡诺图表示</a></li>
-<li><a href="#orgf26a8f1">2.4. 逻辑图表示</a></li>
-<li><a href="#org0b6b702">2.5. 波形图表示</a></li>
+<li><a href="#orgf5d454c">2.1. 表达式表示</a></li>
+<li><a href="#org7c3a0db">2.2. 真值表表示</a></li>
+<li><a href="#orga4c912a">2.3. 卡诺图表示</a></li>
+<li><a href="#orgf634beb">2.4. 逻辑图表示</a></li>
+<li><a href="#orgda58b30">2.5. 波形图表示</a></li>
 </ul>
 </li>
-<li><a href="#org6d33356">3. 布尔函数的化简</a>
+<li><a href="#orge9cb0da">3. 布尔函数的化简</a>
 <ul>
-<li><a href="#org5ec9736">3.1. 公式法化简</a></li>
-<li><a href="#orgbf1bb5c">3.2. 卡诺图化简</a></li>
-<li><a href="#orga84fce3">3.3. 计算机化简</a></li>
+<li><a href="#org8b642e4">3.1. 公式法化简</a></li>
+<li><a href="#org9f0d77a">3.2. 卡诺图化简</a></li>
+<li><a href="#orgb3d535b">3.3. 计算机化简</a></li>
 </ul>
 </li>
-<li><a href="#orge937545">4. 参考资料</a></li>
+<li><a href="#org470e887">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -103,8 +104,8 @@
 在具体介绍布尔函数之前，首先对布尔代数做一个简单的介绍。
 </p>
 
-<div id="outline-container-org56d47c3" class="outline-2">
-<h2 id="org56d47c3"><span class="section-number-2">1</span> 布尔代数简介</h2>
+<div id="outline-container-org6c1114b" class="outline-2">
+<h2 id="org6c1114b"><span class="section-number-2">1</span> 布尔代数简介</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 布尔代数是代数的一个数学分支，它的变量取值是真值 <b>真</b> 或 <b>假</b> ，通常用符号 1 和 0 来表示。 布尔代数的主要运算包括合取 <b>与</b> (conjunction)(and)，记作∧；析取 <b>或</b> (disjunction)(or)，记作∨；否定 <b>非</b> (negation)(not)，记作¬。
@@ -119,8 +120,8 @@
 </p>
 </div>
 
-<div id="outline-container-org04771d3" class="outline-3">
-<h3 id="org04771d3"><span class="section-number-3">1.1</span> 变量取值范围</h3>
+<div id="outline-container-orgeeb182a" class="outline-3">
+<h3 id="orgeeb182a"><span class="section-number-3">1.1</span> 变量取值范围</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 与初等代数变量的取值是数字不同，布尔代数中，变量的值只能是真值 <b>真</b>  或 <b>假</b> 。这些值是由 <b>位</b> 表示，写作 1 和 0。它们和整数 1 和 0 并不一样，1 和 0 在这里仅仅是符号，而不是数字。
@@ -128,8 +129,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgff0a8e9" class="outline-3">
-<h3 id="orgff0a8e9"><span class="section-number-3">1.2</span> 基本运算</h3>
+<div id="outline-container-org8fc98f6" class="outline-3">
+<h3 id="org8fc98f6"><span class="section-number-3">1.2</span> 基本运算</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 布尔代数的基本运算包括
@@ -267,8 +268,8 @@ NOT，写作 ¬，当 x = 0 时 ¬x = 1，当 x = 1 时 ¬x = 0。
 </div>
 </div>
 
-<div id="outline-container-org01a10d4" class="outline-3">
-<h3 id="org01a10d4"><span class="section-number-3">1.3</span> 运算律</h3>
+<div id="outline-container-org519863d" class="outline-3">
+<h3 id="org519863d"><span class="section-number-3">1.3</span> 运算律</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 若将 ∨ 与加匹配，∧ 与乘匹配，布尔运算满足许多普通的代数运算规律：
@@ -325,8 +326,8 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </div>
 </div>
 
-<div id="outline-container-orge55aa63" class="outline-2">
-<h2 id="orge55aa63"><span class="section-number-2">2</span> 布尔函数的表示方法</h2>
+<div id="outline-container-org19168c3" class="outline-2">
+<h2 id="org19168c3"><span class="section-number-2">2</span> 布尔函数的表示方法</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 布尔函数是指那些参数和函数值都属于一个二值集合的函数，二值集合通常是{0，1}。它有时也被称为”开关函数”。
@@ -349,8 +350,8 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </p>
 </div>
 
-<div id="outline-container-orgc88951d" class="outline-3">
-<h3 id="orgc88951d"><span class="section-number-3">2.1</span> 表达式表示</h3>
+<div id="outline-container-orgf5d454c" class="outline-3">
+<h3 id="orgf5d454c"><span class="section-number-3">2.1</span> 表达式表示</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 逻辑表达式由逻辑变量和逻辑运算符号组成，用于表示变量之间逻辑关系。常用的逻辑表达式有与或表达式，或与表达式与非与非表达式，或非或非表达式，与或非表达式。
@@ -401,8 +402,8 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </p>
 </div>
 
-<div id="outline-container-org07b8852" class="outline-4">
-<h4 id="org07b8852"><span class="section-number-4">2.1.1</span> 标准与或表达式</h4>
+<div id="outline-container-orgde3d849" class="outline-4">
+<h4 id="orgde3d849"><span class="section-number-4">2.1.1</span> 标准与或表达式</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <p>
 标准与或表达式的每一个与项都包含了所有相关的逻辑变量。在每一个与项中，每个变量以原变量或反变量的形式出现且仅出现一次。这样的与项被称为标准与项，或称为最小项。
@@ -462,8 +463,8 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </div>
 </div>
 
-<div id="outline-container-orge644d54" class="outline-4">
-<h4 id="orge644d54"><span class="section-number-4">2.1.2</span> 标准或与表达式</h4>
+<div id="outline-container-org350b7c0" class="outline-4">
+<h4 id="org350b7c0"><span class="section-number-4">2.1.2</span> 标准或与表达式</h4>
 <div class="outline-text-4" id="text-2-1-2">
 <p>
 标准或与表达式的每一个与项都包含了所有相关的逻辑变量。在每一个或项中，每个变量以原变量或反变量的形式出现且仅出现一次。这样的或项被称为标准与项，或称为最大项。
@@ -524,8 +525,8 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </div>
 </div>
 
-<div id="outline-container-orgb404fb5" class="outline-4">
-<h4 id="orgb404fb5"><span class="section-number-4">2.1.3</span> 标准与或和或与的相互转化</h4>
+<div id="outline-container-org1f7d8e0" class="outline-4">
+<h4 id="org1f7d8e0"><span class="section-number-4">2.1.3</span> 标准与或和或与的相互转化</h4>
 <div class="outline-text-4" id="text-2-1-3">
 <p>
 从上面的两个例子可以看出，同一函数的标准与或表达式的最小项编号和标准或与表达式的最大项编号是互补的。
@@ -542,8 +543,8 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </div>
 </div>
 
-<div id="outline-container-orgf6de0d8" class="outline-3">
-<h3 id="orgf6de0d8"><span class="section-number-3">2.2</span> 真值表表示</h3>
+<div id="outline-container-org7c3a0db" class="outline-3">
+<h3 id="org7c3a0db"><span class="section-number-3">2.2</span> 真值表表示</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 真值表是用来反映变量所有取值集合及对应函数值得表格。
@@ -634,8 +635,9 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </div>
 </div>
 
-<div id="outline-container-org22fb954" class="outline-3">
-<h3 id="org22fb954"><span class="section-number-3">2.3</span> 卡诺图表示</h3>
+
+<div id="outline-container-orga4c912a" class="outline-3">
+<h3 id="orga4c912a"><span class="section-number-3">2.3</span> 卡诺图表示</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 卡诺图 （Karnaugh map）是一种简化布尔代数表达式的方法。它是对 Edward Veith 的 Veitch chart 的改进。Veitch chart 因此以 Marquand-Veitch diagrams 这个名字而为人所知，卡诺图也叫 Karnaugh-Veitch 图（KV maps）。
@@ -700,7 +702,7 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </p>
 
 
-<div id="orgfb67a05" class="figure">
+<div id="orgd6ad6bf" class="figure">
 <p><img src="./1.gif" alt="1.gif" />
 </p>
 <p><span class="figure-number">Figure 1: </span>卡诺图球</p>
@@ -715,7 +717,7 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </p>
 
 
-<div id="org28be3e7" class="figure">
+<div id="org37e03b6" class="figure">
 <p><img src="./2.gif" alt="2.gif" />
 </p>
 <p><span class="figure-number">Figure 2: </span>折叠展示</p>
@@ -723,8 +725,8 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 </div>
 </div>
 
-<div id="outline-container-orgf26a8f1" class="outline-3">
-<h3 id="orgf26a8f1"><span class="section-number-3">2.4</span> 逻辑图表示</h3>
+<div id="outline-container-orgf634beb" class="outline-3">
+<h3 id="orgf634beb"><span class="section-number-3">2.4</span> 逻辑图表示</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 由逻辑门电路符号构成的，用来表示逻辑变量之间关系的图形称为逻辑电路图，简称逻辑图。
@@ -783,7 +785,7 @@ De Morgan：\(¬x ∧ ¬y = ¬(x ∨ y), ¬x ∨ ¬y = ¬(x ∧ y)\)
 \(F=AB+AC\) 的逻辑图表示为：（没有现成的图片）
 </p>
 
-<pre class="example" id="orgf534b1f">
+<pre class="example" id="org664770a">
        +----+
 B -----| OR |          +-----+
 C -----|    |----------| AND |------- F
@@ -794,8 +796,8 @@ A ----------------+
 </div>
 </div>
 
-<div id="outline-container-org0b6b702" class="outline-3">
-<h3 id="org0b6b702"><span class="section-number-3">2.5</span> 波形图表示</h3>
+<div id="outline-container-orgda58b30" class="outline-3">
+<h3 id="orgda58b30"><span class="section-number-3">2.5</span> 波形图表示</h3>
 <div class="outline-text-3" id="text-2-5">
 <p>
 波形图绘制了输入输出之间不同时刻的电平变化，也可以表示输入端在不同逻辑信号作用下所对应的输出信号之间的逻辑关系。
@@ -805,7 +807,7 @@ A ----------------+
 还是以 \(F = AB + AC\) 为例，其波形图可表示为：
 </p>
 
-<pre class="example" id="orgd2cbf8e">
+<pre class="example" id="orgf22caf6">
                   --- --- --- ---          1
 A --- --- --- ---                          0
           --- ---         --- ---          1
@@ -819,8 +821,8 @@ F --- --- --- --- ---                      0
 </div>
 </div>
 
-<div id="outline-container-org6d33356" class="outline-2">
-<h2 id="org6d33356"><span class="section-number-2">3</span> 布尔函数的化简</h2>
+<div id="outline-container-orge9cb0da" class="outline-2">
+<h2 id="orge9cb0da"><span class="section-number-2">3</span> 布尔函数的化简</h2>
 <div class="outline-text-2" id="text-3">
 <blockquote>
 <p>
@@ -845,8 +847,8 @@ F --- --- --- --- ---                      0
 </p>
 </div>
 
-<div id="outline-container-org5ec9736" class="outline-3">
-<h3 id="org5ec9736"><span class="section-number-3">3.1</span> 公式法化简</h3>
+<div id="outline-container-org8b642e4" class="outline-3">
+<h3 id="org8b642e4"><span class="section-number-3">3.1</span> 公式法化简</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 公式法就是反复利用布尔代数中的基本公式和常用公式，消去与或逻辑函数式中多余的乘积项和每个乘积项中多余的变量，以求得到逻辑函数表达式的最简形式。布尔运算的优先级为：非 &gt; 与 &gt; 或。公式法没有固定的步骤。
@@ -878,8 +880,8 @@ F --- --- --- --- ---                      0
 </div>
 </div>
 
-<div id="outline-container-orgbf1bb5c" class="outline-3">
-<h3 id="orgbf1bb5c"><span class="section-number-3">3.2</span> 卡诺图化简</h3>
+<div id="outline-container-org9f0d77a" class="outline-3">
+<h3 id="org9f0d77a"><span class="section-number-3">3.2</span> 卡诺图化简</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 在卡诺图中，凡邻接的两个小方格具有逻辑相邻性，即它们只有一个变量的取值不同，其他变量取值相同。逻辑相邻的最小项相或时，可以使用 \(AB + A\overline{B}=A\) 进行合并。
@@ -911,7 +913,7 @@ F --- --- --- --- ---                      0
 </p>
 
 
-<div id="orga84818f" class="figure">
+<div id="org0dbea1b" class="figure">
 <p><img src="./11.png" alt="11.png" />
 </p>
 <p><span class="figure-number">Figure 3: </span>卡诺图图解</p>
@@ -934,8 +936,8 @@ F --- --- --- --- ---                      0
 </p>
 </div>
 
-<div id="outline-container-orgf5155c0" class="outline-4">
-<h4 id="orgf5155c0"><span class="section-number-4">3.2.1</span> 具有无关项时的情况</h4>
+<div id="outline-container-orge65aecb" class="outline-4">
+<h4 id="orge65aecb"><span class="section-number-4">3.2.1</span> 具有无关项时的情况</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <p>
 卡诺图可以轻易化简带有无关项的逻辑函数。
@@ -962,7 +964,7 @@ F --- --- --- --- ---                      0
 </p>
 
 
-<div id="org5d5fd66" class="figure">
+<div id="org2cfbb88" class="figure">
 <p><img src="./12.png" alt="12.png" />
 </p>
 </div>
@@ -974,16 +976,16 @@ F --- --- --- --- ---                      0
 </div>
 </div>
 
-<div id="outline-container-orga84fce3" class="outline-3">
-<h3 id="orga84fce3"><span class="section-number-3">3.3</span> 计算机化简</h3>
+<div id="outline-container-orgb3d535b" class="outline-3">
+<h3 id="orgb3d535b"><span class="section-number-3">3.3</span> 计算机化简</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 当逻辑函数中的项过多时，公式法化简显得有些力不从心，卡诺图仅对于变量个数小于 4 的情况比较有效，随着变量个数的增多，卡诺图的直观性越来越差。计算机化简是最好的选择。
 </p>
 </div>
 
-<div id="outline-container-orgf96e017" class="outline-4">
-<h4 id="orgf96e017"><span class="section-number-4">3.3.1</span> Quine-McCluskey algorithm</h4>
+<div id="outline-container-org5f49278" class="outline-4">
+<h4 id="org5f49278"><span class="section-number-4">3.3.1</span> Quine-McCluskey algorithm</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 奎因-麦克拉斯基算法是一种最简化布尔函数的方法，它由 Willard V. Quine 开发，并由 Edward J. McCluskey 扩展。它在功能上和卡诺图是等价的，但是它的表格式形式能够更加高效地用于计算机算法，而且它也给出了检查是否已经达到布尔函数最简形式的确定性方法。
@@ -995,7 +997,7 @@ F --- --- --- --- ---                      0
 </div>
 
 <ol class="org-ol">
-<li><a id="org7933908"></a>蕴涵项<br />
+<li><a id="org7b59a50"></a>蕴涵项<br />
 <div class="outline-text-5" id="text-3-3-1-1">
 <p>
 在布尔逻辑的与或表达式中，如果与项 P 满足：
@@ -1024,7 +1026,7 @@ F --- --- --- --- ---                      0
 </div>
 </li>
 
-<li><a id="org4a9568e"></a>算法内容<br />
+<li><a id="orgd00b7ec"></a>算法内容<br />
 <div class="outline-text-5" id="text-3-3-1-2">
 <p>
 该算法包括两个步骤：
@@ -1039,7 +1041,7 @@ F --- --- --- --- ---                      0
 </li>
 
 
-<li><a id="orgee55c47"></a>算法复杂度<br />
+<li><a id="org26d6b58"></a>算法复杂度<br />
 <div class="outline-text-5" id="text-3-3-1-3">
 <p>
 尽管在处理超过 4 个变量时该算法比卡诺图更好，Quine-McCluskey 的使用范围还是很有限，因为它要解决的问题是 NP-完全 问题。该算法的运行时间随着变量的个数将按指数规律增长。对一个有 n 个变量的函数，它的质蕴涵项的个数可以高达 \(3^nln(n)\) 个。
@@ -1051,7 +1053,7 @@ F --- --- --- --- ---                      0
 </div>
 </li>
 
-<li><a id="orgd29732f"></a>具体例子<br />
+<li><a id="org4a9f7bd"></a>具体例子<br />
 <div class="outline-text-5" id="text-3-3-1-4">
 <p>
 在例子中，使用的函数为四参数布尔函数 \(f: \{0, 1 \}^4 \rightarrow \{ 0, 1 \}\) ，它的表达式表示为 \(f(A, B, C, D) = \sum m(4, 8, 10, 11, 12, 15) + \sum \varnothing (9, 14)\) 。
@@ -1534,8 +1536,8 @@ F --- --- --- --- ---                      0
 </div>
 </div>
 
-<div id="outline-container-orge937545" class="outline-2">
-<h2 id="orge937545"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-org470e887" class="outline-2">
+<h2 id="org470e887"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 《数字电子技术基础》（第三版）—— 李庆常，王美玲
@@ -1565,7 +1567,7 @@ Implicant : <a href="https://en.wikipedia.org/wiki/Implicant">https://en.wikiped
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-03-05 Thu 00:00</p> <p>Last modified: 2021-08-03 Tue 09:36</p>
+<p>Create Date: 2020-03-05 Thu 00:00</p> <p>Last modified: 2021-08-04 Wed 13:04</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

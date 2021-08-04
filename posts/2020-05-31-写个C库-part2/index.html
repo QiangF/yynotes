@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-03 Tue 13:36 -->
+<!-- 2021-08-04 Wed 13:06 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>2020-05-31-写个C库-part2 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,14 +51,14 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org8eb7bab">1. 事件处理和主循环</a>
+<li><a href="#org1818842">1. 事件处理和主循环</a>
 <ul>
-<li><a href="#org3b93b3e">1.1. 清单</a></li>
+<li><a href="#org914d649">1.1. 清单</a></li>
 </ul>
 </li>
-<li><a href="#org2cf82b7">2. 同步和异步 I/O</a>
+<li><a href="#org3885381">2. 同步和异步 I/O</a>
 <ul>
-<li><a href="#org4db3b7f">2.1. 清单</a></li>
+<li><a href="#org1950851">2.1. 清单</a></li>
 </ul>
 </li>
 </ul>
@@ -84,8 +84,8 @@
 前一篇：<a href="http://davidz25.blogspot.com/2011/06/writing-c-library-part-1.html">part one</a>
 </p>
 
-<div id="outline-container-org8eb7bab" class="outline-2">
-<h2 id="org8eb7bab"><span class="section-number-2">1</span> 事件处理和主循环</h2>
+<div id="outline-container-org1818842" class="outline-2">
+<h2 id="org1818842"><span class="section-number-2">1</span> 事件处理和主循环</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 事件驱动（event-driven）的应用程序，尤其是 <a href="https://en.wikipedia.org/wiki/Graphical_user_interface">GUI</a> 应用，通常都围绕“主循环”的概念构建。“主循环” 接受并分派事件，比如 按键/按钮 的按压，进程间的通信（<a href="https://en.wikipedia.org/wiki/Inter-process_communication">IPC</a>），鼠标移动，计时器和 文件/套接字 I/O，等等。每当事件发生时，主循环通常会 “回调”（call back） 应用程序。
@@ -124,8 +124,8 @@
 </p>
 </div>
 
-<div id="outline-container-org3b93b3e" class="outline-3">
-<h3 id="org3b93b3e"><span class="section-number-3">1.1</span> 清单</h3>
+<div id="outline-container-org914d649" class="outline-3">
+<h3 id="org914d649"><span class="section-number-3">1.1</span> 清单</h3>
 <div class="outline-text-3" id="text-1-1">
 <ul class="org-ul">
 <li>提供整合主循环的 API</li>
@@ -136,8 +136,8 @@
 </div>
 </div>
 
-<div id="outline-container-org2cf82b7" class="outline-2">
-<h2 id="org2cf82b7"><span class="section-number-2">2</span> 同步和异步 I/O</h2>
+<div id="outline-container-org3885381" class="outline-2">
+<h2 id="org3885381"><span class="section-number-2">2</span> 同步和异步 I/O</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 让用户知道对函数的调用是否会引发 同步I/O（ <a href="http://en.wikipedia.org/wiki/Asynchronous_I/O">synchronous I/O</a>）（也叫做阻塞 I/O）是很重要的。例如，一个带用户界面的应用需要对使用者的输入进行响应，甚至可能要为了达到平滑的动画效果而逐帧（<a href="http://en.wikipedia.org/wiki/Vertical_blanking_interval">every frame</a>）更新用户界面（例如，60 次每秒）。为了避免应用无响应和动画抖动的情况，应用的 UI 线程不应该调用任何进行 同步I/O 的函数。
@@ -172,8 +172,8 @@
 </p>
 </div>
 
-<div id="outline-container-org4db3b7f" class="outline-3">
-<h3 id="org4db3b7f"><span class="section-number-3">2.1</span> 清单</h3>
+<div id="outline-container-org1950851" class="outline-3">
+<h3 id="org1950851"><span class="section-number-3">2.1</span> 清单</h3>
 <div class="outline-text-3" id="text-2-1">
 <ul class="org-ul">
 <li>清楚记录函数是否进行了任何的 同步I/O</li>
@@ -192,7 +192,7 @@
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-05-31 Sun 00:00</p> <p>Last modified: 2021-08-03 Tue 13:35</p>
+<p>Create Date: 2020-05-31 Sun 00:00</p> <p>Last modified: 2021-08-04 Wed 13:06</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">

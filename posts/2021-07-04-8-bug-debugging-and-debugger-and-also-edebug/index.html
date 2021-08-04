@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 12:31 -->
+<!-- 2021-08-04 Wed 13:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>8-bug-debugging-and-debugger-and-also-edebug <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -51,42 +51,42 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org6834fdf">1. 什么是调试（debugging）</a></li>
-<li><a href="#orgacfd1fa">2. 关于 bug 的进一步说明</a>
+<li><a href="#org28d5bb2">1. 什么是调试（debugging）</a></li>
+<li><a href="#orgb6603da">2. 关于 bug 的进一步说明</a>
 <ul>
-<li><a href="#orgec90f7c">2.1. 一些著名的 bug</a></li>
-<li><a href="#org5420d7c">2.2. 对 bug 的分类</a></li>
-<li><a href="#org854b46e">2.3. 导致 bug 的常见错误（error）</a></li>
-<li><a href="#org84126fe">2.4. 产生 bug 的原因</a></li>
+<li><a href="#org36544d7">2.1. 一些著名的 bug</a></li>
+<li><a href="#orgf88c35f">2.2. 对 bug 的分类</a></li>
+<li><a href="#orgb531b08">2.3. 导致 bug 的常见错误（error）</a></li>
+<li><a href="#org71d8980">2.4. 产生 bug 的原因</a></li>
 </ul>
 </li>
-<li><a href="#orgc0fb416">3. 调试的流程、思路和方法</a>
+<li><a href="#org8b108ec">3. 调试的流程、思路和方法</a>
 <ul>
-<li><a href="#orgaa5fe6b">3.1. 调试之前的准备</a></li>
-<li><a href="#org6b4559b">3.2. Identify the error（识别错误）</a></li>
-<li><a href="#orgc543e96">3.3. Find the error location（找到错误位置，或者叫错误定位）</a></li>
-<li><a href="#org49dc082">3.4. Analyze the error（分析错误）</a></li>
-<li><a href="#org60b5abb">3.5. Prove your analysis（证明分析）</a></li>
-<li><a href="#org7f4f3eb">3.6. Cover lateral damage（覆盖横向损伤）</a></li>
-<li><a href="#orgc968cd7">3.7. Fix &amp; Validate（修复和验证）</a></li>
-<li><a href="#org9c557a3">3.8. 关于单步调试和日志调试的讨论</a></li>
+<li><a href="#org264ae53">3.1. 调试之前的准备</a></li>
+<li><a href="#org44e0ea2">3.2. Identify the error（识别错误）</a></li>
+<li><a href="#orgd0ce03b">3.3. Find the error location（找到错误位置，或者叫错误定位）</a></li>
+<li><a href="#orge95877f">3.4. Analyze the error（分析错误）</a></li>
+<li><a href="#orgd68d452">3.5. Prove your analysis（证明分析）</a></li>
+<li><a href="#orge4fd23a">3.6. Cover lateral damage（覆盖横向损伤）</a></li>
+<li><a href="#org1da9a48">3.7. Fix &amp; Validate（修复和验证）</a></li>
+<li><a href="#org214003e">3.8. 关于单步调试和日志调试的讨论</a></li>
 </ul>
 </li>
-<li><a href="#org414436c">4. 什么是调试器（debugger）</a>
+<li><a href="#org3836d5f">4. 什么是调试器（debugger）</a>
 <ul>
-<li><a href="#org2af19e9">4.1. 调试器应该具有的功能</a></li>
-<li><a href="#org476333a">4.2. 调试器的原理</a></li>
+<li><a href="#orgb3bd600">4.1. 调试器应该具有的功能</a></li>
+<li><a href="#orgc661a4b">4.2. 调试器的原理</a></li>
 </ul>
 </li>
-<li><a href="#org896a845">5. Emacs 中的调试</a>
+<li><a href="#orge5cb8d9">5. Emacs 中的调试</a>
 <ul>
-<li><a href="#org82807f6">5.1. 对变量和函数的追踪</a></li>
-<li><a href="#orgb0b350e">5.2. Elisp 的内置调试器</a></li>
-<li><a href="#orgbc960e9">5.3. edebug</a></li>
+<li><a href="#org1ab154f">5.1. 对变量和函数的追踪</a></li>
+<li><a href="#org3a9fd31">5.2. Elisp 的内置调试器</a></li>
+<li><a href="#org2bbcaff">5.3. edebug</a></li>
 </ul>
 </li>
-<li><a href="#orge140ffc">6. 后记</a></li>
-<li><a href="#org129daa9">7. 参考资料</a></li>
+<li><a href="#org9fe2de3">6. 后记</a></li>
+<li><a href="#org5bcaafb">7. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -123,8 +123,8 @@
 本文中使用的 emacs 环境为 emacs on windows 27.1
 </p>
 
-<div id="outline-container-org6834fdf" class="outline-2">
-<h2 id="org6834fdf"><span class="section-number-2">1</span> 什么是调试（debugging）</h2>
+<div id="outline-container-org28d5bb2" class="outline-2">
+<h2 id="org28d5bb2"><span class="section-number-2">1</span> 什么是调试（debugging）</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 要想知道什么是调试器，那应该从认识什么是调试开始。
@@ -139,11 +139,11 @@
 </p>
 
 <p>
-这称得上是计算机发展史中的一段逸闻。debugging 这个词因为 Grace Hopper 女士的使用而流行了起来，不过根据维基百科上的说法，在此之前 debugging 似乎已经作为术语在航天领域中使用了<a href="#orgfe6cb23">【1】</a>。Grace Hopper 本人也在一次采访中表示这个词不是她创造的。
+这称得上是计算机发展史中的一段逸闻。debugging 这个词因为 Grace Hopper 女士的使用而流行了起来，不过根据维基百科上的说法，在此之前 debugging 似乎已经作为术语在航天领域中使用了<a href="#org62f2d7b">【1】</a>。Grace Hopper 本人也在一次采访中表示这个词不是她创造的。
 </p>
 
 <p>
-Grace Hopper 是一个传奇人物，她参加过第二次世界大战，开发了计算机程序语言 COBOL，因为连续被返聘而退修了三次，官至海军准将，于苏联解体 6 天后逝世，享年 85 岁<a href="#org3906ff8">【2】</a>。老实说，在查到这一段历史之前我一直将她和另一位叫作 Augusta Ada King-Noel, Countess of Lovelace 的女士记为同一人。Ada 是著名诗人拜伦的唯一婚生子女，是最早的程序员之一。程序语言 Ada 就是以她的名字命名的。Ada 的笔记据称对计算机的发展起到了非常重要的作用<a href="#orga12a700">【3】</a>。
+Grace Hopper 是一个传奇人物，她参加过第二次世界大战，开发了计算机程序语言 COBOL，因为连续被返聘而退修了三次，官至海军准将，于苏联解体 6 天后逝世，享年 85 岁<a href="#orgdb5a254">【2】</a>。老实说，在查到这一段历史之前我一直将她和另一位叫作 Augusta Ada King-Noel, Countess of Lovelace 的女士记为同一人。Ada 是著名诗人拜伦的唯一婚生子女，是最早的程序员之一。程序语言 Ada 就是以她的名字命名的。Ada 的笔记据称对计算机的发展起到了非常重要的作用<a href="#org9edbb36">【3】</a>。
 </p>
 
 <p>
@@ -199,8 +199,8 @@ Debugging tactics can involve interactive debugging, control flow analysis, unit
 </div>
 </div>
 
-<div id="outline-container-orgacfd1fa" class="outline-2">
-<h2 id="orgacfd1fa"><span class="section-number-2">2</span> 关于 bug 的进一步说明</h2>
+<div id="outline-container-orgb6603da" class="outline-2">
+<h2 id="orgb6603da"><span class="section-number-2">2</span> 关于 bug 的进一步说明</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 考虑到本文和调试相关，而调试的对象正是 bug，这里对 bug 多做一些说明是有必要的。
@@ -211,12 +211,12 @@ Software bug 指程序或系统中导致出现错误或未预期结果的 error�
 </p>
 
 <p>
-bug 翻译为中文的话就是错误，software bug 即软件错误，这没什么好说的。不过我在维基百科<a href="#org1dc77ed">【5】</a>上看到了这样的说法：许多人建议放弃使用 “bug” 这个词来指程序错误。某个观点是这样的：“bug” 这个词背离了“问题是人造成的”的意思，反而隐含了“缺陷是自己产生”的意思。某些人建议使用“defect”来代替“bug”，不过收效甚微。从 1970 年代以来，Gray Kildall 有点幽默地建议使用“blunder”（篓子）一词。
+bug 翻译为中文的话就是错误，software bug 即软件错误，这没什么好说的。不过我在维基百科<a href="#org643de54">【5】</a>上看到了这样的说法：许多人建议放弃使用 “bug” 这个词来指程序错误。某个观点是这样的：“bug” 这个词背离了“问题是人造成的”的意思，反而隐含了“缺陷是自己产生”的意思。某些人建议使用“defect”来代替“bug”，不过收效甚微。从 1970 年代以来，Gray Kildall 有点幽默地建议使用“blunder”（篓子）一词。
 </p>
 </div>
 
-<div id="outline-container-orgec90f7c" class="outline-3">
-<h3 id="orgec90f7c"><span class="section-number-3">2.1</span> 一些著名的 bug</h3>
+<div id="outline-container-org36544d7" class="outline-3">
+<h3 id="org36544d7"><span class="section-number-3">2.1</span> 一些著名的 bug</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 这里纯粹是我自己想给自己来点科普，有兴趣的读者可以看看，或者搜索一下相关内容。
@@ -227,11 +227,11 @@ bug 翻译为中文的话就是错误，software bug 即软件错误，这没什
 </p>
 </div>
 
-<div id="outline-container-orgd319d67" class="outline-4">
-<h4 id="orgd319d67"><span class="section-number-4">2.1.1</span> 千年虫（Y2K）</h4>
+<div id="outline-container-orgdc583f1" class="outline-4">
+<h4 id="orgdc583f1"><span class="section-number-4">2.1.1</span> 千年虫（Y2K）</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <p>
-（此处的内容来自<a href="#org649e59f">【6】</a>）
+（此处的内容来自<a href="#org147d46f">【6】</a>）
 </p>
 
 <p>
@@ -252,11 +252,11 @@ Y2K 也被叫做 Year 2000 problem，the Millennium bug，the Y2K glitch 等等�
 </div>
 </div>
 
-<div id="outline-container-orgbc3a18b" class="outline-4">
-<h4 id="orgbc3a18b"><span class="section-number-4">2.1.2</span> The Patriot Missile Failure</h4>
+<div id="outline-container-orgde9b043" class="outline-4">
+<h4 id="orgde9b043"><span class="section-number-4">2.1.2</span> The Patriot Missile Failure</h4>
 <div class="outline-text-4" id="text-2-1-2">
 <p>
-（这里就是对参考资料<a href="#orgcba3a15">【7】</a>的翻译）
+（这里就是对参考资料<a href="#org2f51c21">【7】</a>的翻译）
 </p>
 
 <p>
@@ -269,11 +269,11 @@ Patriot Missile 即“爱国者导弹”的意思。1991 年的 2 月 25 日，�
 </div>
 </div>
 
-<div id="outline-container-org10c2b40" class="outline-4">
-<h4 id="org10c2b40"><span class="section-number-4">2.1.3</span> The Ariane 5 Disaster</h4>
+<div id="outline-container-org07d68b1" class="outline-4">
+<h4 id="org07d68b1"><span class="section-number-4">2.1.3</span> The Ariane 5 Disaster</h4>
 <div class="outline-text-4" id="text-2-1-3">
 <p>
-（此处的描述来自参考资料<a href="#org80900dc">【8】</a>）
+（此处的描述来自参考资料<a href="#orge991639">【8】</a>）
 </p>
 
 <p>
@@ -291,16 +291,16 @@ Patriot Missile 即“爱国者导弹”的意思。1991 年的 2 月 25 日，�
 </div>
 </div>
 
-<div id="outline-container-org5420d7c" class="outline-3">
-<h3 id="org5420d7c"><span class="section-number-3">2.2</span> 对 bug 的分类</h3>
+<div id="outline-container-orgf88c35f" class="outline-3">
+<h3 id="orgf88c35f"><span class="section-number-3">2.2</span> 对 bug 的分类</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
-bug 的种类非常之多，根据不同的视角可以有很多不同思路的分类。我看了看维基百科上面的分类，感觉有点杂，这里我尝试着能不能改进一下。以下的分类参考的是<a href="#org368c970">【9】</a>。
+bug 的种类非常之多，根据不同的视角可以有很多不同思路的分类。我看了看维基百科上面的分类，感觉有点杂，这里我尝试着能不能改进一下。以下的分类参考的是<a href="#org7f7e2ed">【9】</a>。
 </p>
 </div>
 
-<div id="outline-container-org22a9b22" class="outline-4">
-<h4 id="org22a9b22"><span class="section-number-4">2.2.1</span> 根据 bug 特性进行分类</h4>
+<div id="outline-container-orga8ad006" class="outline-4">
+<h4 id="orga8ad006"><span class="section-number-4">2.2.1</span> 根据 bug 特性进行分类</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 根据 bug 的特性分类的话可以分为功能缺陷（functional defect），性能缺陷（performance defeat），可用性缺陷（usability defect），兼容性缺陷（compatibility defect）和安全缺陷（security defect）
@@ -321,8 +321,8 @@ bug 的种类非常之多，根据不同的视角可以有很多不同思路的�
 </div>
 
 
-<div id="outline-container-orgaf13df5" class="outline-4">
-<h4 id="orgaf13df5"><span class="section-number-4">2.2.2</span> 根据 bug 严重性进行分类</h4>
+<div id="outline-container-org217d39d" class="outline-4">
+<h4 id="org217d39d"><span class="section-number-4">2.2.2</span> 根据 bug 严重性进行分类</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 这可以分为四类：
@@ -341,8 +341,8 @@ bug 的种类非常之多，根据不同的视角可以有很多不同思路的�
 </div>
 
 
-<div id="outline-container-orgb92355d" class="outline-4">
-<h4 id="orgb92355d"><span class="section-number-4">2.2.3</span> 根据优先级的分类</h4>
+<div id="outline-container-org71103c1" class="outline-4">
+<h4 id="org71103c1"><span class="section-number-4">2.2.3</span> 根据优先级的分类</h4>
 <div class="outline-text-4" id="text-2-2-3">
 <p>
 bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低优先级：
@@ -362,8 +362,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 
 
-<div id="outline-container-org854b46e" class="outline-3">
-<h3 id="org854b46e"><span class="section-number-3">2.3</span> 导致 bug 的常见错误（error）</h3>
+<div id="outline-container-orgb531b08" class="outline-3">
+<h3 id="orgb531b08"><span class="section-number-3">2.3</span> 导致 bug 的常见错误（error）</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 在上面我提到过这样一句话：大多数的 bug 的来源都是程序设计、程序代码、程序使用的组件或操作系统中的错误或失误。少数是由编译器产出不正确的代码导致。我在上面也或多或少地提到了一些设计问题导致的 bug，这一小节主要是对编程中导致 bug 出现的常见错误的一些总结和归类。
@@ -382,8 +382,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </p>
 </div>
 
-<div id="outline-container-orgebb84d4" class="outline-4">
-<h4 id="orgebb84d4"><span class="section-number-4">2.3.1</span> 算数（Arithmetic）</h4>
+<div id="outline-container-org000e76f" class="outline-4">
+<h4 id="org000e76f"><span class="section-number-4">2.3.1</span> 算数（Arithmetic）</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <ul class="org-ul">
 <li>除法运算中以 0 作为除数</li>
@@ -396,8 +396,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 
 
-<div id="outline-container-org04a4624" class="outline-4">
-<h4 id="org04a4624"><span class="section-number-4">2.3.2</span> 逻辑（Logic）</h4>
+<div id="outline-container-org2a34807" class="outline-4">
+<h4 id="org2a34807"><span class="section-number-4">2.3.2</span> 逻辑（Logic）</h4>
 <div class="outline-text-4" id="text-2-3-2">
 <p>
 在计算机程序中，逻辑错误导致软件不能正确工作，它不会使软件崩溃。下面是两种常见的逻辑错误
@@ -412,8 +412,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 
 
-<div id="outline-container-orga19352f" class="outline-4">
-<h4 id="orga19352f"><span class="section-number-4">2.3.3</span> 语法（Syntax）</h4>
+<div id="outline-container-org124b5a4" class="outline-4">
+<h4 id="org124b5a4"><span class="section-number-4">2.3.3</span> 语法（Syntax）</h4>
 <div class="outline-text-4" id="text-2-3-3">
 <p>
 语法 bug 是出现在应用代码中的错误。它一般是简单的语法错误，比如拼错了一个符号。编译器在编译代码时会提供错误的信息，开发者可以根据编译器报错来修复错误。
@@ -435,8 +435,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org80aa119" class="outline-4">
-<h4 id="org80aa119"><span class="section-number-4">2.3.4</span> 资源（Resource）</h4>
+<div id="outline-container-org49acfcf" class="outline-4">
+<h4 id="org49acfcf"><span class="section-number-4">2.3.4</span> 资源（Resource）</h4>
 <div class="outline-text-4" id="text-2-3-4">
 <ul class="org-ul">
 <li>缓冲区溢出</li>
@@ -453,8 +453,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 
 
-<div id="outline-container-org10ef652" class="outline-4">
-<h4 id="org10ef652"><span class="section-number-4">2.3.5</span> 多线程相关（multi-threading）</h4>
+<div id="outline-container-org8be6bb1" class="outline-4">
+<h4 id="org8be6bb1"><span class="section-number-4">2.3.5</span> 多线程相关（multi-threading）</h4>
 <div class="outline-text-4" id="text-2-3-5">
 <ul class="org-ul">
 <li>死锁，任务 A 的继续需要在任务 B 完成后，任务 B 的完成需要 A 的完成</li>
@@ -465,8 +465,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 
 
-<div id="outline-container-orge04a812" class="outline-4">
-<h4 id="orge04a812"><span class="section-number-4">2.3.6</span> 接口（Interfacting）</h4>
+<div id="outline-container-org6f6f643" class="outline-4">
+<h4 id="org6f6f643"><span class="section-number-4">2.3.6</span> 接口（Interfacting）</h4>
 <div class="outline-text-4" id="text-2-3-6">
 <ul class="org-ul">
 <li>使用 API 的方式不正确</li>
@@ -478,8 +478,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 
 
-<div id="outline-container-org84126fe" class="outline-3">
-<h3 id="org84126fe"><span class="section-number-3">2.4</span> 产生 bug 的原因</h3>
+<div id="outline-container-org71d8980" class="outline-3">
+<h3 id="org71d8980"><span class="section-number-3">2.4</span> 产生 bug 的原因</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 上一节中我介绍了一些常见的导致 bug 出现的错误。这一小节想要回答的问题是：哪些因素导致了 bug 的产生。
@@ -490,12 +490,12 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </p>
 
 <p>
-以下内容来自参考资料<a href="#org08be240">【10】</a>
+以下内容来自参考资料<a href="#org3933b52">【10】</a>
 </p>
 </div>
 
-<div id="outline-container-org7b2f400" class="outline-4">
-<h4 id="org7b2f400"><span class="section-number-4">2.4.1</span> 糟糕的交流或没有交流</h4>
+<div id="outline-container-org4a46a91" class="outline-4">
+<h4 id="org4a46a91"><span class="section-number-4">2.4.1</span> 糟糕的交流或没有交流</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <p>
 软件的成功是离不开客户、开发和测试团队之间的良好沟通的。不明确的需求和对需求的误解是导致软件缺陷的两个主要因素。
@@ -510,15 +510,15 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </p>
 
 
-<div id="org3af8764" class="figure">
+<div id="org951d135" class="figure">
 <p><img src="./3.png" alt="3.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgc26e87d" class="outline-4">
-<h4 id="orgc26e87d"><span class="section-number-4">2.4.2</span> 软件的复杂性</h4>
+<div id="outline-container-org8542ddd" class="outline-4">
+<h4 id="org8542ddd"><span class="section-number-4">2.4.2</span> 软件的复杂性</h4>
 <div class="outline-text-4" id="text-2-4-2">
 <p>
 对于没有现代软件开发经验的人来说，当前软件程序的复杂性是难以应付的。窗口界面，客户端-服务器架构、分布式应用、数据通信、庞大的关系式数据库和庞大的应用程序规模都促成了软件/系统复杂性的指数增长。
@@ -530,8 +530,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-orgaf96ec0" class="outline-4">
-<h4 id="orgaf96ec0"><span class="section-number-4">2.4.3</span> 程序员犯错</h4>
+<div id="outline-container-org883d9c6" class="outline-4">
+<h4 id="org883d9c6"><span class="section-number-4">2.4.3</span> 程序员犯错</h4>
 <div class="outline-text-4" id="text-2-4-3">
 <p>
 就像任何人一样，程序员也是会犯错的。并不是所有的程序员都是领域专家。没有经验的程序员在编码时可能会引入一些非常简单的错误。
@@ -543,8 +543,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org3d17396" class="outline-4">
-<h4 id="org3d17396"><span class="section-number-4">2.4.4</span> 需求的变更</h4>
+<div id="outline-container-org362d4cf" class="outline-4">
+<h4 id="org362d4cf"><span class="section-number-4">2.4.4</span> 需求的变更</h4>
 <div class="outline-text-4" id="text-2-4-4">
 <p>
 客户可能不能理解变更或以任意方式要求重新设计、重新安排对项目带来的影响。如果有许多小变更或大的变更，项目各部分之间已知或未知的依赖关系可能会相互影响并导致问题，对变更的追踪的复杂性可能会导致错误。从而对工程人员的积极性造成影响
@@ -560,8 +560,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-orgef9b170" class="outline-4">
-<h4 id="orgef9b170"><span class="section-number-4">2.4.5</span> 时间压力</h4>
+<div id="outline-container-orgd28cf59" class="outline-4">
+<h4 id="orgd28cf59"><span class="section-number-4">2.4.5</span> 时间压力</h4>
 <div class="outline-text-4" id="text-2-4-5">
 <p>
 对软件项目的进度安排是及其困难的，通常需要大量的猜测。当最后期限迫在眉睫时，错误就会发生。如果没有足够的时间用来设计、编码和测试，那么引入 bug 是一件很容易的事。
@@ -569,8 +569,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org5fff5fd" class="outline-4">
-<h4 id="org5fff5fd"><span class="section-number-4">2.4.6</span> 不完善的代码文档</h4>
+<div id="outline-container-orge2f9b6b" class="outline-4">
+<h4 id="orge2f9b6b"><span class="section-number-4">2.4.6</span> 不完善的代码文档</h4>
 <div class="outline-text-4" id="text-2-4-6">
 <p>
 维护写的不好的或文档很差的代码是很困难的，这将会导致 bug 的出现。在许多组织中，管理层不鼓励程序员写代码文档或编写清晰易懂的代码。不过事实通常是反过来的：程序员通过快速编写代码来获取分数，如果没人能读懂的话就会有工作保障。
@@ -582,8 +582,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org7e4e0b8" class="outline-4">
-<h4 id="org7e4e0b8"><span class="section-number-4">2.4.7</span> 软件开发工具带来的问题</h4>
+<div id="outline-container-orgd5ad942" class="outline-4">
+<h4 id="orgd5ad942"><span class="section-number-4">2.4.7</span> 软件开发工具带来的问题</h4>
 <div class="outline-text-4" id="text-2-4-7">
 <p>
 可视化工具，类库，编译器，脚本工具等等，通常都会引入它们自己的 bug 或是不完善的文档。使用它们会带来附加的 bug。对软件工具的不断变更会带来持续的版本兼容性问题。
@@ -591,8 +591,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-orge3a9abf" class="outline-4">
-<h4 id="orge3a9abf"><span class="section-number-4">2.4.8</span> 缺少有经验的测试人员</h4>
+<div id="outline-container-orgc41da05" class="outline-4">
+<h4 id="orgc41da05"><span class="section-number-4">2.4.8</span> 缺少有经验的测试人员</h4>
 <div class="outline-text-4" id="text-2-4-8">
 <p>
 有专业领域知识的熟练测试人员对于项目的成功是极端重要的。但并非所有公司都能找到有经验的测试人员。领域知识加上测试者寻找缺陷的能力能够产出高质量的软件。缺少其中任意一项都会导致 buggy 的软件。
@@ -602,8 +602,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-orgc0fb416" class="outline-2">
-<h2 id="orgc0fb416"><span class="section-number-2">3</span> 调试的流程、思路和方法</h2>
+<div id="outline-container-org8b108ec" class="outline-2">
+<h2 id="org8b108ec"><span class="section-number-2">3</span> 调试的流程、思路和方法</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 （这一小节的标题是“流程，思路与方法”，我打算以流程为主干，中间穿插各个流程步骤中需要用到的思路和方法，如果还有剩下的东西，那就在流程之外作为补充。）
@@ -614,16 +614,16 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </p>
 
 <ul class="org-ul">
-<li><a href="#org6f45d09">【11】</a>中是这样描述的：第一步，重现发现的 bug。第二部，对 bug 进行描述，尝试从用户那里得到足够多的输入以获得确切的原因。第三步，捕获 bug 出现时的程序快照（snapshot），尝试获取此时程序的状态和所有的变量值。第四步，根据状态和变量值对快照进行分析，基于此找到 bug 出现的原因。第五步，修复存在的 bug，并保证修复没有引入新的 bug。</li>
+<li><a href="#orgc28ab81">【11】</a>中是这样描述的：第一步，重现发现的 bug。第二部，对 bug 进行描述，尝试从用户那里得到足够多的输入以获得确切的原因。第三步，捕获 bug 出现时的程序快照（snapshot），尝试获取此时程序的状态和所有的变量值。第四步，根据状态和变量值对快照进行分析，基于此找到 bug 出现的原因。第五步，修复存在的 bug，并保证修复没有引入新的 bug。</li>
 
-<li><a href="#orgb474661">【12】</a>中则将调试过程分为简单的三步，即：观测错误，定位错误和修复错误。</li>
+<li><a href="#org13ff316">【12】</a>中则将调试过程分为简单的三步，即：观测错误，定位错误和修复错误。</li>
 
-<li><a href="#org723fa0e">【13】</a>中则是：识别错误，确认错误位置，分析错误，证明分析正确性，覆盖横向缺陷（Cover Lateral Damage），修复并验证</li>
+<li><a href="#org88cd749">【13】</a>中则是：识别错误，确认错误位置，分析错误，证明分析正确性，覆盖横向缺陷（Cover Lateral Damage），修复并验证</li>
 </ul>
 
 
 <p>
-我参考的多数资料中列出的调试步骤和<a href="#org723fa0e">【13】</a>中的差不多，下面我们以它为基础来分步骤介绍调试：
+我参考的多数资料中列出的调试步骤和<a href="#org88cd749">【13】</a>中的差不多，下面我们以它为基础来分步骤介绍调试：
 </p>
 
 <ul class="org-ul">
@@ -642,12 +642,12 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 
 
 <p>
-对于以上 6 步的具体描述，我在很大程度上参考了<a href="#org0b36aa6">【14】</a>中的内容。
+对于以上 6 步的具体描述，我在很大程度上参考了<a href="#orgc090048">【14】</a>中的内容。
 </p>
 </div>
 
-<div id="outline-container-orgaa5fe6b" class="outline-3">
-<h3 id="orgaa5fe6b"><span class="section-number-3">3.1</span> 调试之前的准备</h3>
+<div id="outline-container-org264ae53" class="outline-3">
+<h3 id="org264ae53"><span class="section-number-3">3.1</span> 调试之前的准备</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 在寻找调试与测试的相关资料时，我浏览了不少的“调试 vs 测试”的文章，原先我准备在本文中加上调试与测试的对比关系，但是在实际操作过程中发现和测试相关的知识非常的多，遂放弃。下面是我找到的关于调试的一些特点：
@@ -663,7 +663,7 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 
 
 <p>
-鉴于此，在开始调试之前，我们应该准备好相应的调试工具，并且我们至少应该对需要调试的代码有一定的了解，参考资料<a href="#orgb474661">【12】</a>中给出的建议是：
+鉴于此，在开始调试之前，我们应该准备好相应的调试工具，并且我们至少应该对需要调试的代码有一定的了解，参考资料<a href="#org13ff316">【12】</a>中给出的建议是：
 </p>
 
 <ul class="org-ul">
@@ -687,8 +687,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 
 
-<div id="outline-container-org6b4559b" class="outline-3">
-<h3 id="org6b4559b"><span class="section-number-3">3.2</span> Identify the error（识别错误）</h3>
+<div id="outline-container-org44e0ea2" class="outline-3">
+<h3 id="org44e0ea2"><span class="section-number-3">3.2</span> Identify the error（识别错误）</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 识别错误这一步骤旨在获取和 bug 相关的信息，对造成 bug 的错误的类型和性质做出一个大致的判断。做个类比的话，和中医讲究的“望闻问切”很像。如果对中医那一套不感兴趣的话，更加现代一点的说法就是医院里面的分诊台。分诊是指对来院急诊 <b>就诊病人</b> 进行 <b>快速、重点</b> 地收集资料，并将资料进行 <b>分析、判断、分类、分科</b> ，同时按照轻重缓急来安排就诊顺序。
@@ -718,7 +718,7 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 
 
 <p>
-<a href="#org953c537">【15】</a>中关于望闻问切给出了常见症状和对应内因，比如面色发白主虚主寒主失血，面色发送主热，面色发黑主肾虚等等。至于这些经验判据是否有效我这里不置可否，毕竟这都是几千年来的中医通过非科学方法得出的结论。（注意，非科学与伪科学是完全不同的概念，关于中医的科学化，有兴趣的可以看看<a href="#org2934f5e">【16】</a>）
+<a href="#org3d946c0">【15】</a>中关于望闻问切给出了常见症状和对应内因，比如面色发白主虚主寒主失血，面色发送主热，面色发黑主肾虚等等。至于这些经验判据是否有效我这里不置可否，毕竟这都是几千年来的中医通过非科学方法得出的结论。（注意，非科学与伪科学是完全不同的概念，关于中医的科学化，有兴趣的可以看看<a href="#org963346a">【16】</a>）
 </p>
 
 <p>
@@ -739,8 +739,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-orgc543e96" class="outline-3">
-<h3 id="orgc543e96"><span class="section-number-3">3.3</span> Find the error location（找到错误位置，或者叫错误定位）</h3>
+<div id="outline-container-orgd0ce03b" class="outline-3">
+<h3 id="orgd0ce03b"><span class="section-number-3">3.3</span> Find the error location（找到错误位置，或者叫错误定位）</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 一旦我们识别出了是什么错误，那就是时候在代码中找出错误的准确位置了。这个时候我们并不在乎对整个错误的理解，我们只关注找到它发生的位置。
@@ -763,7 +763,7 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </p>
 
 <p>
-比 print 调试和单步调试更好的是打 log（logging），也就是通过日志文件来判断错误的发生位置。在参考资料<a href="#orgeafa060">【18】</a>中作者这样说到：
+比 print 调试和单步调试更好的是打 log（logging），也就是通过日志文件来判断错误的发生位置。在参考资料<a href="#org6e3e77a">【18】</a>中作者这样说到：
 </p>
 
 <blockquote>
@@ -803,8 +803,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org49dc082" class="outline-3">
-<h3 id="org49dc082"><span class="section-number-3">3.4</span> Analyze the error（分析错误）</h3>
+<div id="outline-container-orge95877f" class="outline-3">
+<h3 id="orge95877f"><span class="section-number-3">3.4</span> Analyze the error（分析错误）</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 这是调试过程中的关键一步，使用自底向上的方法从发现错误的地方开始分析，这样你就能够看到错误发生的深层原因了。除了找出错误发生原因外，错误分析的另一个重要任务是错误发生点周围没有其他的错误（冰山理论），以及确定在修复过程中引入其他缺陷的风险是什么。
@@ -816,8 +816,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org60b5abb" class="outline-3">
-<h3 id="org60b5abb"><span class="section-number-3">3.5</span> Prove your analysis（证明分析）</h3>
+<div id="outline-container-orgd68d452" class="outline-3">
+<h3 id="orgd68d452"><span class="section-number-3">3.5</span> Prove your analysis（证明分析）</h3>
 <div class="outline-text-3" id="text-3-5">
 <p>
 在对原始错误进行分析后，你应该根据你的分析来编写一些自动化测试，测试该错误可能导致的其他问题。如果你的测试都失败了，那就证明你的分析是正确的。（这就是所谓的演绎法）
@@ -825,8 +825,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org7f4f3eb" class="outline-3">
-<h3 id="org7f4f3eb"><span class="section-number-3">3.6</span> Cover lateral damage（覆盖横向损伤）</h3>
+<div id="outline-container-orge4fd23a" class="outline-3">
+<h3 id="orge4fd23a"><span class="section-number-3">3.6</span> Cover lateral damage（覆盖横向损伤）</h3>
 <div class="outline-text-3" id="text-3-6">
 <p>
 在这一阶段，你几乎已经准备好开始修复错误了，但是你还必须在修改代码之前擦干净你的屁股。你需要创建或集合代码的所有单元测试，这些单元测试围绕你将要修改的位置进行，这样你可以确保在修改完成后不会对代码的其他部分造成破坏。这些单元测试应该全数通过。
@@ -838,8 +838,8 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-orgc968cd7" class="outline-3">
-<h3 id="orgc968cd7"><span class="section-number-3">3.7</span> Fix &amp; Validate（修复和验证）</h3>
+<div id="outline-container-org1da9a48" class="outline-3">
+<h3 id="org1da9a48"><span class="section-number-3">3.7</span> Fix &amp; Validate（修复和验证）</h3>
 <div class="outline-text-3" id="text-3-7">
 <p>
 现在可以修复这个错误了，修复后再运行所有的测试脚本检查是否全都通过。
@@ -847,15 +847,15 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </div>
 </div>
 
-<div id="outline-container-org9c557a3" class="outline-3">
-<h3 id="org9c557a3"><span class="section-number-3">3.8</span> 关于单步调试和日志调试的讨论</h3>
+<div id="outline-container-org214003e" class="outline-3">
+<h3 id="org214003e"><span class="section-number-3">3.8</span> 关于单步调试和日志调试的讨论</h3>
 <div class="outline-text-3" id="text-3-8">
 <p>
-在上面我引用了知乎用户“灵剑”的一篇回答。在回答所述的问题上还有其他讲的不错的回答，和该问题同类型的问题也是存在的<a href="#org586ec34">【19】</a>，可以前去浏览。
+在上面我引用了知乎用户“灵剑”的一篇回答。在回答所述的问题上还有其他讲的不错的回答，和该问题同类型的问题也是存在的<a href="#org4391ce1">【19】</a>，可以前去浏览。
 </p>
 
 <p>
-上面我只引用了使用日志文件的优点，现在把另外一半补上<a href="#orgeafa060">【18】</a>：
+上面我只引用了使用日志文件的优点，现在把另外一半补上<a href="#org6e3e77a">【18】</a>：
 </p>
 
 <blockquote>
@@ -878,14 +878,14 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </blockquote>
 
 <p>
-在实践中，程序的调试方法并不局限，一个有经验的程序员会选择当前条件下最为善巧方便的方法。<a href="#org586ec34">【19】</a>（作者：Aman）
+在实践中，程序的调试方法并不局限，一个有经验的程序员会选择当前条件下最为善巧方便的方法。<a href="#org4391ce1">【19】</a>（作者：Aman）
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org414436c" class="outline-2">
-<h2 id="org414436c"><span class="section-number-2">4</span> 什么是调试器（debugger）</h2>
+<div id="outline-container-org3836d5f" class="outline-2">
+<h2 id="org3836d5f"><span class="section-number-2">4</span> 什么是调试器（debugger）</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 在充分地介绍了 bug 和 debugging 后，我们终于可以来看一看 debugger 了。这一节的目的是简单介绍调试器的功能和工作原理。本来我想着展示一些实际调试例子，但是调试本身就是一个非常跳跃的过程，其中的思路通常都是非线性的，gif 录制时间过长的话加载起来还是挺费事的，我会在下面给出一些一些调试示例的资料。（调试的展示我会在本文的 emacs 部分进行，但也仅仅是使用相当简单的代码展示基础功能而已。）
@@ -896,7 +896,7 @@ bug 的优先级也分为 4 级：紧急、高优先级、中等优先级和低�
 </p>
 
 <p>
-先给出根据维基百科<a href="#org61118c9">【21】</a>的说法，调试器的定义如下：
+先给出根据维基百科<a href="#orgf23ce56">【21】</a>的说法，调试器的定义如下：
 </p>
 
 <blockquote>
@@ -914,16 +914,16 @@ A debugger or debugging tool is a computer program used to test and debug other 
 </p>
 </div>
 
-<div id="outline-container-org2af19e9" class="outline-3">
-<h3 id="org2af19e9"><span class="section-number-3">4.1</span> 调试器应该具有的功能</h3>
+<div id="outline-container-orgb3bd600" class="outline-3">
+<h3 id="orgb3bd600"><span class="section-number-3">4.1</span> 调试器应该具有的功能</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
-关于调试器的详细功能，我貌似找不到一个比较权威的说法，这里就主要参考了 gdb <a href="#org25a74b9">【23】</a> 和 VS 中调试器<a href="#orge619ce1">【22】</a>提供的功能。由于 GUI 演示起来方便直观，这里就使用 VS 上的调试器来录制 gif。
+关于调试器的详细功能，我貌似找不到一个比较权威的说法，这里就主要参考了 gdb <a href="#orgc587d79">【23】</a> 和 VS 中调试器<a href="#orge8985d6">【22】</a>提供的功能。由于 GUI 演示起来方便直观，这里就使用 VS 上的调试器来录制 gif。
 </p>
 </div>
 
-<div id="outline-container-org96acbfe" class="outline-4">
-<h4 id="org96acbfe"><span class="section-number-4">4.1.1</span> 单步执行（single-stepping）</h4>
+<div id="outline-container-org20b285b" class="outline-4">
+<h4 id="org20b285b"><span class="section-number-4">4.1.1</span> 单步执行（single-stepping）</h4>
 <div class="outline-text-4" id="text-4-1-1">
 <p>
 顾名思义，单步执行就是一下只执行一步。在调试过程中一步一步跟踪程序执行的流程，根据变量的值来找出错误的原因。
@@ -934,7 +934,7 @@ A debugger or debugging tool is a computer program used to test and debug other 
 </p>
 
 
-<div id="org25eb692" class="figure">
+<div id="orgb1767a0" class="figure">
 <p><img src="./4.gif" alt="4.gif" />
 </p>
 </div>
@@ -949,8 +949,8 @@ A debugger or debugging tool is a computer program used to test and debug other 
 </div>
 </div>
 
-<div id="outline-container-orgb09ef28" class="outline-4">
-<h4 id="orgb09ef28"><span class="section-number-4">4.1.2</span> 断点（breakpoint）</h4>
+<div id="outline-container-org4e13fa3" class="outline-4">
+<h4 id="org4e13fa3"><span class="section-number-4">4.1.2</span> 断点（breakpoint）</h4>
 <div class="outline-text-4" id="text-4-1-2">
 <p>
 这大概是我在写这篇文章前唯一使用过的调试器功能（是的，我之前没用过单步执行的功能，我一般先靠 print 猜出错误发生点，然后在这个点打上断点&#x2026;&#x2026;.）。
@@ -965,7 +965,7 @@ A debugger or debugging tool is a computer program used to test and debug other 
 </p>
 
 
-<div id="orgacae812" class="figure">
+<div id="orgc2ea190" class="figure">
 <p><img src="./5.gif" alt="5.gif" />
 </p>
 </div>
@@ -976,8 +976,8 @@ A debugger or debugging tool is a computer program used to test and debug other 
 </div>
 </div>
 
-<div id="outline-container-orgb8abe8b" class="outline-4">
-<h4 id="orgb8abe8b"><span class="section-number-4">4.1.3</span> 检查数据（Inspect data）</h4>
+<div id="outline-container-orge9c9f92" class="outline-4">
+<h4 id="orge9c9f92"><span class="section-number-4">4.1.3</span> 检查数据（Inspect data）</h4>
 <div class="outline-text-4" id="text-4-1-3">
 <p>
 调试器应该提供监视当前数据的能力，这些数据可以是：
@@ -1005,8 +1005,8 @@ VS 调试器关于这方面的使用说明汇总在<a href="https://docs.microso
 </div>
 </div>
 
-<div id="outline-container-org476333a" class="outline-3">
-<h3 id="org476333a"><span class="section-number-3">4.2</span> 调试器的原理</h3>
+<div id="outline-container-orgc661a4b" class="outline-3">
+<h3 id="orgc661a4b"><span class="section-number-3">4.2</span> 调试器的原理</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 由于能力不够且已经有人写出了很好的文章，这里我先贴上一些网址：
@@ -1071,16 +1071,16 @@ VS 调试器关于这方面的使用说明汇总在<a href="https://docs.microso
 </div>
 </div>
 
-<div id="outline-container-org896a845" class="outline-2">
-<h2 id="org896a845"><span class="section-number-2">5</span> Emacs 中的调试</h2>
+<div id="outline-container-orge5cb8d9" class="outline-2">
+<h2 id="orge5cb8d9"><span class="section-number-2">5</span> Emacs 中的调试</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 写了这么多，总算是介绍完了 bug，debugging 和 debugger 三大内容。接下来就是 Emacs 相关了，我会介绍一些 Emacs 提供的调试机制。
 </p>
 </div>
 
-<div id="outline-container-org82807f6" class="outline-3">
-<h3 id="org82807f6"><span class="section-number-3">5.1</span> 对变量和函数的追踪</h3>
+<div id="outline-container-org1ab154f" class="outline-3">
+<h3 id="org1ab154f"><span class="section-number-3">5.1</span> 对变量和函数的追踪</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 对变量的追踪主要和 <code>add-variable-watcher</code> ， <code>remove-variable-watcher=， =get-variable-watchers</code> 三个函数有关。
@@ -1154,7 +1154,7 @@ val: abc, newval: nil, operation makunbound, where nil
 </p>
 
 
-<div id="orga10c7f8" class="figure">
+<div id="org77703ff" class="figure">
 <p><img src="./6.gif" alt="6.gif" />
 </p>
 </div>
@@ -1164,15 +1164,15 @@ val: abc, newval: nil, operation makunbound, where nil
 </p>
 
 
-<div id="orgbaa249e" class="figure">
+<div id="org26892c5" class="figure">
 <p><img src="./7.gif" alt="7.gif" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgb0b350e" class="outline-3">
-<h3 id="orgb0b350e"><span class="section-number-3">5.2</span> Elisp 的内置调试器</h3>
+<div id="outline-container-org3a9fd31" class="outline-3">
+<h3 id="org3a9fd31"><span class="section-number-3">5.2</span> Elisp 的内置调试器</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 Lisp 调试器提供了暂停（suspend）求值的能力，当求值被暂停时（一般被称为中断），你可以检查运行时堆栈，检查局部和全局变量，或者对它们进行修改。
@@ -1183,7 +1183,7 @@ Lisp 调试器提供了暂停（suspend）求值的能力，当求值被暂停�
 </p>
 
 
-<div id="orgddbd88c" class="figure">
+<div id="orgc125482" class="figure">
 <p><img src="./8.JPG" alt="8.JPG" />
 </p>
 </div>
@@ -1197,7 +1197,7 @@ Lisp 调试器提供了暂停（suspend）求值的能力，当求值被暂停�
 </p>
 
 
-<div id="orgce73c4a" class="figure">
+<div id="org3cc48dd" class="figure">
 <p><img src="./9.JPG" alt="9.JPG" />
 </p>
 </div>
@@ -1223,7 +1223,7 @@ Lisp 调试器提供了暂停（suspend）求值的能力，当求值被暂停�
 </p>
 
 
-<div id="orgabe11e4" class="figure">
+<div id="org747c3dd" class="figure">
 <p><img src="./10.gif" alt="10.gif" />
 </p>
 </div>
@@ -1243,7 +1243,7 @@ Lisp 调试器提供了暂停（suspend）求值的能力，当求值被暂停�
 </div>
 
 
-<div id="org24f0232" class="figure">
+<div id="orgf94c54c" class="figure">
 <p><img src="./11.gif" alt="11.gif" />
 </p>
 </div>
@@ -1266,8 +1266,8 @@ Lisp 调试器提供了暂停（suspend）求值的能力，当求值被暂停�
 </div>
 </div>
 
-<div id="outline-container-orgbc960e9" class="outline-3">
-<h3 id="orgbc960e9"><span class="section-number-3">5.3</span> edebug</h3>
+<div id="outline-container-org2bbcaff" class="outline-3">
+<h3 id="org2bbcaff"><span class="section-number-3">5.3</span> edebug</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 edebug 是一个源代码级别的调试器，关于它的功能，文档上是这样说的：
@@ -1297,8 +1297,8 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 </div>
 
-<div id="outline-container-orgd435a43" class="outline-4">
-<h4 id="orgd435a43"><span class="section-number-4">5.3.1</span> 一些基础知识</h4>
+<div id="outline-container-org502ea79" class="outline-4">
+<h4 id="org502ea79"><span class="section-number-4">5.3.1</span> 一些基础知识</h4>
 <div class="outline-text-4" id="text-5-3-1">
 <p>
 首先是如何让代码能够变得被 edebug 调试，这就需要对代码进行调校（instrument）。在调校之后，函数中会插入一些额外的代码（这不会修改源代码），以便于在合适的地方触发 edebug。
@@ -1353,7 +1353,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org6429880" class="figure">
+<div id="org88709b1" class="figure">
 <p><img src="./12.gif" alt="12.gif" />
 </p>
 </div>
@@ -1363,7 +1363,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="orgb0164be" class="figure">
+<div id="orgaf0aa75" class="figure">
 <p><img src="./13.gif" alt="13.gif" />
 </p>
 </div>
@@ -1373,7 +1373,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org8b3414c" class="figure">
+<div id="org1749521" class="figure">
 <p><img src="./14.gif" alt="14.gif" />
 </p>
 </div>
@@ -1384,8 +1384,8 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </div>
 </div>
 
-<div id="outline-container-org51b911a" class="outline-4">
-<h4 id="org51b911a"><span class="section-number-4">5.3.2</span> edebug 中的单步执行</h4>
+<div id="outline-container-orgf7202f6" class="outline-4">
+<h4 id="orgf7202f6"><span class="section-number-4">5.3.2</span> edebug 中的单步执行</h4>
 <div class="outline-text-4" id="text-5-3-2">
 <p>
 在上面我演示了 edebug 的自动单步模式，也就是 <code>t</code> 命令（在 edebug 中它被叫做 trace 模式）。同时我也提到了 <code>T</code> 模式（Rapid trace），它的速度真的是非常快。那么有什么办法来自己一个一个的执行呢？那就是使用 <code>n</code> 模式 和 <code>SPC</code> 模式。 <code>SPC</code> 就是键盘上的空格，每按一下，程序就从当前停止点跳到下一个停止点，光标也是跟着跳动。与 <code>SPC</code> 模式不同的是， <code>n</code> （next）模式是从上一个 <b>结束</b> 停止点（也就是尾停止点）跳到下一个 <b>结束</b> 停止点，它所使用的函数是 <code>edebug-next-mode</code> 。
@@ -1409,8 +1409,8 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </div>
 </div>
 
-<div id="outline-container-org0d7b439" class="outline-4">
-<h4 id="org0d7b439"><span class="section-number-4">5.3.3</span> edebug 中的断点</h4>
+<div id="outline-container-orgc1a96d3" class="outline-4">
+<h4 id="orgc1a96d3"><span class="section-number-4">5.3.3</span> edebug 中的断点</h4>
 <div class="outline-text-4" id="text-5-3-3">
 <p>
 除了使用单步执行外，我们也可以让调试器一直执行，直到碰到了什么条件或断点使它停下来为止。下面我们先从介绍怎么打断点开始。
@@ -1429,7 +1429,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org0371fd3" class="figure">
+<div id="orgcf400f3" class="figure">
 <p><img src="./15.gif" alt="15.gif" />
 </p>
 </div>
@@ -1443,7 +1443,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org9e9ab0e" class="figure">
+<div id="orge0570d1" class="figure">
 <p><img src="./16.gif" alt="16.gif" />
 </p>
 </div>
@@ -1479,8 +1479,8 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </div>
 </div>
 
-<div id="outline-container-orgeb8e1c7" class="outline-4">
-<h4 id="orgeb8e1c7"><span class="section-number-4">5.3.4</span> 在 edebug 中观察数据</h4>
+<div id="outline-container-org0075a7b" class="outline-4">
+<h4 id="org0075a7b"><span class="section-number-4">5.3.4</span> 在 edebug 中观察数据</h4>
 <div class="outline-text-4" id="text-5-3-4">
 <p>
 当 edebug 处于暂停状态时，你可以通过对一些表达式求值来说去想要的变量的状态。除了 edebug 显式保留的数据外，对导致副作用的表达式求值会得到想要的后果。
@@ -1495,7 +1495,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="orga747a0d" class="figure">
+<div id="orgb0bbe40" class="figure">
 <p><img src="./17.gif" alt="17.gif" />
 </p>
 </div>
@@ -1521,7 +1521,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org02296bc" class="figure">
+<div id="org77dabf9" class="figure">
 <p><img src="./18.gif" alt="18.gif" />
 </p>
 </div>
@@ -1539,7 +1539,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org25f52b4" class="figure">
+<div id="orgf8cb883" class="figure">
 <p><img src="./19.JPG" alt="19.JPG" />
 </p>
 </div>
@@ -1549,7 +1549,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org258c3d3" class="figure">
+<div id="orgef87c10" class="figure">
 <p><img src="./20.gif" alt="20.gif" />
 </p>
 </div>
@@ -1560,8 +1560,8 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </div>
 </div>
 
-<div id="outline-container-orgc34a160" class="outline-4">
-<h4 id="orgc34a160"><span class="section-number-4">5.3.5</span> 其他的一些杂项</h4>
+<div id="outline-container-org7140af2" class="outline-4">
+<h4 id="org7140af2"><span class="section-number-4">5.3.5</span> 其他的一些杂项</h4>
 <div class="outline-text-4" id="text-5-3-5">
 <p>
 除了上面提到的几种前进方式（ <code>t</code> ， <code>SPC</code> ， <code>c</code> 等等），还有一些，这里列在下面：
@@ -1588,8 +1588,8 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </div>
 </div>
 
-<div id="outline-container-orgcb66203" class="outline-4">
-<h4 id="orgcb66203"><span class="section-number-4">5.3.6</span> 文档中我没有介绍的</h4>
+<div id="outline-container-orgcc9c70b" class="outline-4">
+<h4 id="orgcc9c70b"><span class="section-number-4">5.3.6</span> 文档中我没有介绍的</h4>
 <div class="outline-text-4" id="text-5-3-6">
 <ul class="org-ul">
 <li>我没有介绍 Views 这一小节，因为目前我对 windows configuation 一无所知</li>
@@ -1610,8 +1610,8 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </div>
 </div>
 
-<div id="outline-container-orge140ffc" class="outline-2">
-<h2 id="orge140ffc"><span class="section-number-2">6</span> 后记</h2>
+<div id="outline-container-org9fe2de3" class="outline-2">
+<h2 id="org9fe2de3"><span class="section-number-2">6</span> 后记</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 呼呼呼，总算是写完了。这篇文章差不多用了我一周时间。
@@ -1622,7 +1622,7 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org6d52cd4" class="figure">
+<div id="org618adb4" class="figure">
 <p><img src="./21.JPG" alt="21.JPG" />
 </p>
 </div>
@@ -1656,117 +1656,117 @@ Elisp 内置的调试器主要是起辅助作用，相比之下 edebug 就是个
 </p>
 
 
-<div id="org5be2cbe" class="figure">
+<div id="org18bd241" class="figure">
 <p><img src="./tail.jpg" alt="tail.jpg" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org129daa9" class="outline-2">
-<h2 id="org129daa9"><span class="section-number-2">7</span> 参考资料</h2>
+<div id="outline-container-org5bcaafb" class="outline-2">
+<h2 id="org5bcaafb"><span class="section-number-2">7</span> 参考资料</h2>
 <div class="outline-text-2" id="text-7">
 <p>
-<a id="orgfe6cb23">【1】</a>  <a href="https://en.wikipedia.org/wiki/Debugging">https://en.wikipedia.org/wiki/Debugging</a>
+<a id="org62f2d7b">【1】</a>  <a href="https://en.wikipedia.org/wiki/Debugging">https://en.wikipedia.org/wiki/Debugging</a>
 </p>
 
 <p>
-<a id="org3906ff8">【2】</a>  <a href="https://en.wikipedia.org/wiki/Grace_Hopper">https://en.wikipedia.org/wiki/Grace_Hopper</a>
+<a id="orgdb5a254">【2】</a>  <a href="https://en.wikipedia.org/wiki/Grace_Hopper">https://en.wikipedia.org/wiki/Grace_Hopper</a>
 </p>
 
 <p>
-<a id="orga12a700">【3】</a>  <a href="https://en.wikipedia.org/wiki/Ada_Lovelace">https://en.wikipedia.org/wiki/Ada_Lovelace</a>
+<a id="org9edbb36">【3】</a>  <a href="https://en.wikipedia.org/wiki/Ada_Lovelace">https://en.wikipedia.org/wiki/Ada_Lovelace</a>
 </p>
 
 <p>
-<a id="org4e3eef5">【4】</a>  <a href="https://paris-swc.github.io/python-testing-debugging-profiling/">https://paris-swc.github.io/python-testing-debugging-profiling/</a>
+<a id="org37d19ae">【4】</a>  <a href="https://paris-swc.github.io/python-testing-debugging-profiling/">https://paris-swc.github.io/python-testing-debugging-profiling/</a>
 </p>
 
 <p>
-<a id="org1dc77ed">【5】</a>  <a href="https://en.wikipedia.org/wiki/Software_bug">https://en.wikipedia.org/wiki/Software_bug</a>
+<a id="org643de54">【5】</a>  <a href="https://en.wikipedia.org/wiki/Software_bug">https://en.wikipedia.org/wiki/Software_bug</a>
 </p>
 
 <p>
-<a id="org649e59f">【6】</a>  <a href="https://en.wikipedia.org/wiki/Year_2000_problem">https://en.wikipedia.org/wiki/Year_2000_problem</a>
+<a id="org147d46f">【6】</a>  <a href="https://en.wikipedia.org/wiki/Year_2000_problem">https://en.wikipedia.org/wiki/Year_2000_problem</a>
 </p>
 
 <p>
-<a id="orgcba3a15">【7】</a>  <a href="http://www-users.math.umn.edu/~arnold//disasters/patriot.html">http://www-users.math.umn.edu/~arnold//disasters/patriot.html</a>
+<a id="org2f51c21">【7】</a>  <a href="http://www-users.math.umn.edu/~arnold//disasters/patriot.html">http://www-users.math.umn.edu/~arnold//disasters/patriot.html</a>
 </p>
 
 <p>
-<a id="org80900dc">【8】</a>  <a href="https://www.bugsnag.com/blog/bug-day-ariane-5-disaster">https://www.bugsnag.com/blog/bug-day-ariane-5-disaster</a>
+<a id="orge991639">【8】</a>  <a href="https://www.bugsnag.com/blog/bug-day-ariane-5-disaster">https://www.bugsnag.com/blog/bug-day-ariane-5-disaster</a>
 </p>
 
 <p>
-<a id="org368c970">【9】</a>  <a href="https://www.scnsoft.com/software-testing/types-of-bugs">https://www.scnsoft.com/software-testing/types-of-bugs</a>
+<a id="org7f7e2ed">【9】</a>  <a href="https://www.scnsoft.com/software-testing/types-of-bugs">https://www.scnsoft.com/software-testing/types-of-bugs</a>
 </p>
 
 <p>
-<a id="org08be240">【10】</a>  <a href="https://www.softwaretestinghelp.com/why-does-software-have-bugs/">https://www.softwaretestinghelp.com/why-does-software-have-bugs/</a>
+<a id="org3933b52">【10】</a>  <a href="https://www.softwaretestinghelp.com/why-does-software-have-bugs/">https://www.softwaretestinghelp.com/why-does-software-have-bugs/</a>
 </p>
 
 <p>
-<a id="org6f45d09">【11】</a>  <a href="https://economictimes.indiatimes.com/definition/debugging">https://economictimes.indiatimes.com/definition/debugging</a>
+<a id="orgc28ab81">【11】</a>  <a href="https://economictimes.indiatimes.com/definition/debugging">https://economictimes.indiatimes.com/definition/debugging</a>
 </p>
 
 <p>
-<a id="orgb474661">【12】</a>  <a href="https://www.cs.colostate.edu/~cs165/.Fall17/recitations/W11L2/doc/debugging.html">https://www.cs.colostate.edu/~cs165/.Fall17/recitations/W11L2/doc/debugging.html</a>
+<a id="org13ff316">【12】</a>  <a href="https://www.cs.colostate.edu/~cs165/.Fall17/recitations/W11L2/doc/debugging.html">https://www.cs.colostate.edu/~cs165/.Fall17/recitations/W11L2/doc/debugging.html</a>
 </p>
 
 <p>
-<a id="org723fa0e">【13】</a>  <a href="https://www.elprocus.com/what-is-debugging-types-techniques-in-embedded-systems/">https://www.elprocus.com/what-is-debugging-types-techniques-in-embedded-systems/</a>
+<a id="org88cd749">【13】</a>  <a href="https://www.elprocus.com/what-is-debugging-types-techniques-in-embedded-systems/">https://www.elprocus.com/what-is-debugging-types-techniques-in-embedded-systems/</a>
 </p>
 
 <p>
-<a id="org0b36aa6">【14】</a>  <a href="https://sites.google.com/site/assignmentssolved/mca/semester5/mc0084/6">https://sites.google.com/site/assignmentssolved/mca/semester5/mc0084/6</a>
+<a id="orgc090048">【14】</a>  <a href="https://sites.google.com/site/assignmentssolved/mca/semester5/mc0084/6">https://sites.google.com/site/assignmentssolved/mca/semester5/mc0084/6</a>
 </p>
 
 <p>
-<a id="org953c537">【15】</a>  <a href="https://baike.baidu.com/item/%E6%9C%9B%E9%97%BB%E9%97%AE%E5%88%87">https://baike.baidu.com/item/%E6%9C%9B%E9%97%BB%E9%97%AE%E5%88%87</a>
+<a id="org3d946c0">【15】</a>  <a href="https://baike.baidu.com/item/%E6%9C%9B%E9%97%BB%E9%97%AE%E5%88%87">https://baike.baidu.com/item/%E6%9C%9B%E9%97%BB%E9%97%AE%E5%88%87</a>
 </p>
 
 <p>
-<a id="org2934f5e">【16】</a>  <a href="http://www.lamost.org/~yzhao/history/chinesemedicine.html">http://www.lamost.org/~yzhao/history/chinesemedicine.html</a>
+<a id="org963346a">【16】</a>  <a href="http://www.lamost.org/~yzhao/history/chinesemedicine.html">http://www.lamost.org/~yzhao/history/chinesemedicine.html</a>
 </p>
 
 <p>
-<a id="orgc6fc65d">【17】</a>  <a href="https://www.cnblogs.com/luguo3000/p/3543487.html">https://www.cnblogs.com/luguo3000/p/3543487.html</a>
+<a id="org9d05476">【17】</a>  <a href="https://www.cnblogs.com/luguo3000/p/3543487.html">https://www.cnblogs.com/luguo3000/p/3543487.html</a>
 </p>
 
 <p>
-<a id="orgeafa060">【18】</a>  <a href="https://www.zhihu.com/question/20626825/answer/106888829">https://www.zhihu.com/question/20626825/answer/106888829</a>
+<a id="org6e3e77a">【18】</a>  <a href="https://www.zhihu.com/question/20626825/answer/106888829">https://www.zhihu.com/question/20626825/answer/106888829</a>
 </p>
 
 <p>
-<a id="org586ec34">【19】</a>  <a href="https://www.zhihu.com/question/364727399">https://www.zhihu.com/question/364727399</a>
+<a id="org4391ce1">【19】</a>  <a href="https://www.zhihu.com/question/364727399">https://www.zhihu.com/question/364727399</a>
 </p>
 
 <p>
-<a id="orgac98dc3">【20】</a>  <a href="https://www.scalyr.com/blog/the-10-commandments-of-logging/">https://www.scalyr.com/blog/the-10-commandments-of-logging/</a>
+<a id="orgaa8d03b">【20】</a>  <a href="https://www.scalyr.com/blog/the-10-commandments-of-logging/">https://www.scalyr.com/blog/the-10-commandments-of-logging/</a>
 </p>
 
 <p>
-<a id="org61118c9">【21】</a>  <a href="https://en.wikipedia.org/wiki/Debugger">https://en.wikipedia.org/wiki/Debugger</a>
+<a id="orgf23ce56">【21】</a>  <a href="https://en.wikipedia.org/wiki/Debugger">https://en.wikipedia.org/wiki/Debugger</a>
 </p>
 
 <p>
-<a id="orge619ce1">【22】</a>  <a href="https://docs.microsoft.com/zh-cn/visualstudio/debugger/what-is-debugging?view=vs-2019">https://docs.microsoft.com/zh-cn/visualstudio/debugger/what-is-debugging?view=vs-2019</a>
+<a id="orge8985d6">【22】</a>  <a href="https://docs.microsoft.com/zh-cn/visualstudio/debugger/what-is-debugging?view=vs-2019">https://docs.microsoft.com/zh-cn/visualstudio/debugger/what-is-debugging?view=vs-2019</a>
 </p>
 
 <p>
-<a id="org25a74b9">【23】</a>  <a href="https://sourceware.org/gdb/current/onlinedocs/gdb/">https://sourceware.org/gdb/current/onlinedocs/gdb/</a>
+<a id="orgc587d79">【23】</a>  <a href="https://sourceware.org/gdb/current/onlinedocs/gdb/">https://sourceware.org/gdb/current/onlinedocs/gdb/</a>
 </p>
 
 <p>
-<a id="org0a84f9b">【24】</a>  <a href="https://en.wikipedia.org/wiki/Breakpoint">https://en.wikipedia.org/wiki/Breakpoint</a>
+<a id="org9a0276a">【24】</a>  <a href="https://en.wikipedia.org/wiki/Breakpoint">https://en.wikipedia.org/wiki/Breakpoint</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-07-04 Sun 00:00</p> <p>Last modified: 2021-08-04 Wed 12:29</p>
+<p>Create Date: 2021-07-04 Sun 00:00</p> <p>Last modified: 2021-08-04 Wed 13:11</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">
