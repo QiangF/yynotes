@@ -1,0 +1,1605 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-08-20 Fri 11:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>decorator pattern, decorator&amp;advice, and emacs advice <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMjY2MTM2.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">decorator pattern, decorator&amp;advice, and emacs advice <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMjY2MTM2.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd266e0d">1. 什么是装饰器（What is Decorator）</a>
+<ul>
+<li><a href="#org2c2e117">1.1. 装饰器模式（Decorator pattern）</a></li>
+<li><a href="#orgebb4b88">1.2. 装饰器（Decorator&amp;Advice）</a></li>
+</ul>
+</li>
+<li><a href="#org05e74da">2. emacs 中的 advice</a>
+<ul>
+<li><a href="#orgfba64db">2.1. 例子：如何为函数添加 advice</a></li>
+<li><a href="#orgca5f182">2.2. defadvice 的用法</a></li>
+<li><a href="#org586ea64">2.3. 访问 advised function 的参数</a></li>
+<li><a href="#org96de990">2.4. advice 的激活与停用（(de)?activate）</a></li>
+<li><a href="#org8a0cdb5">2.5. advice 的启用和禁用（enable/disable）</a></li>
+<li><a href="#orge3818b9">2.6. 一些补充</a></li>
+</ul>
+</li>
+<li><a href="#org1efa61f">3. emacs 的 nadvice</a>
+<ul>
+<li><a href="#org4696234">3.1. nadvice 的 function 系列函数</a></li>
+<li><a href="#orgac21662">3.2. 各种各样的 advice 组合方式</a></li>
+<li><a href="#org9a7e81d">3.3. nadvice 的 advice 系列函数</a></li>
+</ul>
+</li>
+<li><a href="#org84c953d">4. 后记</a></li>
+</ul>
+</div>
+</div>
+<p>
+在阅读 <i>elisp manual</i> 时，我在 Funciton 一章了解到了 <i>Advising Functions</i> ，它的作用是在不修改函数代码的情况下改变函数的行为。这么看来它和装饰器模式是很像的。正好前段时间读了读  <i>gof</i> ，它在“结构型模式”一章中介绍了 decorator。以它们两个来作为主要内容来介绍装饰器及其使用应该会写出一篇不错的笔记。因此本文主要分为两个部分，即介绍装饰器和 emacs 中的 function advice 。
+</p>
+
+<p>
+需要注意的是，装饰器模式（Decorator pattern）和装饰器（decorator）不是同一个东西。装饰器模式是设计模式中的一种，而装饰器是一种拓展函数的机制，它也被叫做 Advice<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>。本文中除了会介绍 emacs 的 defadvice 外，还会介绍 Python 中的 decorator 的简单使用。
+</p>
+
+<div id="outline-container-orgd266e0d" class="outline-2">
+<h2 id="orgd266e0d"><span class="section-number-2">1</span> 什么是装饰器（What is Decorator）</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+文章的开头也说到了装饰器模式和装饰器的区别。所以这一节会分为两个小节，分别介绍装饰器模式和装饰器。
+</p>
+</div>
+
+<div id="outline-container-org2c2e117" class="outline-3">
+<h3 id="org2c2e117"><span class="section-number-3">1.1</span> 装饰器模式（Decorator pattern）</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+首先我们还是从维基百科<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>开始吧，它对 <i>decorator</i> 是这样定义的：
+</p>
+
+<blockquote>
+<p>
+<i>In object-oriented programming, the decorator pattern is a design pattern that allows behavior to be add to an individual object, dynamically, without affecting the behavior of other objects from the same class. The decorator pattern is often useful for adhering to the Single Responsibility Principle, as it allows functionality to be divided between classes with unique areas of concern. Decorator use can be more efficient than subclassing, because an object's behavior can be argumented without defining an entirely new object.</i>
+</p>
+
+<p>
+在 OOP 中， <b>装饰器模式</b> 是一种允许在不影响其他同类对象情况下动态改变某个单独对象行为的 <b>设计模式</b> 。装饰器模式通常有助于遵守单一职责原则（Single Responsibility Principle），因为它可以实现不同关注点的类的功能的划分。装饰器比子类化更加高效，因为不用定义全新的对象就可以增强对象的行为
+</p>
+</blockquote>
+
+<p>
+这里<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>有一段更简洁的定义：
+</p>
+
+<blockquote>
+<p>
+<i>Decorator is a structural design pattern that lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.</i>
+</p>
+
+<p>
+装饰器是一种结构化的设计模式，它让你可以通过将对象放在包含某些行为的包装器（wrapper）中，来将新的行为附加到对象
+</p>
+</blockquote>
+
+<p>
+一言以蔽之，装饰器模式允许你不通过修改对象定义来扩展对象的行为。一张广为流传的图上是这样描述装饰器模式的：
+</p>
+
+
+<div id="org38844ba" class="figure">
+<p><object type="image/svg+xml" data="./1.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+</p>
+<p><span class="figure-number">Figure 1: </span>decorator pattern, <a href="https://en.wikipedia.org/wiki/Decorator_pattern#/media/File:Decorator_UML_class_diagram.svg">wikipedia</a></p>
+</div>
+
+<p>
+从上图中可以看到，Component 是接口类，ConcreteComponent 是具体类，Decorator 是装饰器类，ConcreteDecorator 是具体装饰器。Decorator 的子类可以为特定功能自由地添加一些操作。
+</p>
+
+<p>
+在 <i>gof</i> 上作者使用的例子是为文本页面添加滚动条和方框等装饰。在这里我们使用一个更简单的例子，那就是为斐波那契数列计算的类添加一个参数检查功能，毕竟如果使用 32 位无符号整数的话最多存储 Fib(47) 而已<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup>。由于 OOP 语言我只会 cpp，下面我们使用它来实现这个简单的装饰器。
+</p>
+
+<p>
+首先，定义 fib 抽象类，在其中定义 calc 方法
+</p>
+<div class="org-src-container">
+<pre class="src src-cpp"><span style="color: #a020f0;">class</span> <span style="color: #228b22;">fib</span>
+{
+  <span style="color: #a020f0;">virtual</span> <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">calc</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>) = 0;
+};
+</pre>
+</div>
+
+<p>
+接着给上面的接口几种不同的实现：
+</p>
+<div class="org-src-container">
+<pre class="src src-cpp"><span style="color: #a020f0;">class</span> <span style="color: #228b22;">fib_rec</span> : <span style="color: #a020f0;">public</span> <span style="color: #228b22;">fib</span>
+{
+    <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">fib</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+        {
+            <span style="color: #a020f0;">if</span> (n == 0) <span style="color: #a020f0;">return</span> 0;
+            <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (n == 1) <span style="color: #a020f0;">return</span> 1;
+            <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">return</span> fib(n - 1) + fib(n - 2);
+        }
+    <span style="color: #a020f0;">virtual</span> <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">calc</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+        {
+            <span style="color: #a020f0;">return</span> fib(n);
+        }
+};
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">fib_iter</span> : <span style="color: #a020f0;">public</span> <span style="color: #228b22;">fib</span>
+{
+    <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">fib</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+        {
+            <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 0, <span style="color: #a0522d;">b</span> = 1;
+            <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">t</span> = 0;
+            <span style="color: #a020f0;">for</span> (<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 0; i &lt; n; i++)
+            {
+                t = a;
+                a = b;
+                b += t;
+
+            }
+            <span style="color: #a020f0;">return</span> a;
+        }
+    <span style="color: #a020f0;">virtual</span> <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">calc</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+        {
+            <span style="color: #a020f0;">return</span> fib(n);
+        }
+};
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">fib_fst</span> : <span style="color: #a020f0;">public</span> <span style="color: #228b22;">fib</span>
+{
+    <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">fib</span>(
+        <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span>,
+        <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">b</span>,
+        <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">p</span>,
+        <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">q</span>,
+        <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">cnt</span>)
+        {
+            <span style="color: #a020f0;">if</span> (!cnt) {
+                <span style="color: #a020f0;">return</span> b;
+            } <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (!cnt &amp; 1) {
+                <span style="color: #a020f0;">return</span> fib(a, b, p*p + q*q, 2*p*q+q*q, cnt/2);
+            } <span style="color: #a020f0;">else</span> {
+                <span style="color: #a020f0;">return</span> fib(a*(p+q)+b*q, b*p+a*q, p, q, cnt-1);
+            }
+        }
+
+    <span style="color: #a020f0;">virtual</span> <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">calc</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+        {
+            <span style="color: #a020f0;">return</span> fib(1, 0, 0, 1, n);
+        }
+};
+
+</pre>
+</div>
+
+<p>
+现在，我们已经有了可以使用的斐波那契函数，它们分别使用了递归方法，迭代方法和 SICP 上面介绍的一种方法。就像上面我说的，u32 最多只能支持到 fib(47)，也许我们有必要对函数接受的参数进行检查来避免溢出。我们可以直接修改源代码，在函数体开始处加上条件判断来确保参数的合理性，不过根据所谓的开闭原则，直接修改源代码是不太好的行为，我们应当对其进行扩展而不是直接修改。
+</p>
+
+<p>
+不能修改的话，那我们可以使用继承来变更上面三个子类的行为，但是我们要为它们添加的功能是一样的，子类化相当于把同样的事情做了三遍，实属愚蠢，这里我们就可以使用装饰器了。
+</p>
+
+<p>
+首先定义出斐波那契类的装饰器：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-cpp"><span style="color: #a020f0;">class</span> <span style="color: #228b22;">fib_deco</span> : <span style="color: #a020f0;">public</span> <span style="color: #228b22;">fib</span>
+ {
+ <span style="color: #a020f0;">public</span>:
+     <span style="color: #a020f0;">virtual</span> <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">calc</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+         {
+             <span style="color: #a020f0;">return</span> container-&gt;calc(n);
+         }
+ <span style="color: #a020f0;">private</span>:
+     <span style="color: #228b22;">fib</span>* <span style="color: #a0522d;">container</span>;
+
+ <span style="color: #a020f0;">public</span>:
+     <span style="color: #0000ff;">fib_deco</span>(<span style="color: #228b22;">fib</span>* <span style="color: #a0522d;">p</span>): <span style="color: #0000ff;">container</span>(p) {}
+};
+
+</pre>
+</div>
+
+<p>
+这个装饰器什么也没有做，它只是使用一个私有变量存储了一个 fib 对象，并在调用 calc 方法时使用 container 指向对象的方法。接下来我们在它的基础上定义限制输入的装饰器：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-cpp"><span style="color: #a020f0;">class</span> <span style="color: #228b22;">fib_47</span> : <span style="color: #a020f0;">public</span> <span style="color: #228b22;">fib_deco</span>
+{
+<span style="color: #a020f0;">public</span>:
+    <span style="color: #a020f0;">virtual</span> <span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #0000ff;">calc</span>(<span style="color: #228b22;">unsigned</span> <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+        {
+            <span style="color: #a020f0;">if</span> (n &gt; 47) <span style="color: #a020f0;">return</span> 114514;
+            <span style="color: #a020f0;">else</span> {
+                <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">fib_deco</span>::calc(n);
+            }
+        }
+    <span style="color: #0000ff;">fib_47</span>(<span style="color: #228b22;">fib</span>*<span style="color: #a0522d;">p</span>): <span style="color: #0000ff;">fib_deco</span>(p) {}
+};
+</pre>
+</div>
+
+<p>
+在装饰器 <code>fib_47</code> 中，我们对参数范围进行了检查，若输入参数大于 47 则直接返回 114514，我们来看看效果：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-cpp"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">main</span>()
+{
+   <span style="color: #228b22;">fib</span>* <span style="color: #a0522d;">a</span> = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">fib_rec</span>;
+   <span style="color: #228b22;">fib</span>* <span style="color: #a0522d;">b</span> = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">fib_iter</span>;
+   <span style="color: #228b22;">fib</span>* <span style="color: #a0522d;">c</span> = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">fib_fst</span>;
+   <span style="color: #008b8b;">std</span>::cout &lt;&lt; a-&gt;calc(5) &lt;&lt; <span style="color: #8b2252;">' '</span> &lt;&lt; b-&gt;calc(6) &lt;&lt; <span style="color: #8b2252;">' '</span> &lt;&lt; c-&gt;calc(7) &lt;&lt; <span style="color: #8b2252;">'\n'</span>;
+   a = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">fib_47</span>(a);
+   b = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">fib_47</span>(b);
+   c = <span style="color: #a020f0;">new</span> <span style="color: #228b22;">fib_47</span>(c);
+   <span style="color: #008b8b;">std</span>::cout &lt;&lt; a-&gt;calc(8) &lt;&lt; <span style="color: #8b2252;">' '</span> &lt;&lt; b-&gt;calc(9) &lt;&lt; <span style="color: #8b2252;">' '</span> &lt;&lt; c-&gt;calc(10) &lt;&lt; <span style="color: #8b2252;">'\n'</span>;
+   <span style="color: #008b8b;">std</span>::cout &lt;&lt; a-&gt;calc(48) &lt;&lt; <span style="color: #8b2252;">' '</span> &lt;&lt; b-&gt;calc(47) &lt;&lt; <span style="color: #8b2252;">' '</span> &lt;&lt; c-&gt;calc(49) &lt;&lt; <span style="color: #8b2252;">'\n'</span>;
+   <span style="color: #a020f0;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+输出结果为：
+</p>
+
+<pre class="example">
+5 8 13
+21 34 55
+114514 2971215073 114514
+</pre>
+
+<p>
+这就体现了装饰器的作用，我在没有对原先代码进行任何修改的情况下为它们加入了参数检查功能。
+</p>
+</div>
+
+<div id="outline-container-org9a23e0d" class="outline-4">
+<h4 id="org9a23e0d"><span class="section-number-4">1.1.1</span> 装饰器模式的适用范围和优缺点</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<p>
+这一部分我就直接参考了 <i>gof</i> ，毕竟我也没有太多的实战经验。
+</p>
+
+<p>
+在 <i>gof</i> 中这样写道：以下情况适合使用装饰器模式
+</p>
+
+<ul class="org-ul">
+<li>在不影响其他对象的情况下，以动态、透明的方式给单个对象添加职责</li>
+
+<li>处理那些可以撤销的职责</li>
+
+<li>当不能采用生成子类的方法进行扩充时。
+
+<ul class="org-ul">
+<li>一是有大量的独立扩展，采用子类化的话会使子类的数量爆炸增长</li>
+
+<li>二是类定义被隐藏而不能定义子类</li>
+</ul></li>
+</ul>
+
+<p>
+上面列出的第一点是可以通过我上面的代码体现的。在为对象添加装饰时，我使用了原指针变量接受了返回的 <code>fib_deco</code> 子类对象，由于是 <code>fib</code> 基类指针，所以方法调用对它来说都是一样的，这就体现出了透明性。由于是运行时的改变，所以又体现了动态性。因为没有对类进行修改，所以自然没有影响其他的对象。
+</p>
+
+<p>
+至于第二点，上面我只使用了三个 <code>fib</code> 指针，可以通过额外的 <code>fib</code> 指针保留各 fib 实现，在不需要装饰器的时候使用它们即可。更好一点方法（我猜的）可能是在 decorator 中添加返回被装饰对象的方法，然后在需要使用原对象时调用该方法，随后销毁装饰器。
+</p>
+
+<p>
+第三点的第一小点是显而易见的，我可懒得去改每一个 fib 实现的定义。第二小点是在类定义不可见而无法定义子类的情况下只能使用装饰器。
+</p>
+
+<p>
+在 <i>gof</i> 上同样也提到了使用装饰器模式的优缺点，它的优点是：
+</p>
+
+<ul class="org-ul">
+<li><b>比静态继承更灵活</b> 与静态继承相比，装饰器模式提供了更加灵活的向对象添加职责的方式，它可以在运行时增加和删除职责。相比之下，继承则要求为每个新增的职责创建一个新的子类，这会产生许多新的类从而增加系统复杂度。</li>
+
+<li><b>避免在层次结构高层的类有太多的特征</b> 装饰器模式提供了一种“即用即付”的方法来添加职责。它并不试图在一个复杂的可定制的类中支持所有可预见的特征，相反，你可以定义一个简单的类，然后使用装饰器来逐渐添加功能。可以从简单的部件组合出复杂的功能。</li>
+</ul>
+
+<p>
+存在优点的同时，它也有以下缺点：
+</p>
+
+<ul class="org-ul">
+<li>装饰器和 Component 不一样，装饰器是一个透明的包装。如果从对象标识的观点出发，被装饰了的组件和组件本身是有区别的，因此使用装饰器时不应该依赖对象标识。</li>
+
+<li>有许多小对象，采用装饰器模式进行系统设计往往会产生许多看上去类似的小对象，这些对象仅仅是在连接方式上有所不同，而不是它们的类或者它们的属性值有所不同。这对于了解系统的人来说是很容易掌握的，但是对于不熟悉的人学习难度较大且很难排错。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgab35c90" class="outline-4">
+<h4 id="orgab35c90"><span class="section-number-4">1.1.2</span> <i>gof</i> 对实现装饰器的建议</h4>
+<div class="outline-text-4" id="text-1-1-2">
+<ol class="org-ol">
+<li><b>保证接口的一致性</b> 装饰器对象的接口必须与它装饰的 Component 接口一致，因此所有的 ConcreteDecorator 类必须有一个公共的父类。</li>
+
+<li><b>省略掉抽象的 Decorator 类</b> 只需要添加一个职责时没有必要定义抽象 Decorator类。通常你需要处理现存的类层次结构而不是设计一个新系统。</li>
+
+<li><b>保持 Component 的简单性</b> 为了接口一致性，Component 和 Decorator 必须有一个公共的父类。因此，保持类的简单性是很重要的，它应该集中于定义接口而不是存储数据。对数据的定义应该延迟到子类中，否则 Component 类会变得过于复杂和庞大，导致其难以使用。Component 类功能太多会使子类具有不需要功能的可能性大大增加。</li>
+</ol>
+
+<p>
+这里我只提一提第二条，在上面的斐波那契类装饰器实现中，我创建了一个抽象装饰器类，但其实是不必要的，因为我需要添加的只是参数检查而已，只需要一个具体装饰器就够了。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgebb4b88" class="outline-3">
+<h3 id="orgebb4b88"><span class="section-number-3">1.2</span> 装饰器（Decorator&amp;Advice）</h3>
+<div class="outline-text-3" id="text-1-2">
+<blockquote>
+<p>
+In aspect and functional programming, advice describes a class of functions which modify other functions when the latter are run; it is a certain function, method or procedure that is to be applied at a given join point of a program.
+</p>
+
+<p>
+<a href="https://en.wikipedia.org/wiki/Advice_(programming)">from wikipedia</a>
+</p>
+</blockquote>
+
+<p>
+上面的装饰器是针对类的，这里的装饰器的装饰对象就是函数了。这一小节的标题我用的是 Decorator&amp;Advice，根据维基百科<sup><a id="fnr.5" class="footref" href="#fn.5">5</a></sup>上的说法的话直接称为 Advice 就行了，但是 Python 中的 Advice 就叫 Decorator，这两种叫法都应该没有问题。这一小节我会简单介绍 Python 的 Decorator 使用方法。关于为什么 Decorator 要叫这个名字，以及其他各个方面的考虑，可以参考这里<sup><a id="fnr.6" class="footref" href="#fn.6">6</a></sup>，我就不在这里详细展开了。
+</p>
+
+<p>
+在 Python 中，装饰器就是一个可以用来修改函数、方法或类定义的可调用对象。装饰器接受一个原始对象，并返回一个被调整过的对象，它随后被绑定到原定义的名字上。Python 装饰器受到了 Java 注解的影响<sup><a id="fnr.7" class="footref" href="#fn.7">7</a></sup>，与之有着相似的语法。
+</p>
+
+<p>
+假设现在有一个函数，它可以将接受的数字乘二并返回：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">double</span>(x):
+    <span style="color: #a020f0;">return</span> x * 2
+</pre>
+</div>
+
+<p>
+如果我们想要让他的返回值再加一的话，除了修改代码，还可以这样做：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">deco</span>(f):
+    <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">fun</span>(x):
+        <span style="color: #a020f0;">return</span> f(x) + 1
+    <span style="color: #a020f0;">return</span> fun
+</pre>
+</div>
+
+<p>
+通过把原函数包在另一个函数里面并返回这个包函数，我们就完成了任务
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a0522d;">double</span> = deco(double)
+double(2)
+=&gt; 5
+</pre>
+</div>
+
+<p>
+发现了吗， <code>double = deco(double)</code> 和上面的装饰器模式示例代码 <code>a = new fib_47(a);</code> 非常的像。Python 为我们提供了一种非常方便的写法，使用 '@' 注解就可以为函数加上包装了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #228b22;">@deco</span>
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">double</span>(x):
+    <span style="color: #a020f0;">return</span> x * 2
+</pre>
+</div>
+
+<p>
+按照 PEP-318 上面的说法，这种写法和上面的那种是等价的，PEP-318 给出的说法是这样的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #228b22;">@dec2</span>
+<span style="color: #228b22;">@dec1</span>
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">func</span>(arg1, arg2, ...):
+    <span style="color: #a020f0;">pass</span>
+
+<span style="color: #b22222;">#</span><span style="color: #b22222;">This is equivalent to:</span>
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">func</span>(arg1, arg2, ...):
+    <span style="color: #a020f0;">pass</span>
+<span style="color: #a0522d;">func</span> = dec2(dec1(func))
+</pre>
+</div>
+
+<p>
+上面这个例子说明装饰器是可以叠加的，最上面的函数注解在最外层，向下逐渐到达内层。
+</p>
+
+<p>
+除了说接受装饰器之外，'@' 还接受返回装饰器的函数调用写法：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #228b22;">@decomaker</span>(argA, argB, ...)
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">func</span>(arg1, arg2, ...):
+    <span style="color: #a020f0;">pass</span>
+<span style="color: #b22222;">#</span><span style="color: #b22222;">This is equivalent to:</span>
+
+<span style="color: #a0522d;">func</span> = decomaker(argA, argB, ...)(func)
+</pre>
+</div>
+
+<p>
+举例来说的话就是这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">decogen</span>(i):
+    <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">deco</span>(f):
+        <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">fun</span>(x):
+            <span style="color: #a020f0;">return</span> f(x) + i
+        <span style="color: #a020f0;">return</span> fun
+    <span style="color: #a020f0;">return</span> deco
+
+<span style="color: #228b22;">@decogen</span>(20)
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">inc1</span>(x):
+    <span style="color: #a020f0;">return</span> x + 1
+
+=&gt; 22
+</pre>
+</div>
+
+<p>
+实际上，Python 对装饰器的要求仅仅是可调用的对象，所以除了函数之外还可以使用类，偏函数等等。由于本文的主要目的不是介绍 Python Decorator，所以就此打住。知乎上有一篇文章<sup><a id="fnr.8" class="footref" href="#fn.8">8</a></sup>写的不错，可以前去参考。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org05e74da" class="outline-2">
+<h2 id="org05e74da"><span class="section-number-2">2</span> emacs 中的 advice</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+elisp 文档是这样描述 advice 的： <i>The advice feature lets you add to the existing definition of a function, by advising the function. This is a cleaner method than redefining the whole function.</i> 。
+</p>
+
+<p>
+emacs 提供了两套 api 来为函数添加 advice，其一是使用 advice.el 中的 defadvice 系列函数，其二是使用 nadvice.el 中的 advice-add, advice-remove 系列函数。defadvice 已经过时了，elisp manual 中给它的标题是：Porting Old Advice &#x2013; Adapting code using the old defadvice。虽说如此，老代码中使用的就是 defadvice，对它进行学习有助于阅读代码。
+</p>
+
+<p>
+因此，除了在这一节介绍 defadvice 外，我会在下一节对 nadvice 进行介绍，它的接口函数相对 defadvice 来说用起来更加简单方便。
+</p>
+
+<p>
+在 emacs 27.2 的 emacs lisp manual 中，对 defadvice 的介绍作为 advice-add 的补充一带而过了，详细的文档在 advice.el 这个文件中。在 advice.el 的 Commentary 的开头部分又提到 <i>Advice is documented in the Emacs Lisp Manual</i> ， 这就说明之前的 elisp manual 中是存在 defadvice 的详细介绍的。经过一番检索，我在这个页面<sup><a id="fnr.9" class="footref" href="#fn.9">9</a></sup>找到了 elisp manual 21。
+</p>
+
+<p>
+在本节的余下部分我对 advice.el 和 elisp manual 21 进行了参考。
+</p>
+</div>
+
+<div id="outline-container-orgfba64db" class="outline-3">
+<h3 id="orgfba64db"><span class="section-number-3">2.1</span> 例子：如何为函数添加 advice</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+现在我们有一个叫做 <code>foo</code> 的函数，它的功能是将数字加一：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">foo</span> (x)
+  <span style="color: #8b2252;">"Add 1 to x"</span>
+  (1+ x))
+</pre>
+</div>
+
+<p>
+假设我们想让它的功能变成将数字加二，我们可以这样来为它添加 advice：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">foo</span> (before foo-add-2 first activate)
+  <span style="color: #8b2252;">"Add Another 1 to x"</span>
+  (<span style="color: #a020f0;">setq</span> x (1+ x)))
+</pre>
+</div>
+
+<p>
+看到了上面代码中 <code>foo</code> 后面的 before 了吗，它表示在函数的 body 执行前起作用的那一类 advice。如果我们要在函数调用中来完成上面的功能的话，我们可以这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">foo</span> (around foo-add-2-a first activate)
+  <span style="color: #8b2252;">"Add Another 1 to x"</span>
+  (<span style="color: #a020f0;">setq</span> x (1+ x))
+  ad-do-it)
+</pre>
+</div>
+
+<p>
+上面的 around 在中文中是“周围”的意思，它的意思是在函数调用时可以进行一些动作。原函数的执行发生在 <code>ad-do-it</code> 出现的地方，around 就像是在原函数的 body 周围插入一些额外的代码，然后把这些代码作为一个整体来执行。
+</p>
+
+<p>
+如果你已经对 <code>foo</code> 函数和它的两个 advice 进行了求值，那么你在使用某个数字调用 <code>foo</code> 时，你会得到这个数字加上 3。这个 3 由 before，around 和原函数分别加上的 1 得来。
+</p>
+
+<p>
+如果我们想在函数完成后把得到的结果乘 2 再返回呢？这个时候可以使用 after 关键字：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">foo</span> (after foo-mul-2 first activate)
+  <span style="color: #8b2252;">"Mul 2 to res"</span>
+  (<span style="color: #a020f0;">cl-incf</span> ad-return-value ad-return-value))
+</pre>
+</div>
+
+<p>
+这个时候，如果你使用 1 作为参数的话，得到的结果就是 8，即 <code>(1 + 1 + 1) * 2</code> 。上面我演示了三类 advice，即 before/around/after 的使用方法。在三个 advice 的共同作用下得到了 <code>(foo 1) =&gt; 8</code> 这样的结果。这个时候问题就来了，如果我想取消掉 advice 该怎么办呢？我们可以这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(ad-deactivate 'foo)
+
+(foo 1) =&gt; 2
+</pre>
+</div>
+
+<p>
+如果想要让这些 advice 再次生效的话，使用 <code>ad-activate</code> 即可，它会激活参数函数的所有 advice。不过这样就引出了另一个问题，如果仅仅想让某些 advice 生效而不使用其他 advice 又该怎么办呢？这个时候就需要用到 enable/disable 机制了，上面的三个 advice 都处于 enable 状态，我们禁掉 after advice 试试：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(ad-disable-advice 'foo 'after 'foo-mul-2)
+(ad-activate 'foo) <span style="color: #b22222;">;; </span><span style="color: #b22222;">if current status is active, can also use ad-update</span>
+(foo 1) =&gt; 4
+</pre>
+</div>
+
+<p>
+以上就是 defadvice 的基本使用介绍，你应该注意到了，除了 before/around/after 外还有 first, activate 等关键字，关于它们的详细介绍请看本节的剩余内容。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgca5f182" class="outline-3">
+<h3 id="orgca5f182"><span class="section-number-3">2.2</span> defadvice 的用法</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+在 advice.el 中是这样描述 <code>defadvice</code> 的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">&lt;function&gt;</span> (&lt;class&gt; &lt;name&gt; [&lt;position&gt;] [&lt;arglist&gt;] {&lt;flags&gt;}*)
+  [ [&lt;documentation-string&gt;] [&lt;interactive-form&gt;] ]
+   {&lt;body-form&gt;}* )
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>&lt;function&gt;</code> 是需要添加 advice 的函数，下面我们叫它 advised function</li>
+<li><code>&lt;class&gt;</code> 是 advice 的类别，它可以是 <code>before</code>, <code>around</code>, <code>after</code>, <code>activation</code> 和 <code>deactivation</code> 。 <code>activation</code> 和 <code>deactivation</code> 是特别的，它们用于定义 hook-like advice</li>
+<li><code>&lt;name&gt;</code> 是 advice 的名字，它是一个非 nil 的符号。它被用来在某一 advice 类别中唯一标识某个 advice，这样便于通过相同的类型和名字来对 advice 进行重定义。advice 的名字是全局符号，所以要使用和函数一样的名字约定</li>
+<li><code>&lt;position&gt;</code> 是可选的，它用来指定在 <code>&lt;class&gt;</code> 的 advice list 中新的 advice 的位置。它的值可以是 <code>first</code>, <code>last</code> 两个符号，或者是从零开始的数字（0 代表 <code>first</code> ，即最前面）。如果没有指定 <code>&lt;position&gt;</code> 那么默认使用 <code>first</code> ，将新的 advice 放到 list 的最前面。如果调用 defadvice 对某个 advice 进行重定义的话，在 defadvice 中指定的 position 会被忽略掉，并继续使用已有的位置。</li>
+<li><code>&lt;arglist&gt;</code> 也是可选的，它是一个表，可用作 advised definition 的形参表。它应当与原函数的参数表兼容，否则对 advised function 的调用会失败。如果多个 advice 指定了参数表，那么对于 before/around/after advice 而言，在最前面（positon 最小）的那个会被使用。</li>
+<li><code>&lt;flags&gt;</code> 由一个或多个符号组成，它指定了和 advice 相关的更多信息。它可以使用的符号包括：
+<ul class="org-ul">
+<li><code>activate</code> ，表示 advised function 的 advice 在定义该 advice 后立刻激活，在 <i>forward advices</i> 情况下它会被忽略</li>
+<li><code>protect</code> ，在该 advice 之前的 advice 出现非本地退出（non-local exit）或错误的情况下，该 advice 被保证执行</li>
+<li><code>compile</code> ，表示 advised definition 应该被编译，如果不同时指定 <code>activate</code> 的话它会被忽略</li>
+<li><code>disable</code> ，表示定义的 advice 应该被禁用。要使用这个 advice 首先需要激活它</li>
+<li><code>preactivate</code> ，指示 advised definition 应该在该 advice 的 defadvice 的宏展开/编译时已经预激活（preactivate）。这样就可以保证一个编译的 advised definition 可在运行时直接使用，而不必重新构建。仅在 <code>defadvice</code> 真正需要被编译时使用这个 flag。</li>
+</ul></li>
+<li><code>&lt;documentation-string&gt;</code> 和 <code>&lt;interactive-form&gt;</code> 就是我们非常熟悉的东西了。interactive-form 可以用来改变或添加新的 interactive 行为，如果有多个 advice 指定了 interactive，那就使位置最前的那个</li>
+<li><code>body-form</code> 就是通常的过程体，在其中可以访问/改变参数，返回值，绑定环境，和其他所有类型的副作用</li>
+</ul>
+
+<p>
+关于 <code>&lt;function&gt;</code> ， <code>&lt;name&gt;</code> ， <code>&lt;documentation-string&gt;</code> ， <code>&lt;body-form&gt;</code> ， <code>&lt;interactive-form&gt;</code> 这几项，我个人认为凡是学过一点 elisp 的人应该都很清楚是什么，因此这里只对 <code>&lt;class&gt;</code> ， <code>&lt;arglist&gt;</code> ， <code>&lt;flags&gt;</code> 进行一定的介绍。由于 <code>&lt;position&gt;</code> 与各项都有关系，我就不单独介绍了。
+</p>
+</div>
+
+<div id="outline-container-orgce6ea9a" class="outline-4">
+<h4 id="orgce6ea9a"><span class="section-number-4">2.2.1</span> &lt;class&gt;</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+文档中说 class 有五个，前三个是普通的 class，后面两个是特殊的 class，我们就先从普通 before/around/after 开始。
+</p>
+
+<p>
+如果一个函数/宏/subr/特殊形式有 N 个 before advice，M 个 around advice 和 K 个 after advice，且它们都处于激活状态，那么添加 advice 后总体情况是这样的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">([macro] lambda &lt;arglist&gt;
+   [ [&lt;advised-docstring&gt;] [(<span style="color: #a020f0;">interactive</span> ...)] ]
+   (<span style="color: #a020f0;">let</span> (ad-return-value)
+     {&lt;before-0-body-form&gt;}*
+           ....
+     {&lt;before-N-1-body-form&gt;}*
+     {&lt;around-0-body-form&gt;}*
+        {&lt;around-1-body-form&gt;}*
+              ....
+           {&lt;around-M-1-body-form&gt;}*
+              (<span style="color: #a020f0;">setq</span> ad-return-value
+                    &lt;apply original definition to &lt;arglist&gt;&gt;)
+           {&lt;other-around-M-1-body-form&gt;}*
+              ....
+        {&lt;other-around-1-body-form&gt;}*
+     {&lt;other-around-0-body-form&gt;}*
+     {&lt;after-0-body-form&gt;}*
+           ....
+     {&lt;after-K-1-body-form&gt;}*
+     ad-return-value))
+</pre>
+</div>
+
+<p>
+我们将它称为 <b>advised definition</b> （在 elisp manual 21 中称之为 combined definition） 。其中， <code>&lt;arglist&gt;</code> 是它的形参表，如果没有 advice 指定新的 arglist 的话，它就是原函数的参数表。 同理，如果没有 advice 指定 interactive-form 的话， <code>(interactive ...)</code> 就是原函数的 interactive。
+</p>
+
+<p>
+在上一小节的举例中，我将 before/around/after 的功能粗略地描述为在函数调用前/调用中/调用后起作用，这样的描述和实际情况差别不大，但是还是不够准确。上面的伪代码来自 advice.el，它准确地反映了各 class 的作用时间：
+</p>
+
+<ul class="org-ul">
+<li>before advice 在调用原函数之前完成它的任务，使用它可以修改函数参数和做一些初始化操作。此时 <code>ad-return-value</code> 这个变量虽然对它（们）是可见的，但是修改该变量值的操作无意义，因为它会在调用原函数后直接被赋予原函数返回值</li>
+<li>around advice 作用在原函数调用的前后起作用，如果你想的话，你也可以在 around advice 中故意不写 ad-do-it，即不调用原函数，这样就好像把原函数掏空了塞个新函数进去一样（不过参数表是一样的）</li>
+<li>after advice 在函数调用完成后起作用，此时修改函数参数已无意义，因为原函数已经被调用过了，不过它（们）可以通过修改 <code>ad-return-value</code> 来修改 advised function 的返回值。此时也可以进行一些资源清理工作</li>
+</ul>
+
+<p>
+可以看到，在上面代码中 around advice 和另两个 advice 的代码形状不太一致，before advice 和 after advice 同类之间是并列关系，而 around advice 同类之间是嵌套关系。这也好理解，嵌套关系保证了原函数只会在最内层的 around advice 中执行一次。你也许会注意到 around advice 好像可以起到 before 和 after advice 的作用，从原理上似乎是不需要这两类 advice。至于为什么要把 advice 分为这三类，我个人的看法是：对 advice 的分类明确了不同阶段的 advice 的职责，使得代码更加清晰，毕竟不是每个人都想在 advice 中至少写一个 <code>ad-do-it</code> 的。
+</p>
+
+<p>
+除了说各类 advice 的职责外，我们再来看看各 advice 在 advised definition 中的执行顺序，它们的执行顺序与 advice 的 position 有关。对于 before advice 和 after advice， position 越小的则执行的越早，position 为 0 则最先执行，这也与上面伪代码中标注的数字一致。对于 around device，position 越小则越在外层，position 最大的在最内层，position 为 0 的在最外层，这在伪代码中也有标注。以下代码可以体现出 advice 与 position 的关系。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">please run these code in order</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yyid</span> (x) x)
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yyid</span> (before bef-1 activate)
+  (<span style="color: #a020f0;">setq</span> x (concat <span style="color: #8b2252;">"1"</span> x)))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yyid</span> (before bef-0 activate)
+  (<span style="color: #a020f0;">setq</span> x (concat <span style="color: #8b2252;">"0"</span> x)))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yyid</span> (around aro-1 activate)
+  ad-do-it
+  (<span style="color: #a020f0;">setq</span> ad-return-value (concat ad-return-value <span style="color: #8b2252;">"3"</span>)))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yyid</span> (around aro-0 activate)
+  ad-do-it
+  (<span style="color: #a020f0;">setq</span> ad-return-value (concat ad-return-value <span style="color: #8b2252;">"2"</span>)))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yyid</span> (after aft-1 activate)
+  (<span style="color: #a020f0;">setq</span> ad-return-value (concat ad-return-value <span style="color: #8b2252;">"5"</span>)))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yyid</span> (after aft-0 activate)
+  (<span style="color: #a020f0;">setq</span> ad-return-value (concat ad-return-value <span style="color: #8b2252;">"4"</span>)))
+
+(yyid <span style="color: #8b2252;">"-"</span>) =&gt; <span style="color: #8b2252;">"10-3245"</span>
+</pre>
+</div>
+
+<p>
+以上就是关于 before/around/after 的介绍。对于 activation 和 deactivation 这两个 advice 类，advice.el 注释中说明并不多，只是说它们用于 hook 而不是 function，它们也不会被包括到 advised function 中。由于涉及到 <code>advice-info</code> 和 <code>forward advice</code> ，所以我会在下面而不是这里对它们进行介绍。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3616e35" class="outline-4">
+<h4 id="org3616e35"><span class="section-number-4">2.2.2</span> &lt;arglist&gt;</h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+在上面我们已经简单介绍过了 &lt;arglist&gt; 的注意事项了，即与原函数的参数表兼容，在这里我们用一些简单例子来说明它的使用。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-add</span> (a b)
+    (+ a b))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-add</span> (before yy-tri (a b c) activate)
+  <span style="color: #8b2252;">"Add three numbers"</span>
+  (<span style="color: #a020f0;">setq</span> b (+ b c)))
+(yy-add 2 3 3) =&gt; 8
+</pre>
+</div>
+
+<p>
+在添加了 arglist 的 advice 中，arglist 中参数的名字并不需要与原函数相同，保持参数与原参数的顺序一致即可，将 <code>yy-add</code> 中的 a b c 全部替换为 x y z 也是可以正常工作的。
+</p>
+
+<p>
+现在还有一个问题，根据文档得知，arglist 的选取是根据 position 来决定的，即选取 position 最小的且带有 arglist 的 advice 来作为新的 arglist。对于同类的 advice 是可以比较 position 的，但是对于不同类的 advice，arglist 又是如何选取的呢？这个问题可以通过几组实验来得出结果，也可以直接阅读源代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">ad-advised-arglist</span> (<span style="color: #a020f0;">function</span>)
+  <span style="color: #8b2252;">"Find first defined arglist in FUNCTION's redefining advices."</span>
+  (<span style="color: #a020f0;">cl-dolist</span> (advice (append (ad-get-enabled-advices function 'before)
+                             (ad-get-enabled-advices function 'around)
+                             (ad-get-enabled-advices function 'after)))
+    (<span style="color: #a020f0;">let</span> ((arglist (ad-arglist (ad-advice-definition advice))))
+      (<span style="color: #a020f0;">if</span> arglist
+          <span style="color: #b22222;">;; </span><span style="color: #b22222;">We found the first one, use it:</span>
+          (<span style="color: #a020f0;">cl-return</span> arglist)))))
+</pre>
+</div>
+
+<p>
+在 advice.el 中叫做 <code>ad-advised-arglist</code> 的函数可以说明这一点，它的 <code>advice</code> 变量是按照 before, around, after 的顺序 append 起来的，所以它会首先使用 before 中的 arglist，如果没有找到再到 around 里面找，最后到 after 里面找。
+</p>
+
+<p>
+不过话又说回来，在不同类的 advice 中指定多个 arglist 是一种很混乱的行为，一般也不会出现。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd190ccf" class="outline-4">
+<h4 id="orgd190ccf"><span class="section-number-4">2.2.3</span> &lt;flags&gt;</h4>
+<div class="outline-text-4" id="text-2-2-3">
+<p>
+和 class 的数量一样，flags 也有 5 个，它们分别是 <code>active</code>, <code>protect</code>, <code>compile</code>, <code>disable</code> 和 <code>preactivate</code> 。
+</p>
+
+<p>
+其中， <code>activate</code> 对我们来说已经很熟悉了，使用它可以在对 defadvice 进行求值后立即为函数加上 advice。但有一种情况例外，那就是 <code>forward advice</code> 。所谓 <code>forward advice</code> ，就是在 advised function 还未定义的时候你就可以为它添加 advice。 <code>forward advice</code> 同时也意味着 <code>automatic activation</code> ，一旦有函数载入时便立即加上 advice。
+</p>
+
+<p>
+需要注意的是， <code>automatic advice</code> 并不等于 <code>forwar advice</code> ，倒不如说是 <code>forward advice</code> 利用了它的特性。 <code>automatic advice</code> 是指：当函数名中存储有 advice-info 时，一旦函数载入就会立刻激活 advice。以下是 <code>forward advice</code> 的例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">evaluate in order</span>
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yysub</span> (before yysub-1)
+  (<span style="color: #a020f0;">setq</span> x (1- x)))
+
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yysub</span> (x y)
+  (- x y))
+
+(yysub 1 2) =&gt; -2
+</pre>
+</div>
+
+<p>
+可以看到，即便我在定义 advice 时没有使用 activate， <code>forward advice</code> 也完成了 advice 的激活。
+</p>
+
+<p>
+<code>protect</code> 保证在之前的 advice 出问题时仍能执行。此外，若将 <code>protect</code> 用于 around advice，position 比它大的 advice 都会带有 <code>protect</code> 效果（就像洋葱一样）。以下是代码演示：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-nothing</span> (x) nil)
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-nothing</span> (before yy-no1 activate)
+  (/ 1 0))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-nothing</span> (around yy-no2 protect activate)
+  (print <span style="color: #8b2252;">"Hello"</span>)
+  ad-do-it)
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-nothing</span> (around yy-no3 last activate)
+  (print <span style="color: #8b2252;">"world"</span>)
+  ad-do-it)
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-nothing</span> (after yy-no4 protect activate)
+(print <span style="color: #8b2252;">"!!!"</span>))
+
+(yy-nothing 1) =&gt;
+
+<span style="color: #8b2252;">"Hello"</span>
+
+<span style="color: #8b2252;">"world"</span>
+
+<span style="color: #8b2252;">"!!!"</span>
+
+</pre>
+</div>
+
+<p>
+即便会弹出 debugger 告诉你出现了除 0 错误， "Hello world !!!" 还是能够打印出来。
+</p>
+
+<p>
+<code>compile</code> 的作用是告诉 emacs 对 advised definition 进行字节码编译。这个选项需要和 activate 一起用，如果没有的话它会被忽略。它的效果如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-int</span> (x) (* x x 0.5))
+(byte-code-function-p 'yy-int) =&gt; nil
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-int</span> (before yy-int-x compile activate)
+  (<span style="color: #a020f0;">setq</span> x (1+ x)))
+
+(byte-code-function-p (symbol-function 'ad-Advice-yy-int)) =&gt; t
+</pre>
+</div>
+
+<p>
+可以看到， <code>symbol-function</code> 得到的结果是一个 byte-compiled function。如果你把 defadvice 和 defun 的求值顺序倒过来，使用 <code>forward advice</code> ，得到的将会是一个未编译的函数。这大概是由于在 <code>forward advice</code> 中 activate 被忽略了，顺带 compile 也就没有用了。
+</p>
+
+<p>
+你可能会对上面的变量 <code>ad-Advice-yy-int</code> 感觉好奇，它是从哪里来的？上面的例子我是参考的 advice.el 中的示例，我猜这个变量存储的就是 advised definition。在 advice.el 的注释中没有对它进行说明。它应该是 advice 模块的内部变量，但是 advice 模块的编写时间太早了，那个时候还没有现在用的命名约定，即使用 <code>name--</code> 作为内部名字的前缀。
+</p>
+
+<p>
+<code>disable</code> 将 advice 的初始状态设置为 <code>disable</code> ，注意， <code>disable</code> 对应的是 <code>enable</code> 而不是 <code>activate</code> ，后者对应的是 <code>deactivate</code> 。将一个 advice 定义为 <code>disable</code> 状态后，如果你需要使用它的话，你需要先将它设置为 <code>enable</code> 状态，再对 advised funtion 进行更新或激活。这一点可以通过以下代码说明：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-tot</span> (x y) (min x y))
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-tot</span> (after yy-tot-1 disable)
+  (<span style="color: #a020f0;">cl-incf</span> ad-return-value))
+
+(yy-tot 1 2) =&gt; 1
+(yy-activate 'yy-tot)
+(yy-tot 1 2) =&gt; 1
+(ad-enable-advice 'yy-tot 'after <span style="color: #8b2252;">"yy-tot-1"</span>)
+(ad-activate 'yy-tot)
+(yy-tot 1 2) =&gt; 2
+</pre>
+</div>
+
+<p>
+<code>preactivate</code> 的作用是在编译时就根据现有的 advice 完成 advised definition 的构造。至于这样做的原因，文档上是这样说的：
+</p>
+
+<blockquote>
+<p>
+Constructing an advised definition is moderately expensive. In a situation where one package defines a lot of advised functions it might be prohibitively expensive to do all the advised definition construction at runtime.
+</p>
+</blockquote>
+
+<p>
+简而言之，preactivation 提供了一种在编译时构建 advised definition 的机制，这样就可以在运行时以较小的代价激活 advised definition。要使用它的话，你需要在 defadvice 中指定这个 flag，调用这个 defadvice 时会创建包括所有 enabled advice 和它本身的 advice 组成的 advised definition。当函数的 advice 激活时，如果 enabled advice 与编译的 advised definition 匹配的话，就会直接使用编译的 advised definition。
+</p>
+
+<p>
+关于 preactivate 的更多信息可以参考 advice.el，由于我很少使用到 emacs 的编译功能，所以我也没有太多的经验。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org586ea64" class="outline-3">
+<h3 id="org586ea64"><span class="section-number-3">2.3</span> 访问 advised function 的参数</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+在上面的所有例子中，我都是在 advice 中直接使用原函数的参数表中的名字，以此来改变原函数的行为，或者是通过指定新的 arglist 从而使用 arglist 里面的名字 。如果我们已知 advised function 的名字的话，这样做是没有问题的，但是不知道名字的话是无法对 advised function 参数进行访问的。因此，除了使用原来的参数名来访问参数，advice.el 还提供了一种方法。
+</p>
+
+<p>
+advice.el 是这样描述的：当 advised definition 被构建后，对实参的访问是通过参数在表中的位置来进行的。也就是说，我们可以通过指定位置而不是名字来访问特定的参数。advice.el 提供了 <code>ad-get-arg</code> 和 <code>ad-get-args</code> 来访问参数，前者访问指定位置的参数，后者访问指定位置和它后面的所有参数组成的表，例如，对于以下函数，使用这两个访问函数的效果如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">foo</span> (x y <span style="color: #228b22;">&amp;optional</span> z <span style="color: #228b22;">&amp;rest</span> r) ....)
+(foo 0 1 2 3 4 5 6)
+
+(ad-get-arg 0) -&gt; 0
+(ad-get-arg 1) -&gt; 1
+(ad-get-arg 2) -&gt; 2
+(ad-get-arg 3) -&gt; 3
+(ad-get-args 2) -&gt; (2 3 4 5 6)
+(ad-get-args 4) -&gt; (4 5 6)
+</pre>
+</div>
+
+<p>
+与之类似地， <code>ad-set-arg</code> 和 <code>ad-set-args</code> 对给定位置的参数进行修改，例如 <code>(ad-set-arg 5 "five")</code> 将第 6 个参数的值赋为 "five"。作用于上面定义的 <code>foo</code> 的话，得到的参数表就成了 <code>(0 1 2 3 4 "five" 6)</code> 。使用 <code>ad-set-args</code> 则可以修改多个参数。使用 <code>(ad-set-args 0 '(5 4 3 2 1 0))</code> 可以得到 <code>(foo 5 4 3 2 1 0)</code> ，可以注意到后面的 6 已经没有了。
+</p>
+
+<p>
+以上的四个函数实现了对参数的读写，但是如果还需要知道更多信息，比如参数名字，类型和值的话，就需要用到 <code>ad-arg-bindings</code> 了。 <code>ad-arg-bindings</code> 是一个文本宏，它会被替换为 binding specification 组成的表，表中的每个 binding specification 对应于每个参数变量。可以使用 <code>ad-arg-binding-field</code> 从其中提取相关信息，它接受一个 binding specification 和一个符号作为参数，符号可以是 <code>'name</code>, <code>'value</code> 和 <code>'type</code> 。
+</p>
+
+<p>
+如果使用 <code>'type</code> 作为参数，那么返回值只可能是三个值，即 <code>required</code> ， <code>optional</code> 和 <code>rest</code> ，分别对应三种不同类型的参数。在 advice.el 中给了这样的例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">let*</span> ((bindings ad-arg-bindings)
+       (firstarg (car bindings))
+       (secondarg (car (cdr bindings))))
+  <span style="color: #b22222;">;; </span><span style="color: #b22222;">Print info about first argument</span>
+  (print (format <span style="color: #8b2252;">"%s=%s (%s)"</span>
+                 (ad-arg-binding-field firstarg 'name)
+                 (ad-arg-binding-field firstarg 'value)
+                 (ad-arg-binding-field firstarg 'type)))
+  ....)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org96de990" class="outline-3">
+<h3 id="org96de990"><span class="section-number-3">2.4</span> advice 的激活与停用（(de)?activate）</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+在上面我们已经简单地使用过 <code>ad-activate</code> 来激活函数，这一小节更进一步，介绍更多的使用情况。
+</p>
+
+<p>
+在正式开始之前，不知道你想过这个问题没有：为什么需要在 defadvice 时使用 activate 来表示定义后立刻激活，而不是默认激活呢？在 advice.el 中对这个问题做出了解释：
+</p>
+
+<blockquote>
+<p>
+advise 发生在两个阶段，即：
+</p>
+<ol class="org-ol">
+<li>对各种 advice 的定义</li>
+<li>激活已定义且可用的所有 advice</li>
+</ol>
+
+<p>
+将 advice 的定义和激活拆开的好处就是，当你要使用一连串的 advice 时，你可以在将它们合并到 advised definition 之前完成所有的定义，这样可以避免在中间构建不必要的 advised definition。对 advice information 的积累是在函数符号的 <code>advice-info</code> 属性中完成的，这与 advised definition 的构建是完全独立的。
+</p>
+</blockquote>
+
+<p>
+当 advised function 第一次激活时，它的原定义会被保存起来，所有启用的 advice 会组合在一起构成 advised definition，随后会使用 advised definiton 对函数进行重定义。如果使用 <code>ad-activate</code> 命令时还使用了 <code>C-u</code> 前缀，那么 advised definition 还会被编译。调用 <code>add-activate</code> 函数时在第二参数位置指定 <code>t</code> 也可以。 <code>ad-default-compilation-action</code> 会根据系统当前状态来决定是否对其进行编译，可以自定义这个 option 来控制编译行为。
+</p>
+
+<p>
+<code>ad-deactivate</code> 可以用来将 advised function 变回原函数。它也可以作为命令调用。因为 <code>ad-activate</code> 会对 advised definition 进行缓存，函数可以以很小的开销来重新激活 advice。
+</p>
+
+<p>
+这里插一嘴对 caching 的介绍。在 advised definition 构建之后，它会作为 advised function 的一部分被缓存到函数的属性 <code>advice-info</code> 中，这样就可以对它进行重用，比如停用后的重新激活。
+</p>
+
+<p>
+因为函数的 <code>advice-info</code> 可能随时间发生变化，所以会使用一个 cache-id 来检验在重用时缓存的内容是否还可用。当 advised function 已经激活过且当前的缓存是有效的，那么就会使用缓存而不是重新创建一个。如果你想要确保构建一个新的 definition 的话，可以在激活 advised function 前使用 <code>ad-clear-cache</code> 清空缓存。
+</p>
+
+<p>
+<code>ad-activate-regexp</code> 和 <code>ad-deactivate-regexp</code> 可以用来激活/停用满足正则条件的 advice 对应的所有 advised function，它们可以用来控制满足某命名规则的一系列函数。最后， <code>ad-activate-all</code> 和 <code>ad-deactivate-all</code> 可以用来激活/停用当前所有的 advised funciton。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8a0cdb5" class="outline-3">
+<h3 id="org8a0cdb5"><span class="section-number-3">2.5</span> advice 的启用和禁用（enable/disable）</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+<code>ad-activate</code> 和 <code>ad-deactivate</code> 提供了激活和停用 advice 的功能。enable/disable 则更进一步，为控制是否在 advised definition 中使用某个 advice 提供了控制手段。每个 advice 都有一个使能标志（enablement flag）。当对 advised function 的 advice 构建 advised definition 时，只有使能标志为 enabled 的才能参与组合。
+</p>
+
+<p>
+对使能标志的控制主要通过两个函数完成： <code>ad-enable-advie</code> 和 <code>ad-disable-function</code> 。例如 <code>(ad-disable-advice 'foo 'before 'my-advice)</code> 就可以使叫做 my-advice 的 before advice 处于 disable 状态。这条代码只是改变了使能标志，要让它在 advised definition 中停用的话需要重新激活一次 foo，即： <code>(ad-activate 'foo)</code> 。
+</p>
+
+<p>
+除了使用准确的函数名，我们也可以使用正则表达式字符串作为这两个函数的第三参数。这样就可以启用/禁止一系列满足正则的 advice。它们的第二参数除了可以是 before/around/after 外，还可以是 any，any 可以在所有三个 class 中寻找 advice。
+</p>
+
+<p>
+除了以上两个函数外，还可以使用 <code>ad-enable-regexp</code> ， <code>ad-disable-regexp</code> 来对全局的所有满足正则表达式的 advice 进行使能控制。在完成使能设定后可以使用 <code>ad-activate-regexp</code> 进行刷新，也可以使用 <code>ad-update-regexp</code> 。更新功能的函数还有 <code>ad-update-all</code> 和 <code>ad-update</code> ， 它们分别对全局函数和指定的函数的 advised definition 进行更新。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge3818b9" class="outline-3">
+<h3 id="orge3818b9"><span class="section-number-3">2.6</span> 一些补充</h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+这一小节主要介绍上文未提及的一些函数。
+</p>
+
+<ul class="org-ul">
+<li><code>ad-unadvise</code> 会停止函数的所有 advice 并将它们都移除掉，它们再也无法被激活了， <code>ad-unadvise-all</code> 则移除掉当前所有 advised function 的 advice，慎用</li>
+
+<li><code>ad-recover</code> ，它尝试恢复原函数，并撤销掉所有的 advice，文档中把它说成是低阶的 <code>ad-unadvise</code> 。仅在紧急情况下使用它，它也有一个 <code>-all</code> 的版本，即 <code>ad-recover-all</code></li>
+
+<li><code>ad-remove-advice</code> ，移除掉某个 class 中的某个 advice</li>
+
+<li><code>ad-compile-function</code> ，如果函数/宏是可编译的，则对其进行字节码编译</li>
+
+<li><code>ad-add-advice</code> ，这是另一种添加 advice 的方式</li>
+
+<li><code>ad-start-advice</code> 和 <code>ad-stop-advice</code> ，这两个函数我是在 elisp manual 21 上找到的，现在已经被废弃掉了</li>
+</ul>
+
+<p>
+除了上面的函数，这里我们最后对 activation 和 deactivation 两个 class 进行一下介绍。这两种 advice 不会被添加到 advised definition 中，它们会整合到钩子（hook form）中，钩子在 advised function 的 advice-info 被激活或被停止时进行求值。这两类 advice 的应用之一是为文件提供文件载入钩子，文件一般是不会有自己的钩子的。advice.el 中的例子如下：
+</p>
+
+<p>
+加入你想要在文件 "file-x" 载入时打印消息，假设文件中最后定义的函数的名字是 “file-x-last-fn"，那么可以定义如下的 advice：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">file-x-last-fn</span> (activation file-x-load-hook)
+   <span style="color: #8b2252;">"Executed whenever file-x is loaded"</span>
+   (<span style="color: #a020f0;">if</span> load-in-progress (message <span style="color: #8b2252;">"Loaded file-x"</span>)))
+</pre>
+</div>
+
+<p>
+它会为 "file-x-last-fn" 建立一个 <code>forward advice</code> ，当文件载入时 advice 就会被激活。因为这类 advice 不会被加入原函数，所以函数的定义保持不变，但是 activation advice 会在它激活时运行，这个效果就像是为文件加上了载入钩子一样。
+</p>
+
+<p>
+话虽如此，我按照文档中描述的做了一遍，发现 activation advice 的 body 并未执行，通过对原函数执行 <code>ad-activate</code> 和 <code>ad-deactivate</code> 后我发现它们的返回值都是 nil，这就说明无法对只含有 activation 和 deactivation advice 的 advised function 进行激活和停止。如果为原函数加上一个空的普通 advice，上述代码就可以正常执行了。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> abc 0) =&gt; 0
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-yy</span> (activation yy-yy-a) (<span style="color: #a020f0;">cl-incf</span> abc)) =&gt; yy-yy
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-yy</span> (deactivation yy-yy-d) (<span style="color: #a020f0;">cl-decf</span> abc 2)) =&gt; yy-yy
+(<span style="color: #a020f0;">defadvice</span> <span style="color: #0000ff;">yy-yy</span> (before yy-yy-nothing)) =&gt; yy-yy
+abc =&gt; 0
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-yy</span> (x) (+ x 1)) =&gt; yy-yy
+abc =&gt; 1
+(ad-deactivate 'yy-yy) =&gt; yy-yy
+abc =&gt; -1
+(ad-activate 'yy-yy) =&gt; yy-yy
+abc =&gt; 0
+</pre>
+</div>
+
+<p>
+通过以上代码就可以直观反映这两类 advice 的功能了。
+</p>
+
+<p>
+以上就是 advice.el 的大致介绍，这些函数都是应用接口，还有许多的用于操控 advice 内部结构的函数，它们也许可以用于 advice 的调试，比如 <code>ad-has-advide</code> ， <code>ad-is-active</code> 等。这里我就不一一展开介绍了。
+</p>
+
+<p>
+关于如何给 subr 和 macro 加上 advice 我也没有提到，因为本来宏就用的少，为宏加上 advice 的情况估计一时半会儿是碰不上了。
+</p>
+
+<p>
+同时需要注意的是，根据我的实操，advice.el 中的注释描述和函数的实际行为可能不一定对的上（比如上面的 activation advice），毕竟它也算是个历史悠久的模块了。建议使用更新的 <code>advice-*</code> 系列函数，用 defadvice 做简单工作，当然最好不用。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1efa61f" class="outline-2">
+<h2 id="org1efa61f"><span class="section-number-2">3</span> emacs 的 nadvice</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+在 nadvice.el 的开头有这样一行注释：
+</p>
+<blockquote>
+<p>
+;; Copyright (C) 2012-2021 Free Software Foundation, Inc.
+</p>
+</blockquote>
+
+<p>
+我猜 nadvice 应该是在 2012 年引入的。
+</p>
+
+<p>
+与 defadvice 不同的是，nadvice 提供了两套函数来添加 advice，它们分别是 add-function/remove-function 和 advice-add/advice-remove，后者是对前者的简单包装。
+</p>
+
+<p>
+由于我们已经有了使用 defadvice 的经验，而且 defadvice 和 advice-add 有着许多的相似之处，这里我们就省略掉用作情景引入的例子，直接开始讲各个函数的用法。
+</p>
+</div>
+
+<div id="outline-container-org4696234" class="outline-3">
+<h3 id="org4696234"><span class="section-number-3">3.1</span> nadvice 的 function 系列函数</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+这一小节要介绍的是 add-function 和 remove-function。 <code>add-function</code> 的函数原型如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">add-function</span> where place function <span style="color: #228b22;">&amp;optional</span> props)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>where</code> 决定了 <code>function</code> 如何与现存函数进行组合，即 advice 是应该在原函数调用前还是调用后起作用，它可以是 :before，:after 等等。下面我会详细介绍各种组合方式</li>
+<li><code>place</code> 决定了 advice 添加到的地方。如果它只是符号的话，那么 <code>function</code> 会被添加到全局，如果 <code>place</code> 是以 <code>(local symbol)</code> （其中 symbol 是一个返回变量名的表达式）的形式出现的话，那么 <code>function</code> 只会在当前 buffer 起作用</li>
+<li><code>funtion</code> 是 advice，它被添加到原函数</li>
+<li><code>props</code> 是一个属性值 alist，用来指定一些额外的属性，只有两个有特殊意义：
+<ul class="org-ul">
+<li><code>name</code> ，给 advice 一个名字，它可以是符号或者字符串。它被用来索引 advice。 <code>remove-function</code> 可以使用它来移除掉用于 advice 的函数。这一般在使用匿名函数作为 advice 时起作用</li>
+<li><code>depth</code> ，用于指定 advice 的次序，它和 defadvice 里面的 position 很像。默认情况下 depth 为 0，depth 为 100 表示 advice 在最深处，depth 为 -100 则表明它应该在最外层。当对两个 advice 指定了相同的 depth 时，最近添加的那个处于外层。</li>
+</ul></li>
+</ul>
+
+<p>
+如果 <code>function</code> 不是 interactive 的话，使用 add-function 得到的组合函数会继承来自原函数的 interactive-form。否则，组合函数会使用来自 <code>function</code> 的 interactive。不过这也是存在例外的，建议直接去阅读文档。
+</p>
+
+<p>
+remove-function 的函数原型是 <code>(remove-function place function)</code> ，它将 <code>function</code> 从 <code>pacle</code> 移除。它仅对使用 add-function 添加的函数起作用。在内部它使用 <code>equal</code> 来比较函数。它也会比较函数的 <code>name</code> 属性，这一般比使用 <code>equal</code> 进行比较更加可靠。
+</p>
+
+<p>
+除了这两个主要函数外，还有几个起辅助作用的小函数：
+</p>
+
+<p>
+<code>advice-function-member-p</code> 接受 advice 和函数作为参数，如果 advice 已经在函数中了就返回非空值。除了使用函数作为 advice 参数外，还可使用在 add-function 中指定的名字作为 advice 参数。
+</p>
+
+<p>
+<code>advice-function-mapc</code> 接受一个函数 <code>f</code> 和 advised function <code>function-def</code> ，它将以 <code>f</code> 对 <code>function-def</code> 中所有的 advice 进行遍历。 <code>f</code> 接受两个参数：advice 函数及其属性
+</p>
+
+<p>
+<code>advice-eval-interactive-spec</code> 接受一个 <code>spec</code> ，然后返回由 <code>spec</code> 指定的参数表。比如 <code>(advice-eval-interactive-spec "r")</code> 就会返回被高亮选中区域的首尾 point。
+</p>
+
+<p>
+由于我还没有讲到 <code>where</code> 可以取哪些组合方法以及各种组合方法的使用方式，这里就举一个最简单的例子来说明 add/remove-function 的使用：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">add3</span> (x) (+ x 3))
+
+(<span style="color: #a020f0;">add-function</span> <span style="color: #483d8b;">:filter-args</span>
+              (symbol-function 'add3)
+              (<span style="color: #a020f0;">lambda</span> (x) (-map '1+ x))
+              '((name . yyy)))
+
+(add3 1) =&gt; 5
+
+(<span style="color: #a020f0;">remove-function</span> (symbol-function 'add3) 'yyy)
+
+(add3 1) =&gt; 4
+
+</pre>
+</div>
+
+<p>
+上面我使用了 <code>name</code> 来指定 advice 的名字，如果不对匿名函数指定一个名字的话，在 lexical-binding 为 non-nil 的情况下，使用原匿名函数的 lambda 表达式作为 remove-function 的函数参数并不能成功删除 advice，但是在 lexical-binding 为 nil 时则可以。这大概是因为在词法作用域下给匿名函数加入了额外的信息，使得两个相同的表达式并不 <code>equal</code> 等价。读者可以自己试一试。
+</p>
+
+<p>
+如果直接使用有名字的函数的话，就不需要在调用 add-function 时指定名字了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">my-1+</span> (x) (-map '1+ x))
+
+(<span style="color: #a020f0;">add-function</span> <span style="color: #483d8b;">:filter-args</span> (symbol-function 'add3) 'my-1+)
+(add3 1) =&gt; 5
+(<span style="color: #a020f0;">remove-function</span> (symbol-function 'add3) 'my-1+)
+(add3 1) =&gt; 4
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgac21662" class="outline-3">
+<h3 id="orgac21662"><span class="section-number-3">3.2</span> 各种各样的 advice 组合方式</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+在上面的 add-function 举例中，我使用 :filter-args 来作为例子，它的作用是对参数进行 filter，原函数调用时使用它返回的参数表作为参数。除它之外还有 9 个组合方式。它们分别是 :before, :after, :around, :override, :before-while, :before-until, :after-while, :after-until, :filter-return。相比于 defadvice 中的 3 种 class，nadvice 对 advice 的职责进行了进一步的细分。
+</p>
+
+<p>
+下面我们将原函数记为 <code>OLDFUN</code> ，将传递给 add-funciton 的 advice 记为 <code>FUNCTION</code> 。
+</p>
+</div>
+
+<div id="outline-container-orge117fd2" class="outline-4">
+<h4 id="orge117fd2"><span class="section-number-4">3.2.1</span> :before</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+:before 的作用就是在原函数调用之前做一些工作，它对原函数的调用没有影响，和原函数调用是平行关系，加上 :before advice 后的函数可以这样理解：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (apply FUNCTION r) (apply OLDFUN r))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdc6fdbc" class="outline-4">
+<h4 id="orgdc6fdbc"><span class="section-number-4">3.2.2</span> :after</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<p>
+:after 是在函数调用之后做一些工作，它与原函数也是平行关系：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (<span style="color: #a020f0;">prog1</span> (apply OLDFUN r) (apply FUNCTION r)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8bb060f" class="outline-4">
+<h4 id="org8bb060f"><span class="section-number-4">3.2.3</span> :around</h4>
+<div class="outline-text-4" id="text-3-2-3">
+<p>
+这个选项和 defadvice 中的 around 很接近，把 <code>OLDFUN</code> 的调用责任交给了你：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (apply FUNCTION OLDFUN r))
+</pre>
+</div>
+
+<p>
+这个时候， <code>FUNCTION</code> 的第一参数就是原函数，你可以决定是否对其调用，以及确定调用的位置。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org320b775" class="outline-4">
+<h4 id="org320b775"><span class="section-number-4">3.2.4</span> :override</h4>
+<div class="outline-text-4" id="text-3-2-4">
+<p>
+:override 相当于完全抛弃了原函数，只调用你在 <code>FUNCTION</code> 的 body 中的代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (apply FUNCTION r))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org324d10a" class="outline-4">
+<h4 id="org324d10a"><span class="section-number-4">3.2.5</span> :before-while 和 :before-until</h4>
+<div class="outline-text-4" id="text-3-2-5">
+<p>
+:before-while 指定根据 <code>FUNCTION</code> 的返回值来决定是否对原函数进行调用，若为非 nil 则调用原函数，即：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> c) (<span style="color: #a020f0;">and</span> (apply FUNCTION r) (apply OLDFUN r)))
+</pre>
+</div>
+
+<p>
+:before-until 则是在 <code>FUNCTION</code> 返回 nil 时才调用原函数，将上面的 and 换成 or 即可。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> c) (<span style="color: #a020f0;">or</span> (apply FUNCTION r) (apply OLDFUN r)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8a6bda5" class="outline-4">
+<h4 id="org8a6bda5"><span class="section-number-4">3.2.6</span> :after-while 和 :after-until</h4>
+<div class="outline-text-4" id="text-3-2-6">
+<p>
+与 :before-while 和 :before-until 一样，它们也是根据条件判断函数是否调用。不同的是，:before-* 系列是根据 <code>FUNCTION</code> 的结果判断是否调用原函数，:after-* 系列则是根据原函数的调用结果来判断是否调用 <code>FUNCTION</code> ：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (<span style="color: #a020f0;">and</span> (apply OLDFUN r) (apply FUNCTION r)))
+(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (<span style="color: #a020f0;">or</span>  (apply OLDFUN r) (apply FUNCTION r)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbc85798" class="outline-4">
+<h4 id="orgbc85798"><span class="section-number-4">3.2.7</span> :filter-atgs 和 :filter-return</h4>
+<div class="outline-text-4" id="text-3-2-7">
+<p>
+它们起到的作用就像是在 defadvice 中的 before 和 after 中分别修改参数和返回值一样。需要注意的是，在上面的位置参数中都是使用 apply 调用 <code>FUNCTION</code> ， 对于 :filter-* 系列则是使用 funcall 函数调用，这也是为什么在上面的 add-function 例子中我使用 <code>(lambda (x) (-map  '1+ x))</code> 来作为 <code>FUNCTION</code> 的原因。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (apply OLDFUN (funcall FUNCTION r)))
+(<span style="color: #a020f0;">lambda</span> (<span style="color: #228b22;">&amp;rest</span> r) (funcall FUNCTION (apply OLDFUN r)))
+</pre>
+</div>
+
+<p>
+我在下面的 advice-* 系列函数中会对上面的几个位置关键字进行演示。
+</p>
+
+
+
+<p>
+这里我们来看一看 depth 对 advice 的影响。对于 :before advice，在最外（depth 最小）意味着它会首先运行，在任何其他 advice 之前；在最里层（depth 最大）则意味着它在原函数执行前最后执行。类似地，对于 :after advice，在最里层意味着它在原函数执行后首先执行，在最外层意味着在它在所有 advice 执行后运行。对于 :override 最内层意味着它只会 override 原函数，在最外层意味着它会 override 所有里层的 :override advice。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9a7e81d" class="outline-3">
+<h3 id="org9a7e81d"><span class="section-number-3">3.3</span> nadvice 的 advice 系列函数</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+在上面的 add-function 例子中，当我指定 <code>place</code> 参数时，由于 add-function 接受函数对象作为参数，所以我不能直接使用函数的符号作为参数，而必须使用 <code>symbol-function</code> 先进行一次转换。对于有名函数，使用 advice-add 和 advice-remove 更加方便。
+</p>
+
+<p>
+以下是和 advice 相关的各个函数或宏：
+</p>
+</div>
+
+<div id="outline-container-orgc13d527" class="outline-4">
+<h4 id="orgc13d527"><span class="section-number-4">3.3.1</span> define-advice</h4>
+<div class="outline-text-4" id="text-3-3-1">
+<p>
+define-advice 的函数原型是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">define-advice</span> <span style="color: #0000ff;">symbol</span> (where lambda-list <span style="color: #228b22;">&amp;optional</span> name depth) <span style="color: #228b22;">&amp;rest</span> body)
+</pre>
+</div>
+
+<p>
+使用它可以定义一个 advice 并将 advice 添加到名字为 <code>symbol</code> 的函数中。如果 <code>name</code> 是 nil 的话 advice 就是匿名的，否则它的名字是 <code>symbol@name</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc1355e0" class="outline-4">
+<h4 id="orgc1355e0"><span class="section-number-4">3.3.2</span> advice-add 和 advice-remove</h4>
+<div class="outline-text-4" id="text-3-3-2">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(advice-add symbol where function <span style="color: #228b22;">&amp;optional</span> props)
+</pre>
+</div>
+
+<p>
+它将 advice function 添加到名字是 <code>symbol</code> 的函数中。 <code>props</code> 和 add-function 中的意思一致。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(advice-remove symbol function)
+</pre>
+</div>
+
+<p>
+advice-remove 将 function 从 <code>symbol</code> 代表的函数中移除， <code>function</code> 可以是 advice 的 <code>name</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf14f671" class="outline-4">
+<h4 id="orgf14f671"><span class="section-number-4">3.3.3</span> 其他函数</h4>
+<div class="outline-text-4" id="text-3-3-3">
+<p>
+<code>(advice-member-p function symbol)</code> 可以判断 advice 是否在函数中。
+</p>
+
+<p>
+<code>(advice-mapc function symbol)</code> 可以对函数的所有 advice 进行遍历。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfe4e8a6" class="outline-4">
+<h4 id="orgfe4e8a6"><span class="section-number-4">3.3.4</span> 补充说明和使用例子</h4>
+<div class="outline-text-4" id="text-3-3-4">
+<p>
+在 elisp manual 27 的 advice 一章中<sup><a id="fnr.10" class="footref" href="#fn.10">10</a></sup> 是这样描述 advice 的：
+</p>
+
+<blockquote>
+<p>
+advice-add can be useful for altering the behavior of existing calls to an existing function without having to redefine the whole function. However, it can be a source of bugs, since existing callers to the function may assume the old behavior, and work incorrectly when the behavior is changed by advice. Advice can also cause confusion in debugging, if the person doing the debugging does not notice or remember that the function has been modified by advice.
+</p>
+
+<p>
+For these reasons, advice should be reserved for the cases where you cannot modify a function’s behavior in any other way.
+</p>
+</blockquote>
+
+<p>
+也就是说，文档建议你不在非用不可的情况下最好不要用 advice。
+</p>
+
+<p>
+下面我们用几个例子来结束这一小节，这里主要使用的是 advide-* 系列函数。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b22222;">;;</span><span style="color: #b22222;">1. use define-advice</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">fact</span> (n)
+  (<span style="color: #a020f0;">cl-loop</span>
+   with x = 1
+   for i from 1 to n
+   do (<span style="color: #a020f0;">setq</span> x (* x i))
+   finally return x))
+
+(<span style="color: #a020f0;">define-advice</span> <span style="color: #0000ff;">fact</span> (<span style="color: #483d8b;">:before</span> (x) yy-fact)
+  (print (format <span style="color: #8b2252;">"n is %s"</span> x)))
+=&gt; fact@yy-fact
+
+(fact 10)
+=&gt;
+<span style="color: #8b2252;">"n is 10"</span>
+3628800
+
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">2. use advice-add</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-fact-1</span> (n)
+  (print (1+ n)))
+(advice-add 'fact <span style="color: #483d8b;">:after</span> 'yy-fact-1)
+=&gt; nil
+
+(fact 10)
+=&gt;
+<span style="color: #8b2252;">"x is 10"</span>
+
+11
+3628800
+
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">3. use :around</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-fact-ar</span> (fun n)
+(funcall fun (+ n 1)))
+
+(advice-add 'fact <span style="color: #483d8b;">:around</span> 'yy-fact-ar)
+
+(fact 10)
+=&gt;
+<span style="color: #8b2252;">"x is 11"</span>
+
+12
+39916800
+
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">4. use :filter-return</span>
+(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy-fact-fre</span> (ret-v)
+   (+ 1 ret-v))
+
+(advice-add 'fact <span style="color: #483d8b;">:filter-return</span> 'yy-fact-fre)
+
+(fact 10)
+=&gt;
+<span style="color: #8b2252;">"x is 11"</span>
+
+12
+39916801
+
+<span style="color: #b22222;">;;</span><span style="color: #b22222;">5. remove all advice</span>
+(<span style="color: #a020f0;">progn</span>
+   (advice-remove 'fact 'yy-fact-1)
+   (advice-remove 'fact 'yy-fact-ar)
+   (advice-remove 'fact 'yy-fact-fre)
+   (advice-remove 'fact 'fact@yy-fact))
+
+(fact 10) =&gt; 3628800
+
+</pre>
+</div>
+
+<p>
+上面都是非常简单的例子，我没有演示 depth 的使用，这方面可以参考 defadvice 中的例子。
+</p>
+
+<p>
+关于 defadvice 和 advice-add 的互操作性我没精力尝试了，有兴趣的同学可以试试。
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org84c953d" class="outline-2">
+<h2 id="org84c953d"><span class="section-number-2">4</span> 后记</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+在开始写这篇文章时，我没想到居然会写这么多，我以为只是几个简单的函数罢了。
+</p>
+
+<p>
+感谢 Hans Chalupsky 和 Stefan Monnier 为我们带来了如此方便和强大的 advice 机制。
+</p>
+
+<p>
+这大概是我在 2021 年的最后一篇文章了，接下来我可能会非常的忙。看到这里的同学真是辛苦了，我们来年再见。
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly9zZWlnYS5uaWNvdmlkZW8uanAvc2VpZ2EvaW0yNzc5NTIx.jpg" alt="load failed"></div><div class="yyimgcomment">koakuma</div>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara"><a href="https://en.wikipedia.org/wiki/Advice_(programming)">https://en.wikipedia.org/wiki/Advice_(programming)</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara"><a href="https://en.wikipedia.org/wiki/Decorator_pattern">https://en.wikipedia.org/wiki/Decorator_pattern</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara"><a href="https://refactoring.guru/design-patterns/decorator">https://refactoring.guru/design-patterns/decorator</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara"><a href="http://www.maths.surrey.ac.uk/hosted-sites/R.Knott/Fibonacci/fibtable.html">http://www.maths.surrey.ac.uk/hosted-sites/R.Knott/Fibonacci/fibtable.html</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara"><a href="https://en.wikipedia.org/wiki/Advice_(programming)">https://en.wikipedia.org/wiki/Advice_(programming)</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara"><p class="footpara"><a href="https://www.python.org/dev/peps/pep-0318/">https://www.python.org/dev/peps/pep-0318/</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7">7</a></sup> <div class="footpara"><p class="footpara"><a href="https://en.wikipedia.org/wiki/Java_annotation">https://en.wikipedia.org/wiki/Java_annotation</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.8" class="footnum" href="#fnr.8">8</a></sup> <div class="footpara"><p class="footpara"><a href="https://zhuanlan.zhihu.com/p/269012332">https://zhuanlan.zhihu.com/p/269012332</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.9" class="footnum" href="#fnr.9">9</a></sup> <div class="footpara"><p class="footpara"><a href="http://ftp.gnu.org/pub//old-gnu/Manuals/elisp-manual-21-2.8/elisp.html">http://ftp.gnu.org/pub//old-gnu/Manuals/elisp-manual-21-2.8/elisp.html</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.10" class="footnum" href="#fnr.10">10</a></sup> <div class="footpara"><p class="footpara"><a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Advising-Named-Functions.html">https://www.gnu.org/software/emacs/manual/html_node/elisp/Advising-Named-Functions.html</a></p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-08-11 Wed 00:00</p> <p>Last modified: 2021-08-20 Fri 11:24</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
