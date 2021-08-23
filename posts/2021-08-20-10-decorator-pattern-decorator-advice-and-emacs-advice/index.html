@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-20 Fri 11:30 -->
+<!-- 2021-08-20 Fri 17:15 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>decorator pattern, decorator&amp;advice, and emacs advice <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMjY2MTM2.jpg" alt="load failed"></div></title>
@@ -12,26 +12,50 @@
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -51,30 +75,30 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd266e0d">1. 什么是装饰器（What is Decorator）</a>
+<li><a href="#org4131f2a">1. 什么是装饰器（What is Decorator）</a>
 <ul>
-<li><a href="#org2c2e117">1.1. 装饰器模式（Decorator pattern）</a></li>
-<li><a href="#orgebb4b88">1.2. 装饰器（Decorator&amp;Advice）</a></li>
+<li><a href="#org310b0f5">1.1. 装饰器模式（Decorator pattern）</a></li>
+<li><a href="#org947bc6f">1.2. 装饰器（Decorator&amp;Advice）</a></li>
 </ul>
 </li>
-<li><a href="#org05e74da">2. emacs 中的 advice</a>
+<li><a href="#org006b29a">2. emacs 中的 advice</a>
 <ul>
-<li><a href="#orgfba64db">2.1. 例子：如何为函数添加 advice</a></li>
-<li><a href="#orgca5f182">2.2. defadvice 的用法</a></li>
-<li><a href="#org586ea64">2.3. 访问 advised function 的参数</a></li>
-<li><a href="#org96de990">2.4. advice 的激活与停用（(de)?activate）</a></li>
-<li><a href="#org8a0cdb5">2.5. advice 的启用和禁用（enable/disable）</a></li>
-<li><a href="#orge3818b9">2.6. 一些补充</a></li>
+<li><a href="#org552ee48">2.1. 例子：如何为函数添加 advice</a></li>
+<li><a href="#orgd659b3e">2.2. defadvice 的用法</a></li>
+<li><a href="#org7b6284c">2.3. 访问 advised function 的参数</a></li>
+<li><a href="#org93eb1ff">2.4. advice 的激活与停用（(de)?activate）</a></li>
+<li><a href="#org1e043cf">2.5. advice 的启用和禁用（enable/disable）</a></li>
+<li><a href="#orgaeb8b47">2.6. 一些补充</a></li>
 </ul>
 </li>
-<li><a href="#org1efa61f">3. emacs 的 nadvice</a>
+<li><a href="#org81c7937">3. emacs 的 nadvice</a>
 <ul>
-<li><a href="#org4696234">3.1. nadvice 的 function 系列函数</a></li>
-<li><a href="#orgac21662">3.2. 各种各样的 advice 组合方式</a></li>
-<li><a href="#org9a7e81d">3.3. nadvice 的 advice 系列函数</a></li>
+<li><a href="#orgb0adcbc">3.1. nadvice 的 function 系列函数</a></li>
+<li><a href="#orgc7ef4d8">3.2. 各种各样的 advice 组合方式</a></li>
+<li><a href="#org1016271">3.3. nadvice 的 advice 系列函数</a></li>
 </ul>
 </li>
-<li><a href="#org84c953d">4. 后记</a></li>
+<li><a href="#org90e704c">4. 后记</a></li>
 </ul>
 </div>
 </div>
@@ -86,16 +110,16 @@
 需要注意的是，装饰器模式（Decorator pattern）和装饰器（decorator）不是同一个东西。装饰器模式是设计模式中的一种，而装饰器是一种拓展函数的机制，它也被叫做 Advice<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>。本文中除了会介绍 emacs 的 defadvice 外，还会介绍 Python 中的 decorator 的简单使用。
 </p>
 
-<div id="outline-container-orgd266e0d" class="outline-2">
-<h2 id="orgd266e0d"><span class="section-number-2">1</span> 什么是装饰器（What is Decorator）</h2>
+<div id="outline-container-org4131f2a" class="outline-2">
+<h2 id="org4131f2a"><span class="section-number-2">1</span> 什么是装饰器（What is Decorator）</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 文章的开头也说到了装饰器模式和装饰器的区别。所以这一节会分为两个小节，分别介绍装饰器模式和装饰器。
 </p>
 </div>
 
-<div id="outline-container-org2c2e117" class="outline-3">
-<h3 id="org2c2e117"><span class="section-number-3">1.1</span> 装饰器模式（Decorator pattern）</h3>
+<div id="outline-container-org310b0f5" class="outline-3">
+<h3 id="org310b0f5"><span class="section-number-3">1.1</span> 装饰器模式（Decorator pattern）</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 首先我们还是从维基百科<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>开始吧，它对 <i>decorator</i> 是这样定义的：
@@ -130,7 +154,7 @@
 </p>
 
 
-<div id="org38844ba" class="figure">
+<div class="figure">
 <p><object type="image/svg+xml" data="./1.svg" class="org-svg">
 Sorry, your browser does not support SVG.</object>
 </p>
@@ -308,8 +332,8 @@ Sorry, your browser does not support SVG.</object>
 </p>
 </div>
 
-<div id="outline-container-org9a23e0d" class="outline-4">
-<h4 id="org9a23e0d"><span class="section-number-4">1.1.1</span> 装饰器模式的适用范围和优缺点</h4>
+<div id="outline-container-org1ffecba" class="outline-4">
+<h4 id="org1ffecba"><span class="section-number-4">1.1.1</span> 装饰器模式的适用范围和优缺点</h4>
 <div class="outline-text-4" id="text-1-1-1">
 <p>
 这一部分我就直接参考了 <i>gof</i> ，毕竟我也没有太多的实战经验。
@@ -367,8 +391,8 @@ Sorry, your browser does not support SVG.</object>
 </div>
 </div>
 
-<div id="outline-container-orgab35c90" class="outline-4">
-<h4 id="orgab35c90"><span class="section-number-4">1.1.2</span> <i>gof</i> 对实现装饰器的建议</h4>
+<div id="outline-container-orgbc1415e" class="outline-4">
+<h4 id="orgbc1415e"><span class="section-number-4">1.1.2</span> <i>gof</i> 对实现装饰器的建议</h4>
 <div class="outline-text-4" id="text-1-1-2">
 <ol class="org-ol">
 <li><b>保证接口的一致性</b> 装饰器对象的接口必须与它装饰的 Component 接口一致，因此所有的 ConcreteDecorator 类必须有一个公共的父类。</li>
@@ -385,8 +409,8 @@ Sorry, your browser does not support SVG.</object>
 </div>
 </div>
 
-<div id="outline-container-orgebb4b88" class="outline-3">
-<h3 id="orgebb4b88"><span class="section-number-3">1.2</span> 装饰器（Decorator&amp;Advice）</h3>
+<div id="outline-container-org947bc6f" class="outline-3">
+<h3 id="org947bc6f"><span class="section-number-3">1.2</span> 装饰器（Decorator&amp;Advice）</h3>
 <div class="outline-text-3" id="text-1-2">
 <blockquote>
 <p>
@@ -513,8 +537,8 @@ double(2)
 </div>
 </div>
 
-<div id="outline-container-org05e74da" class="outline-2">
-<h2 id="org05e74da"><span class="section-number-2">2</span> emacs 中的 advice</h2>
+<div id="outline-container-org006b29a" class="outline-2">
+<h2 id="org006b29a"><span class="section-number-2">2</span> emacs 中的 advice</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 elisp 文档是这样描述 advice 的： <i>The advice feature lets you add to the existing definition of a function, by advising the function. This is a cleaner method than redefining the whole function.</i> 。
@@ -537,8 +561,8 @@ emacs 提供了两套 api 来为函数添加 advice，其一是使用 advice.el 
 </p>
 </div>
 
-<div id="outline-container-orgfba64db" class="outline-3">
-<h3 id="orgfba64db"><span class="section-number-3">2.1</span> 例子：如何为函数添加 advice</h3>
+<div id="outline-container-org552ee48" class="outline-3">
+<h3 id="org552ee48"><span class="section-number-3">2.1</span> 例子：如何为函数添加 advice</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 现在我们有一个叫做 <code>foo</code> 的函数，它的功能是将数字加一：
@@ -621,8 +645,8 @@ emacs 提供了两套 api 来为函数添加 advice，其一是使用 advice.el 
 </div>
 </div>
 
-<div id="outline-container-orgca5f182" class="outline-3">
-<h3 id="orgca5f182"><span class="section-number-3">2.2</span> defadvice 的用法</h3>
+<div id="outline-container-orgd659b3e" class="outline-3">
+<h3 id="orgd659b3e"><span class="section-number-3">2.2</span> defadvice 的用法</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 在 advice.el 中是这样描述 <code>defadvice</code> 的：
@@ -658,8 +682,8 @@ emacs 提供了两套 api 来为函数添加 advice，其一是使用 advice.el 
 </p>
 </div>
 
-<div id="outline-container-orgce6ea9a" class="outline-4">
-<h4 id="orgce6ea9a"><span class="section-number-4">2.2.1</span> &lt;class&gt;</h4>
+<div id="outline-container-orgdddbc75" class="outline-4">
+<h4 id="orgdddbc75"><span class="section-number-4">2.2.1</span> &lt;class&gt;</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 文档中说 class 有五个，前三个是普通的 class，后面两个是特殊的 class，我们就先从普通 before/around/after 开始。
@@ -743,8 +767,8 @@ emacs 提供了两套 api 来为函数添加 advice，其一是使用 advice.el 
 </div>
 </div>
 
-<div id="outline-container-org3616e35" class="outline-4">
-<h4 id="org3616e35"><span class="section-number-4">2.2.2</span> &lt;arglist&gt;</h4>
+<div id="outline-container-orga98fd51" class="outline-4">
+<h4 id="orga98fd51"><span class="section-number-4">2.2.2</span> &lt;arglist&gt;</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 在上面我们已经简单介绍过了 &lt;arglist&gt; 的注意事项了，即与原函数的参数表兼容，在这里我们用一些简单例子来说明它的使用。
@@ -791,8 +815,8 @@ emacs 提供了两套 api 来为函数添加 advice，其一是使用 advice.el 
 </div>
 </div>
 
-<div id="outline-container-orgd190ccf" class="outline-4">
-<h4 id="orgd190ccf"><span class="section-number-4">2.2.3</span> &lt;flags&gt;</h4>
+<div id="outline-container-org6f4ede2" class="outline-4">
+<h4 id="org6f4ede2"><span class="section-number-4">2.2.3</span> &lt;flags&gt;</h4>
 <div class="outline-text-4" id="text-2-2-3">
 <p>
 和 class 的数量一样，flags 也有 5 个，它们分别是 <code>active</code>, <code>protect</code>, <code>compile</code>, <code>disable</code> 和 <code>preactivate</code> 。
@@ -916,8 +940,8 @@ Constructing an advised definition is moderately expensive. In a situation where
 </div>
 </div>
 
-<div id="outline-container-org586ea64" class="outline-3">
-<h3 id="org586ea64"><span class="section-number-3">2.3</span> 访问 advised function 的参数</h3>
+<div id="outline-container-org7b6284c" class="outline-3">
+<h3 id="org7b6284c"><span class="section-number-3">2.3</span> 访问 advised function 的参数</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 在上面的所有例子中，我都是在 advice 中直接使用原函数的参数表中的名字，以此来改变原函数的行为，或者是通过指定新的 arglist 从而使用 arglist 里面的名字 。如果我们已知 advised function 的名字的话，这样做是没有问题的，但是不知道名字的话是无法对 advised function 参数进行访问的。因此，除了使用原来的参数名来访问参数，advice.el 还提供了一种方法。
@@ -967,8 +991,8 @@ advice.el 是这样描述的：当 advised definition 被构建后，对实参�
 </div>
 </div>
 
-<div id="outline-container-org96de990" class="outline-3">
-<h3 id="org96de990"><span class="section-number-3">2.4</span> advice 的激活与停用（(de)?activate）</h3>
+<div id="outline-container-org93eb1ff" class="outline-3">
+<h3 id="org93eb1ff"><span class="section-number-3">2.4</span> advice 的激活与停用（(de)?activate）</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 在上面我们已经简单地使用过 <code>ad-activate</code> 来激活函数，这一小节更进一步，介绍更多的使用情况。
@@ -1014,8 +1038,8 @@ advise 发生在两个阶段，即：
 </div>
 </div>
 
-<div id="outline-container-org8a0cdb5" class="outline-3">
-<h3 id="org8a0cdb5"><span class="section-number-3">2.5</span> advice 的启用和禁用（enable/disable）</h3>
+<div id="outline-container-org1e043cf" class="outline-3">
+<h3 id="org1e043cf"><span class="section-number-3">2.5</span> advice 的启用和禁用（enable/disable）</h3>
 <div class="outline-text-3" id="text-2-5">
 <p>
 <code>ad-activate</code> 和 <code>ad-deactivate</code> 提供了激活和停用 advice 的功能。enable/disable 则更进一步，为控制是否在 advised definition 中使用某个 advice 提供了控制手段。每个 advice 都有一个使能标志（enablement flag）。当对 advised function 的 advice 构建 advised definition 时，只有使能标志为 enabled 的才能参与组合。
@@ -1035,8 +1059,8 @@ advise 发生在两个阶段，即：
 </div>
 </div>
 
-<div id="outline-container-orge3818b9" class="outline-3">
-<h3 id="orge3818b9"><span class="section-number-3">2.6</span> 一些补充</h3>
+<div id="outline-container-orgaeb8b47" class="outline-3">
+<h3 id="orgaeb8b47"><span class="section-number-3">2.6</span> 一些补充</h3>
 <div class="outline-text-3" id="text-2-6">
 <p>
 这一小节主要介绍上文未提及的一些函数。
@@ -1113,8 +1137,8 @@ abc =&gt; 0
 </div>
 </div>
 
-<div id="outline-container-org1efa61f" class="outline-2">
-<h2 id="org1efa61f"><span class="section-number-2">3</span> emacs 的 nadvice</h2>
+<div id="outline-container-org81c7937" class="outline-2">
+<h2 id="org81c7937"><span class="section-number-2">3</span> emacs 的 nadvice</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 在 nadvice.el 的开头有这样一行注释：
@@ -1138,8 +1162,8 @@ abc =&gt; 0
 </p>
 </div>
 
-<div id="outline-container-org4696234" class="outline-3">
-<h3 id="org4696234"><span class="section-number-3">3.1</span> nadvice 的 function 系列函数</h3>
+<div id="outline-container-orgb0adcbc" class="outline-3">
+<h3 id="orgb0adcbc"><span class="section-number-3">3.1</span> nadvice 的 function 系列函数</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 这一小节要介绍的是 add-function 和 remove-function。 <code>add-function</code> 的函数原型如下：
@@ -1226,8 +1250,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-orgac21662" class="outline-3">
-<h3 id="orgac21662"><span class="section-number-3">3.2</span> 各种各样的 advice 组合方式</h3>
+<div id="outline-container-orgc7ef4d8" class="outline-3">
+<h3 id="orgc7ef4d8"><span class="section-number-3">3.2</span> 各种各样的 advice 组合方式</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 在上面的 add-function 举例中，我使用 :filter-args 来作为例子，它的作用是对参数进行 filter，原函数调用时使用它返回的参数表作为参数。除它之外还有 9 个组合方式。它们分别是 :before, :after, :around, :override, :before-while, :before-until, :after-while, :after-until, :filter-return。相比于 defadvice 中的 3 种 class，nadvice 对 advice 的职责进行了进一步的细分。
@@ -1238,8 +1262,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </p>
 </div>
 
-<div id="outline-container-orge117fd2" class="outline-4">
-<h4 id="orge117fd2"><span class="section-number-4">3.2.1</span> :before</h4>
+<div id="outline-container-orgbe59de6" class="outline-4">
+<h4 id="orgbe59de6"><span class="section-number-4">3.2.1</span> :before</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <p>
 :before 的作用就是在原函数调用之前做一些工作，它对原函数的调用没有影响，和原函数调用是平行关系，加上 :before advice 后的函数可以这样理解：
@@ -1252,8 +1276,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-orgdc6fdbc" class="outline-4">
-<h4 id="orgdc6fdbc"><span class="section-number-4">3.2.2</span> :after</h4>
+<div id="outline-container-org6761112" class="outline-4">
+<h4 id="org6761112"><span class="section-number-4">3.2.2</span> :after</h4>
 <div class="outline-text-4" id="text-3-2-2">
 <p>
 :after 是在函数调用之后做一些工作，它与原函数也是平行关系：
@@ -1266,8 +1290,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-org8bb060f" class="outline-4">
-<h4 id="org8bb060f"><span class="section-number-4">3.2.3</span> :around</h4>
+<div id="outline-container-org20fd821" class="outline-4">
+<h4 id="org20fd821"><span class="section-number-4">3.2.3</span> :around</h4>
 <div class="outline-text-4" id="text-3-2-3">
 <p>
 这个选项和 defadvice 中的 around 很接近，把 <code>OLDFUN</code> 的调用责任交给了你：
@@ -1284,8 +1308,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-org320b775" class="outline-4">
-<h4 id="org320b775"><span class="section-number-4">3.2.4</span> :override</h4>
+<div id="outline-container-orgd32d447" class="outline-4">
+<h4 id="orgd32d447"><span class="section-number-4">3.2.4</span> :override</h4>
 <div class="outline-text-4" id="text-3-2-4">
 <p>
 :override 相当于完全抛弃了原函数，只调用你在 <code>FUNCTION</code> 的 body 中的代码：
@@ -1298,8 +1322,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-org324d10a" class="outline-4">
-<h4 id="org324d10a"><span class="section-number-4">3.2.5</span> :before-while 和 :before-until</h4>
+<div id="outline-container-orga48f5bd" class="outline-4">
+<h4 id="orga48f5bd"><span class="section-number-4">3.2.5</span> :before-while 和 :before-until</h4>
 <div class="outline-text-4" id="text-3-2-5">
 <p>
 :before-while 指定根据 <code>FUNCTION</code> 的返回值来决定是否对原函数进行调用，若为非 nil 则调用原函数，即：
@@ -1321,8 +1345,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-org8a6bda5" class="outline-4">
-<h4 id="org8a6bda5"><span class="section-number-4">3.2.6</span> :after-while 和 :after-until</h4>
+<div id="outline-container-orgf701e50" class="outline-4">
+<h4 id="orgf701e50"><span class="section-number-4">3.2.6</span> :after-while 和 :after-until</h4>
 <div class="outline-text-4" id="text-3-2-6">
 <p>
 与 :before-while 和 :before-until 一样，它们也是根据条件判断函数是否调用。不同的是，:before-* 系列是根据 <code>FUNCTION</code> 的结果判断是否调用原函数，:after-* 系列则是根据原函数的调用结果来判断是否调用 <code>FUNCTION</code> ：
@@ -1336,8 +1360,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-orgbc85798" class="outline-4">
-<h4 id="orgbc85798"><span class="section-number-4">3.2.7</span> :filter-atgs 和 :filter-return</h4>
+<div id="outline-container-org1fce7c0" class="outline-4">
+<h4 id="org1fce7c0"><span class="section-number-4">3.2.7</span> :filter-atgs 和 :filter-return</h4>
 <div class="outline-text-4" id="text-3-2-7">
 <p>
 它们起到的作用就像是在 defadvice 中的 before 和 after 中分别修改参数和返回值一样。需要注意的是，在上面的位置参数中都是使用 apply 调用 <code>FUNCTION</code> ， 对于 :filter-* 系列则是使用 funcall 函数调用，这也是为什么在上面的 add-function 例子中我使用 <code>(lambda (x) (-map  '1+ x))</code> 来作为 <code>FUNCTION</code> 的原因。
@@ -1362,8 +1386,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </div>
 </div>
 
-<div id="outline-container-org9a7e81d" class="outline-3">
-<h3 id="org9a7e81d"><span class="section-number-3">3.3</span> nadvice 的 advice 系列函数</h3>
+<div id="outline-container-org1016271" class="outline-3">
+<h3 id="org1016271"><span class="section-number-3">3.3</span> nadvice 的 advice 系列函数</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 在上面的 add-function 例子中，当我指定 <code>place</code> 参数时，由于 add-function 接受函数对象作为参数，所以我不能直接使用函数的符号作为参数，而必须使用 <code>symbol-function</code> 先进行一次转换。对于有名函数，使用 advice-add 和 advice-remove 更加方便。
@@ -1374,8 +1398,8 @@ remove-function 的函数原型是 <code>(remove-function place function)</code>
 </p>
 </div>
 
-<div id="outline-container-orgc13d527" class="outline-4">
-<h4 id="orgc13d527"><span class="section-number-4">3.3.1</span> define-advice</h4>
+<div id="outline-container-orgf8f09e2" class="outline-4">
+<h4 id="orgf8f09e2"><span class="section-number-4">3.3.1</span> define-advice</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 define-advice 的函数原型是：
@@ -1392,8 +1416,8 @@ define-advice 的函数原型是：
 </div>
 </div>
 
-<div id="outline-container-orgc1355e0" class="outline-4">
-<h4 id="orgc1355e0"><span class="section-number-4">3.3.2</span> advice-add 和 advice-remove</h4>
+<div id="outline-container-orgac7eb78" class="outline-4">
+<h4 id="orgac7eb78"><span class="section-number-4">3.3.2</span> advice-add 和 advice-remove</h4>
 <div class="outline-text-4" id="text-3-3-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(advice-add symbol where function <span style="color: #228b22;">&amp;optional</span> props)
@@ -1415,8 +1439,8 @@ advice-remove 将 function 从 <code>symbol</code> 代表的函数中移除， <
 </div>
 </div>
 
-<div id="outline-container-orgf14f671" class="outline-4">
-<h4 id="orgf14f671"><span class="section-number-4">3.3.3</span> 其他函数</h4>
+<div id="outline-container-orgb6c5a50" class="outline-4">
+<h4 id="orgb6c5a50"><span class="section-number-4">3.3.3</span> 其他函数</h4>
 <div class="outline-text-4" id="text-3-3-3">
 <p>
 <code>(advice-member-p function symbol)</code> 可以判断 advice 是否在函数中。
@@ -1428,8 +1452,8 @@ advice-remove 将 function 从 <code>symbol</code> 代表的函数中移除， <
 </div>
 </div>
 
-<div id="outline-container-orgfe4e8a6" class="outline-4">
-<h4 id="orgfe4e8a6"><span class="section-number-4">3.3.4</span> 补充说明和使用例子</h4>
+<div id="outline-container-org82cda51" class="outline-4">
+<h4 id="org82cda51"><span class="section-number-4">3.3.4</span> 补充说明和使用例子</h4>
 <div class="outline-text-4" id="text-3-3-4">
 <p>
 在 elisp manual 27 的 advice 一章中<sup><a id="fnr.10" class="footref" href="#fn.10">10</a></sup> 是这样描述 advice 的：
@@ -1534,8 +1558,8 @@ For these reasons, advice should be reserved for the cases where you cannot modi
 </div>
 </div>
 
-<div id="outline-container-org84c953d" class="outline-2">
-<h2 id="org84c953d"><span class="section-number-2">4</span> 后记</h2>
+<div id="outline-container-org90e704c" class="outline-2">
+<h2 id="org90e704c"><span class="section-number-2">4</span> 后记</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 在开始写这篇文章时，我没想到居然会写这么多，我以为只是几个简单的函数罢了。
@@ -1583,8 +1607,8 @@ For these reasons, advice should be reserved for the cases where you cannot modi
 </div></div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-08-11 Wed 00:00</p> <p>Last modified: 2021-08-20 Fri 11:24</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+<p>Create Date: 2021-08-20 Fri 00:00</p> <p>Last modified: 2021-08-20 Fri 17:15</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
   <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>

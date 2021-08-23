@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 13:11 -->
+<!-- 2021-08-23 周一 19:26 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>4-关于作用域的一个小结 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -12,26 +12,50 @@
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -39,61 +63,55 @@
  <a accesskey="h" href="../../index.html"> UP </a>
  |
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
-</div><div id="preamble" class="status">
-<div>
-  <a href="../../index.html">Go Home </a>
-  <hr class="Solid">
-</div>
-</div>
-<div id="content">
+</div><div id="content">
 <h1 class="title">4-关于作用域的一个小结 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org97ef3e5">1. 写在前面</a></li>
-<li><a href="#org6d79680">2. 一些名词</a>
+<li><a href="#org6df168b">1. 写在前面</a></li>
+<li><a href="#orgea464ec">2. 一些名词</a>
 <ul>
-<li><a href="#orgba192db">2.1. 什么是名字绑定（name binding）</a></li>
-<li><a href="#org4942ba7">2.2. 什么是上下文（context）</a></li>
-<li><a href="#org4e913f1">2.3. 什么是环境（environment）</a></li>
-<li><a href="#org0f5e504">2.4. 总结</a></li>
+<li><a href="#org50fc46c">2.1. 什么是名字绑定（name binding）</a></li>
+<li><a href="#org66389d2">2.2. 什么是上下文（context）</a></li>
+<li><a href="#org879d676">2.3. 什么是环境（environment）</a></li>
+<li><a href="#org5c6465f">2.4. 总结</a></li>
 </ul>
 </li>
-<li><a href="#org644ed10">3. 什么是作用域（scope）</a>
+<li><a href="#org4dfdc0a">3. 什么是作用域（scope）</a>
 <ul>
-<li><a href="#org3e1eb07">3.1. 为什么要有作用域</a></li>
-<li><a href="#org81edbbc">3.2. 各种各样的作用域</a></li>
-<li><a href="#orgcbe158d">3.3. 作用域与名字解析（name resolution）</a></li>
-<li><a href="#orga189a11">3.4. 作用域与生存期（extent）</a></li>
-<li><a href="#org6269a0b">3.5. 什么是“静态作用域”</a></li>
-<li><a href="#orgac9bc32">3.6. 什么是“动态作用域”</a></li>
-<li><a href="#orge1d3328">3.7. 总结</a></li>
+<li><a href="#org3dcb6e2">3.1. 为什么要有作用域</a></li>
+<li><a href="#org741b766">3.2. 各种各样的作用域</a></li>
+<li><a href="#org93f5b72">3.3. 作用域与名字解析（name resolution）</a></li>
+<li><a href="#orgf5021fb">3.4. 作用域与生存期（extent）</a></li>
+<li><a href="#org52cc9a7">3.5. 什么是“静态作用域”</a></li>
+<li><a href="#orge384d81">3.6. 什么是“动态作用域”</a></li>
+<li><a href="#orgbe4b653">3.7. 总结</a></li>
 </ul>
 </li>
-<li><a href="#org30b4f55">4. elisp 的 lexical-binding</a>
+<li><a href="#orge12cb7f">4. elisp 的 lexical-binding</a>
 <ul>
-<li><a href="#orgcf66719">4.1. elisp 文档中的内容</a></li>
-<li><a href="#orgc1d3938">4.2. 特殊变量与 defvar</a></li>
-<li><a href="#org8274db7">4.3. lexical-binding 的使用</a></li>
+<li><a href="#org24387a3">4.1. elisp 文档中的内容</a></li>
+<li><a href="#org201cbb9">4.2. 特殊变量与 defvar</a></li>
+<li><a href="#orge372662">4.3. lexical-binding 的使用</a></li>
 </ul>
 </li>
-<li><a href="#org4c07a14">5. Scheme 的 syntax-case</a>
+<li><a href="#orgee33560">5. Scheme 的 syntax-case</a>
 <ul>
-<li><a href="#org0601421">5.1. 什么是卫生宏（Hygienic macro）</a></li>
-<li><a href="#orgde57c3f">5.2. 什么是 syntax-case</a></li>
-<li><a href="#org6e46c23">5.3. 与 syntax-case 相关的函数与宏</a></li>
-<li><a href="#org1f65796">5.4. Scheme 宏的一些使用用例</a></li>
+<li><a href="#orgf45e0d3">5.1. 什么是卫生宏（Hygienic macro）</a></li>
+<li><a href="#orgcc1de7e">5.2. 什么是 syntax-case</a></li>
+<li><a href="#org66fc589">5.3. 与 syntax-case 相关的函数与宏</a></li>
+<li><a href="#orgda50e2e">5.4. Scheme 宏的一些使用用例</a></li>
 </ul>
 </li>
-<li><a href="#org9188178">6. 后记</a></li>
-<li><a href="#orgce0c9f2">7. 参考资料</a></li>
+<li><a href="#org63b3371">6. 后记</a></li>
+<li><a href="#orgef66514">7. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org97ef3e5" class="outline-2">
-<h2 id="org97ef3e5"><span class="section-number-2">1</span> 写在前面</h2>
+<div id="outline-container-org6df168b" class="outline-2">
+<h2 id="org6df168b"><span class="section-number-2">1</span> 写在前面</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 我很早之前就想总结一下作用域相关的知识了，但是限于个人水平一直没有写。除开能力因素，另一个原因是没有找到动态作用域的语言，没有具体的例子来供我学习理解。通过 scheme 的 <code>fulid-let</code> 和 racket 的 <code>parameterize</code> 可以使用动态作用域，但我也不常用，一直以来也没什么印象。
@@ -104,18 +122,18 @@
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">split-window-instead</span> (way-func)
-  (<span style="color: #a020f0;">lambda</span> ()
-    (<span style="color: #a020f0;">interactive</span>)
-    (<span style="color: #a020f0;">let</span> ((other-buffer (<span style="color: #a020f0;">and</span> (next-window) (window-buffer (next-window)))))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">split-window-instead</span> (way-func)
+  (<span style="color: #00af00;">lambda</span> ()
+    (<span style="color: #00af00;">interactive</span>)
+    (<span style="color: #00af00;">let</span> ((other-buffer (<span style="color: #00af00;">and</span> (next-window) (window-buffer (next-window)))))
       (delete-other-windows)
       (funcall way-func)
-      (<span style="color: #a020f0;">when</span> other-buffer
+      (<span style="color: #00af00;">when</span> other-buffer
         (set-window-buffer (next-window) other-buffer)))))
 
 (lazy-load-set-keys
-  ((<span style="color: #8b2252;">"C-x |"</span> . (<span style="color: #a020f0;">split-window-instead</span> 'split-window-horizontally))
-   (<span style="color: #8b2252;">"C-x _"</span> . (<span style="color: #a020f0;">split-window-instead</span> 'split-window-vertically))))
+  ((<span style="color: #ff1f8b;">"C-x |"</span> . (<span style="color: #00af00;">split-window-instead</span> 'split-window-horizontally))
+   (<span style="color: #ff1f8b;">"C-x _"</span> . (<span style="color: #00af00;">split-window-instead</span> 'split-window-vertically))))
 </pre>
 </div>
 
@@ -147,23 +165,23 @@
 </div>
 
 
-<div id="outline-container-org6d79680" class="outline-2">
-<h2 id="org6d79680"><span class="section-number-2">2</span> 一些名词</h2>
+<div id="outline-container-orgea464ec" class="outline-2">
+<h2 id="orgea464ec"><span class="section-number-2">2</span> 一些名词</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 本来我准备直接从作用域开始，但是查阅资料后我发现要弄清楚作用域还需要其他的一些概念。这一小节用来介绍与之相关的东西，比如名字绑定、上下文，环境等。
 </p>
 </div>
 
-<div id="outline-container-orgba192db" class="outline-3">
-<h3 id="orgba192db"><span class="section-number-3">2.1</span> 什么是名字绑定（name binding）</h3>
+<div id="outline-container-org50fc46c" class="outline-3">
+<h3 id="org50fc46c"><span class="section-number-3">2.1</span> 什么是名字绑定（name binding）</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 名字绑定指实体与标识符之间的关联。标识符绑定到实体被称为引用该对象。最简单的，以下代码就建立了变量名 <code>a</code> 与 <code>int</code> 型整数 19 的绑定：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 19;
+<pre class="src src-c"><span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 19;
 </pre>
 </div>
 
@@ -172,7 +190,7 @@
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #a020f0;">typedef</span> <span style="color: #228b22;">int</span> (*<span style="color: #228b22;">wocao</span>)(<span style="color: #228b22;">int</span>, <span style="color: #228b22;">int</span>);
+<pre class="src src-c"><span style="color: #00af00;">typedef</span> <span style="color: #18b2b2;">int</span> (*<span style="color: #18b2b2;">wocao</span>)(<span style="color: #18b2b2;">int</span>, <span style="color: #18b2b2;">int</span>);
 </pre>
 </div>
 
@@ -181,24 +199,24 @@
 </p>
 
 <p>
-绑定可以分为两类，即 <b>动态绑定</b> （dynamic/late binding）和 <b>静态绑定</b> （static/early binding）。动态绑定指名字绑定发生在程序运行时，而静态绑定指名字绑定发生在程序开始运行之前。<a href="#org586369d">【2】</a>
+绑定可以分为两类，即 <b>动态绑定</b> （dynamic/late binding）和 <b>静态绑定</b> （static/early binding）。动态绑定指名字绑定发生在程序运行时，而静态绑定指名字绑定发生在程序开始运行之前。<a href="#orga70fcd0">【2】</a>
 </p>
 
 <p>
-与绑定相关的概念还有 <b>重绑定</b> （rebinding）和 <b>修改</b> （mutation），前者指变更标识符引用的对象，后者指对对象进行修改。后者的就是一般意义上的副作用（side effect）。在下面的代码中，前者是重绑定，而后者是修改：<a href="#org586369d">【2】</a>
+与绑定相关的概念还有 <b>重绑定</b> （rebinding）和 <b>修改</b> （mutation），前者指变更标识符引用的对象，后者指对对象进行修改。后者的就是一般意义上的副作用（side effect）。在下面的代码中，前者是重绑定，而后者是修改：<a href="#orga70fcd0">【2】</a>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #b22222;">//</span><span style="color: #b22222;">the former</span>
+<pre class="src src-c"><span style="color: #b2b2b2; font-style: italic;">//</span><span style="color: #b2b2b2; font-style: italic;">the former</span>
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 1;
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 1;
     {
-        <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 2;
+        <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 2;
     }
 }
-<span style="color: #b22222;">// </span><span style="color: #b22222;">the latter</span>
+<span style="color: #b2b2b2; font-style: italic;">// </span><span style="color: #b2b2b2; font-style: italic;">the latter</span>
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 1;
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 1;
     {
         a = 2;
     }
@@ -208,8 +226,8 @@
 </div>
 </div>
 
-<div id="outline-container-org4942ba7" class="outline-3">
-<h3 id="org4942ba7"><span class="section-number-3">2.2</span> 什么是上下文（context）</h3>
+<div id="outline-container-org66389d2" class="outline-3">
+<h3 id="org66389d2"><span class="section-number-3">2.2</span> 什么是上下文（context）</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 “上下文”是一个非常宽泛的概念，撇开编程不管的话我们也会时不时碰到这个词语，例如出现在语文题目中的“联系上下文解释文中词语”。我查了查现代汉语词典，它的解释和例句如下：
@@ -251,7 +269,7 @@
 </p>
 
 <p>
-在维基百科<a href="#org5df8e08">【3】</a>中是这样定义上下文的：
+在维基百科<a href="#orgcbe6375">【3】</a>中是这样定义上下文的：
 </p>
 
 <blockquote>
@@ -278,8 +296,8 @@ Scheme 中的 call/cc 可以捕获 continuation，并一次或多次地回到这
 </div>
 </div>
 
-<div id="outline-container-org4e913f1" class="outline-3">
-<h3 id="org4e913f1"><span class="section-number-3">2.3</span> 什么是环境（environment）</h3>
+<div id="outline-container-org879d676" class="outline-3">
+<h3 id="org879d676"><span class="section-number-3">2.3</span> 什么是环境（environment）</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 ”环境“也是一个很常见的概念，最近也发生了一件看上去对世界环境影响很大的环境事件呢 (  ^ω^)。我们先看看字典上对这个词的解释吧：
@@ -326,8 +344,8 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </div>
 </div>
 
-<div id="outline-container-org0f5e504" class="outline-3">
-<h3 id="org0f5e504"><span class="section-number-3">2.4</span> 总结</h3>
+<div id="outline-container-org5c6465f" class="outline-3">
+<h3 id="org5c6465f"><span class="section-number-3">2.4</span> 总结</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 在我看来，上下文就是某件事要进行下去最少需要的东西，而环境就是与某个体有交互的所有东西构成的总体。按我这么理解的话，上下文也算是一种环境，借用集合的概念，它是某件事的环境的子环境。
@@ -340,8 +358,8 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </div>
 </div>
 
-<div id="outline-container-org644ed10" class="outline-2">
-<h2 id="org644ed10"><span class="section-number-2">3</span> 什么是作用域（scope）</h2>
+<div id="outline-container-org4dfdc0a" class="outline-2">
+<h2 id="org4dfdc0a"><span class="section-number-2">3</span> 什么是作用域（scope）</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 首先，我们需要知道作用域是用来描述什么的 —— 它描述的是名字绑定在程序中的可见性。 <b>某个名字绑定的作用域就是程序中该绑定可见的那一部分</b> 。
@@ -356,8 +374,8 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </p>
 </div>
 
-<div id="outline-container-org3e1eb07" class="outline-3">
-<h3 id="org3e1eb07"><span class="section-number-3">3.1</span> 为什么要有作用域</h3>
+<div id="outline-container-org3dcb6e2" class="outline-3">
+<h3 id="org3dcb6e2"><span class="section-number-3">3.1</span> 为什么要有作用域</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 这方面我也在网上几乎找不到什么资料，凡是搜索“作用域”都会不可避免的搜到 javascript 相关的东西，而且大多都是闭包啊，引入 let 块作用域啊之类的东西。所以，这一小节的内容纯粹就是我的个人发挥了，如果有不同意的地方，欢迎与我交流。
@@ -368,7 +386,7 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </p>
 
 <p>
-这样自然是不利于模块化的，在编写一部分代码时还不得不考虑另一部分。考虑到不是所有的变量都要被所有人使用，给变量划分一个作用区域，让区域外的代码看不见该变量的话就 ok 了。作用域对各个变量的势力范围做了一个划分，有利于更好的模块化。维基百科<a href="#orge39dd1f">【8】</a>上这样写道：
+这样自然是不利于模块化的，在编写一部分代码时还不得不考虑另一部分。考虑到不是所有的变量都要被所有人使用，给变量划分一个作用区域，让区域外的代码看不见该变量的话就 ok 了。作用域对各个变量的势力范围做了一个划分，有利于更好的模块化。维基百科<a href="#orgea4424f">【8】</a>上这样写道：
 </p>
 
 <blockquote>
@@ -379,8 +397,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-org81edbbc" class="outline-3">
-<h3 id="org81edbbc"><span class="section-number-3">3.2</span> 各种各样的作用域</h3>
+<div id="outline-container-org741b766" class="outline-3">
+<h3 id="org741b766"><span class="section-number-3">3.2</span> 各种各样的作用域</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 作用域可以龟缩于一个简单的表示式，也可以囊括整个程序，这取决于具体的作用域规则。在最小与最大的两者之间还存在许多其他的作用域。
@@ -391,20 +409,20 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 </div>
 
-<div id="outline-container-orgf1ebd57" class="outline-4">
-<h4 id="orgf1ebd57"><span class="section-number-4">3.2.1</span> 表达式作用域（expression scope）</h4>
+<div id="outline-container-org6c0a691" class="outline-4">
+<h4 id="org6c0a691"><span class="section-number-4">3.2.1</span> 表达式作用域（expression scope）</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <p>
 表达式作用域指名字绑定的作用域是一个表达式。许多语言中都有表达式作用域，尤其是提供了 let 表达式的函数式语言。下面的例子使用 elisp 说明了表达式作用域的范围，使用 <code>;</code> 围成的小盒子就是 <code>a</code> 在 let 表达式中的作用域：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">let</span> ((a 1))
-  <span style="color: #b22222;">;;;;;;;;;;;;;;;;;;;;;</span>
-  <span style="color: #b22222;">;; </span><span style="color: #b22222;">(+ a            ;;</span>
-  <span style="color: #b22222;">;;    </span><span style="color: #b22222;">(let ((b 2)) ;;</span>
-  <span style="color: #b22222;">;;      </span><span style="color: #b22222;">(+ a b)))) ;;</span>
-  <span style="color: #b22222;">;;;;;;;;;;;;;;;;;;;;;</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">let</span> ((a 1))
+  <span style="color: #b2b2b2; font-style: italic;">;;;;;;;;;;;;;;;;;;;;;</span>
+  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">(+ a            ;;</span>
+  <span style="color: #b2b2b2; font-style: italic;">;;    </span><span style="color: #b2b2b2; font-style: italic;">(let ((b 2)) ;;</span>
+  <span style="color: #b2b2b2; font-style: italic;">;;      </span><span style="color: #b2b2b2; font-style: italic;">(+ a b)))) ;;</span>
+  <span style="color: #b2b2b2; font-style: italic;">;;;;;;;;;;;;;;;;;;;;;</span>
 </pre>
 </div>
 
@@ -414,8 +432,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-org4c3a9e5" class="outline-4">
-<h4 id="org4c3a9e5"><span class="section-number-4">3.2.2</span> 块作用域（block scope）</h4>
+<div id="outline-container-org799cc3d" class="outline-4">
+<h4 id="org799cc3d"><span class="section-number-4">3.2.2</span> 块作用域（block scope）</h4>
 <div class="outline-text-4" id="text-3-2-2">
 <p>
 名字绑定的作用域是一个块，这样的作用域就是块作用域。它几乎存在于所有的块结构化编程语言中，例如 C 系语言。大多数情况下块一般都在函数内。
@@ -434,37 +452,37 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #a020f0;">for</span> (i = 0; i &lt; N; ++i) {
-<span style="color: #b22222;">/******************************/</span>
-<span style="color: #b22222;">/* </span><span style="color: #b22222;">printf("%d \n", i);</span><span style="color: #b22222;">        */</span>
-<span style="color: #b22222;">/* </span><span style="color: #b22222;">i = i + 1;</span><span style="color: #b22222;">                 */</span>
-<span style="color: #b22222;">/******************************/</span> <span style="color: #b22222;">//</span><span style="color: #b22222;">scope of i</span>
+<pre class="src src-c"><span style="color: #00af00;">for</span> (i = 0; i &lt; N; ++i) {
+<span style="color: #b2b2b2; font-style: italic;">/******************************/</span>
+<span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">printf("%d \n", i);</span><span style="color: #b2b2b2; font-style: italic;">        */</span>
+<span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">i = i + 1;</span><span style="color: #b2b2b2; font-style: italic;">                 */</span>
+<span style="color: #b2b2b2; font-style: italic;">/******************************/</span> <span style="color: #b2b2b2; font-style: italic;">//</span><span style="color: #b2b2b2; font-style: italic;">scope of i</span>
 }
 
 
-<span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span> = 1;
+<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">n</span> = 1;
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span> = 2;
-    <span style="color: #b22222;">/********************/</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">n = n + 1;</span><span style="color: #b22222;">       */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">n = n + 2;</span><span style="color: #b22222;">       */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">n = n + 3;</span><span style="color: #b22222;">       */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">printf("%d", n);</span><span style="color: #b22222;"> */</span>
-    <span style="color: #b22222;">/********************/</span> <span style="color: #b22222;">// </span><span style="color: #b22222;">scope of inner n</span>
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">n</span> = 2;
+    <span style="color: #b2b2b2; font-style: italic;">/********************/</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">n = n + 1;</span><span style="color: #b2b2b2; font-style: italic;">       */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">n = n + 2;</span><span style="color: #b2b2b2; font-style: italic;">       */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">n = n + 3;</span><span style="color: #b2b2b2; font-style: italic;">       */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">printf("%d", n);</span><span style="color: #b2b2b2; font-style: italic;"> */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/********************/</span> <span style="color: #b2b2b2; font-style: italic;">// </span><span style="color: #b2b2b2; font-style: italic;">scope of inner n</span>
 }
 
 
-<span style="color: #228b22;">int</span> <span style="color: #0000ff;">factor</span>(<span style="color: #228b22;">int</span> <span style="color: #a0522d;">n</span>)
+<span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">factor</span>(<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">n</span>)
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">i</span> = 0;
-    <span style="color: #b22222;">/**********************************/</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">int res = 1;</span><span style="color: #b22222;">                   */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">for (i = 1; i &lt; n; i++)</span><span style="color: #b22222;">        */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">{</span><span style="color: #b22222;">                              */</span>
-    <span style="color: #b22222;">/*     </span><span style="color: #b22222;">res = res * i;</span><span style="color: #b22222;">             */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">}</span><span style="color: #b22222;">                              */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">return res;</span><span style="color: #b22222;">                    */</span>
-    <span style="color: #b22222;">/**********************************/</span> <span style="color: #b22222;">// </span><span style="color: #b22222;">scope of i</span>
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">i</span> = 0;
+    <span style="color: #b2b2b2; font-style: italic;">/**********************************/</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">int res = 1;</span><span style="color: #b2b2b2; font-style: italic;">                   */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">for (i = 1; i &lt; n; i++)</span><span style="color: #b2b2b2; font-style: italic;">        */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">{</span><span style="color: #b2b2b2; font-style: italic;">                              */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/*     </span><span style="color: #b2b2b2; font-style: italic;">res = res * i;</span><span style="color: #b2b2b2; font-style: italic;">             */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">}</span><span style="color: #b2b2b2; font-style: italic;">                              */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">return res;</span><span style="color: #b2b2b2; font-style: italic;">                    */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/**********************************/</span> <span style="color: #b2b2b2; font-style: italic;">// </span><span style="color: #b2b2b2; font-style: italic;">scope of i</span>
 }
 </pre>
 </div>
@@ -475,8 +493,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orge8c8016" class="outline-4">
-<h4 id="orge8c8016"><span class="section-number-4">3.2.3</span> 函数作用域（function scope）</h4>
+<div id="outline-container-orgaf98be0" class="outline-4">
+<h4 id="orgaf98be0"><span class="section-number-4">3.2.3</span> 函数作用域（function scope）</h4>
 <div class="outline-text-4" id="text-3-2-3">
 <p>
 名字绑定的作用域是整个函数的作用域就是函数作用域。几乎所有的语言中都有函数作用域，语言提供了一种在函数或子例程中创建局部变量的方法：它的作用域从函数头开始，在函数返回语句处结束。大多数情况下，它的生命周期就是函数调用的过程 —— 它在函数调用开始时被创建，在函数返回时被销毁。不过某些语言提供了静态局部变量（比如 C），它的生命周期贯穿程序的生命周期，但是它的作用域仅限于所在的函数。
@@ -487,24 +505,24 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">add</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span>, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">b</span>)
+<pre class="src src-c"><span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">add</span> (<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span>, <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">b</span>)
 {
-    <span style="color: #b22222;">/**********************************/</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">int i = 0;</span><span style="color: #b22222;">                     */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">for (i = 0; i &lt; a; i++)</span><span style="color: #b22222;">        */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">{</span><span style="color: #b22222;">                              */</span>
-    <span style="color: #b22222;">/*     </span><span style="color: #b22222;">b = b + 1;</span><span style="color: #b22222;">                 */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">}</span><span style="color: #b22222;">                              */</span>
-    <span style="color: #b22222;">/* </span><span style="color: #b22222;">return b + a - a;</span><span style="color: #b22222;">              */</span>
-    <span style="color: #b22222;">/**********************************/</span> <span style="color: #b22222;">//</span><span style="color: #b22222;">scope of a and b</span>
+    <span style="color: #b2b2b2; font-style: italic;">/**********************************/</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">int i = 0;</span><span style="color: #b2b2b2; font-style: italic;">                     */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">for (i = 0; i &lt; a; i++)</span><span style="color: #b2b2b2; font-style: italic;">        */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">{</span><span style="color: #b2b2b2; font-style: italic;">                              */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/*     </span><span style="color: #b2b2b2; font-style: italic;">b = b + 1;</span><span style="color: #b2b2b2; font-style: italic;">                 */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">}</span><span style="color: #b2b2b2; font-style: italic;">                              */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/* </span><span style="color: #b2b2b2; font-style: italic;">return b + a - a;</span><span style="color: #b2b2b2; font-style: italic;">              */</span>
+    <span style="color: #b2b2b2; font-style: italic;">/**********************************/</span> <span style="color: #b2b2b2; font-style: italic;">//</span><span style="color: #b2b2b2; font-style: italic;">scope of a and b</span>
 }
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org382e191" class="outline-4">
-<h4 id="org382e191"><span class="section-number-4">3.2.4</span> 文件作用域（file scope）</h4>
+<div id="outline-container-orgde0b5ba" class="outline-4">
+<h4 id="orgde0b5ba"><span class="section-number-4">3.2.4</span> 文件作用域（file scope）</h4>
 <div class="outline-text-4" id="text-3-2-4">
 <p>
 名字绑定的作用域是一个文件目的作用域就是文件作用域。文件作用域这种叫法一般都是指 C 语言，在 C 语言中它被称为文件链接。在文件的 top level 定义的函数和变量的作用域就是从它们的声明处直到文件末尾。这也可以被看做是一种模块作用域。
@@ -512,8 +530,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orgb9889cc" class="outline-4">
-<h4 id="orgb9889cc"><span class="section-number-4">3.2.5</span> 模块作用域（module scope）</h4>
+<div id="outline-container-org96d43fd" class="outline-4">
+<h4 id="org96d43fd"><span class="section-number-4">3.2.5</span> 模块作用域（module scope）</h4>
 <div class="outline-text-4" id="text-3-2-5">
 <p>
 名字的作用域是一个模块，这样的作用域就是模块作用域。模块作用域可以在模块化编程语言中使用，这些语言以模块作为复杂程序的单元，它们允许隐藏信息并暴露有限的接口。Python 是一个很典型的例子。
@@ -521,8 +539,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-org5a61bcf" class="outline-4">
-<h4 id="org5a61bcf"><span class="section-number-4">3.2.6</span> 全局作用域（global scope）</h4>
+<div id="outline-container-org7bb0a86" class="outline-4">
+<h4 id="org7bb0a86"><span class="section-number-4">3.2.6</span> 全局作用域（global scope）</h4>
 <div class="outline-text-4" id="text-3-2-6">
 <p>
 作用域是整个程序的作用域被称为全局作用域。一般来说，使用具有全局作用域的变量（即全局变量）被认为是坏习惯，因为它会可能导致名字冲突或不小心掩盖变量。全局作用域一般用于其他类型的名字，比如函数名，类名和数据类型名。
@@ -531,28 +549,28 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orgcbe158d" class="outline-3">
-<h3 id="orgcbe158d"><span class="section-number-3">3.3</span> 作用域与名字解析（name resolution）</h3>
+<div id="outline-container-org93f5b72" class="outline-3">
+<h3 id="org93f5b72"><span class="section-number-3">3.3</span> 作用域与名字解析（name resolution）</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 会不会存在两个名字相同的名字绑定的作用域部分重叠的情况呢？这样的代码很容易想出来，比如全局变量与块变量同名的情况，以及块嵌套中的重名变量：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #b22222;">// </span><span style="color: #b22222;">global variable and block varibale</span>
-<span style="color: #228b22;">int</span> <span style="color: #a0522d;">incf19</span> = 42;
+<pre class="src src-c"><span style="color: #b2b2b2; font-style: italic;">// </span><span style="color: #b2b2b2; font-style: italic;">global variable and block varibale</span>
+<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">incf19</span> = 42;
 
-<span style="color: #228b22;">int</span> <span style="color: #0000ff;">incp10</span>(<span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span>, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">b</span>)
+<span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">incp10</span>(<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span>, <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">b</span>)
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">incf19</span> = 43;
-    printf(<span style="color: #8b2252;">"%d"</span>, incf19);
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">incf19</span> = 43;
+    printf(<span style="color: #ff1f8b;">"%d"</span>, incf19);
 }
 
-<span style="color: #b22222;">//</span><span style="color: #b22222;">block nest block</span>
-<span style="color: #228b22;">int</span> <span style="color: #a0522d;">yy1</span> = 1;
+<span style="color: #b2b2b2; font-style: italic;">//</span><span style="color: #b2b2b2; font-style: italic;">block nest block</span>
+<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">yy1</span> = 1;
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">yy1</span> = 2;
-    printf(<span style="color: #8b2252;">"%d"</span>, yy1);
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">yy1</span> = 2;
+    printf(<span style="color: #ff1f8b;">"%d"</span>, yy1);
 }
 </pre>
 </div>
@@ -562,7 +580,7 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 
 <p>
-我在 wikipedia 上面找到了一个描述这种特性的术语，即名字解析<a href="#org72223da">【7】</a>。在编程语言中， <b>名字解析指通过程序表达式中的符号找到对应的实体</b> 。对于变量而言，就是找到变量的值。名字解析规则并不只和作用域有关，微机百科上面有更加详细的描述，由于这里只关注作用域其他内容就从略了。
+我在 wikipedia 上面找到了一个描述这种特性的术语，即名字解析<a href="#org5d9b220">【7】</a>。在编程语言中， <b>名字解析指通过程序表达式中的符号找到对应的实体</b> 。对于变量而言，就是找到变量的值。名字解析规则并不只和作用域有关，微机百科上面有更加详细的描述，由于这里只关注作用域其他内容就从略了。
 </p>
 
 <p>
@@ -579,11 +597,11 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orga189a11" class="outline-3">
-<h3 id="orga189a11"><span class="section-number-3">3.4</span> 作用域与生存期（extent）</h3>
+<div id="outline-container-orgf5021fb" class="outline-3">
+<h3 id="orgf5021fb"><span class="section-number-3">3.4</span> 作用域与生存期（extent）</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
-说到作用域就不得不谈另一个概念，那就是 extent。网上有人将其翻译为“生命周期”，但是这已经是 lifetime 的翻译了，我这里就翻译为“生存期”<a href="#orgb7965e9">【5】</a>与其区分。
+说到作用域就不得不谈另一个概念，那就是 extent。网上有人将其翻译为“生命周期”，但是这已经是 lifetime 的翻译了，我这里就翻译为“生存期”<a href="#org01632cb">【5】</a>与其区分。
 </p>
 
 <p>
@@ -599,7 +617,7 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 
 <p>
-在参考资料<a href="#org5ad8a3f">【6】</a>中列出了几种有用的作用域和生存期，我把它们列在下面。
+在参考资料<a href="#orgf0c1a27">【6】</a>中列出了几种有用的作用域和生存期，我把它们列在下面。
 </p>
 
 <p>
@@ -625,7 +643,7 @@ It is considered good programming practice to make the scope of variables as nar
 
 
 <p>
-在<a href="#org5ad8a3f">【6】</a>中还这样写道：
+在<a href="#orgf0c1a27">【6】</a>中还这样写道：
 </p>
 
 <blockquote>
@@ -635,7 +653,7 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </blockquote>
 
 <p>
-动态作用域被定义为同时具有不定作用域和动态生存期的名字绑定。不过<a href="#org5ad8a3f">【6】</a>中也提到，dynamic scope 是一个误称，因为它除了描述了作用域还描述了生存期，管它叫动态绑定（dynamic binding）可能更好些。
+动态作用域被定义为同时具有不定作用域和动态生存期的名字绑定。不过<a href="#orgf0c1a27">【6】</a>中也提到，dynamic scope 是一个误称，因为它除了描述了作用域还描述了生存期，管它叫动态绑定（dynamic binding）可能更好些。
 </p>
 
 <p>
@@ -644,8 +662,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 </div>
 
-<div id="outline-container-org6269a0b" class="outline-3">
-<h3 id="org6269a0b"><span class="section-number-3">3.5</span> 什么是“静态作用域”</h3>
+<div id="outline-container-org52cc9a7" class="outline-3">
+<h3 id="org52cc9a7"><span class="section-number-3">3.5</span> 什么是“静态作用域”</h3>
 <div class="outline-text-3" id="text-3-5">
 <p>
 在开始具体的讨论之前，我觉得有必要对动态作用域和静态作用域这两个名字做一个说明。动态作用域和静态作用域的叫法是不太准确的，因为严格来说作用域描述的只是绑定的空间性质。管它们叫“动态作用域规则”和“静态作用域规则”可能更好一些。我会在下文中给所有的动态和静态作用域加上双引号，以此和纯粹的作用域相区分。
@@ -668,9 +686,9 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">add-gen</span>
-    (<span style="color: #a020f0;">lambda</span> (x)
-      (<span style="color: #a020f0;">lambda</span> (y)
+<pre class="src src-scheme">(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">add-gen</span>
+    (<span style="color: #00af00;">lambda</span> (x)
+      (<span style="color: #00af00;">lambda</span> (y)
         (+ x y))))
 </pre>
 </div>
@@ -680,8 +698,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">add1</span> (add-gen 1))
-(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">add10</span> (add-gen 10))
+<pre class="src src-scheme">(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">add1</span> (add-gen 1))
+(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">add10</span> (add-gen 10))
 (add1 1)
 =&gt; 2
 (add10 1)
@@ -698,9 +716,9 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">x</span> 1)
-(<span style="color: #a020f0;">define</span> (<span style="color: #0000ff;">add</span> y) (+ x y))
-(<span style="color: #a020f0;">let</span> ((x 2))
+<pre class="src src-scheme">(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">x</span> 1)
+(<span style="color: #00af00;">define</span> (<span style="color: #ef2929;">add</span> y) (+ x y))
+(<span style="color: #00af00;">let</span> ((x 2))
   (add 1))
 =&gt; 2
 </pre>
@@ -712,8 +730,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 </div>
 
-<div id="outline-container-orgac9bc32" class="outline-3">
-<h3 id="orgac9bc32"><span class="section-number-3">3.6</span> 什么是“动态作用域”</h3>
+<div id="outline-container-orge384d81" class="outline-3">
+<h3 id="orge384d81"><span class="section-number-3">3.6</span> 什么是“动态作用域”</h3>
 <div class="outline-text-3" id="text-3-6">
 <p>
 有了上面的关于“静态作用域”的总结，我们来看看什么是“动态作用域”。
@@ -728,18 +746,18 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">add-gen</span> (x)
-  (<span style="color: #a020f0;">lambda</span> (y) (+ x y)))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">add-gen</span> (x)
+  (<span style="color: #00af00;">lambda</span> (y) (+ x y)))
 (fset 'add1 (add-gen 1))
 (add1 1)
 =&gt; error
-(<span style="color: #a020f0;">let</span> ((x 1))
+(<span style="color: #00af00;">let</span> ((x 1))
   (add1 1))
 =&gt; 2
 
-(<span style="color: #a020f0;">setq</span> x 1)
-(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">add</span> (y) (+ x y))
-(<span style="color: #a020f0;">let</span> ((x 2))
+(<span style="color: #00af00;">setq</span> x 1)
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">add</span> (y) (+ x y))
+(<span style="color: #00af00;">let</span> ((x 2))
   (add 1))
 =&gt; 3
 </pre>
@@ -754,8 +772,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">let</span> ((a 1))
-  (+ a (<span style="color: #a020f0;">let</span> ((a 2)) a)))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">let</span> ((a 1))
+  (+ a (<span style="color: #00af00;">let</span> ((a 2)) a)))
 =&gt; 3
 </pre>
 </div>
@@ -766,15 +784,15 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 </div>
 
-<div id="outline-container-orge1d3328" class="outline-3">
-<h3 id="orge1d3328"><span class="section-number-3">3.7</span> 总结</h3>
+<div id="outline-container-orgbe4b653" class="outline-3">
+<h3 id="orgbe4b653"><span class="section-number-3">3.7</span> 总结</h3>
 <div class="outline-text-3" id="text-3-7">
 <p>
 这一节中我对作用域进行了一个比较详细的介绍。我介绍了作用域的作用，作用域的种类，以及名字解析这个概念。
 </p>
 
 <p>
-关于“动态作用域”和“静态作用域”的区别，我在知乎上找到了一个不错的回答<a href="#org90b06f1">【9】</a>，虽然有些不完整但是非常容易理解：
+关于“动态作用域”和“静态作用域”的区别，我在知乎上找到了一个不错的回答<a href="#org6a7906b">【9】</a>，虽然有些不完整但是非常容易理解：
 </p>
 
 <blockquote>
@@ -798,8 +816,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 </div>
 
-<div id="outline-container-org30b4f55" class="outline-2">
-<h2 id="org30b4f55"><span class="section-number-2">4</span> elisp 的 lexical-binding</h2>
+<div id="outline-container-orge12cb7f" class="outline-2">
+<h2 id="orge12cb7f"><span class="section-number-2">4</span> elisp 的 lexical-binding</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 啰里啰唆的说了那么多，总算是到本文的主要部分。（并不是）
@@ -810,8 +828,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </p>
 </div>
 
-<div id="outline-container-orgcf66719" class="outline-3">
-<h3 id="orgcf66719"><span class="section-number-3">4.1</span> elisp 文档中的内容</h3>
+<div id="outline-container-org24387a3" class="outline-3">
+<h3 id="org24387a3"><span class="section-number-3">4.1</span> elisp 文档中的内容</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 每个局部绑定都有一定的作用域和生存期。作用域指源代码文本中可以访问绑定的位置。生存期指程序执行时绑定存在的时间。
@@ -843,8 +861,8 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </div>
 </div>
 
-<div id="outline-container-orgc1d3938" class="outline-3">
-<h3 id="orgc1d3938"><span class="section-number-3">4.2</span> 特殊变量与 defvar</h3>
+<div id="outline-container-org201cbb9" class="outline-3">
+<h3 id="org201cbb9"><span class="section-number-3">4.2</span> 特殊变量与 defvar</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 即便启用了词法绑定，某些变量仍然是动态绑定，它们被称作特殊变量（special variables）。使用 defvar，defcustom 和 defconst 定义的变量就是特殊变量。
@@ -855,11 +873,11 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> lexical-binding t)
-(<span style="color: #a020f0;">defvar</span> <span style="color: #a0522d;">a</span> 1)
-(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">b</span> (x)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> lexical-binding t)
+(<span style="color: #00af00;">defvar</span> <span style="color: #ff8700;">a</span> 1)
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">b</span> (x)
   (+ a x))
-(<span style="color: #a020f0;">let</span> ((a 2))
+(<span style="color: #00af00;">let</span> ((a 2))
   (b 1))
 =&gt; 3
 </pre>
@@ -867,8 +885,8 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </div>
 </div>
 
-<div id="outline-container-org8274db7" class="outline-3">
-<h3 id="org8274db7"><span class="section-number-3">4.3</span> lexical-binding 的使用</h3>
+<div id="outline-container-orge372662" class="outline-3">
+<h3 id="orge372662"><span class="section-number-3">4.3</span> lexical-binding 的使用</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
 通过上面的例子可以看到，改变变量 <code>lexical-binding</code> 的值就可以确定到底是使用动态绑定还是静态绑定。设置 <code>lexical-binding</code> 为 <code>nil</code> 使用动态绑定，否则使用词法绑定。
@@ -879,7 +897,7 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;;; </span><span style="color: #b22222;">-*- lexical-binding: t -*-</span>
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">-*- lexical-binding: t -*-</span>
 </pre>
 </div>
 
@@ -892,12 +910,12 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> lexical-binding nil)
-(<span style="color: #a020f0;">setq</span> y 1)
-(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy</span> (x)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> lexical-binding nil)
+(<span style="color: #00af00;">setq</span> y 1)
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy</span> (x)
   (+ x y))
-(<span style="color: #a020f0;">setq</span> lexical-binding t)
-(<span style="color: #a020f0;">let</span> ((y 2))
+(<span style="color: #00af00;">setq</span> lexical-binding t)
+(<span style="color: #00af00;">let</span> ((y 2))
   (yy 1))
 =&gt; 3
 </pre>
@@ -908,12 +926,12 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> lexical-binding t)
-(<span style="color: #a020f0;">setq</span> y 1)
-(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">yy</span> (x)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> lexical-binding t)
+(<span style="color: #00af00;">setq</span> y 1)
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy</span> (x)
   (+ x y))
-(<span style="color: #a020f0;">setq</span> lexical-binding nil)
-(<span style="color: #a020f0;">let</span> ((y 1))
+(<span style="color: #00af00;">setq</span> lexical-binding nil)
+(<span style="color: #00af00;">let</span> ((y 1))
   (yy 2))
 =&gt; 3
 </pre>
@@ -928,14 +946,14 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> lexical-binding nil)
-(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">yy1</span> (x)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> lexical-binding nil)
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy1</span> (x)
   `(+ 1 ,x))
 (symbol-function 'yy1)
 =&gt; (macro lambda (x) (list '+ 1 x))
 
-(<span style="color: #a020f0;">setq</span> lexical-binding t)
-(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">yy2</span> (x)
+(<span style="color: #00af00;">setq</span> lexical-binding t)
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy2</span> (x)
   `(+ 1 ,x))
 (symbol-function 'yy2)
 =&gt; (macro closure (y yq yp ys yg ty stream-null stream-null yyy cc cc yao yyy t) (x) (list '+ 1 x))
@@ -947,32 +965,32 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">foo</span> (a)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">foo</span> (a)
   (list 'setq (eval a) t))
-(<span style="color: #a020f0;">setq</span> x 'b)
-(foo x) &#8594; (<span style="color: #a020f0;">setq</span> b t)
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">but</span>
-(<span style="color: #a020f0;">setq</span> a 'c)
-(foo a) &#8594; (<span style="color: #a020f0;">setq</span> a t)
+(<span style="color: #00af00;">setq</span> x 'b)
+(<span style="color: #00af00;">foo</span> x) &#8594; (<span style="color: #00af00;">setq</span> b t)
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">but</span>
+(<span style="color: #00af00;">setq</span> a 'c)
+(<span style="color: #00af00;">foo</span> a) &#8594; (<span style="color: #00af00;">setq</span> a t)
 </pre>
 </div>
 
 <p>
-上面的宏的问题在于，当宏参数名与实际参数名相同时，调用宏时得到的名字绑定 <code>a -&gt; a</code> 会对宏里面的 <code>eval</code> 产生影响，所以第二个例子出现了问题。文档里面也建议不要在宏里面求值。那么，上面的代码在词法绑定中会出现什么结果呢？
+上面的宏的问题在于，当宏参数名与实际参数名相同时，调用宏时得到的名字绑定 <code>a -&gt; a</code> ，由于是动态绑定所以会影响全局的 a 值，从而对宏里面的 <code>eval</code> 产生影响，所以第二个例子出现了问题。文档里面也建议不要在宏里面求值。那么，上面的代码在词法绑定中会出现什么结果呢？
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> lexical-binding t)
-(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">foo</span> (a)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> lexical-binding t)
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">foo</span> (a)
   (list 'setq (eval a) t))
-(<span style="color: #a020f0;">setq</span> a 'c)
-(foo a)
+(<span style="color: #00af00;">setq</span> a 'c)
+(<span style="color: #00af00;">foo</span> a)
 c =&gt; t
 </pre>
 </div>
 
 <p>
-在定义宏时，宏的参数不具有任何作用域，它只是在那里而已，宏里面的 <code>a</code> 会指向外面的 <code>a</code> ，所以在调用宏时使用同名宏参数没有影响。
+这是由于词法作用域下 let 不会修改全局的 <code>a</code> 的值，而 eval 又在空环境（即全局环境）下求值，所以能够得到正确的结果。
 </p>
 
 <p>
@@ -982,15 +1000,15 @@ c =&gt; t
 </div>
 </div>
 
-<div id="outline-container-org4c07a14" class="outline-2">
-<h2 id="org4c07a14"><span class="section-number-2">5</span> Scheme 的 syntax-case</h2>
+<div id="outline-container-orgee33560" class="outline-2">
+<h2 id="orgee33560"><span class="section-number-2">5</span> Scheme 的 syntax-case</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 好了，本节是本文的最后一节，会对 Scheme 的 syntax-case 宏进行一个简单的介绍，也作为我学习 Scheme 的一个小结。如果您只对 syntax-case 感兴趣的话，您也只需要阅读本文的这一部分。
 </p>
 
 <p>
-syntax-case 的发明者是 chez-scheme 的作者 Kent，据他所说，syntax-case 的功能比 syntax-rules 要强很多。强大自然也要有相应的代价，那就是很难写。参考资料<a href="#org3fe86d1">【10】</a>中是这样说的：
+syntax-case 的发明者是 chez-scheme 的作者 Kent，据他所说，syntax-case 的功能比 syntax-rules 要强很多。强大自然也要有相应的代价，那就是很难写。参考资料<a href="#org6bc9e79">【10】</a>中是这样说的：
 </p>
 
 <blockquote>
@@ -1004,26 +1022,26 @@ syntax-case 非常强大，既可以支持高级宏，也可以支持过程宏�
 </p>
 </div>
 
-<div id="outline-container-org0601421" class="outline-3">
-<h3 id="org0601421"><span class="section-number-3">5.1</span> 什么是卫生宏（Hygienic macro）</h3>
+<div id="outline-container-orgf45e0d3" class="outline-3">
+<h3 id="orgf45e0d3"><span class="section-number-3">5.1</span> 什么是卫生宏（Hygienic macro）</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 <b>卫生宏保证展开时不会出现意外的名字捕获</b> 。
 </p>
 
 <p>
-那么什么是意外的名字捕获呢？下面的一段 C 代码<a href="#org532cf60">【11】</a>可以说明这个问题：
+那么什么是意外的名字捕获呢？下面的一段 C 代码<a href="#org90759d2">【11】</a>可以说明这个问题：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #483d8b;">#define</span> <span style="color: #0000ff;">INCI</span>(<span style="color: #a0522d;">i</span>) <span style="color: #a020f0;">do</span> { <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span>=0; ++i; } <span style="color: #a020f0;">while</span> (0)
-<span style="color: #228b22;">int</span> <span style="color: #0000ff;">main</span>(<span style="color: #228b22;">void</span>)
+<pre class="src src-c"><span style="color: #b218b2;">#define</span> <span style="color: #ef2929;">INCI</span>(<span style="color: #ff8700;">i</span>) <span style="color: #00af00;">do</span> { <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span>=0; ++i; } <span style="color: #00af00;">while</span> (0)
+<span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">main</span>(<span style="color: #18b2b2;">void</span>)
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 4, <span style="color: #a0522d;">b</span> = 8;
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 4, <span style="color: #ff8700;">b</span> = 8;
     INCI(a);
     INCI(b);
-    printf(<span style="color: #8b2252;">"a is now %d, b is now %d\n"</span>, a, b);
-    <span style="color: #a020f0;">return</span> 0;
+    printf(<span style="color: #ff1f8b;">"a is now %d, b is now %d\n"</span>, a, b);
+    <span style="color: #00af00;">return</span> 0;
 }
 </pre>
 </div>
@@ -1033,13 +1051,13 @@ syntax-case 非常强大，既可以支持高级宏，也可以支持过程宏�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">main</span>(<span style="color: #228b22;">void</span>)
+<pre class="src src-c"><span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">main</span>(<span style="color: #18b2b2;">void</span>)
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 4, <span style="color: #a0522d;">b</span> = 8;
-    <span style="color: #a020f0;">do</span> { <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 0; ++a; } <span style="color: #a020f0;">while</span> (0);
-    <span style="color: #a020f0;">do</span> { <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 0; ++b; } <span style="color: #a020f0;">while</span> (0);
-    printf(<span style="color: #8b2252;">"a is now %d, b is now %d\n"</span>, a, b);
-    <span style="color: #a020f0;">return</span> 0;
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 4, <span style="color: #ff8700;">b</span> = 8;
+    <span style="color: #00af00;">do</span> { <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 0; ++a; } <span style="color: #00af00;">while</span> (0);
+    <span style="color: #00af00;">do</span> { <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 0; ++b; } <span style="color: #00af00;">while</span> (0);
+    printf(<span style="color: #ff1f8b;">"a is now %d, b is now %d\n"</span>, a, b);
+    <span style="color: #00af00;">return</span> 0;
 }
 </pre>
 </div>
@@ -1053,12 +1071,12 @@ syntax-case 非常强大，既可以支持高级宏，也可以支持过程宏�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">yy-unless</span> (condit <span style="color: #228b22;">&amp;rest</span> exp)
-  `(<span style="color: #a020f0;">if</span> (not ,condit)
-       (<span style="color: #a020f0;">progn</span> ,@exp)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-unless</span> (condit <span style="color: #18b2b2;">&amp;rest</span> exp)
+  `(<span style="color: #00af00;">if</span> (not ,condit)
+       (<span style="color: #00af00;">progn</span> ,@exp)
      nil))
 
-(<span style="color: #a020f0;">cl-flet</span> ((not (x) x))
+(<span style="color: #00af00;">cl-flet</span> ((not (x) x))
   (yy-unless t (+ 1 2)))
 =&gt; 3
 </pre>
@@ -1069,13 +1087,13 @@ syntax-case 非常强大，既可以支持高级宏，也可以支持过程宏�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> lexical-binding t)
-(<span style="color: #a020f0;">defmacro</span> <span style="color: #0000ff;">yy-unless</span> (condit <span style="color: #228b22;">&amp;rest</span> exp)
-  `(<span style="color: #a020f0;">if</span> (funcall 'not ,condit)
-       (<span style="color: #a020f0;">progn</span> ,@exp)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> lexical-binding t)
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-unless</span> (condit <span style="color: #18b2b2;">&amp;rest</span> exp)
+  `(<span style="color: #00af00;">if</span> (funcall 'not ,condit)
+       (<span style="color: #00af00;">progn</span> ,@exp)
      nil))
 
-(<span style="color: #a020f0;">cl-flet</span> ((not (x) x))
+(<span style="color: #00af00;">cl-flet</span> ((not (x) x))
   (yy-unless t (+ 1 2)))
 =&gt; nil
 </pre>
@@ -1105,22 +1123,22 @@ syntax-case 非常强大，既可以支持高级宏，也可以支持过程宏�
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">my-unless</span>
-  (<span style="color: #a020f0;">syntax-rules</span> ()
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">my-unless</span>
+  (<span style="color: #00af00;">syntax-rules</span> ()
     ((_ condition body ...)
-     (<span style="color: #a020f0;">if</span> (not condition)
-         (<span style="color: #a020f0;">begin</span> body ...)))))
+     (<span style="color: #00af00;">if</span> (not condition)
+         (<span style="color: #00af00;">begin</span> body ...)))))
 </pre>
 </div>
 
 <p>
-就解决意外的名字捕获这个问题而言，卫生宏只是一种解决方案而已。更多的解决方法可以参考<a href="#org532cf60">【11】</a>。
+就解决意外的名字捕获这个问题而言，卫生宏只是一种解决方案而已。更多的解决方法可以参考<a href="#org90759d2">【11】</a>。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgde57c3f" class="outline-3">
-<h3 id="orgde57c3f"><span class="section-number-3">5.2</span> 什么是 syntax-case</h3>
+<div id="outline-container-orgcc1de7e" class="outline-3">
+<h3 id="orgcc1de7e"><span class="section-number-3">5.2</span> 什么是 syntax-case</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 在这里我默认你已经学过了 syntax-rules，对 Scheme 的宏有了一定的了解，一些比较基础的东西我就不做过多解释了，我主要介绍与 syntax-case 相关的东西。这里我也不详细说明 syntax-case 的语法了，通过一些例子你就明白了，具体的语法可以参考书上的定义。
@@ -1154,14 +1172,14 @@ syntax-case 接收的语法对象有四种，分别是：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">showyy</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">showyy</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (display x)
     1))
 
 
-(showyy (<span style="color: #a020f0;">lambda</span> (x) (+ x 1)))
-=&gt; #&lt;syntax (showyy (<span style="color: #a020f0;">lambda</span> (x) (+ x 1)))&gt;1
+(showyy (<span style="color: #00af00;">lambda</span> (x) (+ x 1)))
+=&gt; #&lt;syntax (showyy (<span style="color: #00af00;">lambda</span> (x) (+ x 1)))&gt;1
 </pre>
 </div>
 
@@ -1174,8 +1192,8 @@ syntax-case 接收的语法对象有四种，分别是：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">apart-1</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">apart-1</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(_ b) #'b])))
 </pre>
@@ -1197,8 +1215,8 @@ syntax-case 接收的语法对象有四种，分别是：
 <pre class="src src-scheme">(defmacro tr-1 (a b c d)
   `(list ,a ,b ,d, c))
 
-(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">tr-2</span>
-   (<span style="color: #a020f0;">lambda</span> (x)
+(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">tr-2</span>
+   (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(_ a b c d) #'(list a b d c)])))
 </pre>
@@ -1227,30 +1245,30 @@ syntax-case 接收的语法对象有四种，分别是：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">func-series</span>
-  (<span style="color: #a020f0;">lambda</span> funs
-    (<span style="color: #a020f0;">lambda</span> (x)
-      (<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> ([x x] [flist funs])
-    (<span style="color: #a020f0;">cond</span>
+<pre class="src src-scheme">(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">func-series</span>
+  (<span style="color: #00af00;">lambda</span> funs
+    (<span style="color: #00af00;">lambda</span> (x)
+      (<span style="color: #00af00;">let</span> <span style="color: #ef2929;">f</span> ([x x] [flist funs])
+    (<span style="color: #00af00;">cond</span>
      ((null? flist) x)
-     (<span style="color: #a020f0;">else</span>
+     (<span style="color: #00af00;">else</span>
       (f ((car flist) x) (cdr flist))))))))
 ((func-series 1+ 1+ 1+) 1)
 =&gt; 4
 
-(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">lambda-series</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">lambda-series</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(_ e1 e2 ...)
-       #`(<span style="color: #a020f0;">lambda</span> (x)
-         #,(<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> ([rest-func #'(e1 e2 ...)])
-             (<span style="color: #a020f0;">if</span> (null? (cdr rest-func))
+       #`(<span style="color: #00af00;">lambda</span> (x)
+         #,(<span style="color: #00af00;">let</span> <span style="color: #ef2929;">f</span> ([rest-func #'(e1 e2 ...)])
+             (<span style="color: #00af00;">if</span> (null? (cdr rest-func))
                  (syntax-case rest-func ()
                    [(f) #'(f x)])
                  #`(e1 #,(f (cdr rest-func))))))])))
 
 (expand '(lambda-series 1+ 1+ 1+))
-=&gt; (<span style="color: #a020f0;">lambda</span> (x) (1+ (1+ (1+ x))))
+=&gt; (<span style="color: #00af00;">lambda</span> (x) (1+ (1+ (1+ x))))
 
 ((lambda-seires list list list list) 1)
 =&gt; ((((1))))
@@ -1281,13 +1299,13 @@ syntax-case 接收的语法对象有四种，分别是：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">funn</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">funn</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(_ f n)
-       #`(<span style="color: #a020f0;">lambda</span> (x)
-       #,(<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">g</span> ([n1 (syntax-&gt;datum #'n)])
-           (<span style="color: #a020f0;">if</span> (zero? (- n1 1))
+       #`(<span style="color: #00af00;">lambda</span> (x)
+       #,(<span style="color: #00af00;">let</span> <span style="color: #ef2929;">g</span> ([n1 (syntax-&gt;datum #'n)])
+           (<span style="color: #00af00;">if</span> (zero? (- n1 1))
            #'(f x)
            #`(f #,(g (- n1 1))))))])))
 
@@ -1325,17 +1343,17 @@ C 语言的宏是“动态作用域”的，你看：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #483d8b;">#define</span> <span style="color: #0000ff;">Add_a</span>(<span style="color: #a0522d;">x</span>) (x + a)
-<span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 2;
-<span style="color: #228b22;">int</span> <span style="color: #0000ff;">f</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">x</span>)
+<pre class="src src-c"><span style="color: #b218b2;">#define</span> <span style="color: #ef2929;">Add_a</span>(<span style="color: #ff8700;">x</span>) (x + a)
+<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 2;
+<span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">f</span> (<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">x</span>)
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 3;
-    <span style="color: #a020f0;">return</span> Add_a(x);
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 3;
+    <span style="color: #00af00;">return</span> Add_a(x);
 }
-<span style="color: #228b22;">int</span> <span style="color: #0000ff;">g</span> (<span style="color: #228b22;">int</span> <span style="color: #a0522d;">x</span>)
+<span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">g</span> (<span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">x</span>)
 {
-    <span style="color: #228b22;">int</span> <span style="color: #a0522d;">a</span> = 4;
-    <span style="color: #a020f0;">return</span> Add_a(x);
+    <span style="color: #18b2b2;">int</span> <span style="color: #ff8700;">a</span> = 4;
+    <span style="color: #00af00;">return</span> Add_a(x);
 }
 </pre>
 </div>
@@ -1349,17 +1367,17 @@ C 语言的宏是“动态作用域”的，你看：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">Add_a</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">Add_a</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(_ x place)
        (syntax-case (datum-&gt;syntax #'place 'a) ()
          [a #'(+ a x)])])))
 
 
-(<span style="color: #a020f0;">let</span> ((a 1))
-  (<span style="color: #a020f0;">let</span> ((k 2))
-    (<span style="color: #a020f0;">let</span> ((a 2))
+(<span style="color: #00af00;">let</span> ((a 1))
+  (<span style="color: #00af00;">let</span> ((k 2))
+    (<span style="color: #00af00;">let</span> ((a 2))
       (Add_a 1 k))))
 =&gt; 3
 </pre>
@@ -1370,8 +1388,8 @@ C 语言的宏是“动态作用域”的，你看：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">Add_a2</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">Add_a2</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(k x)
        #`(+ x #,(datum-&gt;syntax  #'k 'a))])))
@@ -1388,19 +1406,19 @@ C 语言的宏是“动态作用域”的，你看：
 </div>
 </div>
 
-<div id="outline-container-org6e46c23" class="outline-3">
-<h3 id="org6e46c23"><span class="section-number-3">5.3</span> 与 syntax-case 相关的函数与宏</h3>
+<div id="outline-container-org66fc589" class="outline-3">
+<h3 id="org66fc589"><span class="section-number-3">5.3</span> 与 syntax-case 相关的函数与宏</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 首先，与 syntax-case 最相关的就是 syntax-rules 啦，毕竟 syntax-case 是从它上面出来的。syntax-rules 是可以用 syntax-case 定义出来的，TSPL 上面是这样写的：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">syntax-rules</span>
-   (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">syntax-rules</span>
+   (<span style="color: #00af00;">lambda</span> (x)
      (syntax-case x ()
        [(_ (i ...) ((keyword . pattern) template) ...)
-         #'(<span style="color: #a020f0;">lambda</span> (x)
+         #'(<span style="color: #00af00;">lambda</span> (x)
              (syntax-case x (i ...)
                 [(_ . pattern) #'template] ...))])))
 </pre>
@@ -1433,12 +1451,12 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">with-syntax</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">with-syntax</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(_ ((p e) ...) b1 b2 ...)
        #'(syntax-case (list e ...) ()
-           [(p ...) (<span style="color: #a020f0;">let</span> () b1 b2 ...)])])))
+           [(p ...) (<span style="color: #00af00;">let</span> () b1 b2 ...)])])))
 </pre>
 </div>
 
@@ -1456,16 +1474,16 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 </div>
 
-<div id="outline-container-org1f65796" class="outline-3">
-<h3 id="org1f65796"><span class="section-number-3">5.4</span> Scheme 宏的一些使用用例</h3>
+<div id="outline-container-orgda50e2e" class="outline-3">
+<h3 id="orgda50e2e"><span class="section-number-3">5.4</span> Scheme 宏的一些使用用例</h3>
 <div class="outline-text-3" id="text-5-4">
 <p>
 这里是我对宏的一些整理，它的一部分来自 TSPL，一部分来自Racket 文档，一部分来自网上的代码，一部分来自我的一点脑洞，宏的难度和复杂程度大概呈递增规律，希望这些例子能有助于你的学习。大部分宏都使用 syntax-case，为了简便少部分也使用 syntax-rules，毕竟它都可以用 syntax-case 定义出来了。
 </p>
 </div>
 
-<div id="outline-container-orgbf9ee7b" class="outline-4">
-<h4 id="orgbf9ee7b"><span class="section-number-4">5.4.1</span> 递归转换器</h4>
+<div id="outline-container-org853cb80" class="outline-4">
+<h4 id="org853cb80"><span class="section-number-4">5.4.1</span> 递归转换器</h4>
 <div class="outline-text-4" id="text-5-4-1">
 <p>
 功能：通过普通的匿名函数得到一个递归函数。
@@ -1476,9 +1494,9 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">rec</span>
- (<span style="color: #a020f0;">syntax-rules</span> ()
-   [(_ x e) (<span style="color: #a020f0;">letrec</span> ([x e]) x)]))
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">rec</span>
+ (<span style="color: #00af00;">syntax-rules</span> ()
+   [(_ x e) (<span style="color: #00af00;">letrec</span> ([x e]) x)]))
 </pre>
 </div>
 
@@ -1487,8 +1505,8 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">length-yy</span> (rec f (<span style="color: #a020f0;">lambda</span> (x)
-                           (<span style="color: #a020f0;">if</span> (null? x) 0
+<pre class="src src-scheme">(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">length-yy</span> (rec f (<span style="color: #00af00;">lambda</span> (x)
+                           (<span style="color: #00af00;">if</span> (null? x) 0
                               (+ 1 (f (cdr x)))))))
 (length-yy '(1 23))
 =&gt; 2
@@ -1497,8 +1515,8 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 </div>
 
-<div id="outline-container-orgc9a90dc" class="outline-4">
-<h4 id="orgc9a90dc"><span class="section-number-4">5.4.2</span> 特殊形式 and 和 or</h4>
+<div id="outline-container-orgc9e1da0" class="outline-4">
+<h4 id="orgc9e1da0"><span class="section-number-4">5.4.2</span> 特殊形式 and 和 or</h4>
 <div class="outline-text-4" id="text-5-4-2">
 <p>
 功能：实现短路逻辑
@@ -1509,20 +1527,20 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">and</span>
-  (<span style="color: #a020f0;">syntax-rules</span> ()
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">and</span>
+  (<span style="color: #00af00;">syntax-rules</span> ()
     [(_) #t]
     [(_ e) e]
     [(_ e1 e2 e3 ...)
-     (<span style="color: #a020f0;">if</span> e1 (<span style="color: #a020f0;">and</span> e2 e3 ...) #f)]))
+     (<span style="color: #00af00;">if</span> e1 (<span style="color: #00af00;">and</span> e2 e3 ...) #f)]))
 
-(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">or</span>
-  (<span style="color: #a020f0;">syntax-rules</span> ()
+(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">or</span>
+  (<span style="color: #00af00;">syntax-rules</span> ()
     [(_) #f]
     [(_ e) e]
     [(_ e1 e2 e3 ...)
-     (<span style="color: #a020f0;">let</span> ([t e1])
-       (<span style="color: #a020f0;">if</span> t t (<span style="color: #a020f0;">or</span> e2 e3 ...)))]))
+     (<span style="color: #00af00;">let</span> ([t e1])
+       (<span style="color: #00af00;">if</span> t t (<span style="color: #00af00;">or</span> e2 e3 ...)))]))
 </pre>
 </div>
 
@@ -1531,15 +1549,15 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">and</span> 1 (<span style="color: #a020f0;">or</span> #t #f) (<span style="color: #a020f0;">or</span> #f #f))
+<pre class="src src-scheme">(<span style="color: #00af00;">and</span> 1 (<span style="color: #00af00;">or</span> #t #f) (<span style="color: #00af00;">or</span> #f #f))
 =&gt; #f
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0d2a504" class="outline-4">
-<h4 id="org0d2a504"><span class="section-number-4">5.4.3</span> 特殊形式 when 和 unless</h4>
+<div id="outline-container-orgd2b2224" class="outline-4">
+<h4 id="orgd2b2224"><span class="section-number-4">5.4.3</span> 特殊形式 when 和 unless</h4>
 <div class="outline-text-4" id="text-5-4-3">
 <p>
 功能：当条件为真/假时，顺序执行给定的表达式，不需要加 begin
@@ -1550,15 +1568,15 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">when</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">when</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
-      ((_ e0 e1 e2 ...) (<span style="color: #a020f0;">syntax</span> (<span style="color: #a020f0;">if</span> e0 (<span style="color: #a020f0;">begin</span> e1 e2 ...)))))))
+      ((_ e0 e1 e2 ...) (<span style="color: #00af00;">syntax</span> (<span style="color: #00af00;">if</span> e0 (<span style="color: #00af00;">begin</span> e1 e2 ...)))))))
 
-(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">unless</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">unless</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
-      ((_ e0 e1 e2 ...) (<span style="color: #a020f0;">syntax</span> (<span style="color: #a020f0;">when</span> (not e0) e1 e2 ...))))))
+      ((_ e0 e1 e2 ...) (<span style="color: #00af00;">syntax</span> (<span style="color: #00af00;">when</span> (not e0) e1 e2 ...))))))
 </pre>
 </div>
 
@@ -1567,15 +1585,15 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">when</span> #t (display 1) (display 2) (display 3))
+<pre class="src src-scheme">(<span style="color: #00af00;">when</span> #t (display 1) (display 2) (display 3))
 =&gt; 123
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org1be7731" class="outline-4">
-<h4 id="org1be7731"><span class="section-number-4">5.4.4</span> loop 循环</h4>
+<div id="outline-container-org0f82657" class="outline-4">
+<h4 id="org0f82657"><span class="section-number-4">5.4.4</span> loop 循环</h4>
 <div class="outline-text-4" id="text-5-4-4">
 <p>
 功能：实现带有 break 功能的循环
@@ -1590,14 +1608,14 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">loop</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">loop</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(k e ...)
        (with-syntax ([break (datum-&gt;syntax #'k 'break)])
-            #'(<span style="color: #a020f0;">call/cc</span>
-               (<span style="color: #a020f0;">lambda</span> (break)
-                 (<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> () e ... (f)))))])))
+            #'(<span style="color: #00af00;">call/cc</span>
+               (<span style="color: #00af00;">lambda</span> (break)
+                 (<span style="color: #00af00;">let</span> <span style="color: #ef2929;">f</span> () e ... (f)))))])))
 </pre>
 </div>
 
@@ -1606,9 +1624,9 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">let</span> ([n 3] [ls '()])
+<pre class="src src-scheme">(<span style="color: #00af00;">let</span> ([n 3] [ls '()])
   (loop
-   (<span style="color: #a020f0;">if</span> (= n 0) (break ls))
+   (<span style="color: #00af00;">if</span> (= n 0) (break ls))
    (set! ls (cons 'a ls))
    (set! n (- n 1))))
 =&gt; (a a a)
@@ -1617,8 +1635,8 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 </div>
 
-<div id="outline-container-org41ce192" class="outline-4">
-<h4 id="org41ce192"><span class="section-number-4">5.4.5</span> letcc</h4>
+<div id="outline-container-orgcd11113" class="outline-4">
+<h4 id="orgcd11113"><span class="section-number-4">5.4.5</span> letcc</h4>
 <div class="outline-text-4" id="text-5-4-5">
 <p>
 功能：不用写 call/cc 中接受的函数，少些点字
@@ -1629,11 +1647,11 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">letcc</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">letcc</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(k name e ...)
-       #'(<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (name) e ...))])))
+       #'(<span style="color: #00af00;">call/cc</span> (<span style="color: #00af00;">lambda</span> (name) e ...))])))
 </pre>
 </div>
 
@@ -1643,7 +1661,7 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 
 <div class="org-src-container">
 <pre class="src src-scheme">(letcc wocao
-       (<span style="color: #a020f0;">let</span> ((a 1)
+       (<span style="color: #00af00;">let</span> ((a 1)
              (b 2))
          (+ 1 (wocao b))))
 =&gt; 2
@@ -1656,8 +1674,8 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
 </div>
 </div>
 
-<div id="outline-container-org94db011" class="outline-4">
-<h4 id="org94db011"><span class="section-number-4">5.4.6</span> 简单的函数生成器</h4>
+<div id="outline-container-orgd989f02" class="outline-4">
+<h4 id="orgd989f02"><span class="section-number-4">5.4.6</span> 简单的函数生成器</h4>
 <div class="outline-text-4" id="text-5-4-6">
 <p>
 功能：使用这个宏来定义一个变量时，生成它的 getter/setter 函数
@@ -1668,8 +1686,8 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">define-gs</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">define-gs</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(k var val)
        (with-syntax
@@ -1677,16 +1695,16 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
                     (string-&gt;symbol
                      (string-append
                       (symbol-&gt;string (syntax-&gt;datum #'var))
-                      <span style="color: #8b2252;">"-get"</span>))))
+                      <span style="color: #ff1f8b;">"-get"</span>))))
            (setter (datum-&gt;syntax #'k
                     (string-&gt;symbol
                      (string-append
                       (symbol-&gt;string (syntax-&gt;datum #'var))
-                      <span style="color: #8b2252;">"-set!"</span>)))))
-         #'(<span style="color: #a020f0;">begin</span>
-            (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">var</span> val)
-            (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">getter</span> (<span style="color: #a020f0;">lambda</span> () var))
-            (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">setter</span> (<span style="color: #a020f0;">lambda</span> (x) (set! var x)))))])))
+                      <span style="color: #ff1f8b;">"-set!"</span>)))))
+         #'(<span style="color: #00af00;">begin</span>
+            (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">var</span> val)
+            (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">getter</span> (<span style="color: #00af00;">lambda</span> () var))
+            (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">setter</span> (<span style="color: #00af00;">lambda</span> (x) (set! var x)))))])))
 </pre>
 </div>
 
@@ -1709,28 +1727,28 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">define-gs2</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
-    (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">gen-id</span>
-      (<span style="color: #a020f0;">lambda</span> (template-id . args)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">define-gs2</span>
+  (<span style="color: #00af00;">lambda</span> (x)
+    (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">gen-id</span>
+      (<span style="color: #00af00;">lambda</span> (template-id . args)
         (datum-&gt;syntax
           template-id
           (string-&gt;symbol
            (apply string-append
-                  (<span style="color: #a020f0;">map</span> (<span style="color: #a020f0;">lambda</span> (x)
-                        (<span style="color: #a020f0;">if</span> (string? x)
+                  (<span style="color: #00af00;">map</span> (<span style="color: #00af00;">lambda</span> (x)
+                        (<span style="color: #00af00;">if</span> (string? x)
                             x
                             (symbol-&gt;string (syntax-&gt;datum x))))
                        args))))))
     (syntax-case x ()
       [(k var val)
        (with-syntax
-           ((getter (gen-id #'k #'var <span style="color: #8b2252;">"-"</span> <span style="color: #8b2252;">"get"</span>))
-            (setter (gen-id #'k #'var <span style="color: #8b2252;">"-"</span> <span style="color: #8b2252;">"set!"</span>)))
-         #'(<span style="color: #a020f0;">begin</span>
-             (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">var</span> val)
-             (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">getter</span> (<span style="color: #a020f0;">lambda</span> () var))
-             (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">setter</span> (<span style="color: #a020f0;">lambda</span> (x) (set! var x)))))])))
+           ((getter (gen-id #'k #'var <span style="color: #ff1f8b;">"-"</span> <span style="color: #ff1f8b;">"get"</span>))
+            (setter (gen-id #'k #'var <span style="color: #ff1f8b;">"-"</span> <span style="color: #ff1f8b;">"set!"</span>)))
+         #'(<span style="color: #00af00;">begin</span>
+             (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">var</span> val)
+             (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">getter</span> (<span style="color: #00af00;">lambda</span> () var))
+             (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">setter</span> (<span style="color: #00af00;">lambda</span> (x) (set! var x)))))])))
 </pre>
 </div>
 
@@ -1740,8 +1758,8 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
 </div>
 </div>
 
-<div id="outline-container-org04ee668" class="outline-4">
-<h4 id="org04ee668"><span class="section-number-4">5.4.7</span> generator</h4>
+<div id="outline-container-orgc3432cc" class="outline-4">
+<h4 id="orgc3432cc"><span class="section-number-4">5.4.7</span> generator</h4>
 <div class="outline-text-4" id="text-5-4-7">
 <p>
 功能：创建一个 generator，就像 js 和 python 中的那样。
@@ -1752,26 +1770,26 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">gen-gen</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
-    (syntax-case x (<span style="color: #a020f0;">lambda</span>)
-      [(k (<span style="color: #a020f0;">lambda</span> varlist e1 e2 ...))
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">gen-gen</span>
+  (<span style="color: #00af00;">lambda</span> (x)
+    (syntax-case x (<span style="color: #00af00;">lambda</span>)
+      [(k (<span style="color: #00af00;">lambda</span> varlist e1 e2 ...))
        (with-syntax
         ((yed (datum-&gt;syntax #'k 'yield)))
-        #'(<span style="color: #a020f0;">lambda</span> varlist
-           (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">store-return</span> values)
-           (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">store-k</span> (<span style="color: #a020f0;">lambda</span> x (<span style="color: #a020f0;">begin</span> e1 e2 ...)))
-           (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">yed</span>
-            (<span style="color: #a020f0;">lambda</span> value
-             (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (k)
+        #'(<span style="color: #00af00;">lambda</span> varlist
+           (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">store-return</span> values)
+           (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">store-k</span> (<span style="color: #00af00;">lambda</span> x (<span style="color: #00af00;">begin</span> e1 e2 ...)))
+           (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">yed</span>
+            (<span style="color: #00af00;">lambda</span> value
+             (<span style="color: #00af00;">call/cc</span> (<span style="color: #00af00;">lambda</span> (k)
                (set! store-k k)
                (apply store-return value)))))
-           (<span style="color: #a020f0;">lambda</span> resume-vals
-             (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (return)
+           (<span style="color: #00af00;">lambda</span> resume-vals
+             (<span style="color: #00af00;">call/cc</span> (<span style="color: #00af00;">lambda</span> (return)
                (set! store-return return)
                (apply store-k resume-vals))))))])))
 
-(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">gen-next</span> (<span style="color: #a020f0;">lambda</span> (x . val) (apply x val)))
+(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">gen-next</span> (<span style="color: #00af00;">lambda</span> (x . val) (apply x val)))
 </pre>
 </div>
 
@@ -1784,25 +1802,25 @@ store-return 作为返回锚点，store-k 存储上一次跳出时的 continuait
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">gen-gen2</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
-    (syntax-case x (<span style="color: #a020f0;">lambda</span>)
-      [(k (<span style="color: #a020f0;">lambda</span> varlist e1 e2 ...))
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">gen-gen2</span>
+  (<span style="color: #00af00;">lambda</span> (x)
+    (syntax-case x (<span style="color: #00af00;">lambda</span>)
+      [(k (<span style="color: #00af00;">lambda</span> varlist e1 e2 ...))
        (with-syntax
     ((yed (datum-&gt;syntax #'k 'yield)))
-    #`(<span style="color: #a020f0;">lambda</span> varlist
-        (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">store-return</span> values)
-        (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">store-k</span> (<span style="color: #a020f0;">lambda</span> x (<span style="color: #a020f0;">begin</span> e1 e2 ...)))
-        (<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">yed</span>
-          (<span style="color: #a020f0;">lambda</span> (x)
+    #`(<span style="color: #00af00;">lambda</span> varlist
+        (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">store-return</span> values)
+        (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">store-k</span> (<span style="color: #00af00;">lambda</span> x (<span style="color: #00af00;">begin</span> e1 e2 ...)))
+        (<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">yed</span>
+          (<span style="color: #00af00;">lambda</span> (x)
             (syntax-case x ()
               [(_ v1 v2 (... ...))
-               #'(<span style="color: #a020f0;">call/cc</span>
-                  (<span style="color: #a020f0;">lambda</span> (k)
+               #'(<span style="color: #00af00;">call/cc</span>
+                  (<span style="color: #00af00;">lambda</span> (k)
                    (set! store-k k)
                    (apply store-return v1 v2 (... ...) '())))])))
-        (<span style="color: #a020f0;">lambda</span> resume-vals
-          (<span style="color: #a020f0;">call/cc</span> (<span style="color: #a020f0;">lambda</span> (return)
+        (<span style="color: #00af00;">lambda</span> resume-vals
+          (<span style="color: #00af00;">call/cc</span> (<span style="color: #00af00;">lambda</span> (return)
              (set! store-return return)
              (apply store-k resume-vals))))))])))
 </pre>
@@ -1813,12 +1831,12 @@ store-return 作为返回锚点，store-k 存储上一次跳出时的 continuait
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">wo-gen</span> (gen-gen
-                (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">wo-gen</span> (gen-gen
+                (<span style="color: #00af00;">lambda</span> (x)
                  (yield x)
                  (yield (+ x 1))
                  (yield (+ x 2)))))
-(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">wo</span> (wo-gen 1))
+(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">wo</span> (wo-gen 1))
 (gen-next wo)
 =&gt; 1
 (gen-next wo)
@@ -1826,16 +1844,16 @@ store-return 作为返回锚点，store-k 存储上一次跳出时的 continuait
 (gen-next wo)
 =&gt; 3
 (gen-next wo)
-=&gt; <span style="color: #228b22;">&lt;nothing&gt;</span>
+=&gt; <span style="color: #18b2b2;">&lt;nothing&gt;</span>
 
 
-(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">fib-gen</span>
-  (gen-gen2 (<span style="color: #a020f0;">lambda</span> (x y)
-              (<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> ([a x] [b y])
+(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">fib-gen</span>
+  (gen-gen2 (<span style="color: #00af00;">lambda</span> (x y)
+              (<span style="color: #00af00;">let</span> <span style="color: #ef2929;">f</span> ([a x] [b y])
                  (yield a)
                  (f b (+ a b))))))
-(<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">fib-s</span> (fib-gen 0 1))
-(gen-next fib-s) <span style="color: #b22222;">;</span><span style="color: #b22222;">call n times</span>
+(<span style="color: #00af00;">define</span> <span style="color: #ef2929;">fib-s</span> (fib-gen 0 1))
+(gen-next fib-s) <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">call n times</span>
 =&gt; 0
 =&gt; 1
 =&gt; 1
@@ -1852,24 +1870,24 @@ store-return 作为返回锚点，store-k 存储上一次跳出时的 continuait
 </div>
 </div>
 
-<div id="outline-container-org822e498" class="outline-4">
-<h4 id="org822e498"><span class="section-number-4">5.4.8</span> setf</h4>
+<div id="outline-container-org724fa07" class="outline-4">
+<h4 id="org724fa07"><span class="section-number-4">5.4.8</span> setf</h4>
 <div class="outline-text-4" id="text-5-4-8">
 <p>
 setf 是 elisp（common lisp 中应该也有吧）的一个宏，它的功能很强大也很奇怪，它把第一个参数看做“左值”，然后对其中的对象进行赋值操作。举例来说的话：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setf</span> a 1)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setf</span> a 1)
 a =&gt; 1
 
-(<span style="color: #a020f0;">setf</span> b (list 1 2))
-(<span style="color: #a020f0;">setf</span> (car b) 2) =&gt; b = (2 2)
-(<span style="color: #a020f0;">setf</span> (cadr b) 3) =&gt; b = (2 3)
-(<span style="color: #a020f0;">setf</span> (cdr b) nil) =&gt; b = (2)
+(<span style="color: #00af00;">setf</span> b (list 1 2))
+(<span style="color: #00af00;">setf</span> (car b) 2) =&gt; b = (2 2)
+(<span style="color: #00af00;">setf</span> (cadr b) 3) =&gt; b = (2 3)
+(<span style="color: #00af00;">setf</span> (cdr b) nil) =&gt; b = (2)
 
-(<span style="color: #a020f0;">setf</span> c (vector 1 2 3))
-(<span style="color: #a020f0;">setf</span> (aref c 0) 2) =&gt; c = [2 2 3]
+(<span style="color: #00af00;">setf</span> c (vector 1 2 3))
+(<span style="color: #00af00;">setf</span> (aref c 0) 2) =&gt; c = [2 2 3]
 </pre>
 </div>
 
@@ -1878,8 +1896,8 @@ a =&gt; 1
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">setf!</span>
-  (<span style="color: #a020f0;">lambda</span> (xx)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">setf!</span>
+  (<span style="color: #00af00;">lambda</span> (xx)
     (syntax-case xx ()
       [(_ form value)
        (syntax-case #'form (car cdr cadr vector-ref)
@@ -1896,29 +1914,29 @@ a =&gt; 1
 </div>
 </div>
 
-<div id="outline-container-orgd6c54be" class="outline-4">
-<h4 id="orgd6c54be"><span class="section-number-4">5.4.9</span> 延时let</h4>
+<div id="outline-container-org1be724d" class="outline-4">
+<h4 id="org1be724d"><span class="section-number-4">5.4.9</span> 延时let</h4>
 <div class="outline-text-4" id="text-5-4-9">
 <p>
 在 elisp 和 Scheme 中都有延时求值的宏，Scheme 中是 delay/force， elisp 中则是 thunk-delay 和 thunk-force，但是 elisp 中还有一个宏，可以像 let 一样用延时求值：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">let</span> ((a (thunk-delay (<span style="color: #a020f0;">progn</span>
-            (print <span style="color: #8b2252;">"1"</span>)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">let</span> ((a (thunk-delay (<span style="color: #00af00;">progn</span>
+            (print <span style="color: #ff1f8b;">"1"</span>)
             1)))
-      (b (thunk-delay (<span style="color: #a020f0;">progn</span>
-            (print <span style="color: #8b2252;">"2"</span>)
+      (b (thunk-delay (<span style="color: #00af00;">progn</span>
+            (print <span style="color: #ff1f8b;">"2"</span>)
             2)))
-      (c (thunk-delay (<span style="color: #a020f0;">progn</span>
-            (print <span style="color: #8b2252;">"3"</span>)
+      (c (thunk-delay (<span style="color: #00af00;">progn</span>
+            (print <span style="color: #ff1f8b;">"3"</span>)
             3))))
   (+ (thunk-force a) (+ (thunk-force b) (+ (thunk-force c) 1))))
 
 
-(thunk-let ((a (<span style="color: #a020f0;">progn</span> (print <span style="color: #8b2252;">"1"</span>) 1))
-            (b (<span style="color: #a020f0;">progn</span> (print <span style="color: #8b2252;">"2"</span>) 2))
-            (c (<span style="color: #a020f0;">progn</span> (print <span style="color: #8b2252;">"3"</span>) 3)))
+(thunk-let ((a (<span style="color: #00af00;">progn</span> (print <span style="color: #ff1f8b;">"1"</span>) 1))
+            (b (<span style="color: #00af00;">progn</span> (print <span style="color: #ff1f8b;">"2"</span>) 2))
+            (c (<span style="color: #00af00;">progn</span> (print <span style="color: #ff1f8b;">"3"</span>) 3)))
   (+ a b c))
 </pre>
 </div>
@@ -1932,30 +1950,30 @@ a =&gt; 1
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">delay-let</span>
-  (<span style="color: #a020f0;">lambda</span> (y)
-    (<span style="color: #a020f0;">define</span> <span style="color: #0000ff;">gen-id</span>
-      (<span style="color: #a020f0;">lambda</span> (template-id . args)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">delay-let</span>
+  (<span style="color: #00af00;">lambda</span> (y)
+    (<span style="color: #00af00;">define</span> <span style="color: #ef2929;">gen-id</span>
+      (<span style="color: #00af00;">lambda</span> (template-id . args)
         (datum-&gt;syntax
           template-id
           (string-&gt;symbol
            (apply string-append
-                  (<span style="color: #a020f0;">map</span> (<span style="color: #a020f0;">lambda</span> (x)
-                         (<span style="color: #a020f0;">if</span> (string? x)
+                  (<span style="color: #00af00;">map</span> (<span style="color: #00af00;">lambda</span> (x)
+                         (<span style="color: #00af00;">if</span> (string? x)
                              x
                              (symbol-&gt;string (syntax-&gt;datum x))))
                        args))))))
     (syntax-case y ()
       [(k ((x1 v1) ...) e1 e2 ...)
        (with-syntax
-         (((a1 ...) (<span style="color: #a020f0;">map</span> (<span style="color: #a020f0;">lambda</span> (x)
-                           (gen-id x <span style="color: #8b2252;">"thunk"</span> x)) #'(x1 ...))))
-         #'(<span style="color: #a020f0;">let</span> ((a1 (<span style="color: #a020f0;">delay</span> v1)) ...)
-              (<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">x1</span>
+         (((a1 ...) (<span style="color: #00af00;">map</span> (<span style="color: #00af00;">lambda</span> (x)
+                           (gen-id x <span style="color: #ff1f8b;">"thunk"</span> x)) #'(x1 ...))))
+         #'(<span style="color: #00af00;">let</span> ((a1 (<span style="color: #00af00;">delay</span> v1)) ...)
+              (<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">x1</span>
                 (make-variable-transformer
-                   (<span style="color: #a020f0;">lambda</span> (x)
+                   (<span style="color: #00af00;">lambda</span> (x)
                      (syntax-case x ()
-                        [id (identifier? #'id) #'(<span style="color: #a020f0;">force</span> a1)]))))
+                        [id (identifier? #'id) #'(<span style="color: #00af00;">force</span> a1)]))))
               ...
               e1 e2 ...))])))
 </pre>
@@ -1970,14 +1988,14 @@ a =&gt; 1
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(<span style="color: #a020f0;">define-syntax</span> <span style="color: #a0522d;">delay-let*</span>
-  (<span style="color: #a020f0;">lambda</span> (x)
+<pre class="src src-scheme">(<span style="color: #00af00;">define-syntax</span> <span style="color: #ff8700;">delay-let*</span>
+  (<span style="color: #00af00;">lambda</span> (x)
     (syntax-case x ()
       [(_ ((x1 v1) ...) e1 e2 ...)
-       (<span style="color: #a020f0;">let</span> <span style="color: #0000ff;">f</span> ((ls #'((x1 v1) ...)))
-         (<span style="color: #a020f0;">cond</span>
+       (<span style="color: #00af00;">let</span> <span style="color: #ef2929;">f</span> ((ls #'((x1 v1) ...)))
+         (<span style="color: #00af00;">cond</span>
            ((null? (cdr ls)) #`(delay-let #,ls e1 e2 ...))
-           (<span style="color: #a020f0;">else</span>
+           (<span style="color: #00af00;">else</span>
              #`(delay-let #,(list (car ls))
              #,(f (cdr ls))))))])))
 </pre>
@@ -1988,9 +2006,9 @@ delay-let* 定义变量时里层可以使用外层的变量，以下代码可以
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">(delay-let* ((x (<span style="color: #a020f0;">begin</span> (display <span style="color: #8b2252;">"a"</span>) 1))
-             (y (<span style="color: #a020f0;">begin</span> (display <span style="color: #8b2252;">"b"</span>) (+ x 1)))
-             (z (<span style="color: #a020f0;">begin</span> (display <span style="color: #8b2252;">"c"</span>) (+ y 2))))
+<pre class="src src-scheme">(delay-let* ((x (<span style="color: #00af00;">begin</span> (display <span style="color: #ff1f8b;">"a"</span>) 1))
+             (y (<span style="color: #00af00;">begin</span> (display <span style="color: #ff1f8b;">"b"</span>) (+ x 1)))
+             (z (<span style="color: #00af00;">begin</span> (display <span style="color: #ff1f8b;">"c"</span>) (+ y 2))))
     (+ x y z))
 =&gt; cba7
 </pre>
@@ -1998,8 +2016,8 @@ delay-let* 定义变量时里层可以使用外层的变量，以下代码可以
 </div>
 </div>
 
-<div id="outline-container-orge679854" class="outline-4">
-<h4 id="orge679854"><span class="section-number-4">5.4.10</span> 其他</h4>
+<div id="outline-container-org3ca0d8d" class="outline-4">
+<h4 id="org3ca0d8d"><span class="section-number-4">5.4.10</span> 其他</h4>
 <div class="outline-text-4" id="text-5-4-10">
 <p>
 Kent，Fridman 写了一个非常厉害的模式匹配宏，链接在<a href="https://github.com/guenchi/match">这里</a>，不过我看不懂。
@@ -2017,8 +2035,8 @@ Kent，Fridman 写了一个非常厉害的模式匹配宏，链接在<a href="ht
 </div>
 </div>
 
-<div id="outline-container-org9188178" class="outline-2">
-<h2 id="org9188178"><span class="section-number-2">6</span> 后记</h2>
+<div id="outline-container-org63b3371" class="outline-2">
+<h2 id="org63b3371"><span class="section-number-2">6</span> 后记</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 本文最开始取的题目是“elisp 的 lexical-binding”，但是写着写着突然发现我对作用域这个概念的理解似乎出了点问题，似乎是有必要把作用域相关的概念全都过一遍。看完了作用域后我终于明白了作用域和动态/静态作用域好像根本不是一个东西。这时候我又想起了很久之前学过的 syntax-case，我对里面的 <code>datum-&gt;syntax</code> 总是无法理解透彻。但是学完作用域后我终于明白了它到底是干什么的了。那就干脆把 syntax-case 也整理一遍吧，蛤。
@@ -2049,82 +2067,68 @@ syntax-case 不就是带了上下文信息的列表变换吗，这有什么难�
 </div>
 </div>
 
-<div id="outline-container-orgce0c9f2" class="outline-2">
-<h2 id="orgce0c9f2"><span class="section-number-2">7</span> 参考资料</h2>
+<div id="outline-container-orgef66514" class="outline-2">
+<h2 id="orgef66514"><span class="section-number-2">7</span> 参考资料</h2>
 <div class="outline-text-2" id="text-7">
 <p>
-<a id="org6dbef2e">【1】</a> <a href="https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding">EmacsWiki: Dynamic Binding Vs Lexical Binding</a>
+<a id="org94d1c95">【1】</a> <a href="https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding">EmacsWiki: Dynamic Binding Vs Lexical Binding</a>
 </p>
 
 <p>
-<a id="org586369d">【2】</a> <a href="https://en.wikipedia.org/wiki/Name_binding">Name binding - Wikipedia</a>
+<a id="orga70fcd0">【2】</a> <a href="https://en.wikipedia.org/wiki/Name_binding">Name binding - Wikipedia</a>
 </p>
 
 <p>
-<a id="org5df8e08">【3】</a> <a href="https://en.wikipedia.org/wiki/Context_(computing)">Context (computing) - Wikipedia</a>
+<a id="orgcbe6375">【3】</a> <a href="https://en.wikipedia.org/wiki/Context_(computing)">Context (computing) - Wikipedia</a>
 </p>
 
 <p>
-<a id="org676b431">【4】</a> <a href="https://en.wikipedia.org/wiki/Scope_(computer_science)">Scope (computer science) - Wikipedia</a>
+<a id="org0b4f36e">【4】</a> <a href="https://en.wikipedia.org/wiki/Scope_(computer_science)">Scope (computer science) - Wikipedia</a>
 </p>
 
 <p>
-<a id="orgb7965e9">【5】</a> 翻译取自这里，<a href="http://blog.huati365.com/5db5259c3933e332">Lisp的作用域和生存期（scope and extent in lisp)- 每日博客 (huati365.com)</a>
+<a id="org01632cb">【5】</a> 翻译取自这里，<a href="http://blog.huati365.com/5db5259c3933e332">Lisp的作用域和生存期（scope and extent in lisp)- 每日博客 (huati365.com)</a>
 </p>
 
 <p>
-<a id="org5ad8a3f">【6】</a> <a href="https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node43.html#SECTION00700000000000000000">3. Scope and Extent (cmu.edu)</a>
+<a id="orgf0c1a27">【6】</a> <a href="https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node43.html#SECTION00700000000000000000">3. Scope and Extent (cmu.edu)</a>
 </p>
 
 <p>
-<a id="org72223da">【7】</a> <a href="https://en.wikipedia.org/wiki/Name_resolution_(programming_languages)">Name resolution (programming languages) - Wikipedia</a>
+<a id="org5d9b220">【7】</a> <a href="https://en.wikipedia.org/wiki/Name_resolution_(programming_languages)">Name resolution (programming languages) - Wikipedia</a>
 </p>
 
 <p>
-<a id="orge39dd1f">【8】</a> <a href="https://en.wikipedia.org/wiki/Variable_(computer_science)">Variable (computer science) - Wikipedia</a>
+<a id="orgea4424f">【8】</a> <a href="https://en.wikipedia.org/wiki/Variable_(computer_science)">Variable (computer science) - Wikipedia</a>
 </p>
 
 <p>
-<a id="org90b06f1">【9】</a> <a href="https://www.zhihu.com/question/20032419/answer/44059188">动态作用域和词法域的区别是什么？ - 知乎 (zhihu.com)</a>
+<a id="org6a7906b">【9】</a> <a href="https://www.zhihu.com/question/20032419/answer/44059188">动态作用域和词法域的区别是什么？ - 知乎 (zhihu.com)</a>
 </p>
 
 <p>
-<a id="org3fe86d1">【10】</a> <a href="https://www.zenlife.tk/scheme-hygiene-macro.md">scheme 卫生宏实现介绍 (zenlife.tk)</a>
+<a id="org6bc9e79">【10】</a> <a href="https://www.zenlife.tk/scheme-hygiene-macro.md">scheme 卫生宏实现介绍 (zenlife.tk)</a>
 </p>
 
 <p>
-<a id="org532cf60">【11】</a> <a href="https://en.wikipedia.org/wiki/Hygienic_macro">Hygienic macro - Wikipedia</a>
+<a id="org90759d2">【11】</a> <a href="https://en.wikipedia.org/wiki/Hygienic_macro">Hygienic macro - Wikipedia</a>
 </p>
 
 <p>
-<a id="org37abaac">【12】</a> <i>the scheme programming lanugage</i>
+<a id="orga473b35">【12】</a> <i>the scheme programming lanugage</i>
 </p>
 
 <p>
-<a id="org6fc5fd7">【13】</a> <a href="https://www.cs.fsu.edu/~engelen/courses/COP402001/notes5_4.pdf">notes5_4.pdf (fsu.edu)</a>
+<a id="org77cd682">【13】</a> <a href="https://www.cs.fsu.edu/~engelen/courses/COP402001/notes5_4.pdf">notes5_4.pdf (fsu.edu)</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
-<hr class="Solid">
-<p>Create Date: 2021-04-17 Sat 00:00</p> <p>Last modified: 2021-08-04 Wed 13:11</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
-
-<p style="text-align:center;">
-  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
-</p>
-
-<p style="text-align:center;">
-  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
-    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
-  </a><br />
-  本作品采用
-  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
-    知识共享署名 4.0 国际许可协议
-  </a>
-  进行许可。
-</p>
+<p class="date">Date: 2021-04-17 周六 00:00</p>
+<p class="author">Author: include-yy</p>
+<p class="date">Created: 2021-08-23 周一 19:26</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>
