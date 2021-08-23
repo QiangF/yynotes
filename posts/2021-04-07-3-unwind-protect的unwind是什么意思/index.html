@@ -3,35 +3,59 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 08:41 -->
+<!-- 2021-08-23 Mon 22:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3-unwind-protect的unwind是什么意思 <div class="yyheadimg"><img src="./aHR0cHM6Ly9kYW5ib29ydS5kb25tYWkudXMvcG9zdHMvMzE4MzI4MD9xPXBhcmVudCUzQTMxODMyODA=.jpg" alt="load failed"></div></title>
+<title>unwind-protect的unwind是什么意思 <div class="yyheadimg"><img src="./aHR0cHM6Ly9kYW5ib29ydS5kb25tYWkudXMvcG9zdHMvMzE4MzI4MD9xPXBhcmVudCUzQTMxODMyODA=.jpg" alt="load failed"></div></title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="include-yy" />
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -46,29 +70,29 @@
 </div>
 </div>
 <div id="content">
-<h1 class="title">3-unwind-protect的unwind是什么意思 <div class="yyheadimg"><img src="./aHR0cHM6Ly9kYW5ib29ydS5kb25tYWkudXMvcG9zdHMvMzE4MzI4MD9xPXBhcmVudCUzQTMxODMyODA=.jpg" alt="load failed"></div></h1>
+<h1 class="title">unwind-protect的unwind是什么意思 <div class="yyheadimg"><img src="./aHR0cHM6Ly9kYW5ib29ydS5kb25tYWkudXMvcG9zdHMvMzE4MzI4MD9xPXBhcmVudCUzQTMxODMyODA=.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org407897f">1. 百度和谷歌的翻译</a></li>
-<li><a href="#orge5e5def">2. 维基百科上的搜索</a></li>
-<li><a href="#org22b59ac">3. C++ exception 中的 unwind</a></li>
-<li><a href="#orgfb9fc05">4. 结语</a></li>
-<li><a href="#orgd0a54bc">5. 参考资料</a></li>
+<li><a href="#orgcbf7d40">1. 百度和谷歌的翻译</a></li>
+<li><a href="#orga299c57">2. 维基百科上的搜索</a></li>
+<li><a href="#orge7b7f5b">3. C++ exception 中的 unwind</a></li>
+<li><a href="#org150931b">4. 结语</a></li>
+<li><a href="#orgc74c8aa">5. 参考资料</a></li>
 </ul>
 </div>
 </div>
 <p>
-在elisp中有一个叫做 <code>unwind-protect</code> 的特殊形式（special-form），它可以在出现错误或使用 throw 时进行一些清理操作。在 Scheme 中也有一个类似的东西叫做 <code>dynamic-wind</code> ，其中也有 <code>wind</code> 这个词。在我参考的<a href="#orge8c8cc0">【1】</a> <a href="#org7f83d32">【2】</a>文档中详细讲解了它们的用法，但是关于 <code>wind/unwind</code> 这个词的来历并没有作详细说明。
+在elisp中有一个叫做 <code>unwind-protect</code> 的特殊形式（special-form），它可以在出现错误或使用 throw 时进行一些清理操作。在 Scheme 中也有一个类似的东西叫做 <code>dynamic-wind</code> ，其中也有 <code>wind</code> 这个词。在我参考的<a href="#org36e0761">【1】</a> <a href="#orga614afe">【2】</a>文档中详细讲解了它们的用法，但是关于 <code>wind/unwind</code> 这个词的来历并没有作详细说明。
 </p>
 
 <p>
 抱着玩玩的心态，我找到了一些解释。
 </p>
 
-<div id="outline-container-org407897f" class="outline-2">
-<h2 id="org407897f"><span class="section-number-2">1</span> 百度和谷歌的翻译</h2>
+<div id="outline-container-orgcbf7d40" class="outline-2">
+<h2 id="orgcbf7d40"><span class="section-number-2">1</span> 百度和谷歌的翻译</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 对于 wind 的翻译：
@@ -144,8 +168,8 @@
 </div>
 </div>
 
-<div id="outline-container-orge5e5def" class="outline-2">
-<h2 id="orge5e5def"><span class="section-number-2">2</span> 维基百科上的搜索</h2>
+<div id="outline-container-orga299c57" class="outline-2">
+<h2 id="orga299c57"><span class="section-number-2">2</span> 维基百科上的搜索</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 通过 wikipedia，我在一个叫做 call stack【3】的词条上找到了相关解释。我将这一段的翻译放在这里：
@@ -162,21 +186,21 @@
 </div>
 </div>
 
-<div id="outline-container-org22b59ac" class="outline-2">
-<h2 id="org22b59ac"><span class="section-number-2">3</span> C++ exception 中的 unwind</h2>
+<div id="outline-container-orge7b7f5b" class="outline-2">
+<h2 id="orge7b7f5b"><span class="section-number-2">3</span> C++ exception 中的 unwind</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 在搜索 unwind 的过程中，我偶然发现这个词在 C++ 中也有，而且 “stack unwind” 已经有了翻译，即“栈展开” 或 “栈回退”。这么看来， <code>unwind-protect</code> 的还挺直观的，就是“展开保护”的意思。
 </p>
 
 <p>
-关于 stack unwinding 这里就不作过多介绍了，stackoverflow <a href="#org42a65d5">【4】</a>上面解释的很不错。<a href="#orgb337899">【3】</a>中有一篇讲解 C++ 异常的文章，讲的很好。作者十几年前写的文章，是个大牛的样子。
+关于 stack unwinding 这里就不作过多介绍了，stackoverflow <a href="#org8ee7b55">【4】</a>上面解释的很不错。<a href="#org21732c7">【3】</a>中有一篇讲解 C++ 异常的文章，讲的很好。作者十几年前写的文章，是个大牛的样子。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgfb9fc05" class="outline-2">
-<h2 id="orgfb9fc05"><span class="section-number-2">4</span> 结语</h2>
+<div id="outline-container-org150931b" class="outline-2">
+<h2 id="org150931b"><span class="section-number-2">4</span> 结语</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 <code>unwind-protect</code> 就是回退保护的意思，而 <code>dynamic-wind</code> 我还找不到翻译（也许可以翻译成“动态缠绕”？），理解成和 <code>unwind-protect</code> 相似的意思也不是不行。它比 <code>unwind-protect</code> 多了一个参数，功能比 <code>unwind-protect</code> 强。因为它接收的都是 <code>thunk</code> ，它在 Scheme 中是以 procedure 而不是 macro 实现的。
@@ -192,31 +216,31 @@
 </div>
 </div>
 
-<div id="outline-container-orgd0a54bc" class="outline-2">
-<h2 id="orgd0a54bc"><span class="section-number-2">5</span> 参考资料</h2>
+<div id="outline-container-orgc74c8aa" class="outline-2">
+<h2 id="orgc74c8aa"><span class="section-number-2">5</span> 参考资料</h2>
 <div class="outline-text-2" id="text-5">
 <p>
-<a id="orge8c8cc0">【1】</a> <a href="https://docs.racket-lang.org/reference/cont.html#%28def._%28%28quote._~23~25kernel%29._dynamic-wind%29%29">10.4 Continuations (racket-lang.org)</a>
+<a id="org36e0761">【1】</a> <a href="https://docs.racket-lang.org/reference/cont.html#%28def._%28%28quote._~23~25kernel%29._dynamic-wind%29%29">10.4 Continuations (racket-lang.org)</a>
 </p>
 
 <p>
-<a id="org7f83d32">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Cleanups.html">https://www.gnu.org/software/emacs/manual/html_node/elisp/Cleanups.html</a>
+<a id="orga614afe">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Cleanups.html">https://www.gnu.org/software/emacs/manual/html_node/elisp/Cleanups.html</a>
 </p>
 
 <p>
-<a id="orgb337899">【3】</a> <a href="http://baiy.cn/">白杨的原创免费作品 (baiy.cn)</a>
+<a id="org21732c7">【3】</a> <a href="http://baiy.cn/">白杨的原创免费作品 (baiy.cn)</a>
 </p>
 
 <p>
-<a id="org42a65d5">【4】</a> <a href="https://stackoverflow.com/questions/2331316/what-is-stack-unwinding">c++ - What is stack unwinding? - Stack Overflow</a>
+<a id="org8ee7b55">【4】</a> <a href="https://stackoverflow.com/questions/2331316/what-is-stack-unwinding">c++ - What is stack unwinding? - Stack Overflow</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-04-07 Wed 00:00</p> <p>Last modified: 2021-08-04 Wed 08:41</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+<p>Create Date: 2021-04-07 Wed 00:00</p> <p>Last modified: 2021-08-20 Fri 13:37</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
   <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>

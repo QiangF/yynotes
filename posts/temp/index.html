@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-23 周一 17:48 -->
+<!-- 2021-08-23 Mon 22:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>emacs 的 macro <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkwMzY3NjEy.jpg" alt="load failed"></div></title>
@@ -63,17 +63,26 @@ for the JavaScript code in this tag.
  <a accesskey="h" href="../../index.html"> UP </a>
  |
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
-</div><div id="content">
+</div><div id="preamble" class="status">
+<div>
+  <a href="../../index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
 <h1 class="title">emacs 的 macro <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkwMzY3NjEy.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org255b7e8">1. emacs 的 macro</a>
+<li><a href="#orga5ea9da">1. emacs 的 macro</a>
 <ul>
-<li><a href="#orga52d676">1.1. 宏与函数的区别</a></li>
-<li><a href="#org9b160b2">1.2. 与宏相关的一些函数和宏</a></li>
-<li><a href="#orgf03ea14">1.3. 宏的缩进</a></li>
+<li><a href="#org5e99245">1.1. 宏与函数的区别</a></li>
+<li><a href="#orgf49107f">1.2. 与宏相关的一些函数和宏</a></li>
+<li><a href="#orgae41d36">1.3. 宏的缩进</a></li>
+<li><a href="#org162c492">1.4. 宏与 lexical-binding</a></li>
+<li><a href="#org48099e7">1.5. manual 中提到的注意事项</a></li>
+<li><a href="#org28773f7">1.6. 一些工具宏</a></li>
 </ul>
 </li>
 </ul>
@@ -87,8 +96,8 @@ for the JavaScript code in this tag.
 本文分为两部分，第一部分简要介绍 emacs 中的 macro，第二部分介绍一些实际中使用宏的例子。
 </p>
 
-<div id="outline-container-org255b7e8" class="outline-2">
-<h2 id="org255b7e8"><span class="section-number-2">1</span> emacs 的 macro</h2>
+<div id="outline-container-orga5ea9da" class="outline-2">
+<h2 id="orga5ea9da"><span class="section-number-2">1</span> emacs 的 macro</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 宏可以用来定义新的控制结构和其他的语言特性。宏定义起来很像函数，但相比于函数是为了求值，宏是为了得到另一个 Lisp 表达式，它在随后才被用来求值。得到新表达式的过程被称为宏的 <b>展开</b> 。
@@ -99,8 +108,8 @@ for the JavaScript code in this tag.
 </p>
 </div>
 
-<div id="outline-container-orga52d676" class="outline-3">
-<h3 id="orga52d676"><span class="section-number-3">1.1</span> 宏与函数的区别</h3>
+<div id="outline-container-org5e99245" class="outline-3">
+<h3 id="org5e99245"><span class="section-number-3">1.1</span> 宏与函数的区别</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 在 emacs 中，我们使用 <code>defmacro</code> 来定义宏，它的语法是：
@@ -224,8 +233,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org9b160b2" class="outline-3">
-<h3 id="org9b160b2"><span class="section-number-3">1.2</span> 与宏相关的一些函数和宏</h3>
+<div id="outline-container-orgf49107f" class="outline-3">
+<h3 id="orgf49107f"><span class="section-number-3">1.2</span> 与宏相关的一些函数和宏</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 这里我只介绍四个函数，这也是在 elisp manual 上列出的四个函数。
@@ -287,8 +296,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgf03ea14" class="outline-3">
-<h3 id="orgf03ea14"><span class="section-number-3">1.3</span> 宏的缩进</h3>
+<div id="outline-container-orgae41d36" class="outline-3">
+<h3 id="orgae41d36"><span class="section-number-3">1.3</span> 宏的缩进</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 在阅读 emacs 的 elisp 源代码时，你可能会看到某些宏里面还有一条类似这样的声明： <code>(declare (indent 1))</code> ，这是在声明宏调用的缩进方式。老实说，文档上关于 declare indent 的部分写的有点晦涩，我尽量多用些例子说明它的用法。
@@ -309,7 +318,7 @@ indent 接受的参数有以下几种形式：
 
 <li>整数 <code>number</code> ，它让前 <code>number</code> 个参数变成 distinguished arguments（这里译为分界参数），剩余的参数被当成表达式的 body 部分。表达式中的行会根据它的第一个参数是否为分界参数来决定它的缩进方式。如果参数不是分界参数，那么该行会使用 <code>lisp-body-indent</code> 加上当前所在表达式缩进来作为缩进列数；如果参数是分界参数且是第一个或第二个，那么它会进行两次缩进，即当前缩进加上两个 <code>lisp-body-indent</code> ；对于非第一第二的分界参数，会使用标准模式缩进，即对齐上一行的首参数</li>
 
-<li>一个符号 <code>symbol</code> ，它是一个函数名，函数被用来计算行的缩进。函数接受 <code>pos</code> 和 <code>state</code> 两个参数， <code>pos</code> 是行的缩进开始位置， <code>stat</code> 是 <code>parse-partial-sexp</code> 在解析完当前行后的返回值。函数的返回值可以是一个整数或一个包含整数的表。如果返回整数，当前行的下面的同层行会与它对齐；如果返回表，下面的行可以使用不同的缩进</li>
+<li>一个符号 <code>symbol</code> ，它是一个函数名，函数被用来计算行的缩进。函数接受 <code>pos</code> 和 <code>state</code> 两个参数， <code>pos</code> 是行的缩进开始位置， <code>state</code> 是 <code>parse-partial-sexp</code> 在解析完当前行后的返回值。函数的返回值可以是一个整数或一个包含整数的表。如果返回整数，当前行的下面的同层行会与它对齐；如果返回表，下面的行可以使用不同的缩进</li>
 </ul>
 
 <p>
@@ -494,6 +503,165 @@ indent 接受的参数有以下几种形式：
 </p>
 </div>
 </div>
+
+<div id="outline-container-org162c492" class="outline-3">
+<h3 id="org162c492"><span class="section-number-3">1.4</span> 宏与 lexical-binding</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+前面我也说到过，宏的结构就是 car 是 符号 <code>macro</code> ，cdr 是函数的序对。在 lexical-binding 为 nil 和 非 nil 的情况下对 macro 中的函数是有影响的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> lexical-binding nil)
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">foo-1</span> (x)
+  (list 'list x))
+(symbol-function 'foo-1) =&gt; (macro lambda (x) (list 'list x))
+
+(<span style="color: #00af00;">setq</span> lexical-binding t)
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">foo-2</span> (x)
+  (list 'list x))
+(symbol-function 'foo-2) =&gt; (macro closure (t) (x) (list 'list x))
+</pre>
+</div>
+
+<p>
+可以看到，此时 macro 的 cdr 是一个闭包而不是单纯的 lambda 函数。此后即便 lexical-binding 设置为 nil，调用这个宏也会按照词法作用域规则求值。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org48099e7" class="outline-3">
+<h3 id="org48099e7"><span class="section-number-3">1.5</span> manual 中提到的注意事项</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+这一小节主要是 manual 上关于宏的需要注意的地方，我把它们综合了一下。
+</p>
+</div>
+
+<div id="outline-container-orgdfc88b7" class="outline-4">
+<h4 id="orgdfc88b7"><span class="section-number-4">1.5.1</span> 宏与编译</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<blockquote>
+<p>
+You might ask why we take the trouble to compute an expansion for a macro and then evaluate the expansion. Why not have the macro body produce the desired results directly? The reason has to do with compilation.
+</p>
+</blockquote>
+
+<p>
+当宏调用出现在将要被编译的 Lisp 程序中时，Lisp 编译器会像解释器一样调用宏定义，然后得到宏展开的结果。但与解释器不同的是，编译器不会继续求值，而是将展开结果插入到程序中。这样一来，编译后的代码可以完成宏的功能，又可以利用编译码的速度。如果宏展开期间有副作用的话是不能这样做的，因为编译器的副作用对运行时没有作用。
+</p>
+
+<p>
+为了让宏调用的编译能够进行，在编译宏调用时被调宏必须事先定义。编译器的一个特性可以帮到你：如果文件中包含 <code>defmacro</code> 宏定义的话，这个宏在文件编译期间会被临时定义。
+</p>
+
+<p>
+对文件进行字节编译时也会执行任何 top-level 的 <code>require</code> 调用，你可以通过 <code>require</code> 定义宏的文件来确保必要的宏定义在编译期间是可用的。要避免编译后对文件的 require 引入不必要的宏的话，可以使用 <code>eval-when-compile</code> 来处理只在编译器使用的 <code>require</code> ，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">eval-when-compile</span>
+  (<span style="color: #00af00;">require</span> '<span style="color: #1f5bff;">some-compile-macro</span>))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org86da98a" class="outline-4">
+<h4 id="org86da98a"><span class="section-number-4">1.5.2</span> 编译时求值（eval）</h4>
+<div class="outline-text-4" id="text-1-5-2">
+<p>
+在宏展开时，在宏体中对宏的参数表达式求值可能会带来一些问题。如果用户碰巧使用了和宏的形参名字相同的实参的话会出现问题，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">with lexical-binding set to nil</span>
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">foo</span> (a)
+  (list 'setq (eval a) t))
+
+(<span style="color: #00af00;">setq</span> x 'b)
+(<span style="color: #00af00;">foo</span> x) =&gt; (<span style="color: #00af00;">setq</span> b t) =&gt; t
+
+(<span style="color: #00af00;">setq</span> a 'c)
+(<span style="color: #00af00;">foo</span> a) =&gt; (<span style="color: #00af00;">setq</span> a t) =&gt; t <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">but set a, not c</span>
+</pre>
+</div>
+
+<p>
+出现这个问题的原因在于，宏的形参 <code>a</code> 绑定了符号 'a，由于动态作用域的关系，a 对符号 c 的绑定在宏展开时暂时被遮蔽了，所以 (eval a) 会得到符号 a 而不是 c。（不过话又说回来，如果打开词法作用域的话就不会有问题了，因为词法作用域的绑定不会改变外面符号绑定的值，而 eval 又是在空环境（全局环境）中求值的，所以没有问题）
+</p>
+
+<p>
+除了说上面的遮蔽问题外，展开时求值对宏的编译也是不利的。在编译时编译器会执行宏定义，但这时被 eval 的变量可能还不存在。
+</p>
+
+<p>
+manual 上对此的建议是：不要在宏展开时对参数表达式进行求值，而是将求值的部分留到宏的展开结果中，这样就可以在运行时求值了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org61c7202" class="outline-4">
+<h4 id="org61c7202"><span class="section-number-4">1.5.3</span> 宏的多次展开</h4>
+<div class="outline-text-4" id="text-1-5-3">
+<p>
+如果宏在展开过程中含有副作用的话，宏的行为可能会与宏的展开次数有关。你应该尽量避免宏展开中的副作用，除非你十分清楚你要做什么。
+</p>
+
+<p>
+但并不是所有的副作用都能被避免的，比如在展开时构建 Lisp 对象。几乎所有的宏展开都包括构建表这一过程，这也是大多数宏的全部工作，它一般是很安全的。但有一种情况是你必须要注意的：当你构建的对象是宏展开中带引用常值的一部分时。
+</p>
+
+<p>
+在大多数的 Lisp 代码中是不需要关心这个问题的。只要你在对宏定义中构建的对象进行带副作用操作时这个问题才变得重要。要避免这个问题，你最好在由宏定义构建的对象中避免任何的副作用操作。
+</p>
+
+<p>
+下面的代码可以用来说明这个问题：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">empty-object</span> ()
+  (list 'quote (cons nil nil)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">initialize</span> (condition)
+  (<span style="color: #00af00;">let</span> ((object (empty-object)))
+    (<span style="color: #00af00;">if</span> condition
+        (setcar object condition))
+    object))
+</pre>
+</div>
+
+<p>
+每当 <code>initialize</code> 被调用时，一个新的 <code>(nil)</code> 就会被创建。所以不用担心各个调用之间的副作用问题。但是如果上面的代码被编译了，那么 initialize 中的 <code>(empty-object)</code> 调用会被展开，并在之后所有对 initialize 调用过程中重复使用。这显然不是我们想要看到的。
+</p>
+
+<p>
+避免这种病态情况的一种方法是将空对象视为常量（即 '(nil)），你不会在 '(nil) 之类的常量上使用 setcar，因此自然也不会在 (empty-object) 上使用它。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org740a5fd" class="outline-4">
+<h4 id="org740a5fd"><span class="section-number-4">1.5.4</span> 其他建议</h4>
+<div class="outline-text-4" id="text-1-5-4">
+<ul class="org-ul">
+<li>请注意不要在宏展开期间完成运行时的工作，记得一定要返回一个表达式</li>
+<li>注意宏参数在展开表达式中的求值次数，写的好的宏会注意避免掉对某个表达式的重复求值</li>
+<li>注意名字冲突问题，使用 <code>make-symbol</code> 或 <code>gensym</code> 等工具来解决问题</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org28773f7" class="outline-3">
+<h3 id="org28773f7"><span class="section-number-3">1.6</span> 一些工具宏</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+上面的各小节基本涵盖了 manual 中 macro 一章的所有内容，但光凭这些干巴巴的东西还不足以让你写出好看好用的宏。这一小节的任务是简单介绍一些可以在宏定义中使用的工具宏，以及一些更加实际的例子。
+</p>
+</div>
+</div>
 </div>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
@@ -505,10 +673,24 @@ indent 接受的参数有以下几种形式：
 </div>
 </div></div>
 <div id="postamble" class="status">
-<p class="date">Date: 2021-08-21 周六 09:58</p>
-<p class="author">Author: include-yy</p>
-<p class="date">Created: 2021-08-23 周一 17:48</p>
-<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+<hr class="Solid">
+<p>Create Date: 2021-08-21 Sat 09:58</p> <p>Last modified: 2021-08-23 Mon 22:29</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
 </div>
 </body>
 </html>

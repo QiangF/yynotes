@@ -3,35 +3,59 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 13:46 -->
+<!-- 2021-08-23 Mon 22:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>1-由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></title>
+<title>由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="include-yy" />
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -46,15 +70,15 @@
 </div>
 </div>
 <div id="content">
-<h1 class="title">1-由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></h1>
+<h1 class="title">由(λ(x)(x x))看elisp与scheme之区别 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGludGVyZXN0LmNvbS9waW4vNDQyMzM3OTk0NjQ5NDIxMTc0Lw==.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc23f3e3">1. 原因分析</a></li>
-<li><a href="#orgca459fc">2. elisp 的调用规则</a></li>
-<li><a href="#orgf0622c9">3. 总结</a></li>
-<li><a href="#orgc6e3ac3">4. 参考资料</a></li>
+<li><a href="#org68f3fbf">1. 原因分析</a></li>
+<li><a href="#orgfc2822b">2. elisp 的调用规则</a></li>
+<li><a href="#org52b642b">3. 总结</a></li>
+<li><a href="#org4d37d60">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -67,9 +91,9 @@
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">fun</span>(<span style="color: #228b22;">void</span>)
+<pre class="src src-c"><span style="color: #18b2b2;">int</span> <span style="color: #ef2929;">fun</span>(<span style="color: #18b2b2;">void</span>)
 {
-    <span style="color: #a020f0;">return</span> fun();
+    <span style="color: #00af00;">return</span> fun();
 }
 </pre>
 </div>
@@ -83,7 +107,7 @@
 </p>
 
 <div class="org-src-container">
-<pre class="src src-scheme">((<span style="color: #a020f0;">lambda</span> (x) (x x)) (<span style="color: #a020f0;">lambda</span> (x) (x x)))
+<pre class="src src-scheme">((<span style="color: #00af00;">lambda</span> (x) (x x)) (<span style="color: #00af00;">lambda</span> (x) (x x)))
 </pre>
 </div>
 
@@ -94,8 +118,8 @@
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">Debugger entered--Lisp error: (void-function x)
   (x x)
-  (<span style="color: #a020f0;">lambda</span> (x) (x x))((<span style="color: #a020f0;">lambda</span> (x) (x x)))
-  eval(((<span style="color: #a020f0;">lambda</span> (x) (x x)) #'(lambda (x) (x x))) nil)
+  (<span style="color: #00af00;">lambda</span> (x) (x x))((<span style="color: #00af00;">lambda</span> (x) (x x)))
+  eval(((<span style="color: #00af00;">lambda</span> (x) (x x)) #'(lambda (x) (x x))) nil)
 ...
 </pre>
 </div>
@@ -104,11 +128,11 @@
 自然，接收了 <code>(lambda(x) (x x))</code> 作为值的形参 x 的值不可能为空，出现错误的原因肯定和 elisp 的求值方式有关。
 </p>
 
-<div id="outline-container-orgc23f3e3" class="outline-2">
-<h2 id="orgc23f3e3"><span class="section-number-2">1</span> 原因分析</h2>
+<div id="outline-container-org68f3fbf" class="outline-2">
+<h2 id="org68f3fbf"><span class="section-number-2">1</span> 原因分析</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-出错了最快的解决方法自然是使用搜索引擎，不过就靠 <code>(lambda(x) (x x))</code> 来作为关键词还真搜不出什么来。那就只能读读文档了。在 elisp mannual 的 function-indirection 一节<a href="#orgb69d620">【1】</a>中我找到了原因。
+出错了最快的解决方法自然是使用搜索引擎，不过就靠 <code>(lambda(x) (x x))</code> 来作为关键词还真搜不出什么来。那就只能读读文档了。在 elisp mannual 的 function-indirection 一节<a href="#org23fcf7d">【1】</a>中我找到了原因。
 </p>
 
 <blockquote>
@@ -126,11 +150,11 @@ If the first element of the list is a symbol then evaluation examines the symbol
 </p>
 
 <p>
-那么，要怎样对上面的错误进行修正呢？elisp 提供了一个叫做 <code>funcall</code> <a href="#org5fea1bb">【2】</a>的函数，它接收一个函数和一个或多个值作为参数，并返回函数返回的值。我们可以这样修改上面的代码：
+那么，要怎样对上面的错误进行修正呢？elisp 提供了一个叫做 <code>funcall</code> <a href="#orga53ec9e">【2】</a>的函数，它接收一个函数和一个或多个值作为参数，并返回函数返回的值。我们可以这样修改上面的代码：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+<pre class="src src-emacs-lisp">((<span style="color: #00af00;">lambda</span> (x) (funcall x x)) (<span style="color: #00af00;">lambda</span> (x) (funcall x x)))
 </pre>
 </div>
 
@@ -139,13 +163,13 @@ If the first element of the list is a symbol then evaluation examines the symbol
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">Debugger entered--Lisp error: (<span style="color: #ff0000; font-weight: bold;">error</span> <span style="color: #8b2252;">"Lisp nesting exceeds &#8216;</span><span style="color: #008b8b;">max-lisp-eval-depth</span><span style="color: #8b2252;">&#8217;"</span>)
- funcall((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
-  (<span style="color: #a020f0;">lambda</span> (x) (funcall x x))((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
-  funcall((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
-  (<span style="color: #a020f0;">lambda</span> (x) (funcall x x))((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
-  funcall((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)) (<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
-  (<span style="color: #a020f0;">lambda</span> (x) (funcall x x))((<span style="color: #a020f0;">lambda</span> (x) (funcall x x)))
+<pre class="src src-emacs-lisp">Debugger entered--Lisp error: (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"Lisp nesting exceeds &#8216;</span><span style="color: #1f5bff;">max-lisp-eval-depth</span><span style="color: #ff1f8b;">&#8217;"</span>)
+ funcall((<span style="color: #00af00;">lambda</span> (x) (funcall x x)) (<span style="color: #00af00;">lambda</span> (x) (funcall x x)))
+  (<span style="color: #00af00;">lambda</span> (x) (funcall x x))((<span style="color: #00af00;">lambda</span> (x) (funcall x x)))
+  funcall((<span style="color: #00af00;">lambda</span> (x) (funcall x x)) (<span style="color: #00af00;">lambda</span> (x) (funcall x x)))
+  (<span style="color: #00af00;">lambda</span> (x) (funcall x x))((<span style="color: #00af00;">lambda</span> (x) (funcall x x)))
+  funcall((<span style="color: #00af00;">lambda</span> (x) (funcall x x)) (<span style="color: #00af00;">lambda</span> (x) (funcall x x)))
+  (<span style="color: #00af00;">lambda</span> (x) (funcall x x))((<span style="color: #00af00;">lambda</span> (x) (funcall x x)))
 ......
 </pre>
 </div>
@@ -159,8 +183,8 @@ If the first element of the list is a symbol then evaluation examines the symbol
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">a</span> (x) (+ x 1))
-(<span style="color: #a020f0;">setq</span> a (<span style="color: #a020f0;">lambda</span> (x) (+ x 2)))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">a</span> (x) (+ x 1))
+(<span style="color: #00af00;">setq</span> a (<span style="color: #00af00;">lambda</span> (x) (+ x 2)))
 
 (funcall a 1)
 =&gt; 3
@@ -175,8 +199,8 @@ If the first element of the list is a symbol then evaluation examines the symbol
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">a</span> (x) (+ x 1))
-(<span style="color: #a020f0;">setq</span> a (<span style="color: #a020f0;">lambda</span> (x) (+ x 2)))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">a</span> (x) (+ x 1))
+(<span style="color: #00af00;">setq</span> a (<span style="color: #00af00;">lambda</span> (x) (+ x 2)))
 
 (apply a 1 nil)
 =&gt; 3
@@ -187,8 +211,8 @@ If the first element of the list is a symbol then evaluation examines the symbol
 </div>
 </div>
 
-<div id="outline-container-orgca459fc" class="outline-2">
-<h2 id="orgca459fc"><span class="section-number-2">2</span> elisp 的调用规则</h2>
+<div id="outline-container-orgfc2822b" class="outline-2">
+<h2 id="orgfc2822b"><span class="section-number-2">2</span> elisp 的调用规则</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 elisp 文档中这样写道：
@@ -231,13 +255,13 @@ A form that is a nonempty list is either a function call, a macro call, or a spe
 </p>
 
 <p>
-这也许说明调用形式的首个项只能是一个元素（element），而不能是一个待求值的表达式。 <code>((lambda (x) (funcall x x)) (lambda (x) (funcall x x)))</code> 中是 lambda 函数表达式作为第一项，这样的形式被允许好像是特殊情况。毕竟官方文档<a href="#orgb69d620">【1】</a>中更推荐使用 <code>funcall</code> 的形式。
+这也许说明调用形式的首个项只能是一个元素（element），而不能是一个待求值的表达式。 <code>((lambda (x) (funcall x x)) (lambda (x) (funcall x x)))</code> 中是 lambda 函数表达式作为第一项，这样的形式被允许好像是特殊情况。毕竟官方文档<a href="#org23fcf7d">【1】</a>中更推荐使用 <code>funcall</code> 的形式。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgf0622c9" class="outline-2">
-<h2 id="orgf0622c9"><span class="section-number-2">3</span> 总结</h2>
+<div id="outline-container-org52b642b" class="outline-2">
+<h2 id="org52b642b"><span class="section-number-2">3</span> 总结</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 这个问题其实就是 Lisp-1 和 Lisp-2 的区别导致的，Lisp-1 的变量命名空间和函数命名空间是统一的，而在 Lisp-2 中两者是分开的。Scheme 的变量和函数显得更加统一一些。
@@ -245,27 +269,27 @@ A form that is a nonempty list is either a function call, a macro call, or a spe
 </div>
 </div>
 
-<div id="outline-container-orgc6e3ac3" class="outline-2">
-<h2 id="orgc6e3ac3"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-org4d37d60" class="outline-2">
+<h2 id="org4d37d60"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="orgb69d620">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection</a>
+<a id="org23fcf7d">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Indirection.html#Function-Indirection</a>
 </p>
 
 <p>
-<a id="org5fea1bb">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions">https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions</a>
+<a id="orga53ec9e">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions">https://www.gnu.org/software/emacs/manual/html_node/elisp/Calling-Functions.html#Calling-Functions</a>
 </p>
 
 <p>
-<a id="org197e5de">【3】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms</a>
+<a id="org30331d0">【3】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms">https://www.gnu.org/software/emacs/manual/html_node/elisp/Function-Forms.html#Function-Forms</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-03-22 Mon 00:00</p> <p>Last modified: 2021-08-04 Wed 00:21</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+<p>Create Date: 2021-03-22 Mon 00:00</p> <p>Last modified: 2021-08-23 Mon 22:34</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
   <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>

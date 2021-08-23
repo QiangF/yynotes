@@ -3,35 +3,59 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 13:11 -->
+<!-- 2021-08-23 Mon 22:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>6-什么是dsl和作为dsl的cl-loop <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzMxOTEy.jpg" alt="load failed"></div></title>
+<title>什么是dsl和作为dsl的cl-loop <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzMxOTEy.jpg" alt="load failed"></div></title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="include-yy" />
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -46,28 +70,28 @@
 </div>
 </div>
 <div id="content">
-<h1 class="title">6-什么是dsl和作为dsl的cl-loop <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzMxOTEy.jpg" alt="load failed"></div></h1>
+<h1 class="title">什么是dsl和作为dsl的cl-loop <div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvNzMxOTEy.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd800afb">1. 什么是 DSL（domain-specific language）</a>
+<li><a href="#orgafb4339">1. 什么是 DSL（domain-specific language）</a>
 <ul>
-<li><a href="#org33fbae5">1.1. 内部 DSL 与 外部 DSL</a></li>
-<li><a href="#org426ef3c">1.2. DSL 的优点和缺点</a></li>
+<li><a href="#orgcd8d695">1.1. 内部 DSL 与 外部 DSL</a></li>
+<li><a href="#org0442269">1.2. DSL 的优点和缺点</a></li>
 </ul>
 </li>
-<li><a href="#org1ed2f31">2. elisp 中的 cl-loop</a>
+<li><a href="#org3492d24">2. elisp 中的 cl-loop</a>
 <ul>
-<li><a href="#org6de0270">2.1. the Basic</a></li>
-<li><a href="#org1caf209">2.2. cl-loop 中的顺序执行</a></li>
-<li><a href="#org2e4df9c">2.3. cl-loop 中的选择结构</a></li>
-<li><a href="#org01fa0c2">2.4. cl-loop 的循环结构</a></li>
-<li><a href="#org12c2d9a">2.5. 总结</a></li>
+<li><a href="#orgd4d8cb4">2.1. the Basic</a></li>
+<li><a href="#org8d3f3c4">2.2. cl-loop 中的顺序执行</a></li>
+<li><a href="#org7452235">2.3. cl-loop 中的选择结构</a></li>
+<li><a href="#orgda96032">2.4. cl-loop 的循环结构</a></li>
+<li><a href="#orgaecff1c">2.5. 总结</a></li>
 </ul>
 </li>
-<li><a href="#orgaa600c1">3. 延申阅读</a></li>
-<li><a href="#orge909690">4. 参考资料</a></li>
+<li><a href="#org6a88dcf">3. 延申阅读</a></li>
+<li><a href="#org9c2bdd2">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -90,8 +114,8 @@
 </ul>
 
 
-<div id="outline-container-orgd800afb" class="outline-2">
-<h2 id="orgd800afb"><span class="section-number-2">1</span> 什么是 DSL（domain-specific language）</h2>
+<div id="outline-container-orgafb4339" class="outline-2">
+<h2 id="orgafb4339"><span class="section-number-2">1</span> 什么是 DSL（domain-specific language）</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 DSL 是一种用于特殊应用领域的编程语言。DSL 与 GPL（通用目的语言，即 general-purose language）相对，通用语言可用于多个领域。在《代码的未来》一书中作者这样写道：
@@ -124,8 +148,8 @@ DSL 这个对特定目的的小规模语言的称呼，是最近才出现的比�
 </p>
 </div>
 
-<div id="outline-container-org33fbae5" class="outline-3">
-<h3 id="org33fbae5"><span class="section-number-3">1.1</span> 内部 DSL 与 外部 DSL</h3>
+<div id="outline-container-orgcd8d695" class="outline-3">
+<h3 id="orgcd8d695"><span class="section-number-3">1.1</span> 内部 DSL 与 外部 DSL</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 使用独立的解释器或编译器实现的 DSL 被称为外部 DSL（External Domain Specific Language），比较有名的例子有 LaTex 或 AWK。
@@ -149,8 +173,8 @@ DSL 这个对特定目的的小规模语言的称呼，是最近才出现的比�
 </div>
 </div>
 
-<div id="outline-container-org426ef3c" class="outline-3">
-<h3 id="org426ef3c"><span class="section-number-3">1.2</span> DSL 的优点和缺点</h3>
+<div id="outline-container-org0442269" class="outline-3">
+<h3 id="org0442269"><span class="section-number-3">1.2</span> DSL 的优点和缺点</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 中文的维基百科居然没有英文对应的翻译（汗），这里我自己翻译一下：
@@ -189,8 +213,8 @@ DSL 的缺点
 </div>
 
 
-<div id="outline-container-org1ed2f31" class="outline-2">
-<h2 id="org1ed2f31"><span class="section-number-2">2</span> elisp 中的 cl-loop</h2>
+<div id="outline-container-org3492d24" class="outline-2">
+<h2 id="org3492d24"><span class="section-number-2">2</span> elisp 中的 cl-loop</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 我在上一篇文章中简单介绍了 <code>cl-loop</code> 的用法，我感觉日常是够用了，但是还不够全面。这篇文章里我会把参考文档里面所有的内容做一个总结，并给出足够详细的例子。
@@ -205,15 +229,15 @@ DSL 的缺点
 </p>
 </div>
 
-<div id="outline-container-org6de0270" class="outline-3">
-<h3 id="org6de0270"><span class="section-number-3">2.1</span> the Basic</h3>
+<div id="outline-container-orgd4d8cb4" class="outline-3">
+<h3 id="orgd4d8cb4"><span class="section-number-3">2.1</span> the Basic</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 首先，让我们看看如果没有任何语句的话 <code>cl-loop</code> 会给出怎样的结果：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>)
 </pre>
 </div>
 
@@ -222,7 +246,7 @@ DSL 的缺点
 </p>
 
 
-<div id="orgb140c0d" class="figure">
+<div class="figure">
 <p><img src="./1.gif" alt="1.gif" />
 </p>
 </div>
@@ -232,7 +256,7 @@ DSL 的缺点
 </p>
 
 
-<div id="org4ec8406" class="figure">
+<div class="figure">
 <p><img src="./2.gif" alt="2.gif" />
 </p>
 </div>
@@ -250,7 +274,7 @@ DSL 的缺点
 </p>
 
 
-<div id="org4a2437d" class="figure">
+<div class="figure">
 <p><img src="./3.gif" alt="3.gif" />
 </p>
 </div>
@@ -260,7 +284,7 @@ DSL 的缺点
 </p>
 
 
-<div id="org6d3ea70" class="figure">
+<div class="figure">
 <p><img src="./4.gif" alt="4.gif" />
 </p>
 </div>
@@ -286,19 +310,19 @@ DSL 的缺点
 </div>
 </div>
 
-<div id="outline-container-org1caf209" class="outline-3">
-<h3 id="org1caf209"><span class="section-number-3">2.2</span> cl-loop 中的顺序执行</h3>
+<div id="outline-container-org8d3f3c4" class="outline-3">
+<h3 id="org8d3f3c4"><span class="section-number-3">2.2</span> cl-loop 中的顺序执行</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 首先需要提到的就是 elisp 表达式在 <code>cl-loop</code> 中的执行，这样的表达式在 <code>cl-loop</code> 里是合法的： <code>(cl-loop (setq x 0))</code> ， <code>(cl-loop (print 1) (print 2) (print 3))</code> 。但是下面是不行的，需要使用错误示例的下面的代码：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">wrong example</span>
-(<span style="color: #a020f0;">cl-loop</span> collect 1 (+ 1 2))
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">wrong example</span>
+(<span style="color: #00af00;">cl-loop</span> collect 1 (+ 1 2))
 
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">right</span>
-(<span style="color: #a020f0;">cl-loop</span> collect 1 do (+ 1 2))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">right</span>
+(<span style="color: #00af00;">cl-loop</span> collect 1 do (+ 1 2))
 </pre>
 </div>
 
@@ -311,7 +335,7 @@ DSL 的缺点
 </p>
 
 
-<div id="orgf9ade4c" class="figure">
+<div class="figure">
 <p><img src="./5.gif" alt="5.gif" />
 </p>
 </div>
@@ -325,13 +349,13 @@ DSL 的缺点
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> with x = 1 return (+ x 1))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span> with x = 1 return (+ x 1))
 =&gt; 2
 
-(<span style="color: #a020f0;">cl-loop</span> with x = 1 do (incf x) (incf x) (incf x) return x)
+(<span style="color: #00af00;">cl-loop</span> with x = 1 do (incf x) (incf x) (incf x) return x)
 =&gt; 4
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = 1
  with y = x
  with z = (+ 1 y)
@@ -345,9 +369,9 @@ DSL 的缺点
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> with x = 17 do &#8230;)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span> with x = 17 do &#8230;)
 
-(<span style="color: #a020f0;">let</span> ((x 17)) (<span style="color: #a020f0;">cl-loop</span> do &#8230;))
+(<span style="color: #00af00;">let</span> ((x 17)) (<span style="color: #00af00;">cl-loop</span> do &#8230;))
 </pre>
 </div>
 
@@ -389,32 +413,32 @@ DSL 的缺点
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">collect</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 collect i)
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">collect</span>
+(<span style="color: #00af00;">cl-loop</span> for i from 0 to 10 collect i)
 =&gt; (0 1 2 3 4 5 6 7 8 9 10)
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">append</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 append (list i))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">append</span>
+(<span style="color: #00af00;">cl-loop</span> for i from 0 to 10 append (list i))
 =&gt; (0 1 2 3 4 5 6 7 8 9 10)
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">=nconc' is similar to append, but use nconc to concate instead</span>
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">type C-h f to see nconc's definition</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">=nconc' is similar to append, but use nconc to concate instead</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">type C-h f to see nconc's definition</span>
 
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">concat</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from ?a to ?z concat (string i))
-=&gt; <span style="color: #8b2252;">"abcdefghijklmnopqrstuvwxyz"</span>
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">vconcat</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 vconcat (vector i))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">concat</span>
+(<span style="color: #00af00;">cl-loop</span> for i from ?a to ?z concat (string i))
+=&gt; <span style="color: #ff1f8b;">"abcdefghijklmnopqrstuvwxyz"</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">vconcat</span>
+(<span style="color: #00af00;">cl-loop</span> for i from 0 to 10 vconcat (vector i))
 =&gt; [0 1 2 3 4 5 6 7 8 9 10]
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">count</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 count t)
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">count</span>
+(<span style="color: #00af00;">cl-loop</span> for i from 0 to 10 count t)
 =&gt; 11
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">sum</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 sum i)
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">sum</span>
+(<span style="color: #00af00;">cl-loop</span> for i from 0 to 10 sum i)
 =&gt; 55
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">maximize</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 maximize i)
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">maximize</span>
+(<span style="color: #00af00;">cl-loop</span> for i from 0 to 10 maximize i)
 =&gt; 10
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">minimize</span>
-(<span style="color: #a020f0;">cl-loop</span> for i from 0 to 10 minimize i)
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">minimize</span>
+(<span style="color: #00af00;">cl-loop</span> for i from 0 to 10 minimize i)
 =&gt; 0
 </pre>
 </div>
@@ -424,7 +448,7 @@ DSL 的缺点
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
 collect 1 into w
 collect 1 into w
 collect 1 into w
@@ -433,7 +457,7 @@ collect 1 into w
 return w)
 =&gt; (1 1 1 1 1)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 sum 1 into x
 sum 2 into x
 sum 3 into x
@@ -441,7 +465,7 @@ sum 4 into x
 return x)
 =&gt; 10
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i from 0 to 10
 collect i
 sum (+ i 1) into x
@@ -456,16 +480,16 @@ collec t x)
 </div>
 </div>
 
-<div id="outline-container-org2e4df9c" class="outline-3">
-<h3 id="org2e4df9c"><span class="section-number-3">2.3</span> cl-loop 中的选择结构</h3>
+<div id="outline-container-org7452235" class="outline-3">
+<h3 id="org7452235"><span class="section-number-3">2.3</span> cl-loop 中的选择结构</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 选择结构非常简单，就是通常语言里面的 <code>if-else</code> 语句，不过它没有 <code>elseif</code> 之类的语句。它的语法是 <code>if condition clause else clause</code> ，其中 <code>else</code> 语句是可选的。可以看到它只接受一条 clause，不过可以通过 <code>and</code> 来将多条语句连接在一起作为一条语句，就像 C 中的复合语句一样。此外，为了避免悬挂 <code>if</code> 的问题，还可以在某个不完整 <code>if</code> 语句后面加上 <code>end</code> 来结束 <code>if</code> 的作用范围：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">the mistake nest if</span>
-(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">the mistake nest if</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = 2
  if (&gt; x 1)
  do (print 1)
@@ -476,7 +500,7 @@ collec t x)
 =&gt; &lt;print 1 and 2&gt;
 
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = 1
  if (&gt; x 1)
  do (print 1)
@@ -486,8 +510,8 @@ collec t x)
  return 1)
 =&gt; &lt;print nothing&gt;
 
-<span style="color: #b22222;">;;</span><span style="color: #b22222;">the right one</span>
-(<span style="color: #a020f0;">cl-loop</span>
+<span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">the right one</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = 1
  if (&gt; x 1)
  do (print 1)
@@ -508,13 +532,13 @@ collec t x)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> when t do (print 1) return 0) =&gt; &lt;print 1&gt;
-(<span style="color: #a020f0;">cl-loop</span> unless nil do (print 1) return 0) =&gt; &lt;print 1&gt;
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span> when t do (print 1) return 0) =&gt; &lt;print 1&gt;
+(<span style="color: #00af00;">cl-loop</span> unless nil do (print 1) return 0) =&gt; &lt;print 1&gt;
 
-(<span style="color: #a020f0;">cl-loop</span> when t do (print 1) else do (print 2) return 0) =&gt; &lt;print 1&gt;
-(<span style="color: #a020f0;">cl-loop</span> when nil do (print 1) else do (print 2) return 0) =&gt; &lt;print 2&gt;
-(<span style="color: #a020f0;">cl-loop</span> unless nil do (print 1) else do (print 2) return 0) =&gt; &lt;print 1&gt;
-(<span style="color: #a020f0;">cl-loop</span> unless t do (print 1) else do (print 2) return 0) =&gt; &lt;print 2&gt;
+(<span style="color: #00af00;">cl-loop</span> when t do (print 1) else do (print 2) return 0) =&gt; &lt;print 1&gt;
+(<span style="color: #00af00;">cl-loop</span> when nil do (print 1) else do (print 2) return 0) =&gt; &lt;print 2&gt;
+(<span style="color: #00af00;">cl-loop</span> unless nil do (print 1) else do (print 2) return 0) =&gt; &lt;print 1&gt;
+(<span style="color: #00af00;">cl-loop</span> unless t do (print 1) else do (print 2) return 0) =&gt; &lt;print 2&gt;
 </pre>
 </div>
 
@@ -524,8 +548,8 @@ collec t x)
 </div>
 </div>
 
-<div id="outline-container-org01fa0c2" class="outline-3">
-<h3 id="org01fa0c2"><span class="section-number-3">2.4</span> cl-loop 的循环结构</h3>
+<div id="outline-container-orgda96032" class="outline-3">
+<h3 id="orgda96032"><span class="section-number-3">2.4</span> cl-loop 的循环结构</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 这里就到了最重要的部分了，毕竟我们使用 <code>cl-loop</code> 就是冲着循环来的。通过使用循环语句，我们就可以正常地退出 <code>cl-loop</code> 表达式了。
@@ -540,17 +564,17 @@ collec t x)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
- initially (<span style="color: #a020f0;">setq</span> j 10)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
+ initially (<span style="color: #00af00;">setq</span> j 10)
  for i from 0 to 10
  collect (+ i j))
 =&gt; (10 11 12 13 14 15 16 17 18 19 20)
 
-<span style="color: #b22222;">;;</span><span style="color: #b22222;">also ok</span>
-(<span style="color: #a020f0;">cl-loop</span>
+<span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">also ok</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i from 0 to 10
 collect (+ i j)
-initially (<span style="color: #a020f0;">setq</span> j 10))
+initially (<span style="color: #00af00;">setq</span> j 10))
 </pre>
 </div>
 
@@ -571,14 +595,14 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  with x = 5
  for i from 0 to 0
  do (identity 1)
- finally (<span style="color: #a020f0;">cl-incf</span> x)
- finally (<span style="color: #a020f0;">cl-incf</span> x)
+ finally (<span style="color: #00af00;">cl-incf</span> x)
+ finally (<span style="color: #00af00;">cl-incf</span> x)
  finally return x
- finally (<span style="color: #a020f0;">cl-incf</span> x))
+ finally (<span style="color: #00af00;">cl-incf</span> x))
 =&gt; 8
 </pre>
 </div>
@@ -588,8 +612,8 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </p>
 </div>
 
-<div id="outline-container-org09f778b" class="outline-4">
-<h4 id="org09f778b"><span class="section-number-4">2.4.1</span> 简单的迭代语句</h4>
+<div id="outline-container-orgc8445c1" class="outline-4">
+<h4 id="orgc8445c1"><span class="section-number-4">2.4.1</span> 简单的迭代语句</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <p>
 除了 <code>for</code> 语句之外，还有更简单的迭代语句，所以这里我们先从它们开始。
@@ -600,15 +624,15 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  repeat 10 count t)
 =&gt; 10
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  repeat 10 sum 1)
 =&gt; 10
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  repeat 10 collect 1)
 =&gt; (1 1 1 1 1 1 1 1 1 1)
 </pre>
@@ -619,8 +643,8 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">while</span> cond forms ...) <span style="color: #b22222;">;; </span><span style="color: #b22222;">eslip code</span>
-(<span style="color: #a020f0;">cl-loop</span> while cond do forms ...) <span style="color: #b22222;">;; </span><span style="color: #b22222;">cl-loop code</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">while</span> cond forms ...) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">eslip code</span>
+(<span style="color: #00af00;">cl-loop</span> while cond do forms ...) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">cl-loop code</span>
 </pre>
 </div>
 
@@ -633,25 +657,25 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  with x = 10
  repeat 10
- do (<span style="color: #a020f0;">cl-incf</span> x 2)
+ do (<span style="color: #00af00;">cl-incf</span> x 2)
  always (cl-evenp x))
 =&gt; t
 
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = 10
  repeat 10
- do (<span style="color: #a020f0;">cl-incf</span> x 2)
+ do (<span style="color: #00af00;">cl-incf</span> x 2)
  never (cl-oddp x))
 =&gt; t
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = 10
  repeat 10
- do (<span style="color: #a020f0;">cl-incf</span> x 2)
+ do (<span style="color: #00af00;">cl-incf</span> x 2)
  thereis (= x 16))
 =&gt; t
 </pre>
@@ -659,8 +683,8 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </div>
 </div>
 
-<div id="outline-container-org2cf0921" class="outline-4">
-<h4 id="org2cf0921"><span class="section-number-4">2.4.2</span> for 语句</h4>
+<div id="outline-container-orga8908fb" class="outline-4">
+<h4 id="orga8908fb"><span class="section-number-4">2.4.2</span> for 语句</h4>
 <div class="outline-text-4" id="text-2-4-2">
 <p>
 可以说 <code>cl-loop</code> 的大部分精华都在 <code>for</code> 语句上面了， <code>for</code> 语句提供了相当多的选项来面对多种多样的循环方法。要分类的话大致可以分为这几类：
@@ -668,7 +692,7 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </div>
 
 <ol class="org-ol">
-<li><a id="org77afb0a"></a>from to 类型<br />
+<li><a id="orgdd87932"></a>from to 类型<br />
 <div class="outline-text-5" id="text-2-4-2-1">
 <p>
 这一类的 <code>for</code> 语句的典型形式拿 C 来举例的话就是 <code>for (int i = 0; i &lt; N; i++)</code> 这样的。前面我们一直在用的 <code>for i from 0 to 10</code> 就是这一种。
@@ -702,21 +726,21 @@ initially (<span style="color: #a020f0;">setq</span> j 10))
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  for x upfrom 0 downto -10
  collect x)
 =&gt; (0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10)
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for x downfrom 0 upto -10
 collect x)
 =&gt; (0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10)
 
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for x upfrom 0 downto 10
  collect x)
 =&gt; nil
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for x downfrom 0 upto 10
 collect x)
 =&gt; nil
@@ -736,17 +760,17 @@ collect x)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
 for i from 0 to 10
 collect (* i i))
 =&gt; (0 1 4 9 16 25 36 49 64 81 100)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i to 10
 collect (+ i i))
 =&gt; (0 2 4 6 8 10 12 14 16 18 20)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i from 0
  if (= i 11)
  return x
@@ -754,7 +778,7 @@ collect (+ i i))
  collect i into x)
 =&gt; (0 1 2 3 4 5 6 7 8 9 10)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i by 3
  if (&lt; i 20)
  collect i into x
@@ -762,50 +786,50 @@ collect (+ i i))
  return x)
 =&gt; (0 3 6 9 12 15 18)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i upfrom 0 to 10
  sum i)
 =&gt; 55
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i downfrom 10 to 0
 sum i)
 =&gt; 55
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i upfrom 10
 when (&gt; i 100) return x
-do (<span style="color: #a020f0;">cl-incf</span> i i)
+do (<span style="color: #00af00;">cl-incf</span> i i)
 collect i into x)
 =&gt; (20 42 86 174)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i downfrom 10 by 2
 when (&lt; i 0) return x
 sum i into x)
 =&gt; 30
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i from 0 upto 10
 collect i)
 =&gt; (0 1 2 3 4 5 6 7 8 9 10)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i upto 10
 collect i)
 =&gt; (0 1 2 3 4 5 6 7 8 9 10)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for i from 0 downto -5
 collect i)
 =&gt; (0 -1 -2 -3 -4 -5)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i below 10
  collect i)
 =&gt; (0 1 2 3 4 5 6 7 8 9)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i from 10 above 5
  collect i)
 =&gt; (10 9 8 7 6)
@@ -816,7 +840,7 @@ collect i)
 </div>
 </li>
 
-<li><a id="orga2b83d0"></a>遍历语句<br />
+<li><a id="orgf354e45"></a>遍历语句<br />
 <div class="outline-text-5" id="text-2-4-2-2">
 <p>
 准确地说，这应该是和 <code>map</code> 和 <code>foreach</code> 比较相近的迭代方法。
@@ -838,7 +862,7 @@ for var in-ref list by function
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  for x in '(1 2 3) by 'cddr
  collect x)
 =&gt; (1 3)
@@ -850,7 +874,7 @@ for var in-ref list by function
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  for x on '(1 2 3)
  collect x)
 =&gt; ((1 2 3) (2 3) (3))
@@ -862,10 +886,10 @@ for var in-ref list by function
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  with x = (list 1 2 3)
  for i in-ref x
- do (<span style="color: #a020f0;">cl-incf</span> i)
+ do (<span style="color: #00af00;">cl-incf</span> i)
  finally return x)
 =&gt; (2 3 4)
 </pre>
@@ -886,18 +910,18 @@ for var across-ref array
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
 with x = [1 2 3]
 for i across x
 collect i)
 =&gt; (1 2 3)
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = (string ?a ?b ?c)
  for i across-ref x
- do (<span style="color: #a020f0;">cl-incf</span> i 23)
+ do (<span style="color: #00af00;">cl-incf</span> i 23)
  finally return x)
-=&gt; <span style="color: #8b2252;">"xyz"</span>
+=&gt; <span style="color: #ff1f8b;">"xyz"</span>
 </pre>
 </div>
 
@@ -916,16 +940,16 @@ for var being the elements of-ref sequence
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  with x = (vector 1 2 3)
  for i being the elements of x
  do (print i))
 =&gt; &lt;print 1, 2, 3&gt;
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  with x = (vector 1 2 3)
  for i being the elements of-ref x
- do (<span style="color: #a020f0;">cl-incf</span> i 100)
+ do (<span style="color: #00af00;">cl-incf</span> i 100)
  finally return x)
 =&gt; [101 102 103]
 </pre>
@@ -960,7 +984,7 @@ for var being the elements of-ref sequence
 </li>
 
 
-<li><a id="org4a04672"></a>通用 <code>for</code> 语句<br />
+<li><a id="org8a145d0"></a>通用 <code>for</code> 语句<br />
 <div class="outline-text-5" id="text-2-4-2-3">
 <p>
 它的语法如下： <code>for var = expr1 then expr2</code> 。
@@ -971,8 +995,8 @@ for var being the elements of-ref sequence
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span> for x on my-list by 'cddr do &#8230;)
-(<span style="color: #a020f0;">cl-loop</span> for x = my-list then (cddr x) while x do &#8230;)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span> for x on my-list by 'cddr do &#8230;)
+(<span style="color: #00af00;">cl-loop</span> for x = my-list then (cddr x) while x do &#8230;)
 </pre>
 </div>
 
@@ -989,8 +1013,8 @@ for var being the elements of-ref sequence
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
-for x = 1 then (<span style="color: #a020f0;">cl-incf</span> x)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
+for x = 1 then (<span style="color: #00af00;">cl-incf</span> x)
 when (&gt; x 10) return y
 collect x into y)
 =&gt; (1 2 3 4 5 6 7 8 9 10)
@@ -1001,19 +1025,19 @@ collect x into y)
 </ol>
 </div>
 
-<div id="outline-container-org2a186ff" class="outline-4">
-<h4 id="org2a186ff"><span class="section-number-4">2.4.3</span> cl-loop 多循环语句与多重循环</h4>
+<div id="outline-container-org511e074" class="outline-4">
+<h4 id="org511e074"><span class="section-number-4">2.4.3</span> cl-loop 多循环语句与多重循环</h4>
 <div class="outline-text-4" id="text-2-4-3">
 <p>
 自然，某些时候一重循环是不够的，比如遍历二阶矩阵就需要二重循环。现在假设我要对如下的二阶矩阵所有元素求和，这样做可以吗：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> mat2 [[1 200 300]
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> mat2 [[1 200 300]
             [200 3 400]
             [300 400 5]])
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i below 3
  for j below 3
  sum (aref (aref mat2 i) j))
@@ -1026,16 +1050,16 @@ collect x into y)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  for i below 3
- sum (<span style="color: #a020f0;">cl-loop</span>
+ sum (<span style="color: #00af00;">cl-loop</span>
       for j below 3
       sum (aref (aref mat2 i) j)))
 =&gt; 1809
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">another approach</span>
-(<span style="color: #a020f0;">cl-loop</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">another approach</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i across mat2
- sum (<span style="color: #a020f0;">cl-loop</span>
+ sum (<span style="color: #00af00;">cl-loop</span>
       for j across i
       sum j))
 =&gt; 1809
@@ -1051,13 +1075,13 @@ collect x into y)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
 named hello
 for i to 10
-do (<span style="color: #a020f0;">cl-loop</span>
+do (<span style="color: #00af00;">cl-loop</span>
     for j from i to 10
-    if (<span style="color: #a020f0;">and</span> (= i 5) (= j 9))
-    do (<span style="color: #a020f0;">cl-return-from</span> hello w)
+    if (<span style="color: #00af00;">and</span> (= i 5) (= j 9))
+    do (<span style="color: #00af00;">cl-return-from</span> hello w)
     else
     collect (list i j) into w))
 =&gt; ((5 5) (5 6) (5 7) (5 8))
@@ -1069,19 +1093,19 @@ do (<span style="color: #a020f0;">cl-loop</span>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  for i from 1 to 10
  for j to 100 by i
  collect (list i j)
 =&gt; ((0 0) (1 0) (2 0) (3 0) (4 0) (5 0) (6 0) (7 0) (8 0) (9 0) (10 0)))
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i from 1 to 10
  for j to 100 by i
  collect (list i j))
 =&gt; ((1 0) (2 1) (3 2) (4 3) (5 4) (6 5) (7 6) (8 7) (9 8) (10 9))
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
  for i from 1 to 10
  for j to 5 by i
  collect (list i j))
@@ -1102,13 +1126,13 @@ do (<span style="color: #a020f0;">cl-loop</span>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">cl-loop</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-loop</span>
  for x below 5
  for y = nil then x
  collect (list x y))
 =&gt; ((0 nil) (1 1) (2 2) (3 3) (4 4))
 
-(<span style="color: #a020f0;">cl-loop</span>
+(<span style="color: #00af00;">cl-loop</span>
 for x below 5
 and y = nil then x
 collect (list x y))
@@ -1119,11 +1143,11 @@ collect (list x y))
 </div>
 </div>
 
-<div id="outline-container-org12c2d9a" class="outline-3">
-<h3 id="org12c2d9a"><span class="section-number-3">2.5</span> 总结</h3>
+<div id="outline-container-orgaecff1c" class="outline-3">
+<h3 id="orgaecff1c"><span class="section-number-3">2.5</span> 总结</h3>
 <div class="outline-text-3" id="text-2-5">
 <p>
-<a href="#orgcffdd64">【6】</a>中总结了 cl-loop 的所有语法，这里直接拿过来：
+<a href="#org2708771">【6】</a>中总结了 cl-loop 的所有语法，这里直接拿过来：
 </p>
 
 <pre class="example">
@@ -1166,8 +1190,8 @@ For more details, see Info node `(cl)Loop Facility'.
 </div>
 </div>
 
-<div id="outline-container-orgaa600c1" class="outline-2">
-<h2 id="orgaa600c1"><span class="section-number-2">3</span> 延申阅读</h2>
+<div id="outline-container-org6a88dcf" class="outline-2">
+<h2 id="org6a88dcf"><span class="section-number-2">3</span> 延申阅读</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <code>cl-loop</code> 是源于 <code>cl</code> 的 <code>loop</code> 的，更多内容可以参考参考资料。
@@ -1175,43 +1199,43 @@ For more details, see Info node `(cl)Loop Facility'.
 </div>
 </div>
 
-<div id="outline-container-orge909690" class="outline-2">
-<h2 id="orge909690"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-org9c2bdd2" class="outline-2">
+<h2 id="org9c2bdd2"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="orgdbdfb63">【1】</a> 《代码的未来》松本行宏
+<a id="orgcd6393f">【1】</a> 《代码的未来》松本行宏
 </p>
 
 <p>
-<a id="org4dadc80">【2】</a> <a href="https://en.wikipedia.org/wiki/Domain-specific_language">Domain-specific language - Wikipedia</a>
+<a id="orgfd2024b">【2】</a> <a href="https://en.wikipedia.org/wiki/Domain-specific_language">Domain-specific language - Wikipedia</a>
 </p>
 
 <p>
-<a id="orge2ca179">【3】</a> <a href="http://www.ai.sri.com/pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
+<a id="org390b448">【3】</a> <a href="http://www.ai.sri.com/pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
 </p>
 
 <p>
-<a id="orgeb95885">【4】</a> <a href="https://gigamonkeys.com/book/loop-for-black-belts.html">LOOP for Black Belts (gigamonkeys.com)</a>
+<a id="orgf6bf592">【4】</a> <a href="https://gigamonkeys.com/book/loop-for-black-belts.html">LOOP for Black Belts (gigamonkeys.com)</a>
 </p>
 
 <p>
-<a id="orgf3cb231">【5】</a> <a href="http://www.ai.sri.com/~pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
+<a id="org2d93f86">【5】</a> <a href="http://www.ai.sri.com/~pkarp/loop.html">Tutorial for the Common Lisp Loop Macro (sri.com)</a>
 </p>
 
 <p>
-<a id="orgcffdd64">【6】</a> <a href="https://kitchingroup.cheme.cmu.edu/blog/2014/11/20/The-loop-macro-in-emacs-lisp/">The loop macro in emacs lisp (cmu.edu)</a>
+<a id="org2708771">【6】</a> <a href="https://kitchingroup.cheme.cmu.edu/blog/2014/11/20/The-loop-macro-in-emacs-lisp/">The loop macro in emacs lisp (cmu.edu)</a>
 </p>
 
 <p>
-<a id="org720fbfa">【7】</a> Loop Facility： <a href="https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html">https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html</a>
+<a id="orge058b2e">【7】</a> Loop Facility： <a href="https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html">https://www.gnu.org/software/emacs/manual/html_node/cl/Loop-Facility.html</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-06-11 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 13:11</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+<p>Create Date: 2021-06-11 Fri 00:00</p> <p>Last modified: 2021-08-23 Mon 22:36</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
   <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>

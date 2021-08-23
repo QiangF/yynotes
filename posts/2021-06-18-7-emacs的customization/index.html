@@ -3,35 +3,59 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 13:11 -->
+<!-- 2021-08-23 Mon 22:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>7-emacs的customization <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vc21pbG9jZy9hcnQvY2lybm8tMTY4OTIzMjgz.jpg" alt="load failed"></div></title>
+<title>emacs的customization <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vc21pbG9jZy9hcnQvY2lybm8tMTY4OTIzMjgz.jpg" alt="load failed"></div></title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="include-yy" />
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -46,27 +70,27 @@
 </div>
 </div>
 <div id="content">
-<h1 class="title">7-emacs的customization <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vc21pbG9jZy9hcnQvY2lybm8tMTY4OTIzMjgz.jpg" alt="load failed"></div></h1>
+<h1 class="title">emacs的customization <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vc21pbG9jZy9hcnQvY2lybm8tMTY4OTIzMjgz.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc82fb0f">1. elisp 的 customization</a>
+<li><a href="#orgf93a975">1. elisp 的 customization</a>
 <ul>
-<li><a href="#org2e14194">1.1. group</a></li>
-<li><a href="#org3deee81">1.2. variable（option）</a></li>
-<li><a href="#orge30307c">1.3. Customization 文档中我没有提到的内容</a></li>
-<li><a href="#org74e62c8">1.4. 一些项目中使用 Customizaiton 的例子</a></li>
+<li><a href="#orgf5bcda9">1.1. group</a></li>
+<li><a href="#org49c8a4a">1.2. variable（option）</a></li>
+<li><a href="#orgb6bb7cd">1.3. Customization 文档中我没有提到的内容</a></li>
+<li><a href="#org4276244">1.4. 一些项目中使用 Customizaiton 的例子</a></li>
 </ul>
 </li>
-<li><a href="#orgddbd18e">2. emacs 的 Easy Customization Interface</a>
+<li><a href="#org7cef6af">2. emacs 的 Easy Customization Interface</a>
 <ul>
-<li><a href="#orgc9600cd">2.1. 选项的设定</a></li>
-<li><a href="#org7278cfa">2.2. 选项的保存</a></li>
+<li><a href="#orgff2cea8">2.1. 选项的设定</a></li>
+<li><a href="#orgbf07253">2.2. 选项的保存</a></li>
 </ul>
 </li>
-<li><a href="#org338a017">3. 后记</a></li>
-<li><a href="#org16b9899">4. 参考资料</a></li>
+<li><a href="#orgb90d135">3. 后记</a></li>
+<li><a href="#orgabb7800">4. 参考资料</a></li>
 </ul>
 </div>
 </div>
@@ -97,8 +121,8 @@
 （话说先演示 customize 是不是更好一些，或者两者应该混在一起？）
 </p>
 
-<div id="outline-container-orgc82fb0f" class="outline-2">
-<h2 id="orgc82fb0f"><span class="section-number-2">1</span> elisp 的 customization</h2>
+<div id="outline-container-orgf93a975" class="outline-2">
+<h2 id="orgf93a975"><span class="section-number-2">1</span> elisp 的 customization</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 关于 Customization Settings，文档上是这样说的： <i>Users of Emacs can customize variables and faces without writing Lisp code, by using the Customize interface</i> 。 换言之，使用 <code>customization</code> 的话可以使用更加方便的 <i>Customize interface</i> 来对 emacs 进行配置。
@@ -126,15 +150,15 @@
 </p>
 </div>
 
-<div id="outline-container-org2e14194" class="outline-3">
-<h3 id="org2e14194"><span class="section-number-3">1.1</span> group</h3>
+<div id="outline-container-orgf5bcda9" class="outline-3">
+<h3 id="orgf5bcda9"><span class="section-number-3">1.1</span> group</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 上面说过，组作为自定义项的容器而存在，它是一系列自定义变量，自定义外观和自定义组的总和。它的存在和一般程序中功能栏上的主菜单类似，可以在主菜单中找到选项或者子菜单。Emacs 提供了一些标准组，它们基本覆盖了配置的各个方面，如下所示：
 </p>
 
 
-<div id="org15b1510" class="figure">
+<div class="figure">
 <p><img src="./1.gif" alt="1.gif" />
 </p>
 </div>
@@ -183,7 +207,7 @@
 </p>
 
 
-<div id="org2375dbe" class="figure">
+<div class="figure">
 <p><img src="./2.gif" alt="2.gif" />
 </p>
 </div>
@@ -214,28 +238,28 @@ group 写组的名字；members 是组的成员，可以写一个或多个，也
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incx</span> nil
-<span style="color: #8b2252;">"include-yy's group"</span>
-<span style="color: #483d8b;">:group</span> 'editing)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defgroup</span> <span style="color: #18b2b2;">incx</span> nil
+<span style="color: #cc0000;">"include-yy's group"</span>
+<span style="color: #b218b2;">:group</span> 'editing)
 
-(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incy</span> nil
-  <span style="color: #8b2252;">"incx's group"</span>
-  <span style="color: #483d8b;">:group</span> 'incx
-  <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"incy_tag"</span>)
+(<span style="color: #00af00;">defgroup</span> <span style="color: #18b2b2;">incy</span> nil
+  <span style="color: #cc0000;">"incx's group"</span>
+  <span style="color: #b218b2;">:group</span> 'incx
+  <span style="color: #b218b2;">:tag</span> <span style="color: #ff1f8b;">"incy_tag"</span>)
 
-(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incz</span> nil
-  <span style="color: #8b2252;">"incy's subgroup"</span>
-  <span style="color: #483d8b;">:group</span> 'incy)
+(<span style="color: #00af00;">defgroup</span> <span style="color: #18b2b2;">incz</span> nil
+  <span style="color: #cc0000;">"incy's subgroup"</span>
+  <span style="color: #b218b2;">:group</span> 'incy)
 
-(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">inca</span> nil
-  <span style="color: #8b2252;">"incz's subgroup"</span>
-  <span style="color: #483d8b;">:group</span> 'incz
-  <span style="color: #483d8b;">:link</span> '(url-link <span style="color: #8b2252;">"www.baidu.com"</span>))
+(<span style="color: #00af00;">defgroup</span> <span style="color: #18b2b2;">inca</span> nil
+  <span style="color: #cc0000;">"incz's subgroup"</span>
+  <span style="color: #b218b2;">:group</span> 'incz
+  <span style="color: #b218b2;">:link</span> '(url-link <span style="color: #ff1f8b;">"www.baidu.com"</span>))
 
-(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">incb</span> nil
-  <span style="color: #8b2252;">"incz's subgroup"</span>
-  <span style="color: #483d8b;">:group</span> 'incz
-  <span style="color: #483d8b;">:group</span> 'incy)
+(<span style="color: #00af00;">defgroup</span> <span style="color: #18b2b2;">incb</span> nil
+  <span style="color: #cc0000;">"incz's subgroup"</span>
+  <span style="color: #b218b2;">:group</span> 'incz
+  <span style="color: #b218b2;">:group</span> 'incy)
 </pre>
 </div>
 
@@ -248,15 +272,15 @@ group 写组的名字；members 是组的成员，可以写一个或多个，也
 </p>
 
 
-<div id="org1672388" class="figure">
+<div class="figure">
 <p><img src="./3.gif" alt="3.gif" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org3deee81" class="outline-3">
-<h3 id="org3deee81"><span class="section-number-3">1.2</span> variable（option）</h3>
+<div id="outline-container-org49c8a4a" class="outline-3">
+<h3 id="org49c8a4a"><span class="section-number-3">1.2</span> variable（option）</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 自定义变量也称用户选项，他们是全局的 Lisp 变量，可以通过自定义界面进行设置。与普通的全局变量不同的是，它们通过 <code>defcustom</code> 宏来定义。 <code>defcustom</code> 除了调用 <code>defvar</code> 之外还会包括一些额外的内容。
@@ -313,17 +337,17 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </p>
 </div>
 
-<div id="outline-container-orgab5ebcf" class="outline-4">
-<h4 id="orgab5ebcf"><span class="section-number-4">1.2.1</span> :type 关键字接受的类型</h4>
+<div id="outline-container-org0470f3b" class="outline-4">
+<h4 id="org0470f3b"><span class="section-number-4">1.2.1</span> :type 关键字接受的类型</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 为了方便起见，接下来所有的代码都是在叫做 <code>yyvar</code> 的组中完成的，它的定义是：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">yyvar</span> nil
-  <span style="color: #8b2252;">"var test"</span>
-  <span style="color: #483d8b;">:group</span> 'editing)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defgroup</span> <span style="color: #18b2b2;">yyvar</span> nil
+  <span style="color: #cc0000;">"var test"</span>
+  <span style="color: #b218b2;">:group</span> 'editing)
 </pre>
 </div>
 
@@ -344,13 +368,13 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">one</span> <span style="color: #8b2252;">"123"</span>
-  <span style="color: #8b2252;">"one custom"</span>
-  <span style="color: #483d8b;">:type</span> '(string))
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">the same, without paren</span>
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">one</span> <span style="color: #8b2252;">"123"</span>
-  <span style="color: #8b2252;">"one custom"</span>
-  <span style="color: #483d8b;">:type</span> 'string)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">one</span> <span style="color: #ff1f8b;">"123"</span>
+  <span style="color: #cc0000;">"one custom"</span>
+  <span style="color: #b218b2;">:type</span> '(string))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">the same, without paren</span>
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">one</span> <span style="color: #ff1f8b;">"123"</span>
+  <span style="color: #cc0000;">"one custom"</span>
+  <span style="color: #b218b2;">:type</span> 'string)
 </pre>
 </div>
 
@@ -367,11 +391,11 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </ul>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yycon</span> '(1 . 2)
-  <span style="color: #8b2252;">"yy's cons"</span>
-  <span style="color: #483d8b;">:type</span> '(cons integer integer))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yycon</span> '(1 . 2)
+  <span style="color: #cc0000;">"yy's cons"</span>
+  <span style="color: #b218b2;">:type</span> '(cons integer integer))
 
-(<span style="color: #a020f0;">setq</span> yycon '(3 . 4))
+(<span style="color: #00af00;">setq</span> yycon '(3 . 4))
 </pre>
 </div>
 
@@ -380,7 +404,7 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </p>
 
 
-<div id="orgfa587cf" class="figure">
+<div class="figure">
 <p><img src="./4.PNG" alt="4.PNG" />
 </p>
 </div>
@@ -390,14 +414,14 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </ul>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yylst</span> '(1 wo <span style="color: #8b2252;">"123"</span>)
-  <span style="color: #8b2252;">"yy's list"</span>
-  <span style="color: #483d8b;">:type</span> '(list integer symbol string))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yylst</span> '(1 wo <span style="color: #ff1f8b;">"123"</span>)
+  <span style="color: #cc0000;">"yy's list"</span>
+  <span style="color: #b218b2;">:type</span> '(list integer symbol string))
 </pre>
 </div>
 
 
-<div id="orgb9f7266" class="figure">
+<div class="figure">
 <p><img src="./5.PNG" alt="5.PNG" />
 </p>
 </div>
@@ -407,26 +431,26 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyl1</span> '(3 4)
-  <span style="color: #8b2252;">"yy l1"</span>
-  <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"hao"</span>
-  <span style="color: #483d8b;">:type</span> '(group integer integer))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yyl1</span> '(3 4)
+  <span style="color: #cc0000;">"yy l1"</span>
+  <span style="color: #b218b2;">:tag</span> <span style="color: #ff1f8b;">"hao"</span>
+  <span style="color: #b218b2;">:type</span> '(group integer integer))
 
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyl2</span> '(1 2)
-  <span style="color: #8b2252;">"yy l2"</span>
-  <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"le"</span>
-  <span style="color: #483d8b;">:type</span> '(list integer integer))
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yyl2</span> '(1 2)
+  <span style="color: #cc0000;">"yy l2"</span>
+  <span style="color: #b218b2;">:tag</span> <span style="color: #ff1f8b;">"le"</span>
+  <span style="color: #b218b2;">:type</span> '(list integer integer))
 </pre>
 </div>
 
 
-<div id="org7634e5d" class="figure">
+<div class="figure">
 <p><img src="./6.PNG" alt="6.PNG" />
 </p>
 </div>
 
 
-<div id="org781865f" class="figure">
+<div class="figure">
 <p><img src="./7.PNG" alt="7.PNG" />
 </p>
 </div>
@@ -447,15 +471,15 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyal</span> '((1 . 2) (2 . 3))
-<span style="color: #8b2252;">"yy's alist"</span>
-<span style="color: #483d8b;">:type</span> '(alist <span style="color: #483d8b;">:key-type</span> integer <span style="color: #483d8b;">:value-type</span> integer)
-<span style="color: #483d8b;">:options</span> '(4 5 6))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yyal</span> '((1 . 2) (2 . 3))
+<span style="color: #cc0000;">"yy's alist"</span>
+<span style="color: #b218b2;">:type</span> '(alist <span style="color: #b218b2;">:key-type</span> integer <span style="color: #b218b2;">:value-type</span> integer)
+<span style="color: #b218b2;">:options</span> '(4 5 6))
 </pre>
 </div>
 
 
-<div id="org597a23d" class="figure">
+<div class="figure">
 <p><img src="./8.gif" alt="8.gif" />
 </p>
 </div>
@@ -476,12 +500,12 @@ option 就是用户选项的名字；standard 是这个选项的标准值，在 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyco</span> 123
-<span style="color: #8b2252;">"yy's choice"</span>
-<span style="color: #483d8b;">:type</span> '(choice
-    (string <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"str"</span>)
-    (integer <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"int"</span>)
-    (symbol <span style="color: #483d8b;">:tag</span> <span style="color: #8b2252;">"sym"</span>)))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yyco</span> 123
+<span style="color: #cc0000;">"yy's choice"</span>
+<span style="color: #b218b2;">:type</span> '(choice
+    (string <span style="color: #b218b2;">:tag</span> <span style="color: #ff1f8b;">"str"</span>)
+    (integer <span style="color: #b218b2;">:tag</span> <span style="color: #ff1f8b;">"int"</span>)
+    (symbol <span style="color: #b218b2;">:tag</span> <span style="color: #ff1f8b;">"sym"</span>)))
 </pre>
 </div>
 
@@ -490,15 +514,15 @@ choice:
 </p>
 
 
-<div id="org3ccdff9" class="figure">
+<div class="figure">
 <p><img src="./9.gif" alt="9.gif" />
 </p>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyrad</span> 123
-<span style="color: #8b2252;">"yy's radio"</span>
-<span style="color: #483d8b;">:type</span> '(radio string integer symbol))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yyrad</span> 123
+<span style="color: #cc0000;">"yy's radio"</span>
+<span style="color: #b218b2;">:type</span> '(radio string integer symbol))
 </pre>
 </div>
 
@@ -507,7 +531,7 @@ radio:
 </p>
 
 
-<div id="orga8e39f7" class="figure">
+<div class="figure">
 <p><img src="./10.gif" alt="10.gif" />
 </p>
 </div>
@@ -529,19 +553,19 @@ radio:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defun</span> <span style="color: #0000ff;">add</span> (x y)
-  <span style="color: #8b2252;">"add two number"</span>
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">add</span> (x y)
+  <span style="color: #cc0000;">"add two number"</span>
   (+ x y))
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyfun-val</span> 1
-  <span style="color: #8b2252;">"yy's fun and val item"</span>
-  <span style="color: #483d8b;">:type</span> '(radio (function-item add)
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yyfun-val</span> 1
+  <span style="color: #cc0000;">"yy's fun and val item"</span>
+  <span style="color: #b218b2;">:type</span> '(radio (function-item add)
                 (variable-item lexical-binding)
                 integer))
 </pre>
 </div>
 
 
-<div id="orgde75c24" class="figure">
+<div class="figure">
 <p><img src="./11.PNG" alt="11.PNG" />
 </p>
 </div>
@@ -559,25 +583,25 @@ radio:
 </div>
 </div>
 
-<div id="outline-container-org289bc18" class="outline-4">
-<h4 id="org289bc18"><span class="section-number-4">1.2.2</span> :set 和 :get</h4>
+<div id="outline-container-orgf29ed98" class="outline-4">
+<h4 id="orgf29ed98"><span class="section-number-4">1.2.2</span> :set 和 :get</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 通过上面的例子也看到了，想要改变一个选项的值，首先在灰色输入框中输入值，然后单击（或Enter键） <code>State</code> 按钮来进行修改。如果我们不设置 <code>:set</code> 的话，Emacs 会使用默认的 <code>set-default</code> 来对选项进行设置，设置 <code>:set</code> 可以改变这一默认行为：
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(fset 'yyse (<span style="color: #a020f0;">lambda</span> (sb va) (set sb (+ va 1))))
+<pre class="src src-emacs-lisp">(fset 'yyse (<span style="color: #00af00;">lambda</span> (sb va) (set sb (+ va 1))))
 
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">yyset1</span> 1
-<span style="color: #8b2252;">"yy's set1"</span>
-<span style="color: #483d8b;">:type</span> 'integer
-<span style="color: #483d8b;">:set</span> 'yyse)
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">yyset1</span> 1
+<span style="color: #cc0000;">"yy's set1"</span>
+<span style="color: #b218b2;">:type</span> 'integer
+<span style="color: #b218b2;">:set</span> 'yyse)
 </pre>
 </div>
 
 
-<div id="orga41d8de" class="figure">
+<div class="figure">
 <p><img src="./12.gif" alt="12.gif" />
 </p>
 </div>
@@ -591,10 +615,10 @@ radio:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">b</span> '(1 2 3)
-<span style="color: #8b2252;">"yy's b"</span>
-<span style="color: #483d8b;">:type</span> '(repeat integer)
-<span style="color: #483d8b;">:get</span> (<span style="color: #a020f0;">lambda</span> (s) (-map  (<span style="color: #a020f0;">lambda</span> (x) (+ x 1)) (symbol-value s))))
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">b</span> '(1 2 3)
+<span style="color: #cc0000;">"yy's b"</span>
+<span style="color: #b218b2;">:type</span> '(repeat integer)
+<span style="color: #b218b2;">:get</span> (<span style="color: #00af00;">lambda</span> (s) (-map  (<span style="color: #00af00;">lambda</span> (x) (+ x 1)) (symbol-value s))))
 </pre>
 </div>
 
@@ -603,15 +627,15 @@ radio:
 </p>
 
 
-<div id="orga2da9b9" class="figure">
+<div class="figure">
 <p><img src="./13.PNG" alt="13.PNG" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0331ec0" class="outline-4">
-<h4 id="org0331ec0"><span class="section-number-4">1.2.3</span> :initialize</h4>
+<div id="outline-container-org13afec3" class="outline-4">
+<h4 id="org13afec3"><span class="section-number-4">1.2.3</span> :initialize</h4>
 <div class="outline-text-4" id="text-1-2-3">
 <p>
 这个关键字参数指定在初始化时一些行为，这里我主要对 Emacs 提供的五个函数进行一些分析。
@@ -646,20 +670,20 @@ radio:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">custom-initialize-set</span>
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s1</span> 1 <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:type</span> 'number
-  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-set
-  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">custom-initialize-set</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">1. with void variable</span>
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s1</span> 1 <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:type</span> 'number
+  <span style="color: #b218b2;">:initialize</span> 'custom-initialize-set
+  <span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s x) (set s (+ x 1))))
 s1 =&gt; 2
 
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
-(<span style="color: #a020f0;">setq</span> s1 1)
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s1</span> 1 <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:type</span> 'number
-  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-set
-  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">2. with non-void variable</span>
+(<span style="color: #00af00;">setq</span> s1 1)
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s1</span> 1 <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:type</span> 'number
+  <span style="color: #b218b2;">:initialize</span> 'custom-initialize-set
+  <span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s x) (set s (+ x 1))))
 s1 =&gt; 1
 </pre>
 </div>
@@ -669,16 +693,16 @@ s1 =&gt; 1
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s2</span> 1 <span style="color: #8b2252;">""</span>
-<span style="color: #483d8b;">:type</span> 'number
-<span style="color: #483d8b;">:initialize</span> 'custom-initialize-default)
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">1. with void variable</span>
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s2</span> 1 <span style="color: #cc0000;">""</span>
+<span style="color: #b218b2;">:type</span> 'number
+<span style="color: #b218b2;">:initialize</span> 'custom-initialize-default)
 s2 =&gt; 1
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
-(<span style="color: #a020f0;">setq</span> s2 2)
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s2</span> 1 <span style="color: #8b2252;">""</span>
-<span style="color: #483d8b;">:type</span> 'number
-<span style="color: #483d8b;">:initialize</span> 'custom-initialize-default)
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">2. with non-void variable</span>
+(<span style="color: #00af00;">setq</span> s2 2)
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s2</span> 1 <span style="color: #cc0000;">""</span>
+<span style="color: #b218b2;">:type</span> 'number
+<span style="color: #b218b2;">:initialize</span> 'custom-initialize-default)
 s2 =&gt; 2
 </pre>
 </div>
@@ -688,18 +712,18 @@ s2 =&gt; 2
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s3</span> 1 <span style="color: #8b2252;">""</span>
-<span style="color: #483d8b;">:type</span> 'number
-<span style="color: #483d8b;">:initialize</span> 'custom-initialize-reset
-<span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">1. with void variable</span>
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s3</span> 1 <span style="color: #cc0000;">""</span>
+<span style="color: #b218b2;">:type</span> 'number
+<span style="color: #b218b2;">:initialize</span> 'custom-initialize-reset
+<span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s x) (set s (+ x 1))))
 s3 =&gt; 2
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
-(<span style="color: #a020f0;">setq</span> s3 2)
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s3</span> 1 <span style="color: #8b2252;">""</span>
-<span style="color: #483d8b;">:type</span> 'number
-<span style="color: #483d8b;">:initialize</span> 'custom-initialize-reset
-<span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">2. with non-void variable</span>
+(<span style="color: #00af00;">setq</span> s3 2)
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s3</span> 1 <span style="color: #cc0000;">""</span>
+<span style="color: #b218b2;">:type</span> 'number
+<span style="color: #b218b2;">:initialize</span> 'custom-initialize-reset
+<span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s x) (set s (+ x 1))))
 s3 =&gt; 3
 </pre>
 </div>
@@ -709,26 +733,26 @@ s3 =&gt; 3
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">1. with void variable</span>
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s4</span> 1 <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:type</span> 'number
-  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-changed
-  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">1. with void variable</span>
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s4</span> 1 <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:type</span> 'number
+  <span style="color: #b218b2;">:initialize</span> 'custom-initialize-changed
+  <span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s x) (set s (+ x 1))))
 s4 =&gt; 1
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">2. with non-void variable</span>
-(<span style="color: #a020f0;">setq</span> s4 2)
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">s4</span> 1 <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:type</span> 'number
-  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-changed
-  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s x) (set s (+ x 1))))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">2. with non-void variable</span>
+(<span style="color: #00af00;">setq</span> s4 2)
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">s4</span> 1 <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:type</span> 'number
+  <span style="color: #b218b2;">:initialize</span> 'custom-initialize-changed
+  <span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s x) (set s (+ x 1))))
 s4 =&gt; 3
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgb46dd26" class="outline-4">
-<h4 id="orgb46dd26"><span class="section-number-4">1.2.4</span> :set-after</h4>
+<div id="outline-container-org7689062" class="outline-4">
+<h4 id="org7689062"><span class="section-number-4">1.2.4</span> :set-after</h4>
 <div class="outline-text-4" id="text-1-2-4">
 <p>
 <code>:local</code> ， <code>:risky</code> ， <code>:safe</code> 这几个关键字我直接过了，因为它们都是用来设置属性值的，但是我现在还不太清楚设置了到底有什么用。
@@ -743,7 +767,7 @@ s4 =&gt; 3
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">my.el</span>
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">my.el</span>
 (custom-set-variables
  '(w3 1)
  '(w2 1)
@@ -756,37 +780,37 @@ s4 =&gt; 3
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><span style="color: #b22222;">;; </span><span style="color: #b22222;">2.el</span>
-<span style="color: #b22222;">;; </span><span style="color: #b22222;">wrong</span>
-(<span style="color: #a020f0;">setq</span> cnt 0)
-(<span style="color: #a020f0;">defgroup</span> <span style="color: #228b22;">wcd</span> nil <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:group</span> 'wp)
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">2.el</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">wrong</span>
+(<span style="color: #00af00;">setq</span> cnt 0)
+(<span style="color: #00af00;">defgroup</span> <span style="color: #18b2b2;">wcd</span> nil <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:group</span> 'wp)
 
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">w1</span> 2 <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:type</span> 'number
-  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s v) (<span style="color: #a020f0;">progn</span> (<span style="color: #a020f0;">cl-incf</span> cnt) (set s cnt)))
-  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-default)
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">w1</span> 2 <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:type</span> 'number
+  <span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s v) (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">cl-incf</span> cnt) (set s cnt)))
+  <span style="color: #b218b2;">:initialize</span> 'custom-initialize-default)
 
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">w2</span> 3 <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:type</span> 'number
-  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s v) (<span style="color: #a020f0;">progn</span> (<span style="color: #a020f0;">cl-incf</span> cnt) (set s cnt)))
-  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-default
-  <span style="color: #b22222;">;;</span><span style="color: #b22222;">:set-after '(w1)</span>
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">w2</span> 3 <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:type</span> 'number
+  <span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s v) (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">cl-incf</span> cnt) (set s cnt)))
+  <span style="color: #b218b2;">:initialize</span> 'custom-initialize-default
+  <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">:set-after '(w1)</span>
   )
 
-(<span style="color: #a020f0;">defcustom</span> <span style="color: #a0522d;">w3</span> 4 <span style="color: #8b2252;">""</span>
-  <span style="color: #483d8b;">:type</span> 'number
-  <span style="color: #483d8b;">:set</span> (<span style="color: #a020f0;">lambda</span> (s v) (<span style="color: #a020f0;">progn</span> (<span style="color: #a020f0;">cl-incf</span> cnt) (set s cnt)))
-  <span style="color: #483d8b;">:initialize</span> 'custom-initialize-default
-  <span style="color: #b22222;">;;</span><span style="color: #b22222;">:set-after '(w2)</span>
+(<span style="color: #00af00;">defcustom</span> <span style="color: #ff8700;">w3</span> 4 <span style="color: #cc0000;">""</span>
+  <span style="color: #b218b2;">:type</span> 'number
+  <span style="color: #b218b2;">:set</span> (<span style="color: #00af00;">lambda</span> (s v) (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">cl-incf</span> cnt) (set s cnt)))
+  <span style="color: #b218b2;">:initialize</span> 'custom-initialize-default
+  <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">:set-after '(w2)</span>
   )
 
-(load-file  <span style="color: #8b2252;">"./my.el"</span>)load-file  <span style="color: #8b2252;">"./my.el"</span>)
+(load-file  <span style="color: #ff1f8b;">"./my.el"</span>)load-file  <span style="color: #ff1f8b;">"./my.el"</span>)
 </pre>
 </div>
 
 
-<div id="orgc68536c" class="figure">
+<div class="figure">
 <p><img src="./14.gif" alt="14.gif" />
 </p>
 </div>
@@ -796,7 +820,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="org8d7dd3b" class="figure">
+<div class="figure">
 <p><img src="./15.gif" alt="15.gif" />
 </p>
 </div>
@@ -825,8 +849,8 @@ s4 =&gt; 3
 </div>
 </div>
 
-<div id="outline-container-orgd656580" class="outline-4">
-<h4 id="orgd656580"><span class="section-number-4">1.2.5</span> 和 customization variable 相关的一些函数</h4>
+<div id="outline-container-org5503296" class="outline-4">
+<h4 id="org5503296"><span class="section-number-4">1.2.5</span> 和 customization variable 相关的一些函数</h4>
 <div class="outline-text-4" id="text-1-2-5">
 <p>
 在文档中提到的函数有：
@@ -872,8 +896,8 @@ s4 =&gt; 3
 </div>
 </div>
 
-<div id="outline-container-orge30307c" class="outline-3">
-<h3 id="orge30307c"><span class="section-number-3">1.3</span> Customization 文档中我没有提到的内容</h3>
+<div id="outline-container-orgb6bb7cd" class="outline-3">
+<h3 id="orgb6bb7cd"><span class="section-number-3">1.3</span> Customization 文档中我没有提到的内容</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 可以说，这一章的主要内容是 <code>defcustom</code> 这个宏以及相应的函数，其他部分的话文档只是一笔带过。这些部分我也不是很熟，因为关于它们的主要文档还在这一章的后面，或者是在 Emacs Mannual 中。
@@ -893,8 +917,8 @@ s4 =&gt; 3
 </div>
 </div>
 
-<div id="outline-container-org74e62c8" class="outline-3">
-<h3 id="org74e62c8"><span class="section-number-3">1.4</span> 一些项目中使用 Customizaiton 的例子</h3>
+<div id="outline-container-org4276244" class="outline-3">
+<h3 id="org4276244"><span class="section-number-3">1.4</span> 一些项目中使用 Customizaiton 的例子</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 以下就是一些在实际项目中使用的例子了，它们的来源主要是 github，我会给出相关的链接，数量大概在 10 个左右。为了避免因为包更新导致的行数对不上，这里我取时间最近的 commit 作为依据：
@@ -930,8 +954,8 @@ s4 =&gt; 3
 </div>
 </div>
 
-<div id="outline-container-orgddbd18e" class="outline-2">
-<h2 id="orgddbd18e"><span class="section-number-2">2</span> emacs 的 Easy Customization Interface</h2>
+<div id="outline-container-org7cef6af" class="outline-2">
+<h2 id="org7cef6af"><span class="section-number-2">2</span> emacs 的 Easy Customization Interface</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 <b>Easy Customization Interface</b> 即 简单自定义界面 的意思。通过 emacs 提供的这一界面可以相对简单地对 emacs 进行配置。
@@ -942,7 +966,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="orgaa63e7d" class="figure">
+<div class="figure">
 <p><img src="./16.gif" alt="16.gif" />
 </p>
 </div>
@@ -952,7 +976,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="org24c790b" class="figure">
+<div class="figure">
 <p><img src="./17.gif" alt="17.gif" />
 </p>
 </div>
@@ -962,7 +986,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="org83226b6" class="figure">
+<div class="figure">
 <p><img src="./18.gif" alt="18.gif" />
 </p>
 </div>
@@ -972,8 +996,8 @@ s4 =&gt; 3
 </p>
 </div>
 
-<div id="outline-container-orgc9600cd" class="outline-3">
-<h3 id="orgc9600cd"><span class="section-number-3">2.1</span> 选项的设定</h3>
+<div id="outline-container-orgff2cea8" class="outline-3">
+<h3 id="orgff2cea8"><span class="section-number-3">2.1</span> 选项的设定</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 上面我们展示了各种各样打开自定义界面的方法，但是对于如何设定选项没有说明。这里就设定的各个方面做一些简单的介绍。
@@ -984,7 +1008,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="org7b5bf0c" class="figure">
+<div class="figure">
 <p><img src="./19.PNG" alt="19.PNG" />
 </p>
 </div>
@@ -998,13 +1022,13 @@ s4 =&gt; 3
 </p>
 
 
-<div id="org8c053b5" class="figure">
+<div class="figure">
 <p><img src="./20.PNG" alt="20.PNG" />
 </p>
 </div>
 
 
-<div id="orgb93efd3" class="figure">
+<div class="figure">
 <p><img src="./21.PNG" alt="21.PNG" />
 </p>
 </div>
@@ -1039,7 +1063,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="org705e35e" class="figure">
+<div class="figure">
 <p><img src="./22.gif" alt="22.gif" />
 </p>
 </div>
@@ -1054,15 +1078,15 @@ s4 =&gt; 3
 </div>
 </div>
 
-<div id="outline-container-org7278cfa" class="outline-3">
-<h3 id="org7278cfa"><span class="section-number-3">2.2</span> 选项的保存</h3>
+<div id="outline-container-orgbf07253" class="outline-3">
+<h3 id="orgbf07253"><span class="section-number-3">2.2</span> 选项的保存</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 在上面的设定展示 gif 中可以看到，emacs 向我的配置文件中写入了数据，那么它写入的是什么呢？请看以下截图：
 </p>
 
 
-<div id="orga25f950" class="figure">
+<div class="figure">
 <p><img src="./23.PNG" alt="23.PNG" />
 </p>
 </div>
@@ -1080,7 +1104,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="org1399029" class="figure">
+<div class="figure">
 <p><img src="./24.gif" alt="24.gif" />
 </p>
 </div>
@@ -1090,7 +1114,7 @@ s4 =&gt; 3
 </p>
 
 
-<div id="orgd3c1361" class="figure">
+<div class="figure">
 <p><img src="./25.PNG" alt="25.PNG" />
 </p>
 </div>
@@ -1100,7 +1124,7 @@ s4 =&gt; 3
 </p>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #a020f0;">setq</span> custom-file <span style="color: #8b2252;">"~/.config/emacs-custom.el"</span>)
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> custom-file <span style="color: #ff1f8b;">"~/.config/emacs-custom.el"</span>)
 (load custom-file)
 </pre>
 </div>
@@ -1108,8 +1132,8 @@ s4 =&gt; 3
 </div>
 </div>
 
-<div id="outline-container-org338a017" class="outline-2">
-<h2 id="org338a017"><span class="section-number-2">3</span> 后记</h2>
+<div id="outline-container-orgb90d135" class="outline-2">
+<h2 id="orgb90d135"><span class="section-number-2">3</span> 后记</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 应该说，自从我使用 emacs 以来，我基本上就没有碰过和 <code>customizaiton</code> 相关的东西，一来初学的时候只知道安装各种包，看着配置文件里面 emacs 自动生成的那一坨 <code>custom-set-variables</code> 和 <code>custom-set-faces</code> 就不是太敢动，二来学习其他人的配置的时候都是抄配置，毕竟 <code>customization</code> 配置是通过界面的，代码根本展现不出来。
@@ -1129,23 +1153,23 @@ Elisp Mannual 的 <code>customization</code> 这一章我也没有想读的欲�
 </div>
 </div>
 
-<div id="outline-container-org16b9899" class="outline-2">
-<h2 id="org16b9899"><span class="section-number-2">4</span> 参考资料</h2>
+<div id="outline-container-orgabb7800" class="outline-2">
+<h2 id="orgabb7800"><span class="section-number-2">4</span> 参考资料</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-<a id="org73b2414">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html">Easy Customization Interface</a>
+<a id="org8456093">【1】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html">Easy Customization Interface</a>
 </p>
 
 <p>
-<a id="org9541433">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Customization.html">Customization Settings</a>
+<a id="org16d1f84">【2】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/Customization.html">Customization Settings</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-06-18 Fri 00:00</p> <p>Last modified: 2021-08-04 Wed 13:11</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+<p>Create Date: 2021-06-18 Fri 00:00</p> <p>Last modified: 2021-08-23 Mon 22:36</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
   <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
