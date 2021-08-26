@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-23 Mon 22:42 -->
+<!-- 2021-08-25 周三 19:37 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>emacs 的 macro <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkwMzY3NjEy.jpg" alt="load failed"></div></title>
@@ -63,54 +63,43 @@ for the JavaScript code in this tag.
  <a accesskey="h" href="../../index.html"> UP </a>
  |
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
-</div><div id="preamble" class="status">
-<div>
-  <a href="../../index.html">Go Home </a>
-  <hr class="Solid">
-</div>
-</div>
-<div id="content">
+</div><div id="content">
 <h1 class="title">emacs 的 macro <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkwMzY3NjEy.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc024bd3">1. emacs 的 macro</a>
+<li><a href="#org56299ca">1. 宏与函数的区别</a></li>
+<li><a href="#org68f8f2f">2. 与宏相关的一些函数和宏</a></li>
+<li><a href="#org293e827">3. 宏的缩进</a></li>
+<li><a href="#org8188500">4. 宏与 lexical-binding</a></li>
+<li><a href="#orgacbe11d">5. manual 中提到的注意事项</a>
 <ul>
-<li><a href="#orgbe4a0c3">1.1. 宏与函数的区别</a></li>
-<li><a href="#orgd1fd179">1.2. 与宏相关的一些函数和宏</a></li>
-<li><a href="#orgd16b204">1.3. 宏的缩进</a></li>
-<li><a href="#org6069732">1.4. 宏与 lexical-binding</a></li>
-<li><a href="#org29ceb42">1.5. manual 中提到的注意事项</a></li>
-<li><a href="#org96f659d">1.6. 一些工具宏</a></li>
+<li><a href="#org26286c1">5.1. 宏与编译</a></li>
+<li><a href="#org8ddb280">5.2. 编译时求值（eval）</a></li>
+<li><a href="#orga4a2fa3">5.3. 宏的多次展开</a></li>
+<li><a href="#org01236b0">5.4. 其他建议</a></li>
 </ul>
 </li>
+<li><a href="#orgb41e34d">6. 一些工具函数和宏</a></li>
 </ul>
 </div>
 </div>
 <p>
-在某篇文章中介绍 debug 相关的内容后，我本应该直接开始学习并记录测试相关的知识，但在 emacs-china 上读到这个帖子<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>后，我觉得似乎有必要先仔细学习一下 emacs 的 byte compile。macro 和字节编译也是有关系的，所以在这篇文章中我们还是先谈谈 macro 吧。
+在某篇文章中介绍 debug 相关的内容后，我本应该直接开始学习并记录测试相关的知识，但在 emacs-china 上读到这个帖子<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>emacsemacs 的 byte compile。macro 和字节编译也是有关系的，所以在这篇文章中我们还是先谈谈 macro 吧。
 </p>
 
-<p>
-本文分为两部分，第一部分简要介绍 emacs 中的 macro，第二部分介绍一些实际中使用宏的例子。
-</p>
-
-<div id="outline-container-orgc024bd3" class="outline-2">
-<h2 id="orgc024bd3"><span class="section-number-2">1</span> emacs 的 macro</h2>
-<div class="outline-text-2" id="text-1">
 <p>
 宏可以用来定义新的控制结构和其他的语言特性。宏定义起来很像函数，但相比于函数是为了求值，宏是为了得到另一个 Lisp 表达式，它在随后才被用来求值。得到新表达式的过程被称为宏的 <b>展开</b> 。
 </p>
 
 <p>
-光是宏本身的话其实没什么好谈的，不就是宏的定义与展开吗？但是弄清楚了这两点并不能让你迅速熟练宏的使用，毕竟 <i>the best way to learn write macro is to write macro</i> 。在这一节中，除了向你介绍宏的基本使用方法外，我还会介绍一些好用的工具宏，以及一些简单的例子，希望对你有所帮助。
+光是宏本身的话其实没什么好谈的，不就是宏的定义与展开吗？但是弄清楚了这两点并不能让你迅速熟练宏的使用，毕竟 <i>the best way to learn write macro is to write macro</i> 。在本文中，除了向你介绍宏的基本使用方法外，我还会介绍一些好用的工具宏，以及一些简单的例子，希望对你有所帮助。
 </p>
-</div>
 
-<div id="outline-container-orgbe4a0c3" class="outline-3">
-<h3 id="orgbe4a0c3"><span class="section-number-3">1.1</span> 宏与函数的区别</h3>
-<div class="outline-text-3" id="text-1-1">
+<div id="outline-container-org56299ca" class="outline-2">
+<h2 id="org56299ca"><span class="section-number-2">1</span> 宏与函数的区别</h2>
+<div class="outline-text-2" id="text-1">
 <p>
 在 emacs 中，我们使用 <code>defmacro</code> 来定义宏，它的语法是：
 </p>
@@ -173,7 +162,7 @@ for the JavaScript code in this tag.
 
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yymac-2</span> (a) `(list ,a))
-(<span style="color: #00af00;">yymac-2</span> 1) =&gt; (1)
+(yymac-2 1) =&gt; (1)
 (macroexpand '(yymac-2 abc)) =&gt; (list abc)
 (macroexpand '(yymac-2 (1 2 3))) =&gt; (list (1 2 3)) <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">bad form</span>
 (macroexpand '(yymac-2 '(1 2 3))) =&gt; (list '(1 2 3))
@@ -188,16 +177,16 @@ for the JavaScript code in this tag.
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">mac-print</span> (ls)
    (<span style="color: #00af00;">let</span> ((a ls))
    `(<span style="color: #00af00;">progn</span>
-     (print ,(car a))
-     (print ,(cadr a))
-     (print ,(caddr a)))))
+      (print ,(car a))
+      (print ,(cadr a))
+      (print ,(caddr a)))))
 
 (<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">mac-print-2</span> (ls)
    (<span style="color: #00af00;">let</span> ((a ls))
-     (list 'progn
-           (list 'print (car a))
-           (list 'print (cadr a))
-           (list 'print (caddr a)))))
+      (list 'progn
+            (list 'print (car a))
+            (list 'print (cadr a))
+            (list 'print (caddr a)))))
 (macroexpand '(mac-print (1 2 3))) =&gt; (<span style="color: #00af00;">progn</span> (print 1) (print 2) (print 3))
 (macroexpand '(mac-print-2 (1 2 3))) =&gt; (<span style="color: #00af00;">progn</span> (print 1) (print 2) (print 3))
 </pre>
@@ -214,8 +203,8 @@ for the JavaScript code in this tag.
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">mac-val</span> (x)
   (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">and</span> (atom x) (symbolp x))
-      `(<span style="color: #00af00;">progn</span> (print ,x)
-              (print (+ ,x 1)))
+       `(<span style="color: #00af00;">progn</span> (print ,x)
+               (print (+ ,x 1)))
     nil))
 (macroexpand '(mac-val yy)) =&gt; (<span style="color: #00af00;">progn</span> (print yy) (print (+ yy 1)))
 (macroexpand '(mac-val 1)) =&gt; nil
@@ -233,9 +222,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgd1fd179" class="outline-3">
-<h3 id="orgd1fd179"><span class="section-number-3">1.2</span> 与宏相关的一些函数和宏</h3>
-<div class="outline-text-3" id="text-1-2">
+<div id="outline-container-org68f8f2f" class="outline-2">
+<h2 id="org68f8f2f"><span class="section-number-2">2</span> 与宏相关的一些函数和宏</h2>
+<div class="outline-text-2" id="text-2">
 <p>
 这里我只介绍四个函数，这也是在 elisp manual 上列出的四个函数。
 </p>
@@ -257,15 +246,15 @@ for the JavaScript code in this tag.
 (<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">inc2</span> (v1 v2)
   (list 'progn (list 'inc v1) (list 'inc v2)))
 
-(macroexpand '(inc2 a b)) =&gt; (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">inc</span> a) (<span style="color: #00af00;">inc</span> b))
-(macroexpand-1 '(inc2 a b)) =&gt; (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">inc</span> a) (<span style="color: #00af00;">inc</span> b))
+(macroexpand '(inc2 a b)) =&gt; (<span style="color: #00af00;">progn</span> (inc a) (inc b))
+(macroexpand-1 '(inc2 a b)) =&gt; (<span style="color: #00af00;">progn</span> (inc a) (inc b))
 (macroexpand-all '(inc2 a b)) =&gt; (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">setq</span> a (1+ a)) (<span style="color: #00af00;">setq</span> b (1+ b)))
 
 (<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-two</span> (mac-name val)
   (list mac-name val))
 
 (macroexpand '(yy-two inc a)) =&gt; (<span style="color: #00af00;">setq</span> a (1+ a))
-(macroexpand-1 '(yy-two inc a)) =&gt; (<span style="color: #00af00;">inc</span> a)
+(macroexpand-1 '(yy-two inc a)) =&gt; (inc a)
 </pre>
 </div>
 
@@ -287,18 +276,18 @@ for the JavaScript code in this tag.
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">inctri</span> (var)
   (list 'setq var (list '+ var 3)))
 
-(macroexpand-all '(inc2 a b) '((<span style="color: #00af00;">inc</span> . (<span style="color: #00af00;">lambda</span> (v) (list 'setq v (list '+ v 3))))))
+(macroexpand-all '(inc2 a b) '((inc . (<span style="color: #00af00;">lambda</span> (v) (list 'setq v (list '+ v 3))))))
 =&gt; (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">setq</span> a (+ a 3)) (<span style="color: #00af00;">setq</span> b (+ b 3)))
-(macroexpand-all '(inc2 a b) `((<span style="color: #00af00;">inc</span> . ,(cdr (symbol-function 'inctri)))))
+(macroexpand-all '(inc2 a b) `((inc . ,(cdr (symbol-function 'inctri)))))
 =&gt; (<span style="color: #00af00;">progn</span> (<span style="color: #00af00;">setq</span> a (+ a 3)) (<span style="color: #00af00;">setq</span> b (+ b 3)))
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgd16b204" class="outline-3">
-<h3 id="orgd16b204"><span class="section-number-3">1.3</span> 宏的缩进</h3>
-<div class="outline-text-3" id="text-1-3">
+<div id="outline-container-org293e827" class="outline-2">
+<h2 id="org293e827"><span class="section-number-2">3</span> 宏的缩进</h2>
+<div class="outline-text-2" id="text-3">
 <p>
 在阅读 emacs 的 elisp 源代码时，你可能会看到某些宏里面还有一条类似这样的声明： <code>(declare (indent 1))</code> ，这是在声明宏调用的缩进方式。老实说，文档上关于 declare indent 的部分写的有点晦涩，我尽量多用些例子说明它的用法。
 </p>
@@ -458,7 +447,7 @@ indent 接受的参数有以下几种形式：
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">ind_ind2</span> (pos state)
   (<span style="color: #00af00;">let</span> ((current-line-delta (- (line-number-at-pos pos)
-                               (line-number-at-pos (nth 1 state)))))
+                                (line-number-at-pos (nth 1 state)))))
     (<span style="color: #00af00;">if</span> (zerop (% current-line-delta 2)) '(2) '(4))))
 
 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">ind_syn2</span> (a b c d)
@@ -482,7 +471,7 @@ indent 接受的参数有以下几种形式：
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">ind_ind3</span> (pos state)
   (<span style="color: #00af00;">let</span> ((current-line-delta (- (line-number-at-pos pos)
-                               (line-number-at-pos (nth 1 state)))))
+                                (line-number-at-pos (nth 1 state)))))
     (list current-line-delta)))
 
 
@@ -504,9 +493,9 @@ indent 接受的参数有以下几种形式：
 </div>
 </div>
 
-<div id="outline-container-org6069732" class="outline-3">
-<h3 id="org6069732"><span class="section-number-3">1.4</span> 宏与 lexical-binding</h3>
-<div class="outline-text-3" id="text-1-4">
+<div id="outline-container-org8188500" class="outline-2">
+<h2 id="org8188500"><span class="section-number-2">4</span> 宏与 lexical-binding</h2>
+<div class="outline-text-2" id="text-4">
 <p>
 前面我也说到过，宏的结构就是 car 是 符号 <code>macro</code> ，cdr 是函数的序对。在 lexical-binding 为 nil 和 非 nil 的情况下对 macro 中的函数是有影响的：
 </p>
@@ -530,17 +519,17 @@ indent 接受的参数有以下几种形式：
 </div>
 </div>
 
-<div id="outline-container-org29ceb42" class="outline-3">
-<h3 id="org29ceb42"><span class="section-number-3">1.5</span> manual 中提到的注意事项</h3>
-<div class="outline-text-3" id="text-1-5">
+<div id="outline-container-orgacbe11d" class="outline-2">
+<h2 id="orgacbe11d"><span class="section-number-2">5</span> manual 中提到的注意事项</h2>
+<div class="outline-text-2" id="text-5">
 <p>
 这一小节主要是 manual 上关于宏的需要注意的地方，我把它们综合了一下。
 </p>
 </div>
 
-<div id="outline-container-org6c97088" class="outline-4">
-<h4 id="org6c97088"><span class="section-number-4">1.5.1</span> 宏与编译</h4>
-<div class="outline-text-4" id="text-1-5-1">
+<div id="outline-container-org26286c1" class="outline-3">
+<h3 id="org26286c1"><span class="section-number-3">5.1</span> 宏与编译</h3>
+<div class="outline-text-3" id="text-5-1">
 <blockquote>
 <p>
 You might ask why we take the trouble to compute an expansion for a macro and then evaluate the expansion. Why not have the macro body produce the desired results directly? The reason has to do with compilation.
@@ -567,9 +556,9 @@ You might ask why we take the trouble to compute an expansion for a macro and th
 </div>
 </div>
 
-<div id="outline-container-orga508406" class="outline-4">
-<h4 id="orga508406"><span class="section-number-4">1.5.2</span> 编译时求值（eval）</h4>
-<div class="outline-text-4" id="text-1-5-2">
+<div id="outline-container-org8ddb280" class="outline-3">
+<h3 id="org8ddb280"><span class="section-number-3">5.2</span> 编译时求值（eval）</h3>
+<div class="outline-text-3" id="text-5-2">
 <p>
 在宏展开时，在宏体中对宏的参数表达式求值可能会带来一些问题。如果用户碰巧使用了和宏的形参名字相同的实参的话会出现问题，就像这样：
 </p>
@@ -580,10 +569,10 @@ You might ask why we take the trouble to compute an expansion for a macro and th
   (list 'setq (eval a) t))
 
 (<span style="color: #00af00;">setq</span> x 'b)
-(<span style="color: #00af00;">foo</span> x) =&gt; (<span style="color: #00af00;">setq</span> b t) =&gt; t
+(foo x) =&gt; (<span style="color: #00af00;">setq</span> b t) =&gt; t
 
 (<span style="color: #00af00;">setq</span> a 'c)
-(<span style="color: #00af00;">foo</span> a) =&gt; (<span style="color: #00af00;">setq</span> a t) =&gt; t <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">but set a, not c</span>
+(foo a) =&gt; (<span style="color: #00af00;">setq</span> a t) =&gt; t <span style="color: #b2b2b2; font-style: italic;">; </span><span style="color: #b2b2b2; font-style: italic;">but set a, not c</span>
 </pre>
 </div>
 
@@ -601,9 +590,9 @@ manual 上对此的建议是：不要在宏展开时对参数表达式进行求�
 </div>
 </div>
 
-<div id="outline-container-org65d408e" class="outline-4">
-<h4 id="org65d408e"><span class="section-number-4">1.5.3</span> 宏的多次展开</h4>
-<div class="outline-text-4" id="text-1-5-3">
+<div id="outline-container-orga4a2fa3" class="outline-3">
+<h3 id="orga4a2fa3"><span class="section-number-3">5.3</span> 宏的多次展开</h3>
+<div class="outline-text-3" id="text-5-3">
 <p>
 如果宏在展开过程中含有副作用的话，宏的行为可能会与宏的展开次数有关。你应该尽量避免宏展开中的副作用，除非你十分清楚你要做什么。
 </p>
@@ -628,7 +617,7 @@ manual 上对此的建议是：不要在宏展开时对参数表达式进行求�
   (<span style="color: #00af00;">let</span> ((object (empty-object)))
     (<span style="color: #00af00;">if</span> condition
         (setcar object condition))
-    object))
+      object))
 </pre>
 </div>
 
@@ -642,9 +631,9 @@ manual 上对此的建议是：不要在宏展开时对参数表达式进行求�
 </div>
 </div>
 
-<div id="outline-container-orgd678a42" class="outline-4">
-<h4 id="orgd678a42"><span class="section-number-4">1.5.4</span> 其他建议</h4>
-<div class="outline-text-4" id="text-1-5-4">
+<div id="outline-container-org01236b0" class="outline-3">
+<h3 id="org01236b0"><span class="section-number-3">5.4</span> 其他建议</h3>
+<div class="outline-text-3" id="text-5-4">
 <ul class="org-ul">
 <li>请注意不要在宏展开期间完成运行时的工作，记得一定要返回一个表达式</li>
 <li>注意宏参数在展开表达式中的求值次数，写的好的宏会注意避免掉对某个表达式的重复求值</li>
@@ -654,13 +643,12 @@ manual 上对此的建议是：不要在宏展开时对参数表达式进行求�
 </div>
 </div>
 
-<div id="outline-container-org96f659d" class="outline-3">
-<h3 id="org96f659d"><span class="section-number-3">1.6</span> 一些工具宏</h3>
-<div class="outline-text-3" id="text-1-6">
+<div id="outline-container-orgb41e34d" class="outline-2">
+<h2 id="orgb41e34d"><span class="section-number-2">6</span> 一些工具函数和宏</h2>
+<div class="outline-text-2" id="text-6">
 <p>
 上面的各小节基本涵盖了 manual 中 macro 一章的所有内容，但光凭这些干巴巴的东西还不足以让你写出好看好用的宏。这一小节的任务是简单介绍一些可以在宏定义中使用的工具宏，以及一些更加实际的例子。
 </p>
-</div>
 </div>
 </div>
 <div id="footnotes">
@@ -673,24 +661,10 @@ manual 上对此的建议是：不要在宏展开时对参数表达式进行求�
 </div>
 </div></div>
 <div id="postamble" class="status">
-<hr class="Solid">
-<p>Create Date: 2021-08-21 Sat 09:58</p> <p>Last modified: 2021-08-23 Mon 22:38</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
-
-<p style="text-align:center;">
-  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
-</p>
-
-<p style="text-align:center;">
-  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
-    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
-  </a><br />
-  本作品采用
-  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
-    知识共享署名 4.0 国际许可协议
-  </a>
-  进行许可。
-</p>
+<p class="date">Date: 2021-08-21 周六 09:58</p>
+<p class="author">Author: include-yy</p>
+<p class="date">Created: 2021-08-25 周三 19:37</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>
