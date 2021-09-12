@@ -1,0 +1,877 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-09-06 周一 12:50 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>emacs 中的 list 函数 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzMxMzAxMTE=.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="content">
+<h1 class="title">emacs 中的 list 函数 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzMxMzAxMTE=.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga4106a5">1. 对表中元素的访问</a>
+<ul>
+<li><a href="#orga99f616">1.1. car, cdr 等 <code>48</code></a></li>
+<li><a href="#orga5b15d2">1.2. 按位置访问 <code>2</code></a></li>
+</ul>
+</li>
+<li><a href="#orgfc16204">2. 获取表的子表</a>
+<ul>
+<li><a href="#orgf2214e2">2.1. 表的复制 <code>7</code></a></li>
+<li><a href="#org6a1e37f">2.2. 表的一部分 <code>11</code></a></li>
+<li><a href="#org8fc24b2">2.3. 移除部分元素 <code>21</code></a></li>
+</ul>
+</li>
+<li><a href="#orgd9b5c00">3. 表的查找与替换</a></li>
+<li><a href="#orgb63f3d5">4. 增加元素</a></li>
+<li><a href="#org491907a">5. 参考资料</a></li>
+<li><a href="#orgead1ba1">6. dash <code>[22/176]</code></a></li>
+</ul>
+</div>
+</div>
+<p>
+本着把文档上每一个函数都敲一遍的理念，本文的目的是学习并记录 elisp 中表函数的用法。除了说 elisp manual 和 cl-lib 中的表函数，我还会介绍 dash.el，它是一个好用的表函数库。那为啥不介绍一下 list 这种数据结构呢？这是因为函数实在是太多了，干脆先拎出来讲讲，之后再写篇文章介绍 list 和 cons。
+</p>
+
+<p>
+除了说罗列一大堆的函数外，我还会尝试对它们进行简单的分类，这样有利于你根据具体情况决定使用哪些函数。除了个别非常简单的函数，文中几乎所有的函数都会有例子。想要了解一下函数类别和函数数量的同学可以看看标题和函数的名字，想了解函数功能和使用方法的同学可以看看例子，什么都不想看的同学可以看看题图。
+</p>
+
+<p>
+根据 dash 的分类和我的一些使用经验，我将它们分为以下几类。之后的每一类对应小节的开头都会列出该类的所有函数名和函数数量。
+</p>
+
+<ul class="org-ul">
+<li>对表中元素的访问</li>
+<li>获取表的子表</li>
+</ul>
+
+<p>
+我使用的是 emacs 27.1 on windows，以下代码均可在该环境中正常执行。
+</p>
+
+<div id="outline-container-orga4106a5" class="outline-2">
+<h2 id="orga4106a5"><span class="section-number-2">1</span> 对表中元素的访问</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orga99f616" class="outline-3">
+<h3 id="orga99f616"><span class="section-number-3">1.1</span> car, cdr 等 <code>48</code></h3>
+<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li><code>car</code>, <code>cdr</code>, <code>cx{2, 4}r</code> <code>30</code></li>
+<li><code>cl-first</code>, <code>cl-second</code> &#x2026; <code>cl-tenth</code> <code>10</code></li>
+<li><code>-first-item</code>, <code>-second-item</code> &#x2026; <code>-fifth-item</code>, <code>-last-item</code> <code>6</code></li>
+<li><code>car-safe</code>, <code>cdr-safe</code> <code>2</code></li>
+</ul>
+
+<p>
+<code>car</code> 和 <code>cdr</code> 可以说是 Lisp 中最经典的两个操作符了， <code>car</code> 取得 cons 的前部分， <code>cdr</code> 取得 cons 的后部分。除了这两个最基本的函数，elisp 中还提供了 <code>cx{2, 4}r</code> 共计 28 个扩展函数，其中 <code>x</code> 可以是 <code>a</code> 或 <code>d</code> ，它们的含义如下<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">(caar x)</td>
+<td class="org-left">(car (car x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadr x)</td>
+<td class="org-left">(car (cdr x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdar x)</td>
+<td class="org-left">(cdr (car x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddr x)</td>
+<td class="org-left">(cdr (cdr x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaar x)</td>
+<td class="org-left">(car (car (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caadr x)</td>
+<td class="org-left">(car (car (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadar x)</td>
+<td class="org-left">(car (cdr (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caddr x)</td>
+<td class="org-left">(car (cdr (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaar x)</td>
+<td class="org-left">(cdr (car (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdadr x)</td>
+<td class="org-left">(cdr (car (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddar x)</td>
+<td class="org-left">(cdr (cdr (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdddr x)</td>
+<td class="org-left">(cdr (cdr (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaaar x)</td>
+<td class="org-left">(car (car (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaadr x)</td>
+<td class="org-left">(car (car (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caadar x)</td>
+<td class="org-left">(car (car (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaddr x)</td>
+<td class="org-left">(car (car (cdr (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadaar x)</td>
+<td class="org-left">(car (cdr (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadadr x)</td>
+<td class="org-left">(car (cdr (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caddar x)</td>
+<td class="org-left">(car (cdr (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadddr x)</td>
+<td class="org-left">(car (cdr (cdr (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaaar x)</td>
+<td class="org-left">(cdr (car (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaadr x)</td>
+<td class="org-left">(cdr (car (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdadar x)</td>
+<td class="org-left">(cdr (car (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaddr x)</td>
+<td class="org-left">(cdr (car (cdr (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddaar x)</td>
+<td class="org-left">(cdr (cdr (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddadr x)</td>
+<td class="org-left">(cdr (cdr (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdddar x)</td>
+<td class="org-left">(cdr (cdr (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddddr x)</td>
+<td class="org-left">(cdr (cdr (cdr (cdr x))))</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+在 CL 中还提供了从 <code>first</code> 到 <code>tenth</code> 十个函数，它们的作用是获取表的第一个到第十个元素。在 elisp 中可以使用 <code>cl-first</code> , <code>cl-second</code> &#x2026; <code>cl-tenth</code> 。在 dash.el 中也提供了从 1 到 5 的函数。即 <code>-first-item</code> 到 <code>fifth-item</code> 。除此之外，dash 还提供了访问最后一个元素的 <code>-last-item</code> 。
+</p>
+
+<p>
+除了简单的 <code>car</code> 和 <code>cdr</code> ，elisp 还提供了 <code>car-safe</code> 和 <code>cdr-safe</code> 。在接受非 cons 类型的参数时它们不会像 <code>car</code> 和 <code>cdr</code> 一样直接报错，而是返回 nil。另外值得一提的是， elisp 中 <code>car</code> 和 <code>cdr</code> 在接受 nil 时会返回 nil ，而不是报错。
+</p>
+
+<p>
+以下是上面部分函数的使用示例：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(car-safe 1) =&gt; nil
+(cdr-safe 1) =&gt; nil
+(car nil) =&gt; nil
+(cdr nil) =&gt; nil
+
+(cl-fifth '(1 2 3 4 5)) =&gt; 5
+(cadddr '(1 2 3 4 5)) =&gt; 4
+(-fourth-item '(1 2 3 4 5)) =&gt; 4
+(-last-item '(1 2 3 4 5)) =&gt; 5
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga5b15d2" class="outline-3">
+<h3 id="orga5b15d2"><span class="section-number-3">1.2</span> 按位置访问 <code>2</code></h3>
+<div class="outline-text-3" id="text-1-2">
+<ul class="org-ul">
+<li><code>nth</code> (N LIST)</li>
+<li><code>elt</code> (SEQ N)</li>
+</ul>
+
+<p>
+除了使用上面的一系列函数，你还可以使用 <code>nth</code> 来通过指定序号访问表中对应元素。与之相似的还有 <code>elt</code> ，不过它面向的是 <code>sequence</code> ，可以用在 list，string 和 vector 上。与 <code>nth</code> 不同的是，它指定位置的参数是第二个而不是第一个。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(nth 2 '(1 2 3)) -&gt; 3
+(elt '(1 2 3) 2) -&gt; 3
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfc16204" class="outline-2">
+<h2 id="orgfc16204"><span class="section-number-2">2</span> 获取表的子表</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+集合中有子集的概念，那么类似地，表也应该有子表，就像 "lo" 是 "hello" 的子串一样。相比于集合式的散点，表是有结构的，它通过一个个箭头把元素串成一串。我认为需要根据是否保留所有元素，保留原表元素顺序，保留原表元素之间连接关系这三个指标来对子表进行分类：
+</p>
+
+<ul class="org-ul">
+<li>表的复制，保留所有元素，保留顺序，保留连接关系，即和原表一模一样（equal）</li>
+<li>从原表中截取一整段，保留顺序和连接关系（这是一般认为的子串）</li>
+<li>从原表中删除个别元素，保留了顺序</li>
+<li>从原表中取出元素按不同于原表的顺序组合，仅是集合意义上的子集</li>
+</ul>
+
+<p>
+根据以上分类可以看出，一个串是某个串的子串的最低限度就是：该串的所有元素属于另一串。对于第四种，不如将它放到“将表作为集合”一节一起说明。
+</p>
+</div>
+
+<div id="outline-container-orgf2214e2" class="outline-3">
+<h3 id="orgf2214e2"><span class="section-number-3">2.1</span> 表的复制 <code>7</code></h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li><code>cl-copy-list</code> (LIST), <code>-copy</code> (LIST), <code>copy-sequence</code> (ARG), <code>cl-copy-seq</code> (ARG)</li>
+<li><code>copy-tree</code> (TREE &amp;optional VECP), <code>-clone</code> (LIST)</li>
+<li><code>copy-alist</code> (ALIST)</li>
+</ul>
+
+<p>
+<code>cl-copy-list</code> ， <code>-copy</code> ， <code>copy-sequence</code> 和 <code>cl-copy-seq</code> 四个函数都接受一个表作为参数，并返回一个副本。它们不会拷贝表中的元素，表中元素的值会与原表共享。换句话说，它们进行的都是浅拷贝。如果使用 <code>'(((1)))</code> 来作为参数，这些函数返回的表的 <code>car</code> 部分的 <code>((1))</code> 是与原表共享的。
+</p>
+
+<p>
+在文档中对 <code>cl-copy-seq</code> 和 <code>copy-sequence</code> 还做出了额外的说明：它们接受的参数可以是 vector，string 和其他序列。如果接受的序列是空的话，函数的返回值可能就是原来的对象。
+</p>
+
+<p>
+以下代码可以体现出它们的用法，以及浅拷贝的特点：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '((1)))
+(<span style="color: #00af00;">setq</span> b1 (cl-copy-list a))
+(<span style="color: #00af00;">setq</span> b2 (-copy a))
+(<span style="color: #00af00;">setq</span> b3 (copy-sequence a))
+(<span style="color: #00af00;">setq</span> b4 (cl-copy-seq a))
+(list a b1 b2 b3 b4) =&gt; (((1)) ((1)) ((1)) ((1)) ((1)))
+(setcar (car a) 2)
+(list a b1 b2 b3 b4) =&gt; (((2)) ((2)) ((2)) ((2)) ((2)))
+</pre>
+</div>
+
+<p>
+<code>copy-tree</code> 和 <code>-clone</code> 进行的则是深拷贝，它们能够识别出 cons 并拷贝到新表中，这样就不会与原表共享 cons 了。使用和上面一样的例子，我们可以得到不同的结果：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '((1)))
+(<span style="color: #00af00;">setq</span> b1 (copy-tree a))
+(<span style="color: #00af00;">setq</span> b2 (-clone a))
+(list a b1 b2) =&gt; ((1) (1) (1))
+(setcar (car a) 2)
+(list a b1 b2) =&gt; ((2) (1) (1))
+</pre>
+</div>
+
+<p>
+<code>copy-tree</code> 还可以识别出 vector 并进行深拷贝，只需要指定可选参数为 t 即可：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '((1) ([2 3 [4]])))
+(<span style="color: #00af00;">setq</span> b (copy-tree a t))
+(list a b) =&gt; (((1) ([2 3 [4]])) ((1) ([2 3 [4]])))
+(setcar (car a) 2)
+(aset (aref (caadr a) 2) 0 1)
+(list a b) =&gt; (((2) ([2 3 [1]])) ((1) ([2 3 [4]])))
+</pre>
+</div>
+
+<p>
+<code>copy-alist</code> 的作用是拷贝一个关联表，相比于浅拷贝它还拷贝了每个关联项的 cons，不过它没有深拷贝关联项中的 <code>car</code> 和 <code>cdr</code> 部分，而是与原 alist 共用。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '((1 . 2) ((2) . 3)))
+(<span style="color: #00af00;">setq</span> b (copy-alist a))
+(setcar (car a) 2)
+(setcar (caadr a) 3) a
+(list a b) =&gt; (((2 . 2) ((3) . 3)) ((1 . 2) ((3) . 3)))
+</pre>
+</div>
+
+<p>
+要说的话，使用 <code>-copy</code> 和 <code>-clone</code> 这两个函数就足够了，如果还要考虑拷贝嵌套的表和向量的话，可以使用 <code>copy-tree</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6a1e37f" class="outline-3">
+<h3 id="org6a1e37f"><span class="section-number-3">2.2</span> 表的一部分 <code>11</code></h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+这一小节的函数可以从原表中拿出连续的一小段出来。从功能上说的话 <code>cdr</code> 应该也被归到这里，但是它与 <code>car</code> 的关系太密切了。
+</p>
+
+<ul class="org-ul">
+<li><code>nthcdr</code> (N LIST), <code>last</code> (LIST &amp;optional N), butlast(X &amp;optional N), nbutlast(X &amp;optional n)</li>
+<li>-take-last(N LIST), -drop(N LIST), -drop-while(PRED LIST)</li>
+<li>-take(N LIST), -drop-last(N LIST), -take-while(PRED LIST)</li>
+<li>-slice(LIST FROM &amp;optional TO STEP)</li>
+</ul>
+
+<p>
+首先是 elisp 自带的四个函数， <code>nthcdr</code> ， <code>last</code> ， <code>butlast</code> 和 <code>nbutlast</code> 。 <code>nthcdr</code> 获取表的第 N 个 cdr，并返回这个值。 <code>last</code> 和 <code>butlast</code> 是相对的，前者取得由原表的后 N 个元素组成的表，它是原表的一部分，后者取得去掉原表后 N 个元素后的表的拷贝。 <code>nbutlast</code> 通过修改原表来去除后面的 N 个元素。
+</p>
+
+<p>
+<code>last</code> ， <code>butlast</code> 和 <code>nbutlast</code> 的参数 N 都是可选的，如果不指定的话， <code>last</code> 获取表中的最后一个元素所在 cons， <code>butlast</code> 获取去掉最后一个元素的表的副本， <code>nbutlast</code> 去掉原表最后一个元素。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(nthcdr 2 '(1 2 3)) =&gt; (3)
+(last '(1 2 3)) =&gt; (3)
+(last '(1 2 3) 2) =&gt; (2 3)
+(last '(1 2 3) -1) =&gt; nil
+(last '(1 2 3) 0) =&gt; nil
+(last '(1 2 3) 5) =&gt; (1 2 3)
+(butlast '(1 2 3) 1) =&gt; (1 2)
+(butlast '(1 2 3) 2) =&gt; (1)
+(butlast '(1 2 3) 3) =&gt; nil
+(butlast '(1 2 3) 5) =&gt; nil
+(butlast '(1 2 3) 0) =&gt; (1 2 3)
+(butlast '(1 2 3) -1) =&gt; (1 2 3)
+
+(<span style="color: #00af00;">setq</span> a '(1 2 3))
+(<span style="color: #00af00;">setq</span> b (butlast a 1))
+(setcar a 2)
+(list a b) =&gt; ((2 2 3) (1 2))
+(<span style="color: #00af00;">setq</span> c (nbutlast a))
+(list a c) ((2 2) (2 2))
+(setcar a 3)
+(list a c) ((3 2) (3 2))
+</pre>
+</div>
+
+<p>
+<code>-take-last</code>  ， <code>-drop</code> 和 <code>-drop-while</code> 的作用就是拿掉表前面的元素。它们的不同之处在于 <code>-take-last</code> 是复制原表，而 <code>-drop</code> 和 <code>-drop-while</code> 是直接拿原表的一部分返回。与其他两个函数不同的是， <code>drop-while</code> 接受一个 <code>pred</code> 参数，它按照表的顺序以表元素为参数，若它返回非空值则从表中拿掉元素继续向下，若返回 nil 则停止并返回剩余的表。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(mapcar (<span style="color: #00af00;">lambda</span> (x) (-take-last x '(1 2 3)))
+        '(-1 0 1 2 3 4))
+=&gt; (nil nil (3) (2 3) (1 2 3) (1 2 3))
+
+(mapcar (<span style="color: #00af00;">lambda</span> (x) (-drop x '(1 2 3)))
+        '(-1 0 1 2 3 4))
+=&gt; ((1 2 3) (1 2 3) (2 3) (3) nil nil)
+
+(-drop-while (<span style="color: #00af00;">lambda</span> (x) (&lt; x 3)) '(1 2 3)) =&gt; (3)
+</pre>
+</div>
+
+<p>
+<code>-take</code> ， <code>-drop-last</code> 和 <code>-take-while</code> 和上面三个函数功能相反，它们获取表前端的元素。它们都返回一个新的表，而不是原表。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(mapcar (<span style="color: #00af00;">lambda</span> (x) (-take x '(1 2 3)))
+        '(-1 0 1 2 3 4))
+=&gt; (nil nil (1) (1 2) (1 2 3) (1 2 3))
+
+(mapcar (<span style="color: #00af00;">lambda</span> (x) (-drop-last x '(1 2 3)))
+        '(-1 0 1 2 3 4))
+=&gt; ((1 2 3) (1 2 3) (1 2) (1) nil nil)
+
+(-take-while (<span style="color: #00af00;">lambda</span> (x) (&lt; x 3)) '(1 2 3)) =&gt; (1 2)
+</pre>
+</div>
+
+<p>
+<code>-slice</code> 就像 <code>substring</code> 一样，可以从表的中间部分获取一个子表，不过它的参数比 <code>substing</code> 灵活的多。 <code>FROM</code> 和 <code>TO</code> 是可以为负数的，不过它们会被以表长取模得到正数，就像对于 <code>(1 2 3)</code> ，如果 <code>FROM</code> 或 <code>TO</code> 为 -13，得到的就是 -13 % 3 + 3 = 2。 <code>STEP</code> 是一个数字，如果不指定的话步长默认为 1，它的正负与否对步长绝对值没有影响。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(-slice '(1 2 3) 1 2) =&gt; (2)
+(-slice '(1 2 3) 1 -1) =&gt; (2)
+(-slice '(1 2 3) -2 -1) =&gt; (2)
+(-slice '(1 2 3) 0 3) =&gt; (1 2 3)
+(-slice '(1 2 3) 0 100) =&gt; (1 2 3)
+(-slice '(1 2 3) 100 101) =&gt; nil
+(-slice '(1 2 3 4 5) 0 5 2) =&gt; (1 3 5)
+(-slice '(1 2 3 4 5) 0 5 -2) =&gt; (1 3 5)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8fc24b2" class="outline-3">
+<h3 id="org8fc24b2"><span class="section-number-3">2.3</span> 移除部分元素 <code>21</code></h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+这一节介绍的函数从原表中移除某些元素，但不改变原表中的元素顺序。
+</p>
+
+<ul class="org-ul">
+<li>remq(ELT LIST), remove(ELT SEQ), cl-remove(ITEM SEQ &#x2026;)</li>
+<li>cl-remove-if(PRED SEQ &#x2026;), cl-remove-if-not(PRED SEQ &#x2026;)</li>
+<li>delq(ELT LIST), delete(ELT LIST), cl-delete(ITEM SEQ &#x2026;)</li>
+<li>cl-delete-if(PRED SEQ &#x2026;), cl-delete-if-not(PRED SEQ &#x2026;)</li>
+<li>delete-dups(LIST), delete-consecutive-dups(LIST &amp;optional CIRCULAR)</li>
+<li>cl-remove-duplicates(SEQ &#x2026;), cl-delete-duplicates(SEQ &#x2026;)</li>
+<li>-remove-item(ITEM LIST), -filter(PRED LIST), -remove(PRED LIST), -remove-first(PRED LIST), -remove-last(PRED LIST)</li>
+<li>-non-nil(LIST), -distinct(LIST)</li>
+</ul>
+
+<p>
+<code>remq</code> 接受一个 ELT 和一个 LIST，在 LIST 中出现的所有 ELT 都会被去除掉。该函数返回去除元素后原表的副本，且使用 <code>eq</code> 来判断原表中元素是否等于参数 ELT。与之相比， <code>remove</code> 使用 <code>equal</code> 来进行比较，且接受的序列不限于表，还可以是向量和字符串。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(remq 'a  '(a b c)) =&gt; (b c)
+(remq 'l '(h e l l o)) =&gt; (h e o)
+(remove 'l '(g a l g a m e)) =&gt; (g a g a m e)
+(remove '(1) '((1) (1) (4) (5) (1) (4))) =&gt; ((4) (5) (4))
+</pre>
+</div>
+
+<p>
+接下来就是 <code>cl-remove</code> ， <code>cl-remove-if</code> 和 <code>cl-remove-if-not</code> 三个函数。从某种意义上来说，后两个函数就是第一个函数的特化版。 <code>cl-remove</code> 默认使用 <code>eql</code> 进行比较，除了接受 ELT 和 SEQ 外，还可以使用关键字指定参数：
+</p>
+
+<ul class="org-ul">
+<li><code>:test</code> 可以指定用于比较的函数，若函数返回非 nil 则移除比较的元素，它接受两个参数，第一参数的值即 ITEM</li>
+<li><code>:test-not</code> 与 <code>:test</code> 相似，不过若它返回 nil 才移除比较元素</li>
+<li><code>:key</code> 指定对表中元素进行的操作，它是一个单参数函数，函数的返回值被用来进行比较</li>
+<li><code>:count</code> 指定替换个数，它是一个整数</li>
+<li><code>:start</code> 指定 remove 操作的起始位置</li>
+<li><code>:end</code> 指定 remove 操作的终止位置</li>
+<li><code>:from-end</code> 表明从后往前进行 remove</li>
+</ul>
+
+<p>
+为啥说 <code>cl-remove-if</code> 和 <code>cl-remove-if-not</code> 是 <code>cl-remove</code> 的特化呢？因为它们的关键字参数中没有 <code>:test</code> 和 <code>:test-not</code> ，这两个函数的 <code>pred</code> 参数分别起到 <code>:test</code> 和 <code>:test-not</code> 的作用，不过它们的函数参数都是单参数函数，以表的元素来作为参数。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(cl-remove 1 '(1 ))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgd9b5c00" class="outline-2">
+<h2 id="orgd9b5c00"><span class="section-number-2">3</span> 表的查找与替换</h2>
+</div>
+
+<div id="outline-container-orgb63f3d5" class="outline-2">
+<h2 id="orgb63f3d5"><span class="section-number-2">4</span> 增加元素</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>push, add-to-list, add-to-ordered-list</li>
+<li>cl-pushnew</li>
+</ul>
+
+<p>
+<code>push</code> 是一个宏，它接受一个元素和一个表变量，将元素添加到变量表的表首，并将得到的新表保存到变量中。它的作用是修改变量，而不是对原来的表进行修改。例子如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '(1 2 3))
+(<span style="color: #00af00;">setq</span> b a)
+(<span style="color: #00af00;">push</span> 4 a)
+a -&gt; (4 1 2 3)
+b -&gt; (1 2 3)
+</pre>
+</div>
+
+<p>
+<code>add-to-list</code> 与 <code>push</code> 相似，也是对变量进行修改得到添加元素后的表，但是如果要添加的元素已经在表中的话，它就不会进行添加。除了接受表变量和新元素外，它还接受 <code>append</code> 和 <code>compare-fn</code> 两个可选参数。如果 <code>append</code> 为非空，则新的元素会被添加到表的末尾，如果 <code>compare-fn</code> 是一个函数，则 <code>add-to-list</code> 会使用指定的函数来进行比较，默认情况下它使用 <code>equal</code> 。另外，文档中还提到不要对词法变量使用这个函数。
+</p>
+
+<p>
+<code>add-to-ordered-list</code> 的必须参数与 <code>add-to-list</code> 相同，但可选参数只有一个 <code>order</code> ，它用来指定添加元素的位置。与 <code>add-to-list</code> 不同的是，它使用 <code>eq</code> 来比较元素是否相等。如果要添加的元素不在表中的话，它会根据 <code>order</code> 被添加到表中，如果已经在表中，它的位置很根据 <code>order</code> 指定的数字进行调整。 <code>order</code> 是一个数字，表中元素的顺序是单调递增序列。
+</p>
+
+<p>
+如果 <code>order</code> 参数是 nil 的话，新的元素会被添加到表的末尾，这种添加是无序的，没有指定顺序的元素在表尾的顺序不是特定的。已存在的元素的数字顺序值不会改变，表的元素顺序信息存储在变量的 plist 属性 <code>list-order</code> 中。
+</p>
+
+<p>
+以下是使用这两个函数的例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> foo '(a b))
+(add-to-list 'foo 'c) -&gt; (c a b)
+(add-to-list 'foo 'b) -&gt; (c a b)
+foo -&gt; (c a b)
+
+(<span style="color: #00af00;">setq</span> bar '())
+(add-to-ordered-list 'bar 'a 1) -&gt; (a)
+(add-to-ordered-list 'bar 'c 3) -&gt; (a c)
+(add-to-ordered-list 'bar 'b 2) -&gt; (a b c)
+(add-to-ordered-list 'bar 'b 4) -&gt; (a c b)
+(add-to-ordered-list 'bar 'd) -&gt; (a c b d)
+(add-to-ordered-list 'bar 'e) -&gt; (a c b e d)
+</pre>
+</div>
+
+<p>
+与 <code>add-to-list</code> 相似的还有 <code>cl-pushnew</code> ，不过它默认使用 <code>eql</code> 来判断是否相等。可以使用 <code>:test</code> 关键字指定比较函数。
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org491907a" class="outline-2">
+<h2 id="org491907a"><span class="section-number-2">5</span> 参考资料</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+【1】<a href="https://franz.com/support/documentation/ansicl.94/ansicl.htm">https://franz.com/support/documentation/ansicl.94/ansicl.htm</a>
+【2】
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMTQ0NzE1.jpg" alt="load failed"></div><div class="yyimgcomment">izayoi sakuya</div>
+</p>
+</div>
+</div>
+<div id="outline-container-orgead1ba1" class="outline-2">
+<h2 id="orgead1ba1"><span class="section-number-2">6</span> dash <code>[22/176]</code></h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> -map (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -map-when (pred rep list)</li>
+<li class="off"><code>[&#xa0;]</code> -map-first (pred rep list)</li>
+<li class="off"><code>[&#xa0;]</code> -map-last (pred rep list)</li>
+<li class="off"><code>[&#xa0;]</code> -map-indexed (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -annotate (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -splice (pred fun list)</li>
+<li class="off"><code>[&#xa0;]</code> -splice-list (pred new-list list)</li>
+<li class="off"><code>[&#xa0;]</code> -mapcat (fn list)</li>
+<li class="on"><code>[X]</code> -copy (list)</li>
+
+<li class="on"><code>[X]</code> -filter (pred list)</li>
+<li class="on"><code>[X]</code> -remove (pred list)</li>
+<li class="on"><code>[X]</code> -remove-first (pred list)</li>
+<li class="on"><code>[X]</code> -remove-last (pred list)</li>
+<li class="on"><code>[X]</code> -remove-item (item list)</li>
+<li class="on"><code>[X]</code> -non-nil (list)</li>
+<li class="on"><code>[X]</code> -slice (list from &amp;optional to step)</li>
+<li class="on"><code>[X]</code> -take (n list)</li>
+<li class="on"><code>[X]</code> -take-last (n list)</li>
+<li class="on"><code>[X]</code> -drop (n list)</li>
+<li class="on"><code>[X]</code> -drop-last (n list)</li>
+<li class="on"><code>[X]</code> -take-while (pred list)</li>
+<li class="on"><code>[X]</code> -drop-while (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -select-by-indices (indices list)</li>
+<li class="off"><code>[&#xa0;]</code> -select-columns (columns table)</li>
+<li class="off"><code>[&#xa0;]</code> -select-column (column table)</li>
+
+<li class="off"><code>[&#xa0;]</code> -keep (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -concat (&amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -flatten (l)</li>
+<li class="off"><code>[&#xa0;]</code> -flatten-n (num list)</li>
+<li class="off"><code>[&#xa0;]</code> -replace (old new list)</li>
+<li class="off"><code>[&#xa0;]</code> -replace-first (old new list)</li>
+<li class="off"><code>[&#xa0;]</code> -replace-last (old new list)</li>
+<li class="off"><code>[&#xa0;]</code> -insert-at (n x list)</li>
+<li class="off"><code>[&#xa0;]</code> -replace-at (n x list)</li>
+<li class="off"><code>[&#xa0;]</code> -update-at (n func list)</li>
+<li class="off"><code>[&#xa0;]</code> -remove-at (n list)</li>
+<li class="off"><code>[&#xa0;]</code> -remove-at-indices (indices list)</li>
+
+<li class="off"><code>[&#xa0;]</code> -reduce-from (fn init list)</li>
+<li class="off"><code>[&#xa0;]</code> -reduce-r-from (fn init list)</li>
+<li class="off"><code>[&#xa0;]</code> -reduce (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -reduce-r (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -reductions-from (fn init list)</li>
+<li class="off"><code>[&#xa0;]</code> -reductions-r-from (fn init list)</li>
+<li class="off"><code>[&#xa0;]</code> -reductions (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -reductions-r (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -count (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -sum (list)</li>
+<li class="off"><code>[&#xa0;]</code> -running-sum (list)</li>
+<li class="off"><code>[&#xa0;]</code> -product (list)</li>
+<li class="off"><code>[&#xa0;]</code> -running-product (list)</li>
+<li class="off"><code>[&#xa0;]</code> -inits (list)</li>
+<li class="off"><code>[&#xa0;]</code> -tails (list)</li>
+<li class="off"><code>[&#xa0;]</code> -common-prefix (&amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -common-suffix (&amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -min (list)</li>
+<li class="off"><code>[&#xa0;]</code> -min-by (comparator list)</li>
+<li class="off"><code>[&#xa0;]</code> -max (list)</li>
+<li class="off"><code>[&#xa0;]</code> -max-by (comparator list)</li>
+
+<li class="off"><code>[&#xa0;]</code> -iterate (fun init n)</li>
+<li class="off"><code>[&#xa0;]</code> -unfold (fun seed)</li>
+
+<li class="off"><code>[&#xa0;]</code> -some (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -every (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -any? (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -all? (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -none? (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -only-some? (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -contains? (list element)</li>
+<li class="off"><code>[&#xa0;]</code> -same-items? (list list2)</li>
+<li class="off"><code>[&#xa0;]</code> -is-prefix? (prefix list)</li>
+<li class="off"><code>[&#xa0;]</code> -is-suffix? (suffix list)</li>
+<li class="off"><code>[&#xa0;]</code> -is-infix? (infix list)</li>
+<li class="off"><code>[&#xa0;]</code> -cons-pair? (obj)</li>
+
+<li class="off"><code>[&#xa0;]</code> -split-at (n list)</li>
+<li class="off"><code>[&#xa0;]</code> -split-with (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -split-on (item list)</li>
+<li class="off"><code>[&#xa0;]</code> -split-when (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -separate (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition (n list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-all (n list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-in-steps (n step list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-all-in-steps (n step list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-by (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-by-header (fn list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-after-pred (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-before-pred (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-before-item (item list)</li>
+<li class="off"><code>[&#xa0;]</code> -partition-after-item (item list)</li>
+<li class="off"><code>[&#xa0;]</code> -group-by (fn list)</li>
+
+<li class="off"><code>[&#xa0;]</code> -elem-index (elem list)</li>
+<li class="off"><code>[&#xa0;]</code> -elem-indices (elem list)</li>
+<li class="off"><code>[&#xa0;]</code> -find-index (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -find-last-index (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -find-indices (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -grade-up (comparator list)</li>
+<li class="off"><code>[&#xa0;]</code> -grade-down (comparator list)</li>
+
+<li class="off"><code>[&#xa0;]</code> -union (list list2)</li>
+<li class="off"><code>[&#xa0;]</code> -difference (list list2)</li>
+<li class="off"><code>[&#xa0;]</code> -intersection (list list2)</li>
+<li class="off"><code>[&#xa0;]</code> -powerset (list)</li>
+<li class="off"><code>[&#xa0;]</code> -permutations (list)</li>
+<li class="on"><code>[X]</code> -distinct (list)</li>
+
+<li class="off"><code>[&#xa0;]</code> -rotate (n list)</li>
+<li class="off"><code>[&#xa0;]</code> -repeat (n x)</li>
+<li class="off"><code>[&#xa0;]</code> -cons* (&amp;rest args)</li>
+<li class="off"><code>[&#xa0;]</code> -snoc (list elem &amp;rest elements)</li>
+<li class="off"><code>[&#xa0;]</code> -interpose (sep list)</li>
+<li class="off"><code>[&#xa0;]</code> -interleave (&amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -iota (count &amp;optional start step)</li>
+<li class="off"><code>[&#xa0;]</code> -zip-with (fn list1 list2)</li>
+<li class="off"><code>[&#xa0;]</code> -zip (&amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -zip-lists (&amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -zip-fill (fill-value &amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -unzip (lists)</li>
+<li class="off"><code>[&#xa0;]</code> -cycle (list)</li>
+<li class="off"><code>[&#xa0;]</code> -pad (fill-value &amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -table (fn &amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -table-flat (fn &amp;rest lists)</li>
+<li class="off"><code>[&#xa0;]</code> -first (pred list)</li>
+<li class="off"><code>[&#xa0;]</code> -last (pred list)</li>
+<li class="on"><code>[X]</code> -first-item (list)</li>
+<li class="on"><code>[X]</code> -second-item (list)</li>
+<li class="on"><code>[X]</code> -third-item (list)</li>
+<li class="on"><code>[X]</code> -fourth-item (list)</li>
+<li class="on"><code>[X]</code> -fifth-item (list)</li>
+<li class="on"><code>[X]</code> -last-item (list)</li>
+<li class="off"><code>[&#xa0;]</code> -butlast (list)</li>
+<li class="off"><code>[&#xa0;]</code> -sort (comparator list)</li>
+<li class="off"><code>[&#xa0;]</code> -list (arg)</li>
+<li class="off"><code>[&#xa0;]</code> -fix (fn list)</li>
+
+<li class="off"><code>[&#xa0;]</code> -tree-seq (branch children tree)</li>
+<li class="off"><code>[&#xa0;]</code> -tree-map (fn tree)</li>
+<li class="off"><code>[&#xa0;]</code> -tree-map-nodes (pred fun tree)</li>
+<li class="off"><code>[&#xa0;]</code> -tree-reduce (fn tree)</li>
+<li class="off"><code>[&#xa0;]</code> -tree-reduce-from (fn init-value tree)</li>
+<li class="off"><code>[&#xa0;]</code> -tree-mapreduce (fn folder tree)</li>
+<li class="off"><code>[&#xa0;]</code> -tree-mapreduce-from (fn folder init-value tree)</li>
+<li class="on"><code>[X]</code> -clone (list)</li>
+
+<li class="off"><code>[&#xa0;]</code> -&gt; (x &amp;optional form &amp;rest more)</li>
+<li class="off"><code>[&#xa0;]</code> -&gt;&gt; (x &amp;optional form &amp;rest more)</li>
+<li class="off"><code>[&#xa0;]</code> &#x2013;&gt; (x &amp;rest forms)</li>
+<li class="off"><code>[&#xa0;]</code> -as-&gt; (value variable &amp;rest forms)</li>
+<li class="off"><code>[&#xa0;]</code> -some-&gt; (x &amp;optional form &amp;rest more)</li>
+<li class="off"><code>[&#xa0;]</code> -some-&gt;&gt; (x &amp;optional form &amp;rest more)</li>
+<li class="off"><code>[&#xa0;]</code> -some&#x2013;&gt; (expr &amp;rest forms)</li>
+<li class="off"><code>[&#xa0;]</code> -doto (init &amp;rest forms)</li>
+
+<li class="off"><code>[&#xa0;]</code> -when-let ((var val) &amp;rest body)</li>
+<li class="off"><code>[&#xa0;]</code> -when-let* (vars-vals &amp;rest body)</li>
+<li class="off"><code>[&#xa0;]</code> -if-let ((var val) then &amp;rest else)</li>
+<li class="off"><code>[&#xa0;]</code> -if-let* (vars-vals then &amp;rest else)</li>
+<li class="off"><code>[&#xa0;]</code> -let (varlist &amp;rest body)</li>
+<li class="off"><code>[&#xa0;]</code> -let* (varlist &amp;rest body)</li>
+<li class="off"><code>[&#xa0;]</code> -lambda (match-form &amp;rest body)</li>
+<li class="off"><code>[&#xa0;]</code> -setq ([match-form val] &#x2026;)</li>
+
+<li class="off"><code>[&#xa0;]</code> -each (list fn)</li>
+<li class="off"><code>[&#xa0;]</code> -each-while (list pred fn)</li>
+<li class="off"><code>[&#xa0;]</code> -each-indexed (list fn)</li>
+<li class="off"><code>[&#xa0;]</code> -each-r (list fn)</li>
+<li class="off"><code>[&#xa0;]</code> -each-r-while (list pred fn)</li>
+<li class="off"><code>[&#xa0;]</code> -dotimes (num fn)</li>
+
+<li class="off"><code>[&#xa0;]</code> -partial (fun &amp;rest args)</li>
+<li class="off"><code>[&#xa0;]</code> -rpartial (fn &amp;rest args)</li>
+<li class="off"><code>[&#xa0;]</code> -juxt (&amp;rest fns)</li>
+<li class="off"><code>[&#xa0;]</code> -compose (&amp;rest fns)</li>
+<li class="off"><code>[&#xa0;]</code> -applify (fn)</li>
+<li class="off"><code>[&#xa0;]</code> -on (op trans)</li>
+<li class="off"><code>[&#xa0;]</code> -flip (fn)</li>
+<li class="off"><code>[&#xa0;]</code> -rotate-args (n fn)</li>
+<li class="off"><code>[&#xa0;]</code> -const (c)</li>
+<li class="off"><code>[&#xa0;]</code> -cut (&amp;rest params)</li>
+<li class="off"><code>[&#xa0;]</code> -not (pred)</li>
+<li class="off"><code>[&#xa0;]</code> -orfn (&amp;rest preds)</li>
+<li class="off"><code>[&#xa0;]</code> -andfn (&amp;rest preds)</li>
+<li class="off"><code>[&#xa0;]</code> -iteratefn (fn n)</li>
+<li class="off"><code>[&#xa0;]</code> -fixfn (fn &amp;optional equal-test halt-test)</li>
+<li class="off"><code>[&#xa0;]</code> -prodfn (&amp;rest fns)</li>
+</ul>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara"><a href="https://franz.com/support/documentation/ansicl.94/dictentr/carcdrca.htm">https://franz.com/support/documentation/ansicl.94/dictentr/carcdrca.htm</a></p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="date">Date: 2021-09-04 周六 00:00</p>
+<p class="author">Author: include-yy</p>
+<p class="date">Created: 2021-09-06 周一 12:50</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
