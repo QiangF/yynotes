@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-09-24 Fri 19:39 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>emacs 的 byte compilation <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkwNzY0NTk0.png" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="http://www.incf19.com/index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">emacs 的 byte compilation <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkwNzY0NTk0.png" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org9d84024">1. 如何编译函数</a></li>
+<li><a href="#org97d1fc3">2. 编译与文档字符串（documentation string）</a></li>
+<li><a href="#org6402743">3. 编译时求值</a>
+<ul>
+<li><a href="#org416a511">3.1. 用于辅助函数</a></li>
+<li><a href="#orgfead220">3.2. 程序执行过程中定义函数</a></li>
+</ul>
+</li>
+<li><a href="#org32dffdb">4. 字节码对象</a></li>
+<li><a href="#org1a4f7ac">5. 字节码的反汇编</a></li>
+<li><a href="#orgb9a2994">6. 编译错误</a></li>
+<li><a href="#orgf55aa98">7. 字节码的速度</a></li>
+</ul>
+</div>
+</div>
+<p>
+在之前的文章中我介绍了 emacs 的 macro，这是出于两个目的，其一是学习 macro 的基本用法，其二是作为本文的前置文章，提供一些与 macro 相关的知识。本文我会参考 manual 简单介绍 emacs 中字节编译的使用，在内容上基本就是一篇笔记。下面的两段话是我从 manual 开头翻译过来的。
+</p>
+
+<p>
+elisp 有一个能把 Lisp 函数翻译为字节码的编译器，编译器会将函数定义替换为字节码，字节码的执行效率更好。当字节码函数被调用时，它的定义会被字节码解释器求值。因为字节码是由解释器执行而不是直接由机器硬件执行，它可以在不同机器上使用而无需重新编译。但是它也没有真正的编译码快。
+</p>
+
+<p>
+一般来说，任何版本的 emacs 都可以运行早先版本 emacs 生成的字节码，但是反过来不一定行得通。
+</p>
+
+<div id="outline-container-org9d84024" class="outline-2">
+<h2 id="org9d84024"><span class="section-number-2">1</span> 如何编译函数</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+凡和字节编译相关的函数大多以 <code>byte-compile</code> 作为前缀，这一小节我会介绍几个相关的函数。
+</p>
+
+<p>
+<code>byte-compile</code> 接受一个 <code>symbol</code> 作为参数，它会对 <code>symbol</code> 的函数定义进行字节编译，并使用编译得到的结果替换符号的函数定义。需要注意的是，它要求 symbol 的 function cell 必须是一个有效的函数对象，而且它不会进行 <code>function indirection</code> 。该函数的返回值是编译后的字节函数对象：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">factor</span> (n)
+  <span style="color: #cc0000;">"computer fact(n)"</span>
+  (<span style="color: #00af00;">or</span> (<span style="color: #00af00;">and</span> (= 1 n) 1) (* n (factor (1- n)))))
+
+(byte-compile 'factor)
+=&gt;
+#[257 <span style="color: #ff1f8b;">"&#137;&#192;U&#131;&#8;&#0;&#192;&#135;&#137;&#193;&#2;S!_&#135;"</span> [1 factor] 4 <span style="color: #ff1f8b;">"computer fact(n)</span>
+
+<span style="color: #ff1f8b;">(fn N)"</span>]
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">do it again</span>
+(byte-compile 'factor)
+=&gt; *message* Function factor is already compiled
+#[257 <span style="color: #ff1f8b;">"&#137;&#192;U&#131;&#8;&#0;&#192;&#135;&#137;&#193;&#2;S!_&#135;"</span> [1 factor] 4 <span style="color: #ff1f8b;">"computer fact(n)</span>
+
+<span style="color: #ff1f8b;">(fn N)"</span>]
+</pre>
+</div>
+
+<p>
+从上面的结果可以看到，如果已经对某个函数进行了字节编译，那么再次对它使用 <code>byte-compile</code> 时， <code>*message*</code> buffer 中会提示你该函数已经被编译。这里的行为与文档中描述的不完全一致，文档指出，当 symbol 的函数对象已编译时， <code>byte-compile</code> 会返回 nil，而上面的结果是编译后的函数对象。不论如何，一切以实际情况为准即可。
+</p>
+
+<p>
+除了说接受符号外，该函数也可接受 lambda 表达式，不过这种情况下函数只会返回编译后的函数，如果丢弃返回值的话相当于什么也没做。
+</p>
+
+<p>
+<code>compile-defun</code> 会读取当前位置的定义并编译，然后求值得到结果。如果你使用它而不是 <code>eval-defun</code> 的话，实际上就相当于得到了函数的编译后版本。在 <code>lisp-interaction-mode</code> 的 key-binding 中我没有找到它，也许它用的并不怎么多。想要体验一下的话，可以考虑临时给它加上一个快捷键，比如这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(global-set-key (kbd <span style="color: #ff1f8b;">"&lt;f5&gt;"</span>) 'compile-defun)
+</pre>
+</div>
+
+<p>
+<code>compile-defun</code> 的返回值就是函数的符号名字。
+</p>
+
+<p>
+<code>byte-compile-file</code> 是对一个文件中的所有定义进行字节编译，并将编译后的函数定义输出到新的文件中。它接受一个字符串作为文件名，并接受一个可选参数 <code>load</code> 。新文件的名字是将旧文件后缀由 ".el" 替换为 ".elc"。如果原文件不以 <code>.el</code> 结尾的话，新文件的名字就是在原文件名后面加上 <code>.elc</code> 。
+</p>
+
+<p>
+文件的编译过程大致是这样的：每次读取文件中的一个 <code>form</code> ，如果它是函数或宏的定义的话，它的编译结果会写出到新文件。其他的 <code>form</code> 会打包在一起（batched together），然后每条 batch 会被编译并写入新文件，这样它们的编译码会在文件被读取时执行。在读取文件时，所有的注释都会被忽略掉。
+</p>
+
+<p>
+如果编译过程没有问题的话，这条命令会返回 t，否则返回 nil。如果 <code>load</code> 为非空的话，在编译完成后该命令还会载入编译后得到的文件。使用 <code>M-x</code> 方式调用时可以使用 <code>C-u</code> 前缀来指定它。
+</p>
+
+<p>
+关于 <code>batched together</code> ，以下例子有助于你对它的理解。将非定义表达式打包到一起的意思就是：挨在一起的表达式被合并为一条编译码
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">cp.el</span>
+(print 1)
+(print 2)
+(print 3)
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy1</span> (x) (+ x 1))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy2</span> (x) (- x 1))
+
+(print 4)
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy3</span> (x y) (+ x y))
+
+(print 5)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">cp.elc</span>
+<span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">ELC&#23;&#0;&#0;&#0;</span>
+<span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">Compiled</span>
+<span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">in Emacs version 27.1</span>
+<span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">with all optimizations.</span>
+
+<span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">This file uses dynamic docstrings, first added in Emacs 19.29.</span>
+
+<span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">This file does not contain utf-8 non-ASCII characters,</span>
+<span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">and so can be loaded in Emacs versions earlier than 23.</span>
+
+<span style="color: #b2b2b2; font-style: italic;">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;</span>
+<span style="color: #b2b2b2; font-style: italic;">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;</span>
+
+
+(byte-code <span style="color: #ff1f8b;">"\300\301!\210\300\302!\210\300\303!\207"</span> [print 1 2 3] 2)
+(<span style="color: #00af00;">defalias</span> '<span style="color: #ef2929;">yy1</span> #[(x) <span style="color: #ff1f8b;">"&#8;T\207"</span> [x] 1])
+(<span style="color: #00af00;">defalias</span> '<span style="color: #ef2929;">yy2</span> #[(x) <span style="color: #ff1f8b;">"&#8;S\207"</span> [x] 1])
+(print 4)
+(<span style="color: #00af00;">defalias</span> '<span style="color: #ef2929;">yy3</span> #[(x y) <span style="color: #ff1f8b;">"&#8;       \\\207"</span> [x y] 2])
+(print 5)
+</pre>
+</div>
+
+<p>
+可以看到，(print 1) (print 2) (print 3) 三条表达式在编译结果中成为了一条 <code>batch</code> ，但是 (print 4) 和 (print 5) 没有，因为它们中间隔了一个 yy3 的定义。
+</p>
+
+<p>
+<code>byte-recompile-directory</code> 接受 <code>directory</code> 作为参数，以及 <code>flag</code> 和 <code>force</code> 作为可选参数。它会对所有在 <code>directory</code> 目录下的需要重编译的 .el 文件进行重编译。关于是否需要重编译的标准是这样的：.el 文件对应的 .elc 文件存在且时间戳老于 .el 文件。
+</p>
+
+<p>
+如果 .el 文件没有对应的 .elc 文件的话，参数 <code>flag</code> 将决定该命令的行为，若 <code>flag</code> 为 nil，该命令会忽略掉这些文件，若 <code>flag</code> 为 0，它会编译这些文件，若 <code>flag</code> 的值不是这两个中的一个，它会询问用户是否对文件进行编译。这个询问是递归式的，子目录中的文件也会被询问。
+</p>
+
+<p>
+如果 <code>force</code> 为非 nil 值，该命令会重编译所有拥有 .elc 的 .el 文件。
+</p>
+
+<p>
+除了上面提到的四个函数，还有一个叫做 <code>batch-byte-compile</code> 的函数，它调用 <code>byte-compile-file</code> 来对文件进行编译。该函数只能在执行 batch 时使用，在完成后它会关闭 emacs。当某一文件出现错误时不会影响其他文件的处理，但它也不保证一定会有输出文件。出现错误后 emacs 会终止并返回非零状态值。
+</p>
+
+<p>
+<code>batch-byte-compile</code> 接受一个可选参数 <code>noforce</code> ，如果它为非空的话，该函数不会重编译已有足够新的 .elc 的 .el 文件。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org97d1fc3" class="outline-2">
+<h2 id="org97d1fc3"><span class="section-number-2">2</span> 编译与文档字符串（documentation string）</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+当 emacs 从 .elc 文件中载入函数和变量的时候，它通常不会将文档字符串载入内存中。只有在需要的时候，文档字符串才会从 .elc 文件中被动态载入。这样可以节约内存和加快载入时间，毕竟跳过了字符串的处理。
+</p>
+
+<p>
+这个特性也有缺点，如果你删除，移动或修改了编译文件（比如重编译得到更新的文件），emacs 可能不能访问之前载入的函数或变量的文档字符串。这种情况一般只会出现在你自己编译 emacs 的时候，或者是编辑或重编译 emacs 的 lisp 源文件时。要解决这个问题，只需要重新载入重编译后的文件即可。
+</p>
+
+<p>
+是否使用这个特性是在编译期间决定的，可以使用 <code>byte-compile-dynamic-docstrings</code> 这个选项来控制该行为。默认情况下它的值是 <code>t</code> ，也就是使用动态载入。
+</p>
+
+<p>
+如果想要在编译文件时指定禁用该特性，可以使用文件局部变量来做到这一点：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">-*- byte-compile-dynamic-docstrings: nil; -*-</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6402743" class="outline-2">
+<h2 id="org6402743"><span class="section-number-2">3</span> 编译时求值</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+在上面的例子中你也看到了，我由 cp.el 得到了 cp.elc，cl.el 中的代码被编译并写入到了对应的 elc 文件中。在该过程中 cp.el 的代码并没有执行，如果我们想让其中的某些代码执行，以此达到某种目的的话，我们可以使用下面介绍的方法。
+</p>
+
+<p>
+<code>eval-and-compile</code> 是一个 special form，在它里面的表达式可以在你编译代码和运行代码时执行。要达到相似的效果，你可以在需要编译的文件中加上 require，然后把需要执行的代码放到 require 的那个文件中，当需要执行的代码很多的时候这样做是比较推荐的。
+</p>
+
+<p>
+<code>eval-when-compile</code> 可以让它里面的表达式在编译时被求值，但在载入 elc 文件时不被求值。它的求值结果会以常值的形式出现在得到的编译文件中。如果你载入 el 文件而不是 elc 文件的话， <code>eval-when-compile</code> 中的表达式会被正常求值。
+</p>
+
+<p>
+如果你需要一个在编译时经过某些计算才能得到的常值，那么你可以这样做：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">defvar</span> <span style="color: #ff8700;">my-regexp</span>
+  (<span style="color: #00af00;">eval-when-compile</span> (regexp-opt '(<span style="color: #ff1f8b;">"aaa"</span> <span style="color: #ff1f8b;">"aba"</span> <span style="color: #ff1f8b;">"abb"</span>))))
+</pre>
+</div>
+
+<p>
+如果你需要用到其他的 package，但只想使用里面的宏，那么可以这样做：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">eval-when-compile</span>
+  (<span style="color: #00af00;">require</span> '<span style="color: #1f5bff;">my-macro-package</span>))
+</pre>
+</div>
+
+<p>
+在编译你的文件后，宏已经展开了，在运行时就不需要使用到其他的 package 了。对于宏和 defsubst 也可以这样，如果只在该 package 内部使用的话，也可以放到 <code>eval-when-compile</code> 里面：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">eval-when-compile</span>
+  (<span style="color: #00af00;">unless</span> (fboundp 'some-new-thing)
+    (<span style="color: #00af00;">defmacro</span> '<span style="color: #ef2929;">some-new-thing</span> ()
+      (compatibility code))))
+</pre>
+</div>
+
+<p>
+文档中是这样描述 <code>eval-and-compile</code> 的： <i>Most use of eval-and-compile are fairly sophisticated</i> 。所以就我来说可能是用不上了。文档中给出了两种使用场景，一是用在宏的辅助函数上，二是函数在程序执行过程中定义（defined programmatically）。下面我们对它们进行稍微详细一点的解读。
+</p>
+</div>
+
+<div id="outline-container-org416a511" class="outline-3">
+<h3 id="org416a511"><span class="section-number-3">3.1</span> 用于辅助函数</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+我在之前的文章中提到过关于 elisp macro 的编译展开行为，这里我们再简单介绍一下。当宏调用出现在需要被编译的 lisp 代码中时，lisp 编译器会像解释器一样展开宏调用，但不同的是编译器会将展开结果插入原宏调用位置并继续编译，而不是对展开结果求值。因此，如果要编译含有宏调用的代码，你需要先让需要的宏先被定义。不过编译器的一个特性可以免除这个麻烦，如果宏定义存在于要被编译的文件中，那么这些宏在编译时会暂时被定义。
+</p>
+
+<p>
+在宏中是可能用到辅助函数的，比如展开过程中需要调用某函数并使用函数的返回值之类的，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-he</span> (x)
+  (<span style="color: #00af00;">let</span> ((x-type (yy-get-type x)))
+    (<span style="color: #00af00;">cl-case</span> x-type
+      ((int) `(+ ,x 1))
+      ((flt) `(+ ,x 1.0))
+      ((sym) `(cons ',x 'a))
+      ((t) x))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-get-type</span> (x)
+  (<span style="color: #00af00;">cond</span>
+   ((symbolp x) 'sym)
+   ((integerp x) 'int)
+   ((floatp x) 'flt)
+   (t t)))
+
+</pre>
+</div>
+
+<p>
+在上面的函数与宏中， <code>yy-get-type</code> 的返回值为 <code>yy-he</code> 所用。如果在宏展开时辅助函数 <code>yy-get-type</code> 还没有定义的话，会出现 <code>void-function</code> 的错误的。
+</p>
+
+<p>
+若宏只在 package 内（这里理解为同一待编译文件即可）使用的话，在文件编译前定义该辅助函数或使用 <code>eval-when-compile</code> 即可，即把 <code>yy-get-type</code> 放到 <code>eval-when-compile</code> 的 body 里面。宏由于编译器特性可以直接放在文件的 top-level。
+</p>
+
+<p>
+但如果在 package 外还要用到宏的话，那么辅助函数对外也必须是可见的，载入 elc 文件时需要载入辅助函数。这个时候就要使用到 <code>eval-and-compile</code> 了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">eval-and-compile</span>
+  (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-get-type</span> (x)
+    (<span style="color: #00af00;">cond</span>
+     ((symbolp x) 'sym)
+     ((integerp x) 'int)
+     ((floatp x) 'flt)
+     (t t))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfead220" class="outline-3">
+<h3 id="orgfead220"><span class="section-number-3">3.2</span> 程序执行过程中定义函数</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+所谓执行中定义函数，指的是执行代码过程中才定义函数（听君一席话，胜听一席话），而不是在代码执行前就定义好函数。这就是说函数可能根据不同情况来选择不同的函数定义。举例来说的话就是这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">if</span> (= 1 1) (fset 'yy-me (<span style="color: #00af00;">lambda</span> (x) (+ x 1)))
+  (fset 'yy-me (<span style="color: #00af00;">lambda</span> (x) (+ x 2))))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-i</span> (x) (yy-me x))
+
+(yy-i 1) =&gt; 2
+</pre>
+</div>
+
+<p>
+如果我们仅仅需要在编译时使用这个函数，把它放到 <code>eval-when-compile</code> 中就可以了，但如果在 package 外我们也想要使用它，那就不得不放到 <code>eval-and-compile</code> 里面了。
+</p>
+
+<p>
+需要说明的是，这一段只是我对文档描述的一种理解，文档原文如下：
+</p>
+
+<blockquote>
+<p>
+If functions are defined programmatically (with fset say), then eval-and-compile can be used to have that done at compile-time as well as run-time, so calls to those functions are checked (and warnings about “not known to be defined” suppressed).
+</p>
+</blockquote>
+
+<p>
+至于 defined programmatically 是不是还包括了其他的情况，我就不是太清楚了。如果你有什么看法欢迎和我交流。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org32dffdb" class="outline-2">
+<h2 id="org32dffdb"><span class="section-number-2">4</span> 字节码对象</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+字节编译后的函数有一种特别的类型：它们是字节码函数对象（byte-code function object）。emacs 使用字节码解释器来执行这些字节码。
+</p>
+
+<p>
+字节码函数的内部表示很像向量，它的元素可以使用 <code>aref</code> 访问。它的打印表示和向量也很像，不过在 '[' 前面有 '#' 作为前缀。它至少拥有四个元素，最多元素数量没有限制，但是一般只会用到前六个，它们分别是：
+</p>
+
+<ul class="org-ul">
+<li><i>argdesc</i></li>
+</ul>
+
+<p>
+<i>argdesc</i> 是参数的描述符。它可以是参数表，或者是参数个数的整数编码值。对于后者，描述符的第 0 位到第 6 位用来指定最小参数个数，第 8 位到第 14 位用来指定参数的最大个数，如果参数表使用了 <code>&amp;rest</code> ，那么第 7 位会被置位，否则会被清除。
+</p>
+
+<p>
+如果 <i>argdesc</i> 是表形式的话，在调用字节码之前实参会被动态绑定到它上面。如果 <i>argdesc</i> 是整数的话，在执行函数字节码前，参数会被压入字节码解释器的堆栈中。
+</p>
+
+<p>
+这里对于数字形式的 <i>argdesc</i> 做一下解释，如果函数的参数表是 <code>(a b)</code> 的话，根据规则，0 - 6 位用来存放最少参数个数， 8 - 14 位用来存放最多参数个数，由于没有 <code>&amp;optional</code> 选项，最少和最多参数数量应该相同，而且由于没有使用 <code>&amp;rest</code> ，第 7 位应该置 0，所以得到的结果应该是：
+</p>
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">14</td>
+<td class="org-right">13</td>
+<td class="org-right">12</td>
+<td class="org-right">11</td>
+<td class="org-right">10</td>
+<td class="org-right">9</td>
+<td class="org-right">8</td>
+<td class="org-right">7</td>
+<td class="org-right">6</td>
+<td class="org-right">5</td>
+<td class="org-right">4</td>
+<td class="org-right">3</td>
+<td class="org-right">2</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+得到的结果就是 <code>1000000010</code> ，换算一下就是 514，我们可以使用以下代码来证实：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">pp-yy1</span> (x y) (+ x y))
+(byte-compile 'pp-yy1)
+=&gt;
+
+#[514 <span style="color: #ff1f8b;">"&#1;&#1;\\\207"</span> [] 4 <span style="color: #ff1f8b;">"</span>
+
+<span style="color: #ff1f8b;">(fn X Y)"</span>]
+</pre>
+</div>
+
+<p>
+上面的例子中，如果我使用三参列表， <i>argdesc</i> 会直接变成参数表的形式。我猜 emacs 只会将参数数量较少的函数编译为 <i>argdesc</i> 使用整数。
+</p>
+
+<ul class="org-ul">
+<li><i>byte-code</i></li>
+</ul>
+
+<p>
+包含字节码指令的字符串
+</p>
+
+<ul class="org-ul">
+<li><i>constants</i></li>
+</ul>
+
+<p>
+由字节码使用的 lisp 对象向量，这包括作为函数名和变量名的符号。
+</p>
+
+<ul class="org-ul">
+<li><i>stacksize</i></li>
+</ul>
+
+<p>
+堆栈的最大大小
+</p>
+
+<ul class="org-ul">
+<li><i>docstring</i></li>
+</ul>
+
+<p>
+文档字符串，如果没有的话就是 nil。这个值可以是一个数字或表，这就表明文档字符串是存储在文件中。通过 <code>documentation</code> 函数可以获取真正的文档字符串。
+</p>
+
+<ul class="org-ul">
+<li><i>interactive</i></li>
+</ul>
+
+<p>
+函数的 interactive 声明。它可以是字符串或 lisp 表达式，如果函数不是 interactive 的话，这个值为 nil。
+</p>
+
+<p>
+在文档的最后还提到了一个叫做 <code>make-byte-code</code> 的函数，使用它可以生成字节码函数。但是作为用户的我们不应该使用它来生成字节码。如果出现了某些差错，emacs可能会在你调用该函数时直接崩溃。你应该总是使用字节码编译器来生成这些对象。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1a4f7ac" class="outline-2">
+<h2 id="org1a4f7ac"><span class="section-number-2">5</span> 字节码的反汇编</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+老实说这一节的意义不大，文档中是这样描述的： <i>People do not write byte-code; that job is left to the byte compiler. But we provide a disassembler to satify a cat-like curiosity.</i> （笑）这个反汇编器可以将字节码转变成人类可读的形式。
+</p>
+
+<p>
+字节码解释器是使用简单的堆栈机器实现的。它将值压入栈中，并在计算时弹栈用来计算，随后将得到的值重新压入栈中。当字节码函数返回时，它将值弹出并将它作为函数的返回值。
+</p>
+
+<p>
+要进行反汇编的话，需要使用 <code>disassemble</code> 函数，它接受一个字节码对象，并返回汇编伪代码。它接受 <code>buffer-or-name</code> 来作为可选参数，若该参数为 nil，该函数会将结果输出到叫做 <code>*Dsiassemble*</code> 的 buffer 中。如果为非 nil 的话，那么它的值必须是一个已存在的 buffer 或 buffer 名，随后函数会输出到 buffer 中。
+</p>
+
+<p>
+我们以一个简单的斐波那契函数作为例子看看它的输出：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">fib</span> (n)
+  (<span style="color: #00af00;">or</span> (<span style="color: #00af00;">and</span> (= n 0) 0)
+      (<span style="color: #00af00;">and</span> (= n 1) 1)
+      (+ (fib (1- n)) (fib (1- (1- n))))))
+
+(disassemble (symbol-function 'fib))
+</pre>
+</div>
+
+<pre class="example">
+byte code:
+  args: (n)
+0	varref	  n
+1	constant  0
+2	eqlsign
+3	goto-if-nil 1
+6	constant  0
+7	return
+8:1	varref	  n
+9	constant  1
+10	eqlsign
+11	goto-if-nil 2
+14	constant  1
+15	return
+16:2	constant  fib
+17	varref	  n
+18	sub1
+19	call	  1
+20	constant  fib
+21	varref	  n
+22	sub1
+23	sub1
+24	call	  1
+25	plus
+26	return
+</pre>
+
+<p>
+我可看不懂这段汇编伪代码，看个乐子算了。不过相比起各种缩写词的汇编，它的可读性还是不错的。关于各指令的意思，如果觉得难猜的话可以直接取读读 elisp manual。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb9a2994" class="outline-2">
+<h2 id="orgb9a2994"><span class="section-number-2">6</span> 编译错误</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+以下大体是 elisp manual 在 Compiler Errors 一节的翻译。
+</p>
+
+<p>
+在编译过程中出现的警告和错误会打印到叫做 <code>*Compile-log*</code> 的 buffer 中。这些消息包括了出现的问题所在文件的文件名和行号。当错误是由语法引起的时候，字节编译器可能不是很清楚出问题的准确位置。找位置的一种方法是在 <code>*Compiler Input*</code> buffer 中找到出现问题的点。
+</p>
+
+<p>
+很常见的一种警告是使用了未定义的函数或变量。这样的问题报告的行号是文件的末尾而不是使用未定义变量或函数的位置。要找到这些位置，你必须自己动手。如果你确定这些警告是多余的，你可以通过以下方法来忽略掉它们：
+</p>
+
+<ul class="org-ul">
+<li>你可以在调用函数时加上 <code>fboundp</code> 判断，就像这样：</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">if</span> (fboundp 'func) ...(func ...)...)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>同样地，你也可以在使用变量之前加上判断：</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">if</span> (boundp 'variable) ...variable...)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>你可以使用 <code>declare-function</code>  来告诉编译器这个函数已经被定义</li>
+
+<li>你可以使用不带初始值的 <code>defvar</code> 来告诉编译器变量已经被定义了（不过需要注意 <code>defvar</code> 会将变量标记为特殊变量）</li>
+</ul>
+
+<p>
+除了上面的方法，你也可是使用下面的两个 sepcial form 来忽略掉某些警告：
+</p>
+
+<p>
+<code>with-suppressed-warnings</code> 接受 <code>warinings</code> 和 <code>body...</code> 作为参数， <code>warnings</code> 是一张 alist，每个项的 car 部分是警告类型，cdr 部分是产生警告的函数或变量的符号。例如，如果你想要忽略 obsolete 警告，你可以这样做：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">with-suppressed-warnings</span> ((obsolete foo))
+   (foo ...))
+</pre>
+</div>
+
+<p>
+相比于 <code>with-supported-warnings</code> ， <code>with-no-warnings</code> 提供了一个更为粗粒度的方法。编译器不会对 body 内的任何警告进行提示。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf55aa98" class="outline-2">
+<h2 id="orgf55aa98"><span class="section-number-2">7</span> 字节码的速度</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+这里我们使用上面定义的 <code>fib</code> 函数来测试一下字节码和非字节码函数的执行速度，为了使差别更加明显，这里通过计算 <code>(fib 40)</code> 来说明速度：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">fib</span> (n)
+  (<span style="color: #00af00;">or</span> (<span style="color: #00af00;">and</span> (= n 0) 0)
+      (<span style="color: #00af00;">and</span> (= n 1) 1)
+      (+ (fib (1- n)) (fib (1- (1- n))))))
+
+(<span style="color: #00af00;">let</span> ((t1 (float-time)))
+  (fib 40)
+  (- (float-time) t1))
+=&gt; 70.61351799964905
+
+(byte-compile 'fib)
+
+(<span style="color: #00af00;">let</span> ((t1 (float-time)))
+  (fib 40)
+  (- (float-time) t1))
+=&gt; 31.948441982269287
+</pre>
+</div>
+
+<p>
+就结果上来说，经过字节编译的 fib 比原始版本快了一倍多。但这并不能说明编译函数一定会带来如此之大的性能提升，毕竟大多数函数不会这么简单，而且调用次数不会这么多（fib 的递归调用次数是指数增长的）。至于有没有必要把自己的配置文件编译一遍，我感觉是没有必要的。这样做带来的性能提升应该不会很多，不断地更新 elc 文件反而成了麻烦。
+</p>
+
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly95YW5kZS5yZS9wb3N0L3Nob3cvMTQ0NzE1.jpg" alt="load failed"></div><div class="yyimgcomment">Izayoi Sakuya</div>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-09-22 Wed 00:00</p> <p>Last modified: 2021-09-24 Fri 19:17</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
