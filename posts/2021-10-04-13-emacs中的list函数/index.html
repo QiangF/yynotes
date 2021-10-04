@@ -1,0 +1,2761 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-10-04 Mon 18:52 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>emacs 中的 list 函数 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzMxMzAxMTE=.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="http://www.incf19.com/index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">emacs 中的 list 函数 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzMxMzAxMTE=.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org4f4e534">1. 一些相关的知识</a>
+<ul>
+<li><a href="#org1470b2f">1.1. 副作用</a></li>
+<li><a href="#orgaa3e4ce">1.2. 比较函数 eq，eql 和 equal</a></li>
+<li><a href="#orgdd44cc1">1.3. 浅拷贝与深拷贝</a></li>
+<li><a href="#org7494783">1.4. plist 和 alist</a></li>
+<li><a href="#org92ee8ad">1.5. cl 风格的函数定义</a></li>
+<li><a href="#org55d36b0">1.6. dash 库</a></li>
+</ul>
+</li>
+<li><a href="#org3cb2552">2. 表的构建与修改</a></li>
+<li><a href="#org610ec84">3. 一些和表有关的谓词</a></li>
+<li><a href="#orgc7c5fc9">4. 常见的表操作</a></li>
+<li><a href="#org770c3bb">5. 对表中元素的访问</a></li>
+<li><a href="#org1d5a8ff">6. 获取表的子表</a></li>
+<li><a href="#orgc9fdb54">7. 表的增加和删除操作</a></li>
+<li><a href="#org6e1620e">8. 表的查找操作</a></li>
+<li><a href="#org7434a17">9. 表的替换操作</a></li>
+<li><a href="#org83fcca4">10. 表的集合操作</a></li>
+<li><a href="#orgd24c6ce">11. 表的迭代（iterate）</a></li>
+<li><a href="#org520b310">12. 表的映射（map）</a></li>
+<li><a href="#org6c031f4">13. 表的压缩（reduce）</a></li>
+<li><a href="#org820ff53">14. 表的分组（partition）</a></li>
+<li><a href="#orgbac7950">15. 作为 plist 和 alist 的表</a>
+<ul>
+<li><a href="#org1ed831a">15.1. plist</a></li>
+<li><a href="#org3e8c676">15.2. alist</a></li>
+</ul>
+</li>
+<li><a href="#org30e0681">16. dash.el 中的杂技</a>
+<ul>
+<li><a href="#orgca35034">16.1. 前缀杂技</a></li>
+<li><a href="#org4f71f73">16.2. 表杂技</a></li>
+<li><a href="#orga469884">16.3. 函数杂技</a></li>
+<li><a href="#org7fd97a3">16.4. threading macro</a></li>
+<li><a href="#org8067610">16.5. binding macro</a></li>
+</ul>
+</li>
+<li><a href="#orgf30305e">17. 后记</a></li>
+</ul>
+</div>
+</div>
+<p>
+本文是对于 elisp manual 上关于 list 操作函数的一份整理。除了 elisp 自带的那些函数，本文还会介绍 cl-seq.el，seq.el 和 dash.el 中的 list 函数。
+</p>
+
+<p>
+虽说本文的目的是记录 list 函数的用法，但这也并不意味着本文就是函数原型和函数示例的简单堆砌。我会根据使用经验和他人的分类方法来对这几百个函数做一个简单的分类，这样勉强算是建立了一个查找表，之后写代码时可做参考而不至于重新发明轮子。
+</p>
+
+<p>
+完整地读完本文对你来说没什么意义，毕竟要了解函数的功能最好是把它们都敲一遍。感兴趣的话随便挑几个分类，看几个函数就行了，在你寻找想要的函数时希望本文能对你有所帮助。
+</p>
+
+<p>
+我使用的是 emacs 27.1 on windows，以下代码均可在该环境中正常执行。其他的环境信息为：
+</p>
+
+<ul class="org-ul">
+<li>seq.el ;; Version: 2.21</li>
+<li>dash.el ;; Version: 2.19.0</li>
+<li>cl-lib ;; Version: 1.0</li>
+</ul>
+
+
+<div id="outline-container-org4f4e534" class="outline-2">
+<h2 id="org4f4e534"><span class="section-number-2">1</span> 一些相关的知识</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+这一小节中我会介绍一些准备知识和一些约定，以便我在正式开始介绍函数时可以少打点字。如果你对具体的函数不感兴趣，那么读完这一节后就可以停下了，希望本小节对你有所帮助。
+</p>
+</div>
+
+<div id="outline-container-org1470b2f" class="outline-3">
+<h3 id="org1470b2f"><span class="section-number-3">1.1</span> 副作用</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+如果你学过一点编程的话，对副作用（side effect）这个词应该不会太陌生。本文中出现的函数大多数都是无副作用的，所以如果我在介绍函数时没有提到副作用，那就默认该函数是无副作用的。下面我就副作用这个词参考维基百科<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>做一点简单的介绍，如果你不清楚的话（应该不会）可以看看。
+</p>
+
+<p>
+在计算机科学中，如果某个操作，函数或表达式被称作是“带副作用的”，那就意味着它会修改某些在它作用范围外的状态变量。举例来说的话，以下操作都是带副作用的：修改非局部变量，修改静态局部变量，修改引用参数，输入输出操作。
+</p>
+
+<p>
+副作用的使用程度依赖于所使用的编程范式。命令式编程通常用于产生副作用来更新系统状态。与之相对的，声明式编程用来报告系统状态，没有副作用。在函数式编程中一般很少使用副作用，这样使得对程序的形式化验证更加容易。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgaa3e4ce" class="outline-3">
+<h3 id="orgaa3e4ce"><span class="section-number-3">1.2</span> 比较函数 eq，eql 和 equal</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+一般来说， eq 和 equal 用的比较频繁，前者用来比较对象是否为同一对象（identity），后者用来比较对象的值是否相同（equality），那么 eql 和它们的区别是什么呢？
+</p>
+
+<p>
+若两个值是 eq 关系，那么它们就是 eql 的关系，若两个数字无法互相区分，那么它们也是 eql 的，对于浮点数，无法区分指它们具有相同的符号，指数项和精度。
+</p>
+
+<p>
+文档中对它的描述如下：
+</p>
+
+<blockquote>
+<p>
+Return t if the two args are ‘eq’ or are indistinguishable numbers.
+Floating-point values with the same sign, exponent and fraction are ‘eql’.
+This differs from numeric comparison: (eql 0.0 -0.0) returns nil and
+(eql 0.0e+NaN 0.0e+NaN) returns t, whereas ‘=’ does the opposite.
+</p>
+</blockquote>
+</div>
+</div>
+
+
+<div id="outline-container-orgdd44cc1" class="outline-3">
+<h3 id="orgdd44cc1"><span class="section-number-3">1.3</span> 浅拷贝与深拷贝</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+浅拷贝（shallow copy）和深拷贝（deep copy）这两个词我在很早之前就遇到过，意思我也大概理解，但是要说清楚还真不会说。这里我们来理一理它们的意思和关系。
+</p>
+
+<p>
+首先，拷贝（copy）的意思是“将某事物通过某种方式制作成相同的一份或多份的行为”，这个定义可能和计算机里的拷贝有些差别，不过我们关注的点在这句话中都有体现，即“某事物”，“某种方式” 和 “一份或多份”。维基百科的“对象拷贝”词条<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>将对象拷贝定义为 <i>creating a copy of existing object</i> 。
+</p>
+
+<p>
+拷贝的目的一般是获取一个可以修改或移动的副本，或是保留当前值。如果不需要对原对象进行这些操作的话，直接使用原对象的引用（可理解为指针）会更有效率。比如我现在有一张表 <code>(setq a '(1 2 3))</code> ，我想在其他地方使用它且不需要对其进行修改，那我可以直接 <code>(setq b a)</code> ，这样变量 b 就存储了指向表 <code>(1 2 3)</code> 的指针（或者说是引用），只是复制了表的指针值。
+</p>
+
+<p>
+浅拷贝相比于获得引用要更进一步，在拷贝过程中，原对象的成员值会被拷贝到新对象的成员中，但仅仅是拷贝值而已。这也被称为 <i>field-by-field copy</i> 。如果成员值是某一基础类型的话，它会被拷贝到新对象的成员中，这样原对象和新对象各有一份值；如果成员值是某一对象的引用，那么新对象成员得到的也是这个引用，因此原对象和新对象共享该引用指向的对象。在后一种情况下，如果引用对象被修改了，那么在原对象和新对象中都可以看到修改。浅拷贝的实现开销很小，因为它只需要拷贝值就行了。
+</p>
+
+<p>
+深拷贝比浅拷贝又要更进一步，浅拷贝中对于引用的处理是直接复制，而深拷贝会创建引用对应对象的拷贝，并将这份拷贝的引用放入新对象的成员中。新对象与原对象不共享对象，它们是两个完全不同的对象。由于需要拷贝对象而不是直接复制引用，它的开销比浅拷贝大。同时，深拷贝过程可能是递归的，在原对象成员中的对象可能还包含其他对象的引用，这就需要对它再进行深拷贝。
+</p>
+
+<p>
+但是很多时候拷贝并不能直接区分为浅拷贝和深拷贝，而可能是两者的结合。在拷贝过程中，某些值只是简单的与原对象共享，而某些引用会被深拷贝得到全新的对象。举例来说的话， <code>copy-sequence</code> 进行的就是浅拷贝，它只是简单复制了表中的元素，而不管表中的元素是引用还是基础类型值。与之相比， <code>copy-tree</code> 要“深”一点，它会递归拷贝表中的表。两者的区别可以通过以下代码体现出来：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '(1 (2) 3))
+(<span style="color: #00af00;">setq</span> b (copy-sequence a))
+(<span style="color: #00af00;">setq</span> c (copy-tree a))
+(setcar (cadr a) 3)
+(list a b c) =&gt; ((1 (3) 3) (1 (3) 3) (1 (2) 3))
+</pre>
+</div>
+
+<p>
+可以看到，使用浅拷贝得到的 b 与 a 共享原表的第二元素 <code>(2)</code> ，而使用深拷贝得到的 c 是完全独立于 a 和 b 的对象。但以上的代码并不能说明 <code>copy-tree</code> 进行的是深拷贝，实际上它只能识别表和向量的结构并进行深拷贝，它对于其他类型的值只能进行浅拷贝，所以它进行的也不是严格意义上的深拷贝。
+</p>
+
+<p>
+综上，关于拷贝我可以分为四种类型，
+</p>
+<ul class="org-ul">
+<li>最简单的一种就是得到引用或指针，这种情况就是拷贝与原对象完全等同（identity）</li>
+<li>其次就是浅拷贝，两个对象共享所有的引用（新对象和原对象是相等的（equality），但是内部某些引用是完全等同的（identity）</li>
+<li>再就是混合拷贝（mix copy），其中即存在深拷贝也存在浅拷贝，比如可能是“原对象的引用指向的对象的某些引用和新对象中的对象中的引用是完全等同的（identity）”的情况（有点绕）</li>
+<li>最后就是深拷贝了，得到的新对象和原对象是相等的（equality），但是它们不共享任何的对象</li>
+</ul>
+
+<p>
+关于浅拷贝和深拷贝的讨论，stackoverflow 上有这样一个帖子<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>，感兴趣的同学可以去看看，顺便和我上面给出的维基链接做个对比阅读。里面的一些理解和说明可能和我这里不太一致，至于孰对孰错就凭你自己的判断了。
+</p>
+
+<p>
+下文中出现的“副本”这个词如果不做特别说明的话都是指浅拷贝。
+</p>
+
+<blockquote>
+<p>
+知道也好不知道也好，那种事情无关紧要啦 &#x2013; 卧烟远江
+</p>
+</blockquote>
+</div>
+</div>
+
+
+<div id="outline-container-org7494783" class="outline-3">
+<h3 id="org7494783"><span class="section-number-3">1.4</span> plist 和 alist</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+alist 就是 association list，即关联表，它记录了从键到值的映射关系。它的每个元素都是一个 cons cell，car 部分是键（key），cdr 部分是关联值（associated value）
+</p>
+
+<p>
+plist 就是 property list，即属性表，它的形式是 <code>(p1 v1 p2 v2 ...)</code> ，每个属性对应一个值。
+</p>
+
+<p>
+下文中出现的 alist 和 plist 就是指这两种表。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org92ee8ad" class="outline-3">
+<h3 id="org92ee8ad"><span class="section-number-3">1.5</span> cl 风格的函数定义</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+在 elisp 中，使用 defun 时可以使用 &amp;optional 和 &amp;rest 来指定可选参数和剩余参数。但是在 COMMON LISP 中还可以指定 &amp;key 和 &amp;aux 参数。我在下面会介绍一些 cl-lib 中的函数，所以需要对这两种参数指定方式和 cl-defun 做个介绍。
+</p>
+
+<p>
+cl-defun 可以接受的参数形式可以是以下几种的组合：
+</p>
+
+<ul class="org-ul">
+<li>VAR &#x2026;</li>
+<li>&amp;optional (VAR INITFORM SVAR)&#x2026;</li>
+<li>&amp;rest VAR</li>
+<li>&amp;key ((KEYWORD VAR) INITFORM SVAR)&#x2026;</li>
+<li>&amp;aux (VAR INITFORM)&#x2026;</li>
+</ul>
+
+<p>
+其中 VAR 和普通的 defun 一样，就是参数名。我们管它叫固定参数。
+</p>
+
+<p>
+至于可选参数（使用 &amp;optional 的参数），它的形式是 <code>(VAR INITFORM SVAR)</code> ，其中 VAR 是参数名，INITFORM 是 VAR 的默认值，如果没有的话那么 VAR 的默认值就是 nil。当在 VAR 之前的参数都被求值后， INITFORM 就会被求值，来得到 VAR 的值。SVAR 是一个提示变量，如果调用函数时在参数表中指定了 VAR，那么 SVAR 的值就是 t，否则就是 nil。如果不使用 SVAR 的话，你就无从知道调用函数时是否指定了该可选参数，不知道该参数是否使用的是默认值。
+</p>
+
+<p>
+下面的函数定义可以说明各种形式的可选参数：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defun</span> <span style="color: #ef2929;">opt-yy</span> (x <span style="color: #18b2b2;">&amp;optional</span> (b (+ x 1)) (c 1 c-use) (d (* x 2)) a)
+  (<span style="color: #00af00;">if</span> a
+      (+ x b c d a)
+    (cons c-use (+ x b c d))))
+
+(opt-yy 2) =&gt; (nil . 10)
+(opt-yy 2 1) =&gt; (nil . 8)
+(opt-yy 2 1 0) =&gt; (t . 7)
+(opt-yy 2 1 0 1) =&gt; (t . 4)
+(opt-yy 2 1 0 1 1) =&gt; 5
+</pre>
+</div>
+
+<p>
+对于剩余参数（使用 &amp;rest 的参数），如果使用多个参数进行函数调用，在填满了固定参数和可选参数后，剩下的参数会被放到一张表中，并将表绑定到剩余参数上，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defun</span> <span style="color: #ef2929;">rest-yy</span> (x <span style="color: #18b2b2;">&amp;optional</span> y z <span style="color: #18b2b2;">&amp;rest</span> c)
+  c)
+
+(rest-yy 1) =&gt; nil
+(rest-yy 1 2 3) =&gt; nil
+(rest-yy 1 2 3 4 5) =&gt; (4 5)
+</pre>
+</div>
+
+<p>
+使用 &amp;key 的参数被称为关键字参数（keyword arguments）。它们也是可选参数，但与 &amp;optional 不同的是，它们使用关键字来对参数进行指定，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defun</span> <span style="color: #ef2929;">key1-yy</span> (x <span style="color: #18b2b2;">&amp;key</span> a) a)
+
+(key1-yy 1) =&gt; nil
+(key1-yy 1 <span style="color: #b218b2;">:a</span> 'b) =&gt; b
+</pre>
+</div>
+
+<p>
+关键字参数的指定形式是 <code>((KEYWORD VAR) INITFORM SVAR)</code> ，其中 <code>(KEYWORD VAR)</code> 可以指定变量 VAR 对应的关键字，关键字在调用函数时使用，变量在函数体内使用，指定的关键字可以不是关键字符号（也就是不带 ':' 前缀的符号），不过这样的话在使用该关键字时需要加上 quote。INITFORM 和 SVAR 的规则和 &amp;optional 一致。
+</p>
+
+<p>
+在调用函数时，如果指定了定义时未说明的关键字会引发错误。这个错误可以通过两种方法忽略。一是在关键字参数定义的后面加上 &amp;allow-other-keys ，二是在调用函数时指定 :allow-other-keys 关键字为非空值。
+</p>
+
+<p>
+在 CL-LIB 的文档中给出的例子是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defun</span> <span style="color: #ef2929;">find-thing</span> (thing <span style="color: #18b2b2;">&amp;rest</span> rest <span style="color: #18b2b2;">&amp;key</span> need <span style="color: #18b2b2;">&amp;allow-other-keys</span>)
+  (<span style="color: #00af00;">or</span> (apply 'cl-member thing thing-list <span style="color: #b218b2;">:allow-other-keys</span> t rest)
+      (<span style="color: #00af00;">if</span> need (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"Thing not found"</span>))))
+</pre>
+</div>
+
+<p>
+在调用 <code>cl-member</code> 时将 :allow-other-keys 设为 t，这样就可以使用 cl-member 中的关键字了。
+</p>
+
+<p>
+辅助参数（auxiliary variables）并不是真正的参数，它们就是函数的局部变量罢了。它的形式是 <code>(VAR INITFORM)</code> 。
+</p>
+
+<p>
+以下例子中的两个函数功能是一样的：
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defun</span> <span style="color: #ef2929;">foo</span> (a b <span style="color: #18b2b2;">&amp;aux</span> (c (+ a b)) d)
+  BODY)
+
+(<span style="color: #00af00;">cl-defun</span> <span style="color: #ef2929;">foo</span> (a b)
+  (<span style="color: #00af00;">let</span> ((c (+ a b)) d)
+    BODY))
+</pre>
+</div>
+
+<p>
+以上差不多就是 cl-defun 中参数表的全部内容。下面我就几种典型的关键字进行介绍
+</p>
+
+<ul class="org-ul">
+<li>:test 和 :test-not ，:test 用来指定函数使用的比较函数，该函数返回非空值说明比较的两值相等；:test-not 指明是否对 :test 函数结果取反</li>
+<li>:key ，用来指定对某一元素的提取操作，该函数的返回值会作为原本元素的值被使用</li>
+<li>:start 和 :end，指定表实际使用的部分，:start 是实际表头，:end 是实际表尾</li>
+<li>:from-end ，从表尾到表头，而不是默认的从表头到表尾</li>
+<li>:count，进行某操作的次数。:from-end 一般需要配合 :count 使用，表示移除从后向前的最多个数的元素
+<ul class="org-ul">
+<li>例子： <code>(cl-remove 1 '(1 2 3 1 1) :from-end t :count 1) =&gt; (1 2 3 1)</code> ，下文中的这两个关键字参数大多是这种用法</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org55d36b0" class="outline-3">
+<h3 id="org55d36b0"><span class="section-number-3">1.6</span> dash 库</h3>
+<div class="outline-text-3" id="text-1-6">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./rainbow-dash.png" alt="rainbow-dash.png" /></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+根据项目页面<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup> 的介绍，这是一个现代的 elisp list API。这个库的函数是相当奇特的，基本所有公共 API 都是以 <code>-</code> 开头。按照 emacs 中的命名约定，公共函数和变量的名字应该是包名加 <code>-</code> 再加上原来的名字，私有名字应该是包名加上 <code>--</code> 再加上原本名字。如果按照这个规则的话， dash.el 中的公开函数应该是 <code>--name</code> 的形式。不过这都无所谓就是了。
+</p>
+
+<p>
+我一开始以为库的名字来源是连接符 <code>-</code> ，但是看到了 README 上的那张 rainbow-dash 的图后才明白库名的出处，真是一语双关啊（笑）。
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkxODgxNjkx.png" alt="load failed"></div><div class="yyimgcomment">rainbow dash</div>
+</p>
+
+<p>
+目前（2021 年 9 月）dash 库的版本是 2.19.1，下面都以这个版本为准。
+</p>
+
+<p>
+关于这个库的大部分内容我会在下面的函数介绍中进行说明，这里就仅仅提一下这个库的特点：
+</p>
+
+<ul class="org-ul">
+<li>某些函数有对应的宏版本（anaphoric macro），宏的名字和函数一样，不过有两个 <code>-</code></li>
+<li>除了多数通用的 list 函数，这个库里面有许多杂技，比如 threading macro，也就是箭头宏</li>
+<li>除了 list 外，这个库还提供了许多好用的绑定结构（binding construct）</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org3cb2552" class="outline-2">
+<h2 id="org3cb2552"><span class="section-number-2">2</span> 表的构建与修改</h2>
+<div class="outline-text-2" id="text-2">
+<ul class="org-ul">
+<li><code>(cons CAR CDR)</code> ，创建并返回一个新的 cons</li>
+<li><code>(list &amp;rest OBJECTS)</code> ，创建并返回以参数作为元素的表
+<ul class="org-ul">
+<li>参数数量任意，若为 0 则返回 nil</li>
+</ul></li>
+<li><code>(make-list LENGTH INIT)</code> ，创建并返回一个长度为 LENGTH，元素全为 INIT 的表</li>
+<li><code>(append &amp;rest SEQUENCES)</code> ，将所有的参数连接起来成一个表并返回，表中的元素由所有参数中的元素组成
+<ul class="org-ul">
+<li>除最后一个参数外，其他参数会被浅拷贝得到新表。最后一个参数直接成为新表的尾部</li>
+</ul></li>
+<li><code>(nconc &amp;rest LISTS)</code> ，将所有 LIST 连接在一起并返回
+<ul class="org-ul">
+<li>与 append 不同的是，它直接 <b>修改</b> 每个 LIST 的尾部来进行连接。最后的参数作为返回表表尾</li>
+</ul></li>
+<li><code>(number-sequence FROM &amp;optional TO INC)</code> ，返回从 FROM 到 TO 的数字序列 list（包括 FROM 和 TO）。INC 是步长，默认值为 1
+<ul class="org-ul">
+<li>如果 TO 为 FROM 或 nil，那么返回的就是 (FROM)。如果 INC 为正但 TO 小于 FROM，或者 INC 为负但是 TO 大于 FROM 的话，函数会返回 nil。如果 INC 为 ZERO 且 TO 不为 nil 或 FROM，那么函数会引发错误（signal an error）。如果 FROM 与 TO 的差值不能被 INC 整除，那么 TO 不在结果表中</li>
+<li>FROM，TO，INC 也可以是浮点数，但由于浮点运算的不精确性可能会得到意想不到的结果</li>
+</ul></li>
+<li><code>(setcar CELL NEWCAR)</code> ，将 CELL 的 CAR 修改为 NEWCAR，并返回 NEWCAR</li>
+<li><code>(setcdr CELL NEWCDR)</code> ，将 CELL 的 CDR 修改为 NEWCDR，并返回 NEWCDR</li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-concatenate TYPE SEQUENCE ...)</code> ，将 SEQUENCES 连接起来成为一个序列并返回，该序列的类型为 TYPE
+<ul class="org-ul">
+<li>和 append 类似</li>
+<li>TYPE 可以是 'vector，'string 或 'list</li>
+</ul></li>
+<li><code>(seq-into-sequence SEQUENCE)</code> ，将 SEQUENCE 转换成一种类型的序列
+<ul class="org-ul">
+<li>在 seq.el 中的默认实现是直接返回 SEQUENCE，这个函数可被用户扩展</li>
+</ul></li>
+<li><code>(seq-into SEQUENCE TYPE)</code> ，将 SEQUENCE 转换成类型为 TYPE 的序列并返回得到的新序列
+<ul class="org-ul">
+<li>若 SEQUENCE 的类型为 TYPE，则直接返回 SEQUENCE</li>
+<li>TYPE 可以是 'vector，'string 或 'list</li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-list* ARG...)</code> ，创建并返回以 ARG&#x2026; 作为元素的表，并将最后一个参数与得到的表 cons 起来
+<ul class="org-ul">
+<li>(cl-list* A B C D) 等价于 (nconc (list A B C) D) 或 (cons A (cons B (cons C D)))</li>
+</ul></li>
+<li><code>(cl-concatenate TYPE SEQUENCE...)</code> ，将 SEQUENCES 连接成类型为 TYPE 的序列
+<ul class="org-ul">
+<li>和 append 类似</li>
+<li>TYPE 可以是 'vector，'string 或 'list</li>
+</ul></li>
+<li><code>(cl-revappend X Y)</code> ，等价于 <code>(append (reverse X) Y)</code></li>
+<li><code>(cl-nreconc X Y)</code> ，等价于 <code>(nconc (nreverse X) Y)</code></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-concat &amp;rest LISTS)</code> ，创建并返回以 LISTS 中各表元素为元素的新表
+<ul class="org-ul">
+<li>内部使用 append 实现，和 append 功能相同</li>
+</ul></li>
+<li><code>(-cons* &amp;rest ARGS)</code> ，创建并返回以 ARGS 作为元素的表，最后两个参数构成表的最后一个 cons
+<ul class="org-ul">
+<li>若最后一个参数不是 list，得的结果就不是 proper list</li>
+<li>类似于 cl-list*</li>
+</ul></li>
+<li><code>(-snoc LIST ELEM &amp;rest ELEMENTS)</code> ，将 ELEM 添加到 LIST 的尾部并返回新表
+<ul class="org-ul">
+<li>如果 ELEMENTS 不为 nil，也将它们添加到 LIST 的尾部</li>
+<li>等价于 <code>(-concat LIST (list elem) elements)</code></li>
+</ul></li>
+<li><code>(-list ARG)</code> ，若 ARG 为 list，直接返回它，否则创建并返回以 ARG 为元素的表</li>
+<li><code>(-repeat N X)</code> ，创建并返回长度为 N ，元素全为 X 的表
+<ul class="org-ul">
+<li>若 N 小于 1 则返回 nil</li>
+<li>类似于 make-list</li>
+</ul></li>
+<li><code>(-cons-to-list CON)</code> ，将 cons pair 转化为以其 car 和 cdr 作为元素的表</li>
+<li><code>(-value-to-list VAL)</code> ，将 VAL 变成表并返回
+<ul class="org-ul">
+<li>对于非 cons pair 的 VAL，仅仅是调用 list，若是 cons pair 则使用 -cons-to-list</li>
+</ul></li>
+<li><code>(-iota COUNT &amp;optional START STEP)</code> ，创建并返回长度为 COUNT 的表，表首元素是 START，每次增加 STEP
+<ul class="org-ul">
+<li>START 默认值为 0，步长默认值为 1</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org610ec84" class="outline-2">
+<h2 id="org610ec84"><span class="section-number-2">3</span> 一些和表有关的谓词</h2>
+<div class="outline-text-2" id="text-3">
+<ul class="org-ul">
+<li><code>(consp OBJECT)</code> ，若 OBJECT 是 cons 则返回 t</li>
+<li><code>(atom OBJECT)</code> ，若 OBJECT 不是 cons 则返回 t</li>
+<li><code>(listp OBJECT)</code> ，若 OBJECT 是 list 则返回 t
+<ul class="org-ul">
+<li>list 就是 cons 或 nil</li>
+</ul></li>
+<li><code>(nlistp OBJECT)</code> ，若 OBJECT 不是 list 则返回 t</li>
+<li><code>(sequencep OBJECT)</code> ，若 OBJECT 是序列则返回 t
+<ul class="org-ul">
+<li>序列是 list 或 array</li>
+</ul></li>
+<li><code>(null OBJECT)</code> ，若 OBJECT 为 nil 则返回 t</li>
+<li><code>(proper-list-p OBJECT)</code> ，若 OBJECT 是 proper list 则返回表的长度，否则返回 nil
+<ul class="org-ul">
+<li>所谓 proper list 是指表的最后一个 cons cell 的 cdr 部分是 nil 且不成环的表</li>
+</ul></li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seqp OBJECT)</code> ，若 OBJECT 是序列则返回非空值</li>
+<li><code>(seq-empty-p SEQUENCE)</code> ，若 SEQUENCE 为非空序列则返回非空值，否则返回 nil</li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-tailp SUBLIST LIST)</code> ，若 SUBLIST 是 LIST 的尾巴则返回 t
+<ul class="org-ul">
+<li>LIST 不一定是 proper list，尾部可以是其他值，若 SUBLIST 是数字的话会使用 equal 和 LIST 尾部 进行比较，否则使用 eq</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '(1 2 3))
+(cl-tailp (cdr a) a) =&gt; t
+(cl-tailp '(3) a) =&gt; nil
+(cl-tailp nil a) =&gt; t
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">use dotted list</span>
+(<span style="color: #00af00;">setq</span> b '(1 2 3 . 4))
+(cl-tailp 4 b) =&gt; t
+(<span style="color: #00af00;">setq</span> c '(1 2 3 . a))
+(cl-tailp 'a c) =&gt; t
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>(cl-endp X)</code> ，判断 X 是否为表的结尾。若 X 为 nil 则返回 t，若为 cons 则返回 nil
+<ul class="org-ul">
+<li>对于非 list 的 X ，函数会引发错误</li>
+</ul></li>
+<li><code>(cl-tree-equal TREE1 TREE2 [K V]...)</code> ，若 TREE1 和 TREE2 有相同结构和相同叶子则返回 t
+<ul class="org-ul">
+<li>叶子比较函数默认是 eql</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-cons-pair? OBJ)</code> ，若 OBJ 是 cons pair 则返回真值。
+<ul class="org-ul">
+<li>要求 OBJ 是 cons 且 cdr 不能是表</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgc7c5fc9" class="outline-2">
+<h2 id="orgc7c5fc9"><span class="section-number-2">4</span> 常见的表操作</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+这一部分中的函数我太清楚到底分到哪一类，干脆直接叫做常用函数吧。
+</p>
+
+<ul class="org-ul">
+<li><code>(pop PLACE)</code> ，返回 PLACE 指向表的首个元素，并使 PLACE 指向表的下个 cons
+<ul class="org-ul">
+<li>如果 PLACE 为 nil 的话，pop 会返回 nil，且不改变 PLACE 的值</li>
+</ul></li>
+<li><code>(push NEWELT PLACE)</code> ，将 NEWELT cons 到 PLACE 指向的表的表头，并使 PLACE 指向得到的新表
+<ul class="org-ul">
+<li>等价于 <code>(setf PLACE (cons NEWELT PLACE))</code> ，但是它保证 PLACE 只被求值一次</li>
+</ul></li>
+<li><code>(add-to-list LIST-VAR ELEMENT &amp;optional APPEND COMARE-FN)</code> ，若 ELEMENT 不在变量 LIST-VAR 指向的表中就将它加入，返回得到的新表
+<ul class="org-ul">
+<li>默认使用 equal 来进行比较，可以通过 COMPARE-FN 指定比较函数</li>
+<li>ELEMENT 在添加时默认放在表头，如果 APPEND 为非空则添加到表尾</li>
+<li>LIST-VAR 不应该是 lexical variable。文档中建议对配置变量（configuration variable）使用该函数，比如 <code>load-path</code> 。在其他时候最好使用 <code>push</code> 或 <code>cl-pushnew</code></li>
+</ul></li>
+<li><code>(add-to-ordered-list LIST-VAR ELEMENT &amp;optional ORDER)</code> ，若 ELEMENT 不在表中则加入它，并返回得到的新表。与 add-to-list 类似
+<ul class="org-ul">
+<li>使用 eq 作为比较函数</li>
+<li>与 add-to-list 不同的是，在调用后表中的元素顺序会被重排以保持被 ORDER 指定的顺序。在调用函数时如果没有指定顺序，那么 ELEMENT 会被放到表的末尾。如果 ORDER 是一个数字的话（整数浮点均可），函数会把这个位置分配给该值。如果 ORDER 是 nil 或者被忽略的话，ELEMENT 的顺序不会被改变。如果 ORDER 是其他任意值的话（比如非空符号），ELEMENT 的顺序会被删除。</li>
+<li>列表的顺序信息存储在符号 LIST-VAR 的 plist 中，它的属性名是 <code>list-order</code> 。LIST-VAR 不应该是 lexical variable</li>
+</ul></li>
+<li><code>(length SEQUENCE)</code> ，返回 SEQUENCE 的长度</li>
+<li><code>(safe-length LIST)</code> ，返回 LIST 的长度，但是会避免错误或死循环
+<ul class="org-ul">
+<li>如果 LIST 不是 list 则返回 0，如果 LIST 是环结构，它会返回不小于 LIST 中元素个数的值</li>
+</ul></li>
+<li><code>(copy-sequence ARG)</code> ，返回 list，vector，string，char-table 或 record 的浅拷贝
+<ul class="org-ul">
+<li>若 ARG 是空序列，该函数会返回相同类型的空对象</li>
+</ul></li>
+<li><code>(copy-tree TREE &amp;optional VECP)</code> ，对 TREE 进行深拷贝并返回拷贝树
+<ul class="org-ul">
+<li>如果 VECP 为非空的话，它也会对向量进行深拷贝</li>
+</ul></li>
+<li><code>(flatten-tree TREE)</code> ，“压扁” TREE 并返回，返回的新表中包含 TREE 中所有非空叶子节点值的表
+<ul class="org-ul">
+<li>保持叶子在原树中的顺序，顺序指深度优先遍历的顺序</li>
+</ul></li>
+<li><code>(reverse SEQ)</code> ，返回 SEQ 浅拷贝的反转序列</li>
+<li><code>(nreverse SEQ)</code> ，返回 SEQ 的反转序列
+<ul class="org-ul">
+<li>直接 <b>修改</b> 原序列并返回修改后的序列</li>
+</ul></li>
+<li><code>(sort SEQ PREDICATE)</code> ，对 SEQ 进行稳定排序并返回排序后序列，使用 PREDICATE 作为比较函数，
+<ul class="org-ul">
+<li>SEQ 应该是 list 或 vector 类型。排序过程中会被 <b>修改</b></li>
+</ul></li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-length SEQUENCE)</code> ，返回 SEQUENCE 的元素个数</li>
+<li><code>(seq-copy SEQUENCE)</code> ，返回 SEQUENCE 的浅拷贝</li>
+<li><code>(seq-reverse SEQUENCE)</code> ，对 SEQUENCE 进行反序操作并返回新表
+<ul class="org-ul">
+<li>返回值与 SEQUENCE 同类型</li>
+</ul></li>
+<li><code>(seq-sort PRED SEQUENCE)</code> ，使用 PRED 作为比较函数对 SEQUENCE 进行排序，返回和 SEQUENCE 同类型的序列
+<ul class="org-ul">
+<li>该函数对 SEQUENCE 的浅拷贝进行排序并返回结果，不会 <b>修改</b> SEQUENCE</li>
+</ul></li>
+<li><code>(seq-sort-by FUNCTION PRED SEQUENCE)</code> ，使用 PRED 作为比较函数进行排序，SEQUENCE 的元素会经过 FUNCTION 转换成新值来进行排序
+<ul class="org-ul">
+<li>FUNCTION 必须是单参函数</li>
+<li>该函数不会 <b>修改</b> SEQUENCE，而是对 SEQUENCE 的浅拷贝排序并返回</li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-pushnew X PLACE [KEYWORD VALUE]...)</code> ，若 X 不在 PLACE 指向 list 中则将它加入其中，类似于 push
+<ul class="org-ul">
+<li>默认使用 eql 作为比较函数</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-adjoin ITEM LIST [KEYWORD VALUE]...)</code> ，若 ITEM 不在 LIST 中就将它插到 LIST 的头部并返回新表，否则直接返回 LIST
+<ul class="org-ul">
+<li>默认使用 eq 作为比较函数</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-list-length X)</code> ，返回 list X 的长度，若 X 是环则返回 nil</li>
+<li><code>(cl-copy-list LIST)</code> ，返回 LIST 的浅拷贝</li>
+<li><code>(cl-sort SEQ PREDICATE [K V]...)</code> ，根据 PREDICATE 对 SEQ 进行排序，
+<ul class="org-ul">
+<li>该函数会 <b>修改</b> SEQ</li>
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-stable-sort SEQ PREDICATE [K V]...)</code> ，cl-sort 的稳定排序版本</li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(!cons CAR CDR)</code> ，将 CDR 设为指向 (cons CAR CDR) ，和 push 类似</li>
+<li><code>(!cdr LIST)</code> ，将 LIST 设为指向 LIST 的 cdr 部分，和 pop 类似</li>
+<li><code>(-flatten L)</code> ，“压扁” L，和 flatten-tree 类似</li>
+<li><code>(-flatten-n NUM LIST)</code> ，和 -flatten 类似，但是只处理到 NUM 层的嵌套</li>
+<li><code>(-tree-seq BRANCH CHILDREN TREE)</code> ，返回树节点构成的新表，包括所有的节点
+<ul class="org-ul">
+<li>对应宏是 <code>(--tree-seq BRANCH CHILDREN TREE)</code></li>
+<li>BRANCH 是分支判断函数，它接受一个参数，若参数为分支则返回非空值</li>
+<li>CHILDREN 为节点提取函数，接受节点作为参数并返回节点值</li>
+<li>例子： <code>(-tree-seq 'consp 'identity '((1) (2) ((3 4) (5)))) =&gt; (((1) (2) ((3 4) (5))) (1) 1 (2) 2 ((3 4) (5)) (3 4) 3 4 (5) 5)</code></li>
+</ul></li>
+<li><code>(-clone LIST)</code> ，返回 LIST 的深拷贝</li>
+<li><code>(-grade-up COMPARATOR LIST)</code> ，根据 COMPARATOR 对 LIST 进行排序，返回各元素在排序表中的序号组成的表，序号按元素从小到大的顺序递增
+<ul class="org-ul">
+<li>举例来说， <code>(-grade-up '&lt; '(1 23 4 56 7 89))</code> 得到 <code>(0 2 4 1 3 5)</code></li>
+</ul></li>
+<li><code>(-grade-down COMPARATOR LIST)</code> ，和 -grade-up 类似，但是返回表中的序号按元素从大到小递增的顺序
+<ul class="org-ul">
+<li><code>(-grade-down '&lt; '(1 23 4 56 7 89))</code> 得到 <code>(5 3 1 4 2 0)</code></li>
+</ul></li>
+<li><code>(-sort COMPARATOR LIST)</code> ，对 LIST 使用稳定排序进行排序并返回排序后的表。比较函数为 COMPARATOR
+<ul class="org-ul">
+<li>对应宏为 <code>(--sort FORM LIST)</code></li>
+<li>该函数不会 <b>修改</b> LIST，它对 LIST 的浅拷贝进行排序并返回排序结果</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org770c3bb" class="outline-2">
+<h2 id="org770c3bb"><span class="section-number-2">5</span> 对表中元素的访问</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li><code>(car LIST)</code> ，返回 LIST 的 car ，若 LIST 为 nil 则返回 nil</li>
+<li><code>(cdr LIST)</code> ，返回 LIST 的 cdr ，若 LIST 为 nil 则返回 nil</li>
+<li><code>(car-safe OBJECT)</code> ，若 OBJECT 为 list，则功能与 car 相同，否则直接返回 nil</li>
+<li><code>(cdr-safe OBJECT)</code> ，若 OBJECT 为 list，则功能与 cdr 相同，否则直接返回 nil</li>
+</ul>
+
+<p>
+<code>car</code> 和 <code>cdr</code> 可以说是 Lisp 中最经典的两个操作符了， <code>car</code> 取得 cons 的前部分， <code>cdr</code> 取得 cons 的后部分。除了这两个最基本的函数，elisp 中还提供了 <code>cx{2, 4}r</code> 共计 28 个扩展函数，其中 <code>x</code> 可以是 <code>a</code> 或 <code>d</code> ，它们的含义如下<sup><a id="fnr.5" class="footref" href="#fn.5">5</a></sup>：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">(caar x)</td>
+<td class="org-left">(car (car x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadr x)</td>
+<td class="org-left">(car (cdr x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdar x)</td>
+<td class="org-left">(cdr (car x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddr x)</td>
+<td class="org-left">(cdr (cdr x))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaar x)</td>
+<td class="org-left">(car (car (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caadr x)</td>
+<td class="org-left">(car (car (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadar x)</td>
+<td class="org-left">(car (cdr (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caddr x)</td>
+<td class="org-left">(car (cdr (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaar x)</td>
+<td class="org-left">(cdr (car (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdadr x)</td>
+<td class="org-left">(cdr (car (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddar x)</td>
+<td class="org-left">(cdr (cdr (car x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdddr x)</td>
+<td class="org-left">(cdr (cdr (cdr x)))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaaar x)</td>
+<td class="org-left">(car (car (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaadr x)</td>
+<td class="org-left">(car (car (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caadar x)</td>
+<td class="org-left">(car (car (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caaddr x)</td>
+<td class="org-left">(car (car (cdr (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadaar x)</td>
+<td class="org-left">(car (cdr (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadadr x)</td>
+<td class="org-left">(car (cdr (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(caddar x)</td>
+<td class="org-left">(car (cdr (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cadddr x)</td>
+<td class="org-left">(car (cdr (cdr (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaaar x)</td>
+<td class="org-left">(cdr (car (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaadr x)</td>
+<td class="org-left">(cdr (car (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdadar x)</td>
+<td class="org-left">(cdr (car (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdaddr x)</td>
+<td class="org-left">(cdr (car (cdr (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddaar x)</td>
+<td class="org-left">(cdr (cdr (car (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddadr x)</td>
+<td class="org-left">(cdr (cdr (car (cdr x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cdddar x)</td>
+<td class="org-left">(cdr (cdr (cdr (car x))))</td>
+</tr>
+
+<tr>
+<td class="org-left">(cddddr x)</td>
+<td class="org-left">(cdr (cdr (cdr (cdr x))))</td>
+</tr>
+</tbody>
+</table>
+
+<ul class="org-ul">
+<li><code>(nth N LIST)</code> ，返回 LIST 的第 N 个元素
+<ul class="org-ul">
+<li>N 从 0 开始。如果 N 超出了 LIST 的长度则返回 nil</li>
+</ul></li>
+<li><code>(elt SEQUENCE N)</code> ，返回 SEQUENCE 的第 N 个元素</li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-elt SEQUENCE N)</code> ，返回 SEQUENCE 的第 N 个元素</li>
+<li><code>(seq-first SEQUENCE)</code> ，返回 SEQUENCE 的第一个元素</li>
+<li><code>(seq-rest SEQUENCE)</code> ，返回除 SEQUENCE 首元素外其余元素的序列
+<ul class="org-ul">
+<li>对于 list 来说就是 cdr</li>
+</ul></li>
+<li><code>(seq-random-elt SEQUENCE)</code> ，随机返回 SEQUENCE 中的一个元素
+<ul class="org-ul">
+<li>若 SEQUENCE 为空序列则引发错误</li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-first LIST)</code> ，返回 LIST 的首元素</li>
+<li><code>(cl-second X)</code> ，返回 list X 的第二元素</li>
+<li><code>(cl-third X)</code> ，返回 list X 的第三元素</li>
+<li><code>(cl-fourth X)</code> ，返回第四元素</li>
+<li><code>(cl-fifth X)</code> ，返回第五元素</li>
+<li><code>(cl-sixth X)</code> ，返回第六元素</li>
+<li><code>(cl-seventh X)</code> ，返回第七元素</li>
+<li><code>(cl-eighth X)</code> ，返回第八元素</li>
+<li><code>(cl-ninth X)</code> ，返回第九元素</li>
+<li><code>(cl-tenth X)</code> ，返回第十元素</li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-first-item LIST)</code> ，返回 LIST 的第一项，若 LIST 太短则返回 nil</li>
+<li><code>(-second-item LIST)</code> ，返回 LIST 的第二项，若 LIST 太短则返回 nil</li>
+<li><code>(-third-item LIST)</code> ，返回 LIST 的第三项，若 LIST 太短则返回 nil</li>
+<li><code>(-fourth-item LIST)</code> ，返回 LIST 的第四项，若 LIST 太短则返回 nil</li>
+<li><code>(-fifth-item LIST)</code> ，返回 LIST 的第五项，若 LIST 太短则返回 nil</li>
+<li><code>(-last-item LIST)</code> ，返回 LIST 的最后一项，若 LIST 为空表则返回 nil</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org1d5a8ff" class="outline-2">
+<h2 id="org1d5a8ff"><span class="section-number-2">6</span> 获取表的子表</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li><code>(nthcdr N LIST)</code> ，取得 LIST 的第 N 个 cdr 并返回
+<ul class="org-ul">
+<li>相当于调用 N 次 cdr</li>
+</ul></li>
+<li><code>(last LIST &amp;optional N)</code> ，返回列表的最后一个 cons，若 LIST 为空的话则返回 nil
+<ul class="org-ul">
+<li>若 N 为非空，则返回从后向前数的 N 个 cons 组成的 list</li>
+<li>若 N 大于表长，则返回 LIST</li>
+</ul></li>
+<li><code>(butlast LIST &amp;optional N)</code> ，返回除 LIST 后 N 项的其他项组成的新表
+<ul class="org-ul">
+<li>如果 N 被忽略了，则返回去除尾项得到的新表</li>
+</ul></li>
+<li><code>(nbutlast LIST &amp;optional N)</code> ，直接 <b>修改</b> LIST 来移除后 N 个元素，并返回修改后的 LIST</li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-subseq SEQUENCE START &amp;optional END)</code> ，返回包括从序号 START 到 END（不包括 END）的 SEQUENCE 元素组成的新序列
+<ul class="org-ul">
+<li>如果忽略 END，它的默认值是 SEQUENCE 的长度</li>
+<li>如果 START 或 END 是负数，那就从后往前数，例子： <code>(seq-subseq '(1 2 3) -3 -1) =&gt; (1 2)</code></li>
+<li>如果 START 或 END 超出范围则引发错误</li>
+</ul></li>
+<li><code>(seq-drop SEQUENCE N)</code> ，移除 SEQUENCE 的前 N 个元素并返回得到序列
+<ul class="org-ul">
+<li>若 N 小于等于 0 则直接返回 SEQUENCE</li>
+<li>对于 list 来说就是 nthcdr</li>
+</ul></li>
+<li><code>(seq-take SEQUENCE N)</code> ，返回 SEQUENCE 前 N 个元素组成的新序列
+<ul class="org-ul">
+<li>返回值的类型和 SEQUENCE 一致</li>
+<li>如果 N 小于等于 0，则返回空序列</li>
+</ul></li>
+<li><code>(seq-drop-while PRED SEQUENCE)</code> ，沿 SEQUENCE 移除满足 PRED 条件的元素，直到遇到不满足 PRED 的元素，随后返回以该元素为首的 SEQUENCE</li>
+<li><code>(seq-take-while PRED SEQUENCE)</code> ，沿 SEQUENCE 取得满足 PRED 条件的元素，直到遇到不满足 PRED 的元素，随后返回由满足 PRED 的元素组成的新序列</li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-ldiff LIST SUBLIST)</code> ，返回去掉 SUBLIST 尾巴的 LIST 副本
+<ul class="org-ul">
+<li>类似于 seq-take，但是 SUBLIST 需要指向 LIST 中某个 cons</li>
+</ul></li>
+<li><code>(cl-subseq SEQ START &amp;optional END)</code> ，返回从 START 到 END（不包括 END）的 SEQ 元素组成的新序列
+<ul class="org-ul">
+<li>如果 END 被忽略了，它的默认值就是 SEQ 的长度</li>
+<li>若 START 或 END 是负数，那就从后往前数</li>
+<li>若 START 或 END 超出了 SEQUENCE 长度则引发错误</li>
+<li>在内部使用了 seq-subseq</li>
+</ul></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-take N LIST)</code> ，返回 LIST 前 N 项组成的新表</li>
+<li><code>(-take-last N LIST)</code> ，返回表的最后 N 项组成的新表</li>
+<li><code>(-take-while PRED LIST)</code> ，沿着表选取满足 PRED 的元素，直到遇到不满足 PRED 的元素，返回由满足元素组成的新表
+<ul class="org-ul">
+<li>对应宏是 <code>(--take-while FORM LIST)</code></li>
+</ul></li>
+<li><code>(-drop-last N LIST)</code> ，返回去掉表最后 N 项后剩余元素组成的新表</li>
+<li><code>(-drop-while PRED LIST)</code> ，沿着表去掉当前元素，直到遇到不满足 PRED 的元素，并返回表剩余的部分（包括第一个不满足 PRED 的元素）
+<ul class="org-ul">
+<li>对应宏是 <code>(--drop-while FORM LIST)</code></li>
+<li>例子： <code>(-drop-while (lambda (x) (&lt; x 5)) '(1 3 5 2)) =&gt; (5 2)</code></li>
+</ul></li>
+<li><code>(-butlast LIST)</code> ，返回由除了 LIST 尾项的其他项组成的新表
+<ul class="org-ul">
+<li>直接调用了 butlast</li>
+</ul></li>
+<li><code>(-slice LIST FROM &amp;option TO STEP)</code> ，返回 LIST 从 FROM 到 TO 的项组成的新表
+<ul class="org-ul">
+<li>若 FROM 或 TO 小于零，它们会被取余到正值</li>
+<li>如果 STEP 为数字，它会作为取子表时的步长，步长默认值为 1</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgc9fdb54" class="outline-2">
+<h2 id="orgc9fdb54"><span class="section-number-2">7</span> 表的增加和删除操作</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li><code>(delq ELT LIST)</code> ，从 LIST 中删除与 ELT 相同的所有元素，并返回 <b>修改</b> 后的表
+<ul class="org-ul">
+<li>使用 eq 进行比较</li>
+</ul></li>
+<li><code>(delete ELT SEQ)</code> ，对于表而言和 delq 相似，使用 equal 进行比较
+<ul class="org-ul">
+<li>若 SEQ 不是表，那么该函数不会修改原结构，而是返回一个新的向量或字符串</li>
+</ul></li>
+<li><code>(remq ELT LIST)</code> ，找出 LIST 中等于 ELT 的项，返回由剩余项组成的新表
+<ul class="org-ul">
+<li>使用 eq 进行比较</li>
+<li>根据实现代码可知，若 LIST 中不存在 ELT 则直接返回 LIST；若 LIST 中等于 ELT 的元素全在表头，则返回不含 ELT 的表的剩余部分，而不是返回复制的表。这一点可由以下代码说明</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '(1 1 2 3))
+(<span style="color: #00af00;">setq</span> b (remq 1 a)) =&gt; (2 3)
+(<span style="color: #00af00;">setf</span> (nth 2 a) 3)
+b =&gt; (3 3)
+
+(<span style="color: #00af00;">setq</span> c (remq 4 a))
+(eq a c) =&gt; t
+</pre>
+</div>
+
+<p>
+我将这种“若无满足条件元素则返回原表，若满足条件的元素全在表头则直接返回剩余表”的行为称为“remove性质1”，本节中若有函数满足该性质，我会直接写“该函数满足 remove性质1”来标识。
+</p>
+
+<ul class="org-ul">
+<li><code>(remove ELT SEQ)</code> ，和 remq 类似，使用 equal 进行比较
+<ul class="org-ul">
+<li>对于表参数满足 remove性质1</li>
+<li>可用于除 list 外的其他类型序列</li>
+</ul></li>
+<li><code>(delete-dups LIST)</code> ，删除表中重复的元素，并返回 <b>修改</b> 后的表
+<ul class="org-ul">
+<li>使用 equal 进行比较，内部实现使用了哈希表</li>
+<li>如果表中存在多个相同的元素则保留第一个出现的</li>
+</ul></li>
+<li><code>(delete-consecutive-dups LIST &amp;optional CIRCULAR)</code> ，从表中删除连续的重复元素
+<ul class="org-ul">
+<li>如果 CIRCULAR 为非空的话，表首和表尾也被看作是连续的</li>
+<li>例子： <code>(delete-consecutive-dups '(1 2 3 4 4 5 5 1) t) =&gt; (1 2 3 4 5)</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-filter PRED SEQUENCE)</code> ，从 SEQUENCE 中筛选出符合 PRED 的元素，并返回由这些元素组成的新表</li>
+<li><code>(seq-remove PRED SEQUENCE)</code> ，从 SEQUENCE 中筛选不符合 PRED 的元素，并返回由这些元素组成的新表</li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-remove ITEM SEQ [KEYWORD VALUE]...)</code> ，找出 SEQ 中等于 ITEM 的项，返回剩余项组成的新序列
+<ul class="org-ul">
+<li>对于表参数满足 remove性质1</li>
+<li>默认比较函数未在函数文档中说明，根据代码可知为 eql</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:count</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-remove-if PREDICATE SEQ [KEYWORD VALUE]...)</code> ，找出满足 PREDICATE 的项，并返回剩余项组成的新序列
+<ul class="org-ul">
+<li>对于表参数满足 remove性质1</li>
+<li>关键字参数有 <code>:key</code> <code>:count</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-remove-if-not PREDICATE SEQ [KEYWORD VALUE]...)</code> ，找出 SEQ 中不满足 PREDICATE 的项，返回剩余项组成的新序列
+<ul class="org-ul">
+<li>对于表参数满足 remove性质1</li>
+<li>关键字参数有 <code>:key</code> <code>:count</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-remove-duplicates SEQ [KEYWORD VALUE]...)</code> ，移除 SEQ 副本中所有重复元素，并返回该副本
+<ul class="org-ul">
+<li>对于表参数满足 remove性质1，不过只能有单一重复元素</li>
+<li>与 delete-dups 不同，它默认保留最后出现的重复元素， 如果指定 :from-end 为 t 则保留第一个出现的重复元素。例子： <code>(cl-remove-duplicates '(1 2 3 1)) =&gt; (2 3 1)</code> <code>(cl-remove-duplicates '(1 2 3 2) :from-end t) =&gt; (1 2 3)</code></li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+<li>如果使用了 :key ，那么进行比较前元素会被 :key 指定的函数调用，并使用返回值与其他元素比较。例子： <code>(cl-remove-duplicates '(-2 -2 2) :key 'abs) =&gt; (2)</code></li>
+</ul></li>
+<li><code>(cl-delete ITEM SEQ [KEYWORD VALUE]...)</code> ，和 cl-remove 类似，但是直接 <b>修改</b> SEQUENCE</li>
+<li><code>(cl-delete-if PREDICATE SEQ [KEYWORD VALUE]...)</code> ，和 cl-remove-if 类似，但是直接 <b>修改</b> SEQ</li>
+<li><code>(cl-delete-if-not PREDICATE SEQ [KEYWORD VALUE]...)</code> ，和 cl-remove-if-not 类似，但是直接 <b>修改</b> SEQ</li>
+<li><code>(cl-delete-duplicates SEQ [KEYWORD VALUE]...)</code> ，和 cl-remove-duplicates 类似，不过是直接 <b>修改</b> SEQ</li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-insert-at N X LIST)</code> ，返回将 X 插入 LIST 的第 N 位置得到的表
+<ul class="org-ul">
+<li>实现方式为先使用 -split-at 对 LIST 分组，再对分组表 Y 进行： <code>(nconc (car Y) (cons X (cadr Y)))</code> 的操作。这样得到的新表与原表 LIST 共享后半段，也就是共享原表第 N 个元素为表头的表。以下代码可以验证上面说法的正确性</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> a '(1 2 3 4 6))
+(<span style="color: #00af00;">setq</span> b (-insert-at 4 5 a)) =&gt; (1 2 3 4 5 6)
+(<span style="color: #00af00;">setf</span> (nth 4 a) 7)
+b =&gt; (1 2 3 4 5 7)
+(<span style="color: #00af00;">setf</span> (nth 5 b) 8)
+a =&gt; (1 2 3 4 8)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>(-interpose SEP LIST)</code> ，在 LIST 副本的每个元素之间插入 SEP，并返回副本
+<ul class="org-ul">
+<li>例子： <code>(-interpose 'o '(s s)) =&gt; (s o s)</code></li>
+</ul></li>
+<li><code>(-filter PRED LIST)</code> ，类似于 cl-remove-if-not，返回由满足 PRED 的元素组成的新表
+<ul class="org-ul">
+<li>对应宏是 <code>(--filter FORM LIST)</code></li>
+</ul></li>
+<li><code>(-keep FN LIST)</code> ，类似于 -filter ，但是新表中的元素是 FN 的返回值，而不是原元素
+<ul class="org-ul">
+<li>对应宏是 <code>(--keep FORM LIST)</code></li>
+<li>例子： <code>(-keep (lambda (x) (and (&gt; x 5) (+ x 1))) '(1 2 3 4 5 6 7)) =&gt; (7 8)</code></li>
+</ul></li>
+<li><code>(-remove-at N LIST)</code> ，移除 LIST 副本的第 N 个元素，并返回副本</li>
+<li><code>(-remove-at-indices INDICES LIST)</code> ，移除 INDCIES 中的序号对应的 LIST 副本中元素，并返回副本
+<ul class="org-ul">
+<li>若 INDICES 中存在相同的序号，那就在删除第一个对应元素后删除邻接的下一个元素。-remove-at-indices 中的实现思路很巧妙。例子： <code>(-remove-at-indices '(0 1 1 3 3) '(1 2 3 4 5 6 7)) =&gt; (4 7)</code></li>
+<li>如果感觉例子不容易理解，可以看看下面 copy 过来的具体实现：</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">-remove-at-indices</span> (indices list)
+  <span style="color: #cc0000;">"Return a list whose elements are elements from LIST without</span>
+<span style="color: #cc0000;">elements selected as `(nth i list)` for all i</span>
+<span style="color: #cc0000;">from INDICES.</span>
+
+<span style="color: #cc0000;">See also: `</span><span style="color: #1f5bff;">-remove-at</span><span style="color: #cc0000;">', `</span><span style="color: #1f5bff;">-remove</span><span style="color: #cc0000;">'"</span>
+  (<span style="color: #00af00;">declare</span> (pure t) (side-effect-free t))
+  (<span style="color: #00af00;">let*</span> ((indices (-sort '&lt; indices))
+         (diffs (cons (car indices) (-map '1- (-zip-with '- (cdr indices) indices))))
+         r)
+    (<span style="color: #00af00;">--each</span> diffs
+      (<span style="color: #00af00;">let</span> ((split (-split-at it list)))
+        (<span style="color: #00af00;">!cons</span> (car split) r)
+        (<span style="color: #00af00;">setq</span> list (cdr (cadr split)))))
+    (<span style="color: #00af00;">!cons</span> list r)
+    (apply '-concat (nreverse r))))
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>(-remove PRED LIST)</code> ，类似于 cl-remove-if，返回由不满足 PRED 的元素组成的新表
+<ul class="org-ul">
+<li>对应宏是 <code>(--remove FORM LIST)</code></li>
+</ul></li>
+<li><code>(-remove-first PRED LIST)</code> ，返回去掉 LIST 中第一个满足 PRED 的元素并返回表
+<ul class="org-ul">
+<li>满足 remove性质1，且与原表共享被删除元素后面的尾表</li>
+<li>对应宏是 <code>(--remove-first FORM LIST)</code></li>
+</ul></li>
+<li><code>(-remove-last PRED LIST)</code> ，去掉 LIST 副本中最后一个满足 PRED 的元素，并返回副本
+<ul class="org-ul">
+<li>对应宏是 <code>(--remove-last FORM LIST)</code></li>
+</ul></li>
+<li><code>(-non-nil LIST)</code> ，返回包含 LIST 中所有非 nil 值元素的新表</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org6e1620e" class="outline-2">
+<h2 id="org6e1620e"><span class="section-number-2">8</span> 表的查找操作</h2>
+<div class="outline-text-2" id="text-8">
+<ul class="org-ul">
+<li><code>(memq ELT LIST)</code> ，若 ELT 是 LIST 的中的元素则返回非空值
+<ul class="org-ul">
+<li>若找到了 ELT，返回值是以第一个 ELT 为首元素的 LIST 子表</li>
+<li>函数使用 eq 进行比较</li>
+</ul></li>
+<li><code>(memql ELT LIST)</code> ，和 memq 相似，使用 eql 来比较</li>
+<li><code>(member ELT LIST)</code> ，和 memql 相似，使用 equal 进行比较</li>
+<li><code>(member-ignore-case ELT LIST)</code> ，和 member 类似，主要用于字符串的比较
+<ul class="org-ul">
+<li>ELT 必须是字符串，字母的大小写会被忽略</li>
+<li>LIST 中的非字符串元素会被忽略</li>
+<li>例子： <code>(member-ignore-case "yy" '("i" "am" "yY" "'s" "dash")) =&gt; ("yY" "s" "dash")</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-contains-p SEQUENCE ELT &amp;optional TESTFN)</code> ，若 SEQUENCE 中存在和 ELT 相等的元素则返回非空值
+<ul class="org-ul">
+<li>默认的比较函数是 equal，可在 TESTFN 指定</li>
+</ul></li>
+<li><code>(seq-some PRED SEQUENCE)</code> ，若 SEQUENCE 中存在元素满足 PRED 则返回非空值，否则返回 nil</li>
+<li><code>(seq-every-p PRED SEQUENCE)</code> ，若 SEQUENCE 中所有元素都满足 PRED 则返回非空值，否则返回 nil</li>
+<li><code>(seq-find PRED SEQUENCE &amp;optional DEFAULT)</code> ，返回 SEQUENCE 中第一个满足 PRED 的元素，若没有找到则返回 DEFAULT，若 DEFAULT 被忽略了则返回 nil</li>
+<li><code>(seq-position SEQUENCE ELT &amp;optional TESTFN)</code> ，返回 SEQUENCE 中第一个和 ELT 相同的元素的序号，若未找到则返回 nil。
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可在 TESTFN 指定</li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-some PREDICATE SEQ...)</code> ，若在 SEQ 中存在满足 PREDICATE 的元素，则返回由 PREDICATE 返回的真值</li>
+<li><code>(cl-every PREDICATE SEQ...)</code> ，若所有的元素都满足 PREDICATE 则返回 t</li>
+<li><code>(cl-notany PREDICATE SEQ...)</code> ，若所有的元素都不满足 PREDICATE 则返回 t</li>
+<li><code>(cl-notevery PREDICATE SEQ...)</code> ，若存在元素不满足 PREDICATE 则返回 t</li>
+
+<li><code>(cl-member ITEM LIST [K V]...)</code> ，找到 LIST 中第一个出现的 ITEM，并返回以 ITEM 为首元素的 LIST 的子表
+<ul class="org-ul">
+<li>默认使用 eql 进行比较</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-member-if PREDICATE LIST [K V]...)</code> ，找到 LIST 中第一个满足 PREDICATE 的项，并返回以其为首元素的 LIST 子表
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-member-if-not PREDICATE LIST [K V]...)</code> ，找到 LIST 中第一个不满足 PREDICATE 的项，并返回以其为首项的 LIST 的子表
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-find ITEM SEQ [K V]...)</code> ，找出在 SEQ 中第一个出现的 ITEM，并返回其值，否则返回 nil
+<ul class="org-ul">
+<li>默认使用 eql 进行比较</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-find-if PREDICATE SEQ [K V]...)</code> ，找到 SEQ 中第一个满足 PREDICATE 的项，并返回其值，否则返回 nil
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-find-if-not PREDICATE SEQ [K V]...)</code> ，找到 SEQ 中第一个不满足 PREDICATE 的项，并返回其值，否则返回 nil
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-position ITEM SEQ [K V]...)</code> ，找到 SEQ 中第一个出现的 ITEM，并返回该 ITEM 的序号。若未找到则返回 nil
+<ul class="org-ul">
+<li>默认使用 eql 进行比较</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-position-if PREDICATE SEQ [K V]...)</code> ，找到 SEQ 中第一个满足 PREDICATE 的项，返回其序号。若未找到则返回 nil
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-position-if-not PREDICATE SEQ [K V]...)</code> ，找到 SEQ 中第一个不满足 PREDICATE 的项，并返回其序号。若未找到则返回 nil
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+
+<li><code>(cl-mismatch SEQ1 SEQ2 [K V]...)</code> ，将 SEQ1 和 SEQ2 进行比较，并返回第一个不等元素的序号。若两者匹配的话就返回 nil。
+<ul class="org-ul">
+<li>默认使用 eql 进行比较</li>
+<li>若有一序列是另一序列的前半段，那么返回值就是较短序列的长度</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:start1</code> <code>:end1</code> <code>:start2</code> <code>:end2</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-search SEQ1 SEQ2 [K V]...)</code> ，在 SEQ2 中寻找是否存在子列 SEQ1，若找到了则返回最先找到的子列的位置，位置即该子列的首元素在 SEQ2 中的序号。否则返回 nil
+<ul class="org-ul">
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:start1</code> <code>:end1</code> <code>:start2</code> <code>:end2</code> <code>:from-end</code></li>
+<li>例子： <code>(cl-search '(1) '(1 2 3)) =&gt; 0</code> <code>(cl-search '(1) '(1 2 3 1) :from-end t) =&gt; 3</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-contains? LIST ELEMENT)</code> ，若 LIST 含有 ELEMENT 则返回非空值
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可通过变量 -compare-fn 进行指定</li>
+</ul></li>
+<li><code>(-some PRED LIST)</code> ，若 LIST 中存在满足 PRED 的元素，则返回第一个使 (PRED X) 为非空值的值
+<ul class="org-ul">
+<li>对应宏是 <code>(--some FORM LIST)</code></li>
+</ul></li>
+<li><code>(-every PRED LIST)</code> ，若 LIST 中所有元素满足 PRED 则返回非空值，该值为最后一次调用 PRED 的返回值，否则返回 nil
+<ul class="org-ul">
+<li>对应宏是 <code>(--every FORM LIST)</code></li>
+</ul></li>
+<li><code>(-any? PRED LIST)</code> ，若 LIST 中所有元素都满足 PRED 则返回 t
+<ul class="org-ul">
+<li>对应宏是 <code>(--any? FORM LIST)</code></li>
+</ul></li>
+<li><code>(-all? PRED LIST)</code> ，和 -any? 功能一致
+<ul class="org-ul">
+<li>对应宏是 <code>(--all? FORM LIST)</code></li>
+</ul></li>
+<li><code>(-none? PRED LIST)</code> ，若 LIST 所有元素都不满足 PRED 则返回 t，否则返回 nil
+<ul class="org-ul">
+<li>对应宏是 <code>(--none? FORM LIST)</code></li>
+</ul></li>
+<li><code>(-only-some? PRED LIST)</code> 若 LIST 中至少有一项满足 PRED 且至少有一项不满足 PRED 则返回 t，否则返回 nil
+<ul class="org-ul">
+<li>对应宏是 <code>(--only-some? FORM LIST)</code></li>
+</ul></li>
+
+<li><code>(-first PRED LIST)</code> ，找到 LIST 中第一个满足 PRED 的元素，并返回它的值，若未找到则返回 nil
+<ul class="org-ul">
+<li>对应宏是 <code>(--first FORM LIST)</code></li>
+</ul></li>
+<li><code>(-last PRED LIST)</code> ，找到 LIST 中最后一个满足 PRED 的元素，并返回该元素，否则返回 nil
+<ul class="org-ul">
+<li>对应宏是 <code>(--last FORM LIST)</code></li>
+</ul></li>
+<li><code>(-elem-index ELEM LIST)</code> ，找到 LIST 中第一个等于 ELEM 的项并返回其序号，若未找到则返回 nil
+<ul class="org-ul">
+<li>使用 equal 进行比较</li>
+</ul></li>
+<li><code>(-elem-indices ELEM LIST)</code> ，和 -elem-index 相似，但是会返回一张表，表中是所有等于 ELEM 元素的序号</li>
+<li><code>(-find-indices PRED LIST)</code> ，找到所有满足 PRED 的项并返回包含它们的序号的表，序号按单调增顺序排列
+<ul class="org-ul">
+<li>对应宏是 <code>(--find-indices FORM LIST)</code></li>
+</ul></li>
+<li><code>(-find-index PRED LIST)</code> ，返回第一个满足 PRED 的元素的序号，若未找到则返回 nil
+<ul class="org-ul">
+<li>对应宏是 <code>(--find-index)</code></li>
+</ul></li>
+<li><code>(-find-last-index PRED LIST)</code> ，返回最后一个满足 PRED 的元素的序号，若未找到则返回 nil
+<ul class="org-ul">
+<li>对应宏是 <code>(--find-last-index FORM LIST)</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org7434a17" class="outline-2">
+<h2 id="org7434a17"><span class="section-number-2">9</span> 表的替换操作</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-fill SEQ ITEM [KEYWORD VALUE]...)</code> ，使用 ITEM 填充 SEQ，并返回 SEQ
+<ul class="org-ul">
+<li>该函数会对 SEQ 进行 <b>修改</b></li>
+<li>关键字参数有 <code>:start</code> <code>:end</code></li>
+</ul></li>
+<li><code>(cl-replace SEQ1 SEQ2 [KEYWORD VALUE]...)</code> ，使用 SEQ2 中的元素替换 SEQ1 中的元素，SEQ1 会被 <b>修改</b> 并返回
+<ul class="org-ul">
+<li>SEQ1 的长度不会改变，若 SEQ1 长度小于 SEQ2 长度则只替换到 SEQ1 结束，例子： <code>(cl-replace '(1 1 1) '(1 2 3 4)) =&gt; (1 2 3)</code></li>
+<li>关键字参数有 <code>:start1</code> <code>:end1</code> <code>:start2</code> <code>:end2</code></li>
+</ul></li>
+<li><code>(cl-substitute NEW OLD SEQ [KEYWORD VALUE]...)</code> ，将 SEQ 副本中的 OLD 值替换为 NEW 值并返回副本
+<ul class="org-ul">
+<li>默认使用 eql 进行比较</li>
+<li>若 NEW 和 OLD 是 eq 关系则直接返回 SEQ。若 SEQ 中不存在 OLD 则直接返回 SEQ</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:count</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-substitute-if NEW PREDICATE SEQ [KEYWORD VALUE]...)</code> ，替换 SEQ 副本中满足 PREDICATE 的项为 NEW，并返回副本
+<ul class="org-ul">
+<li>若 NEW 为 nil 则直接返回 SEQ，若 SEQ 中没有满足 PREDICATE 的项则直接返回 SEQ</li>
+<li>关键字参数有 <code>:key</code> <code>:count</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-substitute-if-not NEW PREDICATE SEQ [KEYWORD VALUE]...)</code> ，替换 SEQ 副本中不满足 PREDICATE 的项为 NEW，并返回副本
+<ul class="org-ul">
+<li>若 NEW 为 nil 则直接返回 SEQ，若 SEQ 中没有不满足 PREDICATE 的项则直接返回 SEQ</li>
+<li>关键字参数有 <code>:key</code> <code>:count</code> <code>:start</code> <code>:end</code> <code>:from-end</code></li>
+</ul></li>
+<li><code>(cl-nsubstitute NEW OLD SEQ [K V]...)</code> ，和 cl-substitute 类似，直接 <b>修改</b> SEQ 并返回</li>
+<li><code>(cl-nsubstitute-if NEW PREDICATE SEQ [K V]...)</code> ，和 cl-substitute-if 类似，直接 <b>修改</b> SEQ 并返回</li>
+<li><code>(cl-nsubstitute-if-not NEW PREDICATE SEQ [K V]...)</code> ，和 cl-substitute-if-not 类似，直接 <b>修改</b> SEQ 并返回</li>
+
+<li><code>(cl-subst NEW OLD TREE [KEYWORD VALUE]...)</code> ，使用 NEW 替换 TREE 副本中的 OLD 值并返回副本
+<ul class="org-ul">
+<li>默认使用 eql 比较</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-subst-if NEW PREIDCATE TREE [K V]...)</code> ，替换 TREE 副本中满足 PREDICATE 的元素为 NEW，并返回副本
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-subst-if-not NEW PREDICATE TREE [K V]...)</code> ，替换 TREE 副本中不满足 PREDICATE 的元素为 NEW，并返回副本
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-sublis ALIST TREE [K V]...)</code> ，将 TREE 中出现的 ALIST 的 KEYS 替换成对应的 VALUES，并返回替换后的副本
+<ul class="org-ul">
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+<li>cl-subst，cl-subst-if 和 cl-subst-if-not 都使用该函数实现</li>
+</ul></li>
+<li><code>(cl-nsubst NEW OLD TREE [K V]...)</code> ，cl-subst 的副作用版本，对 TREE 进行 <b>修改</b> 并返回</li>
+<li><code>(cl-nsubst-if NEW PREDICATE TREE [K V]...)</code> ，cl-subst-if 的副作用版本，对 TREE 进行 <b>修改</b> 并返回</li>
+<li><code>(cl-nsubst-if-not NEW PREDICATE TREE [K V]...)</code> ，cl-subst-if-not 的副作用版本，对 TREE 进行 <b>修改</b> 并返回</li>
+<li><code>(cl-nsublis ALIST TREE [K V]...)</code> ，cl-sublis 的副作用版本，对 TREE 进行 <b>修改</b> 并返回
+<ul class="org-ul">
+<li>cl-nsubst，cl-nsubst 和 cl-nsubst-if-not 都使用该函数实现</li>
+</ul></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-replace OLD NEW LIST)</code> ，替换掉 LIST 副本中的 OLD 为 NEW 并返回副本
+<ul class="org-ul">
+<li>使用 equal 比较</li>
+</ul></li>
+<li><code>(-replace-first OLD NEW LIST)</code> ，替换掉 LIST 副本中第一个出现的 OLD 为 NEW，并返回副本
+<ul class="org-ul">
+<li>使用 equal 比较</li>
+</ul></li>
+<li><code>(-replace-last OLD NEW LIST)</code> ，替换掉 LIST 中最后一个出现的 OLD 为 NEW
+<ul class="org-ul">
+<li>使用 equal 比较</li>
+</ul></li>
+<li><code>(-replace-at N X LIST)</code> ，将 LIST 副本的第 N 个元素替换为 X，并返回副本</li>
+<li><code>(-update-at N FUNC LIST)</code> ，对 LIST 副本的第 N 个元素调用 FUNC，并用返回值替换该元素，返回副本
+<ul class="org-ul">
+<li>对应宏是 <code>(--update-at N FORM LIST)</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org83fcca4" class="outline-2">
+<h2 id="org83fcca4"><span class="section-number-2">10</span> 表的集合操作</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-set-equal-p SEQ1 SEQ2 &amp;optional TESTFN)</code> ，若 SEQ1 和 SEQ2 中的元素全部相同则返回非空值
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可通过 TESTFN 指定</li>
+<li>两个序列的元素顺序和数量不影响判定</li>
+<li>例子 <code>(seq-set-equal-p '(1 1 1 2 3) '(3 2 1)) =&gt; t</code></li>
+</ul></li>
+<li><code>(seq-uniq SEQUENCE &amp;optional TESTFN)</code> ，返回除掉 SEQUENCE 中重复元素的新表
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可通过 TESTFN 指定</li>
+<li>保留第一个出现的重复元素，例如 <code>(seq-uniq '(1 1 2 3 2 )) =&gt; (1 2 3)</code></li>
+</ul></li>
+<li><code>(seq-intersection SEQ1 SEQ2 &amp;optional TESTFN)</code> ，求交集，返回一个新表，表中的元素在 SEQ1 和 SEQ2 中都有出现
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可通过 TESTFN 指定</li>
+<li>不保证结果中元素的唯一性</li>
+<li>例子 <code>(seq-intersection '(1 1 2 3) '(2 2 33 3 3)) =&gt; (2 3)</code></li>
+</ul></li>
+<li><code>(seq-difference SEQ1 SEQ2 &amp;optional TESTFN)</code> ，求差集，返回一张表，表中的元素只在 SEQ1 中存在，在 SEQ2 中不存在
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可通过 TESTFN 指定</li>
+<li>不保证结果中元素的唯一性</li>
+<li>例子 <code>(seq-difference '(1 1 2 3) '(2 2 33 3 3)) =&gt; (1 1)</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-subsetp LIST1 LIST2 [K V]...)</code> ，若 LIST1 是 LIST2 的子集则返回真值
+<ul class="org-ul">
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-merge TYPE SEQ1 SEQ2 PREDICATE [K V]...)</code> ，将两个序列进行合并，并返回合并结果
+<ul class="org-ul">
+<li>合并得到的序列类型为 TYPE，使用 PREDICATE 来判断合并顺序</li>
+<li>该函数通过 <b>修改</b> SEQ1 和 SEQ2 来进行合并，也就是 <b>修改</b> cons 来重排</li>
+<li>该函数主要用于两个有序序列的合并，所谓有序是指针对 PREDICATE 而言的有序</li>
+<li>关键字参数有 <code>:key</code></li>
+<li>例子： <code>(cl-merge 'list '(1 3 5) '(2 4 6) '&lt;) =&gt; (1 2 3 4 5 6)</code></li>
+</ul></li>
+<li><code>(cl-union LIST1 LIST2 [K V]...)</code> ，对 LIST1 和 LIST2 进行求并集操作，并返回求并结果
+<ul class="org-ul">
+<li>若 LIST1 或 LIST2 中有一值为 nil 则返回另一值</li>
+<li>若没有指定关键字参数且两表是 equal 关系则返回 LIST1</li>
+<li>默认比较函数为 eq，对 number 则默认使用 eql</li>
+<li>该函数的实现方式是以较长的表作为基础，将它没有但较短的表中有的项 push 到它的前面，最后返回添加完成的表，这个例子可以说明这一点： <code>(cl-union '(1 2 3) '(4 5)) =&gt; (5 4 1 2 3)</code></li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-nunion LIST1 LIST2 [K V]...)</code> ，cl-union 的副作用版本
+<ul class="org-ul">
+<li>话虽这么说，cl-seq 里面的实现其实就是调用 cl-union</li>
+</ul></li>
+<li><code>(cl-intersection LIST1 LIST2 [K V]...)</code> ，对两者求交集，返回包含交集结果的新表
+<ul class="org-ul">
+<li>若 LIST1 或 LIST2 中有一为 nil 则返回 nil，若两者是 equal 关系则返回 LIST1</li>
+<li>默认比较函数是 eq，比较数字用 eql</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-nintersection LIST1 LIST2 [K V]...)</code> ，cl-intersection 的副作用版本
+<ul class="org-ul">
+<li>也只是调用了 cl-intersection 而已</li>
+</ul></li>
+<li><code>(cl-set-difference LIST1 LIST2 [K V]...)</code> ，对两者求差集，返回只包含 LIST1 中元素而没有 LIST2 中元素的新表
+<ul class="org-ul">
+<li>若 LIST1 或 LIST2 为 nil 则返回 LIST1</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-nset-difference LIST1 LIST2 [K V]...)</code> ，cl-set-difference 的副作用版本
+<ul class="org-ul">
+<li>仅仅调用了 cl-set-difference 而已</li>
+</ul></li>
+<li><code>(cl-set-exclusive-or LIST1 LIST2 [K V]...)</code> ，对两者进行异或操作，即返回包含仅在 LIST1 或 LIST2 中出现的 ITEM 的新表
+<ul class="org-ul">
+<li>若其中一表为 nil 则返回另一表，若两表是 equal 关系则返回 nil</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+<li>使用了 cl-set-difference</li>
+</ul></li>
+<li><code>(cl-nset-exclusive-or LIST1 LIST2 [K V]...)</code> ，cl-set-exclusive-or 的副作用版本
+<ul class="org-ul">
+<li>使用了 cl-nset-difference</li>
+</ul></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-same-items? LIST LIST2)</code> ，若 LIST 和 LIST2 表示的集合相同且元素数量相同则返回 t
+<ul class="org-ul">
+<li>元素在表中的顺序不影响判断</li>
+<li>默认使用 equal 判断，可用 -compare-fn 指定比较函数</li>
+</ul></li>
+<li><code>(-distinct LIST)</code> ，移除 LIST 副本中重复项并返回副本
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可以通过 -compare-fn 指定比较函数</li>
+<li>若表中元素个数大于 32 个，会使用哈希表来提速</li>
+<li>保留第一个重复元素</li>
+<li>例子： <code>(-distinct '(1 2 3 2)) =&gt; (1 2 3)</code></li>
+</ul></li>
+<li><code>(-union LIST LIST2)</code> ，对两参数求并集，返回并集新表
+<ul class="org-ul">
+<li>默认使用 equal 进行判断，或通过 -compare-fn 指定判断函数</li>
+<li>内部使用哈希表加速比较，若 -compare-fn 不是 eq, eql 或 equal 则使用迭代比较</li>
+</ul></li>
+<li><code>(-intersection LIST LIST2)</code> ，对两参数求交集，返回交集新表
+<ul class="org-ul">
+<li>对 LIST 中元素进行筛选，筛出在 LIST2 中的元素</li>
+<li>默认比较函数是 equal，可通过 -comapre-fn 指定比较函数</li>
+</ul></li>
+<li><code>(-difference LIST LIST2)</code> ，对 LIST 和 LIST2 求差集，返回的表中仅有在 LIST 中出现而不在 LIST2 中出现的元素
+<ul class="org-ul">
+<li>对 LIST 中元素进行筛选，筛出不在 LIST2 中的元素</li>
+<li>默认使用 equal，可通过 -compare-fn 指定比较函数</li>
+</ul></li>
+<li><code>(-powerset LIST)</code> ，求 LIST 的幂集，返回包含结果的表
+<ul class="org-ul">
+<li>例子： <code>(-powerset '(1 2 3)) =&gt; ((1 2 3) (1 2) (1 3) (1) (2 3) (2) (3) nil)</code></li>
+</ul></li>
+<li><code>(-permutations LIST)</code> ，返回 LIST 的全排列，即排列组合中的排列
+<ul class="org-ul">
+<li>例子： <code>(-permutations '(1 2 3)) =&gt; ((1 2 3) (1 3 2) (2 1 3) (2 3 1) (3 1 2) (3 2 1))</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgd24c6ce" class="outline-2">
+<h2 id="orgd24c6ce"><span class="section-number-2">11</span> 表的迭代（iterate）</h2>
+<div class="outline-text-2" id="text-11">
+<ul class="org-ul">
+<li><code>(mapc FUNCTION SEQUENCE)</code> ，对 SEQUENCE 的每个元素应用 FUNCTION，调用结束后返回 SEQUENCE
+<ul class="org-ul">
+<li>一般是为了发挥函数的副作用，该函数对 SEQUECNE 没有副作用</li>
+<li>举例来说的话， <code>(mapc print '(1 2 3))</code></li>
+</ul></li>
+<li><code>(dolist (VAR LIST [RESULT]) BODY ...)</code> ，对 LIST 进行遍历，将 VAR 与 LIST 中的每一元素绑定并执行 BODY，以 RESULT 作为返回值，若没有 RESULT 则返回 nil</li>
+</ul>
+
+<p>
+这是一个简单的例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">setq</span> a 0)
+(<span style="color: #00af00;">dolist</span> (i '(1 2 3 4 5) a) (<span style="color: #00af00;">cl-incf</span> a i)) =&gt; 15
+</pre>
+</div>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-doseq (VAR SEQUENCE) BODY ...)</code> ，和 dolist 类似</li>
+<li><code>(seq-do FUNCTION SEQUENCE)</code> ，将函数应用到 SEQUENCE 的每个元素，该函数返回 SEQUENCE
+<ul class="org-ul">
+<li>类似于 mapc，也是为了函数的副作用</li>
+</ul></li>
+<li><code>(seq-do-indexed FUNCTION SEQUENCE)</code> ，与 seq-do 类似，但是函数接受两个参数，第一参数是序列的元素，第二参数是元素在表中的序号
+<ul class="org-ul">
+<li>例子： <code>(progn (setq a nil) (seq-do-indexed (lambda (ele id) (push (cons ele id) a)) '(1 2 3)) a) =&gt; ((3 . 2) (2 . 1) (1 . 0))</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-mapc FUNCTION SEQUENCE...)</code> ，和 mapc 类似，但是函数可接受多个参数
+<ul class="org-ul">
+<li>使用 FUNCTION 应用到序列上，直到最短的 SEQUENCE 到达尾部，随后返回第一个序列</li>
+<li>例子： <code>(cl-mapc (lambda (x y) nil) '(1 2 3) '(2 3 4)) =&gt; (1 2 3)</code></li>
+</ul></li>
+<li><code>(cl-mapl FUNCTION LIST...)</code> ，和 cl-maplist 类似，但是不会积累函数 FUNCTION 的返回值
+<ul class="org-ul">
+<li>也是只使用函数副作用</li>
+</ul></li>
+<li><code>(cl-dolist (VAR LIST [RESULT]) BODY...)</code> ，和 dolist 几乎一致，但是它包含一个隐藏的 cl-block，可以使用 cl-return-from 跳转</li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+<ul class="org-ul">
+<li><code>(-each LIST FN)</code> ，对 LIST 的每个元素调用 FN，并返回 nil
+<ul class="org-ul">
+<li>主要用于副作用操作</li>
+<li>对应宏是 <code>(--each LIST &amp;rest BODY)</code></li>
+</ul></li>
+<li><code>(-each-indexed LIST FN)</code> ，和 -each 类似，但函数 FN 接受两个参数，即 index 和 item，它们分别是元素的序号和值
+<ul class="org-ul">
+<li>例子： <code>(-each-indexed '(1 2 3) (lambda (index elem) (princ (+ index elem)))) =&gt; 输出 135</code></li>
+</ul></li>
+<li><code>(-each-while LIST PRED FN)</code> ，对元素调用 FN，直到遇到不满足 PRED 的元素。返回值为 nil
+<ul class="org-ul">
+<li>用于副作用</li>
+<li>对应宏是 <code>(--each-while LIST PRED &amp;rest BODY)</code></li>
+<li>例子： <code>(-each-while '(1 2 3 4) (lambda (x) (&lt; x 3)) 'princ) =&gt; 输出 12</code></li>
+</ul></li>
+<li><code>(-each-r LIST FN)</code> ，和 -each 类似，不过从表尾开始迭代
+<ul class="org-ul">
+<li>对应宏是 <code>(--each-r LIST &amp;rest BODY)</code></li>
+<li>例子： <code>(-each-r '(1 2 3 4) 'princ) =&gt; 输出 4321</code></li>
+</ul></li>
+<li><code>(-each-r-while LIST PRED FN)</code> ，和 -each-while 类似，不过从表尾开始迭代
+<ul class="org-ul">
+<li>对应宏是 <code>(--each-r-while LIST PRED &amp;rest BODY)</code></li>
+<li>例子： <code>(-each-r-while '(1 2 3 4) (lambda (x) (&gt; x 3)) 'princ) =&gt; 输出 4</code></li>
+</ul></li>
+<li><code>(-iterate FUN INIT N)</code> ，返回包含使用 FUN 调用 INIT 从 0 次到 N - 1 次的返回值的表
+<ul class="org-ul">
+<li>对应宏是 <code>(--iterate FORM INIT N)</code></li>
+<li>例子： <code>(-iterate '1+ 0 10) =&gt; (0 1 2 3 4 5 6 7 8 9)</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org520b310" class="outline-2">
+<h2 id="org520b310"><span class="section-number-2">12</span> 表的映射（map）</h2>
+<div class="outline-text-2" id="text-12">
+<ul class="org-ul">
+<li><code>(mapcar FUNCTION SEQUENCE)</code> ，将 SEQUENCE 通过 FUNCTION 映射到一个新表
+<ul class="org-ul">
+<li>返回表的长度和 SEQUENCE 一致，其中的元素是 FUNCTION 应用到 SEQUENCE 中对应元素的返回值</li>
+<li>SEQUENCE 的类型可以是表，向量，布尔向量或字符串</li>
+</ul></li>
+<li><code>(mapcan FUNCTION SEQUENCE)</code> ，和 mapcar 相似，但是是通过修改 SEQUENCE 来获取映射结果</li>
+<li><code>(mapconcat FUNCTION SEQUENCE SEPARATOR)</code> ，对 SEQUENCE 各元素应用 FUNCTION，并将结果使用 concat 函数连成字符串
+<ul class="org-ul">
+<li>在每个结果之间以 SEPARATOR 作为分隔符号，它必须是一个字符串</li>
+<li>FUNCTION 接受一个参数，它的返回值必须是一个字符序列，可以是字符串或由字符组成的向量和表，字符值必须是合法的码点（codepoint）</li>
+<li>例子： <code>(mapconcat (lambda (x) (concat "a" (string x))) "abcde" "-") =&gt; "aa-ab-ac-ad-ae"</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-map FUNCTION SEQUENCE)</code> ，类似于 mapcar，返回映射得到的新表</li>
+<li><code>(seq-map-indexed FUNCTION SEQUENCE)</code> ，与 seq-map 类似，但是 FUNCTION 接受元素和序号两个参数
+<ul class="org-ul">
+<li>例子： <code>(seq-map-indexed (lambda (x y) (+ x y)) '(6 5 4)) =&gt; (6 6 6)</code></li>
+</ul></li>
+<li><code>(seq-mapn FUNCTION SEQUENCES ...)</code> ，和 seq-map 类似，但是它可以将函数应用到多个 SEQUENCE
+<ul class="org-ul">
+<li>函数参数的元数必须和 SEQUENCES 的个数相等，当到达最短的 SEQUENCE 末尾时函数会直接返回，以函数的应用结果组成的表作为返回值</li>
+<li>例子： <code>(seq-mapn (lambda (x y) (+ x y)) '(1 2 3) '(2 3 4 5)) =&gt; (3 5 7)</code></li>
+</ul></li>
+<li><code>(seq-mapcat FUNCTION SEQUENCE &amp;optional TYPE)</code> ，将映射结果连接起来并返回
+<ul class="org-ul">
+<li>若未指定 TYPE，则默认返回表，可以指定 vector, list 或 string</li>
+<li>例子： <code>(seq-mapcat (lambda (x) (list x (+ x 1))) '(1 2 3)) =&gt; (1 2 2 3 3 4)</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-mapcar FUNCTION SEQ ...)</code> ，将一个或多个 SEQ 使用函数 FUNCTION 映射到一张新表中
+<ul class="org-ul">
+<li>如果存在多个 SEQ，FUNCTION 的参数个数与 SEQ 的数量应该相同，且在最短的 SEQ 到达末尾时返回结果</li>
+<li>类似于上面提到的 seq-mapn</li>
+</ul></li>
+<li><code>(cl-map TYPE FUNCTION SEQUENCE...)</code> ，类似于 cl-mapcar，可通过 TYPE 指定返回序列的类型
+<ul class="org-ul">
+<li>TYPE 可以是 list，vector，bool-vector，string，array， character，float 等</li>
+</ul></li>
+<li><code>(cl-mapcan FUNCTION SEQUENCE...)</code> ，和 cl-mapcar 类似，但使用 nconc 将各返回值连接起来
+<ul class="org-ul">
+<li>例子： <code>(cl-mapcan (lambda (x) (list x)) '(1 2 3)) =&gt; (1 2 3)</code></li>
+</ul></li>
+<li><code>(cl-maplist FUNCTION LIST...)</code> ，和 cl-mapcar 类似，函数应用的对象是 LIST 的每个 cons 而不是元素
+<ul class="org-ul">
+<li>例子： <code>(cl-maplist (lambda (x) x) '(1 2 3)) =&gt; ((1 2 3) (2 3) (3))</code></li>
+</ul></li>
+<li><code>(cl-mapcon FUNCTION LIST...)</code> ，和 cl-maplist 类似，但是使用 nconc 将结果连起来</li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-map FN LIST)</code> ，使用 FN 将 LIST 映射得到新表
+<ul class="org-ul">
+<li>对应宏是 <code>(--map FORM LIST)</code></li>
+</ul></li>
+<li><code>(-map-indexed FN LIST)</code> ，和 -map 类似，不过 FN 接受两个参数，即元素序号和元素
+<ul class="org-ul">
+<li>对应宏是 <code>(--map-indexed)</code></li>
+<li>例子： <code>(-map-indexed (lambda (id el) (cons id el)) '(1 2 3)) ((0 . 1) (1 . 2) (2 . 3))</code></li>
+</ul></li>
+<li><code>(-map-when PRED REP LIST)</code> ，表中不满足 PRED 的元素不会被映射而保持原值，满足 PRED 的元素会被 REP 函数映射到新值
+<ul class="org-ul">
+<li>和 cl-substitute-if 有相似之处</li>
+<li>对应宏是 <code>(--map-when PRED REP LIST)</code></li>
+<li>例子： <code>(-map-when (lambda (x) (&gt; x 5)) (lambda (x) (* x 2)) '(1 2 3 5 6 7 2 1)) =&gt; (1 2 3 5 12 14 2 1)</code></li>
+</ul></li>
+<li><code>(-map-first PRED REP LIST)</code> ，和 -map-when 很像，但是只对第一个满足 PRED 的元素调用 REP
+<ul class="org-ul">
+<li>对应宏是 <code>(--map-first PRED REP LIST)</code></li>
+<li>例子： <code>(-map-first 'cl-oddp '1+ '(1 2 3)) =&gt; (2 2 3)</code></li>
+</ul></li>
+<li><code>(-map-last PRED PEP LIST)</code> ，和 -map-first 是相反的，对最后一个满足 PRED 的元素调用 REP
+<ul class="org-ul">
+<li>对应宏是 <code>(--map-last PRED REP LIST)</code></li>
+<li>例子： <code>(-map-last 'cl-oddp '1+ '(1 2 3)) =&gt; (1 2 4)</code></li>
+</ul></li>
+<li><code>(-mapcat FN LIST)</code> ，返回将 FN 返回值连接起来的表，FN 的返回值必须是表
+<ul class="org-ul">
+<li>对应宏是 <code>(--mapcat FORM LIST)</code></li>
+<li>例子： <code>(-mapcat 'identity '((1) (2) (3))) =&gt; (1 2 3)</code></li>
+</ul></li>
+<li><code>(-splice PRED FUN LIST)</code> ，对满足 PRED 的元素调用 FUN，得到的结果会被“剥掉”一层表
+<ul class="org-ul">
+<li>对应宏是 <code>(--splice PRED FORM LIST)</code></li>
+<li>例子： <code>(-splice 'cl-oddp (lambda (x) (list x x)) '(1 2 3)) =&gt; (1 1 2 3 3)</code></li>
+</ul></li>
+<li><code>(-splice-list PRED NEW-LIST LIST)</code> ，将满足 PRED 的元素替换为 NEW-LIST，并“剥开” NEW-LIST
+<ul class="org-ul">
+<li>对应宏是 <code>(--splice-list PRED NEW-LIST LIST)</code></li>
+<li>例子： <code>(-splice-list 'cl-evenp '(1 1 4 5 1 4) '(1 9 1 9 8 1)) =&gt; (1 9 1 9 1 1 4 5 1 4 1)</code></li>
+</ul></li>
+<li><code>(-tree-map FN TREE)</code> ，对 TREE 进行递归映射得到新树并返回
+<ul class="org-ul">
+<li>对应宏是 <code>(--tree-map FORM TREE)</code></li>
+<li>例子： <code>(-tree-map '1+ '((1 2) (2 3) ((3) ((4) 5 (()))))) =&gt; ((2 3) (3 4) ((4) ((5) 6 (nil))))</code></li>
+</ul></li>
+<li><code>(-tree-map-nodes PRED FUN TREE)</code> ，对于满足 PRED 的节点调用函数 FUN，返回映射后的新树
+<ul class="org-ul">
+<li>对应宏是 <code>(--tree-map-nodes PRED FORM TREE)</code></li>
+<li>若 PRED 返回 nil，该函数会继续向下解构 cons，若返回非空值则对该节点调用 FUN</li>
+<li>例子： <code>(-tree-map-nodes (lambda (x) (if (consp x) nil (cl-evenp x))) '1+ '((1 2) (2 3) ((3) ((4) 5)))) =&gt; ((1 3) (3 3) ((3) ((5) 5)))</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org6c031f4" class="outline-2">
+<h2 id="org6c031f4"><span class="section-number-2">13</span> 表的压缩（reduce）</h2>
+<div class="outline-text-2" id="text-13">
+<p>
+<b>seq.el</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-reduce FUNCTION SEQUENCE INITIAL-VALUE)</code> ，以 INITIAL-VALUE 作为初始值，按序列顺序对 SEQUENCE 使用 FUNCTION 进行压缩
+<ul class="org-ul">
+<li>FUNCTION 接受两个参数，第一参数存放上一次 FUNCTION 的返回值，它的初始值是 INITIAL-VALUE，第二参数是 SEQUENCE 中的元素</li>
+<li>函数以最后一次调用 FUNCTION 的值作为返回值，若 SEQUENCE 为空序列则返回 INITIAL-VALUE</li>
+<li>例子： <code>(seq-reduce '+ '(1 2 3) 0) =&gt; 6</code></li>
+</ul></li>
+<li><code>(seq-count PRED SEQUENCE)</code> ，返回 SEQUENCE 中满足 PRED 的元素的个数
+<ul class="org-ul">
+<li>例子： <code>(seq-count 'cl-oddp '(1 2 3)) =&gt; 2</code></li>
+</ul></li>
+<li><code>(seq-min SEQUENCE)</code> ，返回 SEQUENCE 中最小的元素
+<ul class="org-ul">
+<li>SEQUENCE 必须是数字或 marker 组成的序列</li>
+</ul></li>
+<li><code>(seq-max SEQUENCE)</code> ，返回 SEQUENCE 中最大的元素
+<ul class="org-ul">
+<li>SEQUENCE 必须是数字或 marker 组成的序列</li>
+</ul></li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-reduce FUNCTION SEQ [KEYWORD VALUE]...)</code> ，和 seq-reduce 类似，以 SEQ 的首元素来作为 seq-reduce 中的初始值
+<ul class="org-ul">
+<li>若指定了 <code>:initial-value</code> ，该函数的功能就和 seq-reduce 一致了</li>
+<li>FUNCTION 的第一参数是积累值，第二参数是当前列表元素值</li>
+<li>关键字参数有 <code>:start</code> <code>:end</code> <code>:from-end</code> <code>:initial-value</code> <code>:key</code></li>
+<li>例子： <code>(cl-reduce '+ '(1 2 3)) =&gt; 6</code></li>
+</ul></li>
+<li><code>(cl-count ITEM SEQ [K V]...)</code> ，对 SEQ 中的 ITEM 进行计数，并返回其个数
+<ul class="org-ul">
+<li>默认比较函数为 eql</li>
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code> <code>:start</code> <code>:end</code></li>
+</ul></li>
+<li><code>(cl-count-if PREDICATE SEQ [K V]...)</code> ，对 SEQ 中满足 PREDICATE 的项进行计数
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code> <code>:start</code> <code>:end</code></li>
+</ul></li>
+<li><code>(cl-count-if-not PREDICATE SEQ [K V]...)</code> ，对 SEQ 中不满足 PREDICATE 的项进行计数
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code> <code>:start</code> <code>:end</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-reduce-from FN INIT LIST)</code> ，和 seq-reduce 类似，不过参数顺序不同。
+<ul class="org-ul">
+<li>对应宏是 <code>(--reduce-from FORM INIT LIST)</code></li>
+<li>例子： <code>(-reduce-from '* 1 '(1 2 3)) =&gt; 6</code></li>
+</ul></li>
+<li><code>(-reduce FN LIST)</code> ，和 cl-reduce 类似
+<ul class="org-ul">
+<li>对应宏是 <code>(--reduce FORM LIST)</code></li>
+</ul></li>
+<li><code>(-reduce-r-from FN INIT LIST)</code> ，和 -reduce-from 类似，但是反向开始
+<ul class="org-ul">
+<li>对应宏是 <code>(--reduce-r-from FORM INIT LIST)</code></li>
+<li>FN 的第一参数是当前值，第二参数是积累值</li>
+<li>通过这个例子可以看出左压缩（-reduce）和右压缩（-reduce-r）的区别： <code>(-reduce-from 'cons nil '(1 2 3)) =&gt; (((nil . 1) . 2) . 3)</code> <code>(-reduce-r-from 'cons nil '(1 2 3)) =&gt; (1 2 3)</code></li>
+</ul></li>
+<li><code>(-reduce-r FN LIST)</code> ，和 -reduce 类似，不过从表尾开始到表头
+<ul class="org-ul">
+<li>对应宏是 <code>(--reduce-r FORM LIST)</code></li>
+</ul></li>
+<li><code>(-reductions-from FN INIT LIST)</code> ，与 -reduce 类似，不过返回值是一个表，表中内容是每一步的积累值
+<ul class="org-ul">
+<li>对应宏是 <code>(--reductions-from FORM INIT LIST)</code></li>
+<li>例子： <code>(-reductions-from '* 1 '(1 2 3)) =&gt; (1 1 2 6)</code></li>
+</ul></li>
+<li><code>(-reductions FN LIST)</code> ，和 -reductions-from 类似，不过以表首元素作为 INIT 值
+<ul class="org-ul">
+<li>对应宏是 <code>(--reductions FORM LIST)</code></li>
+</ul></li>
+<li><code>(-reductions-r-from FN INIT LIST)</code> ，和 reductions-from 类似，不过从表尾开始
+<ul class="org-ul">
+<li>对应宏是 <code>(--reductions-r-from FORM INIT LIST)</code></li>
+<li>例子： <code>(-reductions-r-from '* 1 '(1 2 3)) =&gt; (6 6 3 1)</code></li>
+</ul></li>
+<li><code>(-reductions-r FN LIST)</code> ，和 reductions 类似，不过从表尾开始</li>
+<li><code>(-count PRED LIST)</code> ，对 LIST 中满足 PRED 的项进行计数，并返回其数量
+-对应宏是 <code>(--count PRED LIST)</code></li>
+<li><code>(-sum LIST)</code> ，对 LIST 求和</li>
+<li><code>(-running-sum LIST)</code> ，返回“奔跑”求和（笑），即返回包含每一步求和值的表
+<ul class="org-ul">
+<li>例子： <code>(-running-sum '(1 2 3 4 5)) =&gt; (1 3 6 10 15)</code></li>
+</ul></li>
+<li><code>(-product LIST)</code> ，对 LIST 求乘积</li>
+<li><code>(-running-product LIST)</code> ，返回“奔跑”乘积</li>
+<li><code>(-max LIST)</code> ，返回 LIST 中的最大值</li>
+<li><code>(-min LIST)</code> ，返回 LIST 中的最小值</li>
+<li><code>(-max-by COMPARATOR LIST)</code> ，根据比较函数返回最大值
+<ul class="org-ul">
+<li>对应宏是 <code>(--max-by FORM LIST)</code></li>
+</ul></li>
+<li><code>(-min-by COMPARATOR LIST)</code> ，根据比较函数返回最小值
+<ul class="org-ul">
+<li>对应宏是 <code>(--min-by FORM LIST)</code></li>
+</ul></li>
+<li><code>(-tree-reduce-from FN INIT-VALUE TREE)</code> ，和 -reduce-from 类似，不过会递归进行
+<ul class="org-ul">
+<li>对应宏是 <code>(--tree-reduce-from FORM INIT-VALUE TREE)</code></li>
+<li>例子： <code>(-tree-reduce-from '+ 0 '((1) (2) (3 4) ((5) 6 ((7))))) =&gt; 28</code></li>
+</ul></li>
+<li><code>(-tree-reduce FN TREE)</code> ，-reduce 的递归版本
+<ul class="org-ul">
+<li>对应宏是 <code>(--tree-reduce FORM TREE)</code></li>
+</ul></li>
+<li><code>(-tree-mapreduce-from FN FOLDER INIT-VALUE TREE)</code> ，映射和压缩的结合
+<ul class="org-ul">
+<li>对应宏是 <code>(--tree-mapreduce-from FORM FOLDER INIT-VALUE TREE)</code></li>
+<li>例子： <code>(-tree-mapreduce-from '1+ '+ 0 '((1) (2) (3) (4 5 (6)))) =&gt; 27</code></li>
+</ul></li>
+<li><code>(-tree-mapreduce FN FOLDER TREE)</code> ，-reduce 的树版本
+<ul class="org-ul">
+<li>对应宏是 <code>(--tree-mapreduce FORM FOLDER TREE)</code></li>
+</ul></li>
+<li><code>(-unfold FUN SEED)</code> ，是 -reduce-r 的对偶函数，接受一个函数和种子，产生结果并以结果作为参数继续调用 FUN，直到 FUN 返回 nil 为止，返回由非空返回值组成的表
+<ul class="org-ul">
+<li>函数 FUN 接受一个种子并返回一个 cons，cons 的 car 作为结果，cdr 作为下一个种子值</li>
+<li>对应宏是 <code>(--unfold FORM SEED)</code></li>
+<li>例子： <code>(-unfold (lambda (x) (if (&gt; x 5) nil (cons x (+ x 1)))) 0) =&gt; (0 1 2 3 4 5)</code></li>
+</ul></li>
+</ul>
+
+<p>
+关于左压缩和右压缩，这里有两张图可以帮助理解：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./fold-left.png" alt="fold-left.png" /></td>
+<td class="org-left"><img src="./fold-right.png" alt="fold-right.png" /></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-org820ff53" class="outline-2">
+<h2 id="org820ff53"><span class="section-number-2">14</span> 表的分组（partition）</h2>
+<div class="outline-text-2" id="text-14">
+<p>
+<b>seq</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(seq-partition SEQUENCE N)</code> ，以 N 个元素为一组对 SEQUENCE 进行分组，返回包含分组的新表
+<ul class="org-ul">
+<li>如果 N 小于等于 0，则返回 nil</li>
+<li>若 SEQUENCE 的长度不能被 N 整除，那么最后一组中元素数量将小于 N</li>
+<li>分组与原序列类型相同</li>
+<li>例子1： <code>(seq-partition '(1 2 3 4 5) 2) =&gt; ((1 2) (3 4) (5))</code></li>
+<li>例子2： <code>(seq-partition [1 3 5 2 4 6] 3) =&gt; [[1 3 5] [2 4 6] ]</code></li>
+<li>例子3： <code>(seq-partition "hello world" 2) =&gt; ("he" "ll" "o " "wo" "rl" "d")</code></li>
+</ul></li>
+<li><code>(seq-group-by FUNCTION SEQUENCE)</code> ，将函数 FUNCTION 应用于 SEQUENCE 中的元素，函数的返回值相等的元素会被分到一组，放到一个 list 中
+<ul class="org-ul">
+<li>相等判定使用 equal</li>
+<li>list 的 car 是函数的返回值，cdr 是当前返回值下的所有元素</li>
+<li>整个函数的返回值是一张 alist，例子： <code>(seq-group-by 'cl-oddp '(1 2 3 4 5 6)) =&gt; ((t 1 3 5) (nil 2 4 6))</code></li>
+</ul></li>
+</ul>
+
+<p>
+<b>dash</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(-split-at N LIST)</code> ，将表从第 N 各元素处分为两半并返回，第 N 个元素在后一半中
+<ul class="org-ul">
+<li>返回值的 car 是前表，它是复制得到的表，cadr 是后表，它是原表的子表</li>
+<li>例子： <code>(-split-at 2 '(1 2 3 4)) =&gt; ((1 2) (3 4))</code> <code>(-split-at 0 nil) =&gt; (nil nil)</code></li>
+</ul></li>
+<li><code>(-split-with PRED LIST)</code> ，返回 ((-take-while PRED LIST) (-drop-while PRED LIST))
+<ul class="org-ul">
+<li>对应宏是 <code>(--split-with PRED LIST)</code></li>
+</ul></li>
+<li><code>(-split-on ITEM LIST)</code> ，在找到 LIST 中等于 ITEM 的项时就进行一次分组
+<ul class="org-ul">
+<li>ITEM 不会再分组结果中出现，它的作用可看作分隔符</li>
+<li>比较函数是 equal</li>
+<li>例子： <code>(-split-on '- '(1 - 2 - 3 4 - 5 6)) =&gt; ((1) (2) (3 4) (5 6))</code></li>
+</ul></li>
+<li><code>(-split-when FN LIST)</code> ，当满足 FN 时就进行一次分组
+<ul class="org-ul">
+<li>对应宏是 <code>(--split-when FORM LIST)</code></li>
+<li>分组中不包括满足 PRED 的元素</li>
+<li>例子： <code>(-split-when 'cl-evenp '(1 2 3)) =&gt; ((1) (3))</code> <code>(-split-when (-const t) '(1 2 3)) =&gt; nil</code></li>
+</ul></li>
+<li><code>(-separate PRED LIST)</code> ，返回表 ((-filter PRED LIST) (-remove PRED LIST))
+<ul class="org-ul">
+<li>对应宏是 <code>(--separate FORM LIST)</code></li>
+<li>例子： <code>(-separate 'cl-oddp '(1 2 3 4 5 6)) =&gt; ((1 3 5) (2 4 6))</code></li>
+</ul></li>
+<li><code>(-partition-all-in-steps N STEP LIST)</code> ，将 LIST 按每 N 个一组分组，每次分组后向后移动 STEP，并再次分组，返回包含分组的表
+<ul class="org-ul">
+<li>例子1： <code>(-partition-all-in-steps 3 1 '(1 2 3 4 5 6)) =&gt; ((1 2 3) (2 3 4) (3 4 5) (4 5 6) (5 6) (6))</code></li>
+<li>例子2： <code>(-partition-all-in-steps 3 3 '(1 2 3 4 5 6)) =&gt; ((1 2 3) (4 5 6))</code></li>
+</ul></li>
+<li><code>(-partition-in-steps N STEP LIST)</code> ，和 -partition-all-in-steps 类似，若剩余项数量不足 N 则停止
+<ul class="org-ul">
+<li>例子： <code>(-partition-in-steps 3 1 '(1 2 3 4 5 6)) =&gt; ((1 2 3) (2 3 4) (3 4 5) (4 5 6))</code></li>
+</ul></li>
+<li><code>(-partition-all N LIST)</code> ，等于 (-partition-all-in-steps N N LIST)</li>
+<li><code>(-partition N LIST)</code> ，和 -parition-all 相似，但若元素不够则不分组
+<ul class="org-ul">
+<li>例子： <code>(-partition 2 '(1 2 3 4 5)) =&gt; ((1 2) (3 4))</code></li>
+</ul></li>
+<li><code>(-partition-by FN LIST)</code> ，根据 FN 的返回值对 LIST 中元素进行分组，每当 FN 返回一个不同的值就分一次组
+<ul class="org-ul">
+<li>对应宏是 <code>(--partition-by FORM LIST)</code></li>
+<li>例子： <code>(-partition-by 'identity '(1 1 2 3 3 4)) =&gt; ((1 1) (2) (3 3) (4))</code></li>
+</ul></li>
+<li><code>(-partition-by-header FN LIST)</code> ，对表首元素调用 FN，并将返回值作为 header 值，然后使用 FN 应用其他元素，每当返回值等于 header 值时就进行一次分组
+<ul class="org-ul">
+<li>使用 equal 判断相等</li>
+<li>当遇到返回值等于 header 时，只有下一元素的调用返回值是其他值，或遇到表尾才进行分组，例子： <code>(-partition-by-header 'numberp '(1 2 3 a 2 4)) =&gt; ((1 2 3 a) (2 4))</code></li>
+<li>对应宏是 <code>(--partition-by-header FORM LIST)</code></li>
+<li>例子： <code>(-partition-by-header 'numberp '(1 a 2 b c d 3)) =&gt; ((1 a) (2 b c d) (3))</code></li>
+</ul></li>
+<li><code>(-partition-after-pred PRED LIST)</code> ，对于满足 PRED 的项，在项后分一组
+<ul class="org-ul">
+<li>对应宏是 <code>(--partition-after-pred FORM LIST)</code></li>
+<li>例子： <code>(-partition-after-pred 'numberp '(a 1 2 c 3 4 d e 5)) =&gt; ((a 1) (2) (c 3) (4) (d e 5))</code></li>
+</ul></li>
+<li><code>(-partition-before-pred PRED LIST)</code> ，对于满足 PRED 的项，在项前分一组
+<ul class="org-ul">
+<li>例子： <code>(-partition-before-pred 'numberp '(a 1 2 c 3 4 d e 5)) =&gt; ((a) (1) (2 c) (3) (4 d e) (5))</code></li>
+</ul></li>
+<li><code>(-partition-after-item ITEM LIST)</code> ，在等于 ITEM 的每个 LIST 项后面分一组
+<ul class="org-ul">
+<li>例子： <code>(-partition-after-item 1 '(1 2 1 3)) =&gt; ((1) (2 1) (3))</code></li>
+</ul></li>
+<li><code>(-partition-before-item ITEM LIST)</code> ，在等于 ITEM 的每个 LIST 项前面分一组
+<ul class="org-ul">
+<li>例子： <code>(-partition-before-item 1 '(1 2 1 3)) =&gt; ((1 2) (1 3))</code></li>
+</ul></li>
+<li><code>(-group-by FN LIST)</code> ，根据 FN 的返回值对 LIST 中元素进行分组并返回
+<ul class="org-ul">
+<li>返回值是一张 alist，每个元素的 car 部分是返回值， cdr 是该返回值对应的元素组成的表</li>
+<li>类似于 seq-group-by</li>
+<li>对应宏是 <code>(--group-by FORM LIST)</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgbac7950" class="outline-2">
+<h2 id="orgbac7950"><span class="section-number-2">15</span> 作为 plist 和 alist 的表</h2>
+<div class="outline-text-2" id="text-15">
+</div>
+<div id="outline-container-org1ed831a" class="outline-3">
+<h3 id="org1ed831a"><span class="section-number-3">15.1</span> plist</h3>
+<div class="outline-text-3" id="text-15-1">
+<ul class="org-ul">
+<li><code>(get SYMBOL PROPNAME)</code> ，返回符号的 plist 的 PROPNAME 属性值，若有多个相同的属性则返回最近由 put 添加的那个</li>
+<li><code>(function-get F PROP &amp;optional AUTOLOAD)</code> ，返回函数 F 的 PROP 属性值
+<ul class="org-ul">
+<li>如果 AUTOLOAD 为非空且 F 是 autoload 函数的话，尝试载入函数并期望它设置了 PROP 属性</li>
+<li>若 AUTOLOAD 为符号 macro ，则仅在 F 是 autoload macro 时才载入</li>
+</ul></li>
+<li><code>(put SYMBOL PROPNAME VALUE)</code> ，将属性 PROPNAME 以 VALUE 值存储在 SYMBOL 的 plist 中</li>
+<li><code>(function-put FUNCTION PROP VALUE)</code> ，设置函数的属性 PROP 值为 VALUE。FUNCTION 只能是符号</li>
+<li><code>(symbol-plist SYMBOL)</code> ，获取符号的 plist</li>
+<li><code>(setplist SYMBOL NEWPLIST)</code> ，将 SYMBOL 的 plist 设置为 NEWPLIST，并返回 NEWPLIST</li>
+
+<li><code>(plist-get PLIST PROP)</code> ，从 PLIST 中提取出一个值，它对应的属性是 PROP，若没有找到则返回 nil
+<ul class="org-ul">
+<li>该函数使用 eq 进行比较。</li>
+</ul></li>
+<li><code>(lax-plist-get PLIST PROP)</code> ，和 plist-get 类似，使用 equal 进行比较</li>
+<li><code>(plist-put PLIST PROP VAL)</code> ，将 PLIST 中 PROP 属性值设置为 VAL， PROP 要求是 symbol
+<ul class="org-ul">
+<li>若 PROP 已在 PLIST 中存在则对原值修改，否则将新的属性和值加入到 PLIST 中。该函数返回 <b>修改</b> 过的 PLIST</li>
+</ul></li>
+<li><code>(lax-plist-put PLIST PROP VAL)</code> ，和 plist-put 类似，使用 equal 比较</li>
+<li><code>(plist-member PLIST PROP)</code> ，若 PLIST 中存在属性 PROP 则返回以 PROP 为首元素的 PLIST 子表</li>
+</ul>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-get SYMBOL PROPNAME &amp;optional DEFAULT)</code> ，返回 SYMBOL 的 PROPNAME 属性值，若不存在则返回 DEFAULT</li>
+<li><code>(cl-getf PLIST PROPNAME &amp;optional DEFAULT)</code> ，在 PLIST 中搜索 PROPNAME，找到了就返回对应属性值，否则返回 DEFAULT</li>
+<li><code>(cl-remprop SYMBOL PROPNAME)</code> ，除去 SYMBOL 的 plist 中的属性 PROPNAME 和它的值</li>
+<li><code>(cl-remf PLACE TAG)</code> ，从 PLACE 所在的 plist 中除去属性 TAG
+<ul class="org-ul">
+<li><code>(cl-remf (symbol-plist symbol) TAG)</code> 作用和 <code>(cl-remprop symbol TAG)</code> 相同</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org3e8c676" class="outline-3">
+<h3 id="org3e8c676"><span class="section-number-3">15.2</span> alist</h3>
+<div class="outline-text-3" id="text-15-2">
+<ul class="org-ul">
+<li><code>(assq KEY ALIST)</code> ，若 KEY 和 ALIST 某元素的 car 是 eq 关系，则返回第一个匹配的 ALIST 元素
+<ul class="org-ul">
+<li>ALIST 中非 cons cell 的元素会被忽略</li>
+</ul></li>
+<li><code>(assoc KEY ALIST &amp;optional TESTFN)</code> ，若 KEY 和 ALIST 的某个元素的 car 是 equal 关系，则返回第一个匹配的 ALIST 元素
+<ul class="org-ul">
+<li>可以通过指定 TESTFN 来选择比较函数</li>
+</ul></li>
+<li><code>(assoc-default KEY ALIST &amp;optional TEST DEFAULT)</code> ，若匹配了，则返回第一个匹配的 ALIST 元素的 cdr 部分。
+<ul class="org-ul">
+<li>若没有匹配且 DEFAULT 参数为非空，则返回 DEFAULT，否则返回 nil</li>
+<li>默认使用 equal 进行比较，可以通过 TEST 参数来选择比较函数</li>
+</ul></li>
+<li><code>(rassq KEY ALIST)</code> ，和 assq 类似，不过使用 ALIST 元素的 cdr 比较</li>
+<li><code>(rassoc KEY ALIST)</code> ，和 assoc 类似，不过使用 ALIST 元素的 cdr 来比较</li>
+<li><code>(alist-get KEY ALIST &amp;optional DEFAULT REMOVE TESTFN)</code> ，找到 ALIST 中的第一个满足 car 部分与 KEY 是 eq 关系的元素，并返回该元素的 cdr 部分
+<ul class="org-ul">
+<li>若没有在 ALIST 中找到 KEY，则返回 DEFAULT</li>
+<li>默认使用 eq 作为比较函数，可以通过 TESTFN 进行选择</li>
+<li>至于 REMOVE 参数，它的使用和 setf 有关，可以在 emacs 中使用 C-h f 查看详细用法</li>
+</ul></li>
+<li><code>(copy-alist ALIST)</code> ，返回 ALIST 的副本
+<ul class="org-ul">
+<li>该函数会复制 ALIST 的每个 cons cell，但是副本会和 ALIST 共享 cons cell 的 car 和 cdr 值</li>
+<li>若 ALIST 中存在不是 cons cell 的元素，则副本会与 ALIST 共享这些元素</li>
+</ul></li>
+<li><code>(assq-delete-all KEY ALIST)</code> ，删除 ALIST 中所有 car 部分和 KEY 为 eq 关系的元素，并返回 <b>修改</b> 后的表</li>
+<li><code>(assoc-delete-all KEY ALIST &amp;optional TEST)</code> ，和 assq-delete-all 类似
+<ul class="org-ul">
+<li>默认使用 equal 进行比较，可以通过 TEST 指定比较函数</li>
+<li>ALIST 中的非 cons cell 元素会被忽略</li>
+</ul></li>
+<li><code>(let-alist ALIST &amp;rest body)</code> ，这是一个用于 alist 的宏，和 let 类似，具体用法见下例：</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(<span style="color: #00af00;">setq</span> yy-alist '((a . b) (b . c) (c . ((a . b) (b . c)))))
+(<span style="color: #00af00;">let-alist</span> yy-alist
+  (<span style="color: #00af00;">and</span>
+     (eq .a 'b)
+     (eq .b 'c)
+     (eq .c.a 'b)
+     (eq .c.b 'c)))
+=&gt; t
+</pre>
+</div>
+
+<p>
+let-alist 的第一个参数是一个用于解析的 alist，body 是执行体。 body 中以 <code>.</code> 作为前缀的标识符表示它是 alist 中的 key，它的值是 key 对应的 value。上面的例子中我用到了 alist 的嵌套，要表示嵌套关系的话 <code>.</code> 也要嵌套。
+</p>
+
+<p>
+let-alist 使用 <code>eq</code> 来判断 key 是否与 body 中的特殊标识符相同。关于它的具体宏定义可以在 emacs 内自行查找。
+</p>
+
+<p>
+<b>cl-lib</b>
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-acons KEY VALUE ALIST)</code> ，将 KEY 和 VALUE 添加到 ALIST 中，返回以 (cons KEY VALUE) 作为 car 和 ALIST 作为 cdr 的新表</li>
+<li><code>(cl-pairlis KEYS VALUES &amp;optional ALIST)</code> ，使用 KEYS 中的键和 VALUES 中的值来创建新 alist，并将其返回
+<ul class="org-ul">
+<li>返回的 alist 的长度取 KEYS 和 VALUES 中的长度较小值</li>
+<li>如果 ALIST 非空，新的 alist 会被添加到 ALIST 的最前面</li>
+<li>例子： <code>(cl-pairlis '(a b c) '(1 2 3 4)) =&gt; ((a . 1) (b . 2) (c . 3))</code></li>
+</ul></li>
+<li><code>(cl-assoc ITEM LIST [K V]...)</code> ，找到 LIST 中第一个满足 car 等于 ITEM 的项，返回第一个匹配的 cons
+<ul class="org-ul">
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+<li>例子： <code>(cl-assoc 'a '((b . 1) (a . 2) (c . 3))) =&gt; (a . 2)</code></li>
+</ul></li>
+<li><code>(cl-assoc-if PREDICATE LIST [K V]...)</code> ，找到第一个满足 PREDICATE 的 ITEM，返回该 cons
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-assoc-if-not PREDICATE LIST [K V]...)</code> ，找到第一个不满足 PREDICATE 的 ITEM，返回该 cons
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-rassoc ITEM LIST [K V]...)</code> ，找到第一个满足 cdr 等于 ITEM 的项
+<ul class="org-ul">
+<li>关键字参数有 <code>:test</code> <code>:test-not</code> <code>:key</code></li>
+</ul></li>
+<li><code>(cl-rassoc-if PREDICATE LIST [K V]...)</code> ，找到第一个 cdr 满足 PREDICATE 的项
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+<li><code>(cl-rassoc-if-not PREDICATE LIST [K V]...)</code> ，找到第一个 cdr 不满足 PREDICATE 的项
+<ul class="org-ul">
+<li>关键字参数有 <code>:key</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org30e0681" class="outline-2">
+<h2 id="org30e0681"><span class="section-number-2">16</span> dash.el 中的杂技</h2>
+<div class="outline-text-2" id="text-16">
+<p>
+下面列出是我不知道怎么分类的 dash 函数和宏，干脆一并称之为杂技。下面的分类命名比较随意，忽略掉也无妨。
+</p>
+
+<p>
+这里的杂技只是戏称而已，就我个人而言，这些函数和宏是非常有用的。更多的例子可以参考 dash 项目的 README<sup><a id="fnr.6" class="footref" href="#fn.6">6</a></sup>
+</p>
+</div>
+
+<div id="outline-container-orgca35034" class="outline-3">
+<h3 id="orgca35034"><span class="section-number-3">16.1</span> 前缀杂技</h3>
+<div class="outline-text-3" id="text-16-1">
+<ul class="org-ul">
+<li><code>(-inits LIST)</code> ，返回所有的 LIST 前缀
+<ul class="org-ul">
+<li>例子： <code>(-inits '(1 2 3)) =&gt; (nil (1) (1 2) (1 2 3))</code></li>
+</ul></li>
+<li><code>(-tails LIST)</code> ，返回所有的 LIST 后缀
+<ul class="org-ul">
+<li>例子： <code>(-tails '(1 2 3)) =&gt; ((1 2 3) (2 3) (3) nil)</code></li>
+</ul></li>
+<li><code>(-common-prefix &amp;rest LISTS)</code> ，返回 LISTS 的最长公共前缀
+<ul class="org-ul">
+<li>例子： <code>(-common-prefix '(1 2 3) '(1 2) '(1 2 3 4) '(1)) =&gt; (1)</code></li>
+</ul></li>
+<li><code>(-common-suffix &amp;rest LISTS)</code> ，返回 LISTS 的最长公共后缀
+<ul class="org-ul">
+<li>例子： <code>(-common-suffix '(1 2 3) '(1 3 3) '(2 3 3)) =&gt; (3)</code></li>
+</ul></li>
+<li><code>(-is-prefix? PREFIX LIST)</code> ，判断 PREFIX 是否为 LIST 的前缀
+<ul class="org-ul">
+<li>例子： <code>(-is-prefix? '(1) '(1 2 3)) =&gt; t</code></li>
+</ul></li>
+<li><code>(-is-suffix? SUFFIX LIST)</code> ，判断 SUFFIX 是否为 LIST 的后缀
+<ul class="org-ul">
+<li>例子： <code>(-is-suffix? '(3 4) '(1 2 3 4)) =&gt; t</code></li>
+</ul></li>
+<li><code>(-is-infix? INFIX LIST)</code> ， 判断 INFIX 是否为 LIST 的中缀
+<ul class="org-ul">
+<li>例子： <code>(-is-infix? '(2 3) '(1 2 3 4)) =&gt; t</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org4f71f73" class="outline-3">
+<h3 id="org4f71f73"><span class="section-number-3">16.2</span> 表杂技</h3>
+<div class="outline-text-3" id="text-16-2">
+<ul class="org-ul">
+<li><code>(-rotate N LIST)</code> 将表向右循环移动 N 格，返回位移后的新表
+<ul class="org-ul">
+<li>若 LIST 为空表，则返回 nil。若 N 为 0，则返回 LIST 的浅拷贝</li>
+<li>例子： <code>(-rotate 2 '(1 2 3 4)) =&gt; (3 4 1 2)</code></li>
+</ul></li>
+<li><code>(-cycle LIST)</code> ，返回由 LIST 中元素组成的环
+<ul class="org-ul">
+<li>例子： <code>(-cycle '(1 2)) =&gt; (1 2 1 2 . #2)</code></li>
+</ul></li>
+<li><code>(-pad FILL-VALUE &amp;rest LISTS)</code> ，对非最长表填充 FILL-VALUE 在最后，使其一样长
+<ul class="org-ul">
+<li>返回值为以填充后得到的新表为元素的表</li>
+<li>根据这个英文猜测函数功能还是挺容易的</li>
+<li>例子： <code>(-pad 16 '(1) '(2) '(3 4 5) '(6 7)) =&gt; ((1 16 16) (2 16 16) (3 4 5) (6 7 16))</code></li>
+</ul></li>
+<li><code>(-annotate FN LIST)</code> ，对 LIST 中各元素应用 FN，映射得到新表并返回
+<ul class="org-ul">
+<li>新表中的元素为以映射值和原值组成的 cons</li>
+<li>对应宏是 <code>(--annotate FORM LIST)</code></li>
+<li>例子： <code>(-annotate '1+ '(1 2 3)) =&gt; ((2 . 1) (3 . 2) (4 . 3))</code></li>
+</ul></li>
+<li><code>(-table FN &amp;rest LISTS)</code> ，穷举 LISTS 中所有可能的参数组合，并将这些组组合通过 FN 映射到新表
+<ul class="org-ul">
+<li>举例来说，由参数表 (1 2) 和 (3 4) 可以得到的参数组合是 (1 3) (1 4) (2 3) (2 4)，也就是求外积（outer product），根据取得元素分组可以得到 ((1 3) (1 4)) 和 ((2 3) (2 4))</li>
+<li>例子： <code>(-table (lambda (x y) (cons x y)) '(1 2 3) '(4 5 6)) =&gt; (((1 . 4) (2 . 4) (3 . 4)) ((1 . 5) (2 . 5) (3 . 5)) ((1 . 6) (2 . 6) (3 . 6)))</code></li>
+</ul></li>
+<li><code>(-table-flat FN &amp;rest LISTS)</code> ，类似 -table，但是结果会被“拍扁”
+<ul class="org-ul">
+<li>例子： <code>(-table-flat 'cons '(1 2 3) '(4 5 6)) =&gt; ((1 . 4) (2 . 4) (3 . 4) (1 . 5) (2 . 5) (3 . 5) (1 . 6) (2 . 6) (3 . 6))</code></li>
+</ul></li>
+<li><code>(-select-by-indices INDICES LIST)</code> ，返回 INDICES 中包含的序号对应 LIST 中的元素组成的表
+<ul class="org-ul">
+<li>例子： <code>(-select-by-indices '(0 0 1) '(1 2 3)) =&gt; (1 1 2)</code></li>
+</ul></li>
+<li><code>(-select-column COLUMN TABLE)</code> ，根据列号 COLUMN 选取 TABLE 中的某一列中的元素，返回元素组成的表
+<ul class="org-ul">
+<li>TABLE 就是元素是表的表</li>
+<li>例子： <code>(-select-column 1 '((1 2) (2 3) (3 4 5))) =&gt; (2 3 4)</code></li>
+</ul></li>
+<li><code>(-select-columns COLUMNS TABLE)</code> ，根据 COLUMS 中的列号选取 TABLE 的元素表中的列，返回得到的新 table
+<ul class="org-ul">
+<li>例子： <code>(-select-columns '(0 1) '((1 2) (2 3) (3 4 5))) =&gt; ((1 2) (2 3) (3 4))</code></li>
+</ul></li>
+<li><code>(-interleave &amp;rest LISTS)</code> ，从结果上来说相当于 (apply 'append nil (cl-mapcar 'list LISTS&#x2026;))
+<ul class="org-ul">
+<li>例子： <code>(-interleave '(1 2 3) '(10 20 30) '(100 200 300 400)) =&gt; (1 10 100 2 20 200 3 30 300)</code></li>
+<li>补充： <code>(apply 'append nil (cl-mapcar 'list '(1 2 3) '(10 20 30) '(100 200 300 400))) =&gt; (1 10 100 2 20 200 3 30 300)</code></li>
+</ul></li>
+
+<li><code>(-zip-with FN LIST1 LIST2)</code> ，可理解为 cl-mapcar 的特化版
+<ul class="org-ul">
+<li>FN 接受两个参数</li>
+<li>对应宏是 <code>(--zip-with FORM LIST1 LIST2)</code></li>
+<li>例子： <code>(-zip-with 'cons '(1 2) '(2 3)) =&gt; ((1 . 2) (2 . 3))</code></li>
+</ul></li>
+<li><code>(-zip-lists &amp;rest LISTS)</code> ，可以理解为 <code>(cl-mapcar 'list LISTS...)</code>
+<ul class="org-ul">
+<li>例子： <code>(-zip-lists '(1 2 3) '(2 3)) =&gt; ((1 2) (2 3))</code></li>
+<li>补充： <code>(cl-mapcar 'list '(1 2 3) '(2 3)) =&gt; ((1 2) (2 3))</code></li>
+</ul></li>
+<li><code>(-zip-pair &amp;rest LISTS)</code> ，和 -zip-lists 类似
+<ul class="org-ul">
+<li>若 LISTS 数量为 2 ，结果是 cons cell 组成的新表，否则和 -zip-lists 一致</li>
+<li>例子1： <code>(-zip-pair '(1 2 3) '(2 3)) =&gt; ((1 . 2) (2 . 3))</code></li>
+<li>例子2： <code>(-zip-pair '(1 2 3) '(2 3) '(3 4)) =&gt; ((1 2 3) (2 3 4))</code></li>
+</ul></li>
+<li><code>(-zip-fill FILL-VALUE &amp;rest LISTS)</code> ，类似于 -zip-pair，但会使用 FILL-VALUE 填充短于最长表的表，然后调用 -zip-pair
+<ul class="org-ul">
+<li>例子： <code>(-zip-fill 0 '(1 2) '(3)) =&gt; ((1 . 3) (2 . 0))</code></li>
+</ul></li>
+<li><code>(-unzip LISTS)</code> ，和 -zip-pair 类似，不过接受的是元素为表的表
+<ul class="org-ul">
+<li>(-unzip (-zip L1 L2 L3 &#x2026;)) 相当于什么也没做（表的数量大于等于3）</li>
+<li>例子1： <code>(-unzip '((1 2 3) (2 4 6))) =&gt; ((1 . 2) (2 . 4) (3 . 6))</code></li>
+<li>例子2： <code>(-unzip (-zip-pair '(1 2 3) '(2 3 4) '(3 4 5))) =&gt; ((1 2 3) (2 3 4) (3 4 5))</code></li>
+</ul></li>
+</ul>
+
+<p>
+我在这一小节没有提到 -zip 这个函数，这是因为 dash 项目的 README 中提到：
+</p>
+
+<blockquote>
+<p>
+For backward compatibility reasons, -zip when called with two lists returns a list of cons cells, rather than a list of proper lists. This is a clunky API, and may be changed in a future release to always return a list of proper lists, as -zip-lists currently does.
+</p>
+
+<p>
+N.B.: Do not rely on the current behavior of -zip for two lists. Instead, use -zip-pair for a list of cons cells, and -zip-lists for a list of proper lists.
+</p>
+</blockquote>
+</div>
+</div>
+
+
+<div id="outline-container-orga469884" class="outline-3">
+<h3 id="orga469884"><span class="section-number-3">16.3</span> 函数杂技</h3>
+<div class="outline-text-3" id="text-16-3">
+<ul class="org-ul">
+<li><code>(-partial FUN &amp;rest ARGS)</code> ，返回 FUN 的偏函数
+<ul class="org-ul">
+<li>例子： <code>(funcall (-partial 'cons 1) 2) =&gt; (1 . 2)</code></li>
+</ul></li>
+<li><code>(-rpartial FUN &amp;rest ARGS)</code> ，返回 FUN 的右偏函数，即确定 FUN 的右边参数
+<ul class="org-ul">
+<li>例子： <code>(funcall (-partial 'cons 2) 1) =&gt; (2 . 1)</code></li>
+</ul></li>
+<li><code>(-juxt &amp;rest FNS)</code> ，返回返回分别调用 FNS 得到结果值的表的函数
+<ul class="org-ul">
+<li>juxt 即并列的意思，FNS 的参数数量应该一致</li>
+<li>例子： <code>(funcall (-juxt (lambda (x) (+ x 2)) (lambda (x) (+ x 1))) 1) =&gt; (3 2)</code></li>
+</ul></li>
+<li><code>(-compose &amp;rest FNS)</code> ，返回一个函数，该函数是 FNS 的组合，右边函数的返回值作为左边函数的参数
+<ul class="org-ul">
+<li>compose 即组合的意思</li>
+<li>例子： <code>(funcall (-compose 'length 'list) 1 2 3) =&gt; 3)</code></li>
+</ul></li>
+<li><code>(-applify FN)</code> ，返回一个函数，该函数功能与 FN 一致，但是接受一个包含原来参数的表作为参数
+<ul class="org-ul">
+<li>例子： <code>(funcall (-applify 'cons) '(1 2)) =&gt; (1 . 2)</code></li>
+</ul></li>
+<li><code>(-on OP TRANS)</code> ，返回一个函数，函数接受参数后使用 TRANS 分别应用到参数，随后使用 TRANS 返回的结果调用 OP
+<ul class="org-ul">
+<li>例子： <code>(funcall (-on '+ '1+) 1 2 3 4) =&gt; 14</code></li>
+</ul></li>
+<li><code>(-flip FN)</code> ，返回一个函数，该函数接受参数顺序与原函数相反
+<ul class="org-ul">
+<li>例子： <code>(funcall (-flip 'mapcar) '(1 2 3) '1+) =&gt; (2 3 4)</code></li>
+</ul></li>
+<li><code>(-rotate-args N FN)</code> ，返回一个函数，新函数的参数表相对于原函数循环右旋 N 位
+<ul class="org-ul">
+<li>例子： <code>(funcall (-rotate-args 2 'cons) 1 2) =&gt; (1 . 2)</code></li>
+</ul></li>
+<li><code>(-const C)</code> ，返回一个函数，函数接受任意数量任意值的参数并返回 C
+<ul class="org-ul">
+<li>例子： <code>(funcall (-const 1) 1 2 3) =&gt; 1</code></li>
+</ul></li>
+<li><code>(-cut &amp;rest PARAMS)</code> ，返回一个函数，函数的某些参数可被占位符 &lt;&gt; 替代，在调用时再指定
+<ul class="org-ul">
+<li>使用 &lt;&gt; 替代的参数在新函数参数表中是从左到右排列的</li>
+<li>例子： <code>(funcall (-cut -map &lt;&gt; '(1 2 3)) '1+) =&gt; (2 3 4)</code></li>
+</ul></li>
+<li><code>(-not PRED)</code> ，返回一个函数，它接受和 PRED 一样的参数，对 PRED 返回值取反
+<ul class="org-ul">
+<li>例子： <code>(funcall (-not 'null) nil) =&gt; nil</code></li>
+</ul></li>
+<li><code>(-orfn &amp;rest PREDS)</code> ，返回一个函数，相当于 <code>(lambda (ARGS) (or (PRED1 ARGS) (PRED2 ARGS) ...)</code>
+<ul class="org-ul">
+<li>例子1： <code>(funcall (-orfn 'cl-oddp (lambda (x) (if (numberp x) 1 2))) 20) =&gt; 1</code></li>
+<li>例子2： <code>(funcall (-orfn 'eq 'equal) 1 1) =&gt; t</code></li>
+</ul></li>
+<li><code>(-andfn &amp;rest PREDS)</code> ，返回一个函数，相当于 <code>(lambda (ARGS) (and (PRED1 ARGS) (PRED2 ARGS) ...)</code>
+<ul class="org-ul">
+<li>例子： <code>(-map (-andfn 'numberp 'cl-oddp) '(1 2)) =&gt; (t nil)</code></li>
+</ul></li>
+<li><code>(-iteratefn FN N)</code> ，返回一个函数，它会对参数迭代 FN N 次并返回结果
+<ul class="org-ul">
+<li>FN 要求是一元函数，若要迭代多元函数可以考虑使用 -applify 转换原函数</li>
+<li>例子1： <code>(funcall (-iteratefn (-partial '* 2) 4) 1) =&gt; 16</code></li>
+<li>例子2： <code>(funcall (-iteratefn '1+ 10 ) 1) =&gt; 11</code></li>
+</ul></li>
+<li><code>(-counter &amp;optional BEG END INC)</code> ，返回一个函数，每调用一次就返回上一次调用返回值加上 INC
+<ul class="org-ul">
+<li>初始返回值为 BEG，若返回值大于等于 END 则返回 nil</li>
+<li>若 END 为 nil，那么函数的返回值无上界</li>
+<li>例子： <code>(let ((a (-counter 1 10 1))) (-unfold (lambda (x) (let ((b (funcall a))) (and b (cons b x)))) nil)) =&gt; (1 2 3 4 5 6 7 8 9)</code></li>
+</ul></li>
+<li><code>(-prodfn &amp;rest FNS)</code> ，接受 N 个函数，返回接受长度为 N 的表作为参数，以表中对应位置的参数调用原先接受的函数，返回包含调用结果的表
+<ul class="org-ul">
+<li>例子： <code>(funcall (-prodfn 'list '1+) '(1 2)) =&gt; ((1) 3)</code></li>
+</ul></li>
+<li><code>(-fix FN LIST)</code> ，使用 FN 应用到 LIST 上，直到 FN 返回的结果表不变为止
+<ul class="org-ul">
+<li>对应宏是 <code>(--fix FORM LIST)</code></li>
+<li>FN 的结果会作为下一次调用的参数，它的参数和返回值都应该是表</li>
+<li>对于单参函数，LIST 可以是非表值</li>
+<li>例子1，稍加修改的冰雹数列： <code>(-fix (lambda (x) (if (eq x 1) 1 (if (cl-oddp x) (1+ (* 3 x)) (/ x 2)))) 7) =&gt; 1</code></li>
+</ul></li>
+<li><code>(-fixfn FN &amp;optional EQUAL-TEST HALT-TEST)</code> ，返回一个函数，可理解为求根函数生成器
+<ul class="org-ul">
+<li>FN 为一元函数，接受一个参数作为初始值</li>
+<li>当以下条件之一满足时函数会停止，其一是函数两次调用结果满足 EQUAL-TEST，其二是 HALT-TEST 被满足</li>
+<li>EQUAL-TSET 默认是 equal，在进行数值迭代可能需要使用近似判断函数</li>
+<li>HALT-TEST 默认是一个计数器，每迭代一次增加 1，当它的返回值达到 -fixin-max-iterations 时返回 t，这样可以避免无限迭代。若指定 HALT-TEST 函数的话，它应该是一个单参函数，传递给他的参数是当前的迭代值，若迭代仍需继续该函数需返回 nil</li>
+<li>例子，计算根号2： <code>(let ((a (-fixfn (lambda (x) (+ (/ x 2.0) (/ 1.0 x))) (lambda (x y) (&lt; (abs (- x y)) 0.001))))) (funcall a 1.0)) =&gt; 1.4142135623746899</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org7fd97a3" class="outline-3">
+<h3 id="org7fd97a3"><span class="section-number-3">16.4</span> threading macro</h3>
+<div class="outline-text-3" id="text-16-4">
+<p>
+threading macro，翻译过来的话应该是线程宏的意思，不过它和线程应该没有什么关系。在这个页面<sup><a id="fnr.7" class="footref" href="#fn.7">7</a></sup>中对线程宏的描述是： <i>Threading macros, also known as arrow macros, convert nested function calls into a linear flow of function calls, improving readability.</i> 使用线程宏的作用是将嵌套结构转化为线性结构从而增加可读性。
+</p>
+
+<p>
+以下宏是 dash 中实现的线程宏。由于函数文档过于简单，这里也参考了 clojure 文档中的内容。
+</p>
+
+<ul class="org-ul">
+<li><code>(-&gt; X &amp;optional FORM &amp;rest more)</code>
+<ul class="org-ul">
+<li><code>-&gt;</code> 被叫做 thread-first macro，它会将前一项插入到后一项的第二个位置。举个例子来说，假设前一项是 a，后一项是 (cons b)，那么插入后的结果就是 (cons a b)。第二个位置一般就是指函数或宏调用的第一参数，这大概就是它叫做 thread-first macro 的原因。</li>
+<li>X 会被插入 FORM 的第二位置，并求值得到结果。如果 more 不为空的话，上一步得到的结果会被插入到下一项的第二位置，这个过程会继续下去直到没有项以供继续调用。</li>
+<li>如果 FORM 不是表的话，它会被转换成 (FORM RESULT) 的形式，RESULT 是上一项的返回值，比如 (-&gt; 1 1+) 中的 1+ 会成为类似 (1+ x) 的形式。</li>
+<li>例子1： <code>(-&gt; 1 (cons 2) (cons 3)) =&gt; ((1 . 2) . 3)</code></li>
+<li>例子2： <code>(-&gt; "hello" (append "world" nil) (append "!" nil)) =&gt; (104 101 108 108 111 119 111 114 108 100 33)</code></li>
+<li>例子3： <code>(-&gt; '1 identity 1+) =&gt; 2</code></li>
+</ul></li>
+
+<li><code>(-&gt;&gt; X &amp;optional FORM &amp;rest more)</code>
+<ul class="org-ul">
+<li><code>-&gt;&gt;</code> 与 <code>-&gt;</code> 相似，不过它被称作 thread-last macro。前一结果会被放到后一项的尾部，相比于 <code>-&gt;</code> 它更适合用于映射函数。</li>
+<li>例子1： <code>(-&gt;&gt; 1 (cons 2) (cons 3)) =&gt; (3 2 . 1)</code></li>
+<li>例子2： <code>(-&gt;&gt; '(1 2 3) (-map '1+) (-reduce '*)) =&gt; 24</code></li>
+</ul></li>
+
+<li><code>(--&gt; X &amp;rest FORMS)</code>
+<ul class="org-ul">
+<li>相比于 <code>-&gt;</code> 和 <code>-&gt;&gt;</code> 它的形式更加灵活，可以通过 it 关键字来指定插入前一结果的位置</li>
+<li>例子1： <code>(--&gt; 1 (cons 2 it) (cons 3 it)) =&gt; (3 2 . 1)</code></li>
+<li>例子2： <code>(--&gt; '(1 2 3) (append '(3 4) it) (append '(5 6) it)) =&gt; (5 6 3 4 1 2 3)</code></li>
+<li>例子3： <code>(--&gt; '(1 2 3) identity (apply '+ it)) =&gt; 6</code></li>
+</ul></li>
+
+<li><code>(-as-&gt; VALUE VARIABLE &amp;rest FORMS)</code>
+<ul class="org-ul">
+<li>将 VALUE 绑定到 VARIABLE 上，在随后的 FORMS 中，每求值一个 FORM 就以返回值作为 VARIABLE 的新值，最后返回 VARIABLE 的值。</li>
+<li>例子： <code>(-as-&gt; 1 a (+ a 1) (+ a 2) (+ a 3)) =&gt; 7</code></li>
+</ul></li>
+
+<li><code>(-some-&gt; X &amp;optional FORM &amp;rest MORE)</code>
+<ul class="org-ul">
+<li>类似于 <code>-&gt;</code> ，若某一 FORM 返回 nil 则停止并返回 nil</li>
+<li>例子1： <code>(-some-&gt; 5 identity not 1+) =&gt; nil</code></li>
+<li>例子2： <code>(-some-&gt; 5 identity 1+) =&gt; 6</code></li>
+</ul></li>
+
+<li><code>(-some-&gt;&gt; X &amp;optional FORM &amp;rest MORE)</code>
+<ul class="org-ul">
+<li>类似于 -some-&gt; ，不过将前一项结果插入到后一项的最后</li>
+</ul></li>
+
+<li><code>(-some--&gt; EXPR &amp;rest FORMS)</code>
+<ul class="org-ul">
+<li>类似于 -some-&gt; ，不过可以使用 it 指定上一项的位置</li>
+</ul></li>
+
+<li><code>(-doto INIT &amp;rest FORMS)</code>
+<ul class="org-ul">
+<li>类似于 -as-&gt; ，不过没有变量名。前一项的值会被插入后一项的第二位置，最后一个 FORM 的返回值会成为表达式的返回值</li>
+<li>对应宏 <code>(--doto INIT &amp;rest FORMS)</code> ，可以通过 it 来指定该值</li>
+<li>例子1： <code>(-doto '(1 2 3) pop pop) =&gt; (3)</code></li>
+<li>例子2： <code>(-doto (cons 1 2) (setcar 3) (setcdr 4)) =&gt; (3 . 4)</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org8067610" class="outline-3">
+<h3 id="org8067610"><span class="section-number-3">16.5</span> binding macro</h3>
+<div class="outline-text-3" id="text-16-5">
+<ul class="org-ul">
+<li><code>(-let (VARLIST &amp;rest BODY)</code>
+<ul class="org-ul">
+<li>与 let 类似，但是带模式匹配，具体的匹配规则类似于 pcase，可参考 README</li>
+</ul></li>
+<li><code>(-let* (VARLIST &amp;rest BODY)</code>
+<ul class="org-ul">
+<li>类似于 let*，带模式匹配</li>
+</ul></li>
+<li><code>(-lambda (MATCH-FORM &amp;rest BODY)</code>
+<ul class="org-ul">
+<li>带模式匹配的 lambda 表达式</li>
+</ul></li>
+<li><code>(-setq (&amp;rest FORMS)</code>
+<ul class="org-ul">
+<li>带模式匹配的 setq</li>
+</ul></li>
+<li><code>(-if-let (VAR VAL) THEN &amp;rest ELSE)</code>
+<ul class="org-ul">
+<li>若 VAL 为非空值，则绑定到 VAR 上并执行 THEN，否则执行 ELSE</li>
+<li>绑定由 -let 完成</li>
+<li>对应宏是 <code>(--if-let (VAR VAL) THEN &amp;rest ELSE)</code></li>
+</ul></li>
+<li><code>(-if-let* (VARS-VALS THEN &amp;rest ELSE)</code>
+<ul class="org-ul">
+<li>VARS-VALS 可以是多个 变量-值 对</li>
+<li>若所有的 VALS 都是非空值，则完成绑定并求值 THEN，否则求值 ELSE</li>
+<li>绑定由 -let* 完成</li>
+</ul></li>
+<li><code>(-when-let (VAR VAL) &amp;rest BODY)</code>
+<ul class="org-ul">
+<li>若 VAL 为非空值，则绑定到 VAR 上并对 BODY 求值</li>
+<li>使用 -let 完成绑定</li>
+<li>对应宏是 <code>(--when-let (VAL &amp;rest BODY)</code></li>
+</ul></li>
+<li><code>(-when-let* (VARS-VALS &amp;rest BODY)</code>
+<ul class="org-ul">
+<li>若 VALS 都为非空值，完成对 VARS 的绑定并对 BODY 求值</li>
+<li>绑定由 -let* 完成</li>
+</ul></li>
+</ul>
+
+<p>
+由于以上结构大多用在代码块中，一行很难写下示例，所以没有给出使用例。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgf30305e" class="outline-2">
+<h2 id="orgf30305e"><span class="section-number-2">17</span> 后记</h2>
+<div class="outline-text-2" id="text-17">
+<p>
+断断续续差不多写了一个月，这篇文章总算是写完了。其间的过程算是有点曲折。
+</p>
+
+<p>
+在刚开始写这篇文章时，我的方法是先分好类，再根据分类在函数文档中寻找可以归为该类的函数。这样带来的问题是每分一个类就得重新看一遍文档，以避免遗漏。如果有 n 个分类的话，这样做的时间复杂度就是 O(n^2)，我在整理到大约 50 个函数时感觉难以进行，文档并不是线性列出所有的函数，阅读很容易出现遗漏，遂放弃。不过在大约一周后我相当了另一种方法，那就是把文档中的所有函数列出来做成表格，根据函数来找分类而不是根据分类来找函数，每归类一个函数就在他旁边打个勾。由于根据函数找分类相对来说容易得多，若函数个数为 n，时间复杂度差不多就是 O(n)。只要把找到的函数过一遍就可以完成分类了。
+</p>
+
+<p>
+org-mode 提供的 GTD 功能让我可以方便地给函数打勾，就像这样：
+</p>
+
+
+<div class="figure">
+<p><img src="./1.png" alt="1.png" />
+</p>
+</div>
+
+<p>
+对我来说，这篇文章的意义就是给我提供了一个查找表函数的方便页面。对于作为读者的你而言，我能想到的最大的作用就是在阅读晦涩的函数文档时说不定能在本文中找到一些直白的解释或例子。如果你想要熟悉常用的 list 函数的话，可以试一试本文中列出的一些函数。
+</p>
+
+<p>
+感谢你的阅读，国庆快乐。
+</p>
+
+<p>
+这回是真的暂时再见了（笑）
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzczMDczNTQw.png" alt="load failed"></div><div class="yyimgcomment">Remilia Scarlet</div>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara"><a href="https://en.wikipedia.org/wiki/Side_effect_(computer_science)">https://en.wikipedia.org/wiki/Side_effect_(computer_science)</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara"><a href="https://en.wikipedia.org/wiki/Object_copying">https://en.wikipedia.org/wiki/Object_copying</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara"><a href="https://stackoverflow.com/questions/184710/what-is-the-difference-between-a-deep-copy-and-a-shallow-copy">https://stackoverflow.com/questions/184710/what-is-the-difference-between-a-deep-copy-and-a-shallow-copy</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara"><a href="https://github.com/magnars/dash.el">https://github.com/magnars/dash.el</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara"><a href="https://franz.com/support/documentation/ansicl.94/dictentr/carcdrca.htm">https://franz.com/support/documentation/ansicl.94/dictentr/carcdrca.htm</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.6" class="footnum" href="#fnr.6">6</a></sup> <div class="footpara"><p class="footpara"><a href="https://github.com/magnars/dash.el">https://github.com/magnars/dash.el</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.7" class="footnum" href="#fnr.7">7</a></sup> <div class="footpara"><p class="footpara"><a href="https://clojure.org/guides/threading_macros">https://clojure.org/guides/threading_macros</a></p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2021-09-04 Sat 00:00</p> <p>Last modified: 2021-10-04 Mon 18:48</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
