@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-10-25 Mon 20:54 -->
+<!-- 2021-10-27 Wed 13:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>蝴蝶效应与 emacs 动画 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzg1Nzc4NTQ1.jpg" alt="load failed"></div></title>
@@ -97,19 +97,19 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org282a81d">1. emacs 与蝴蝶效应</a></li>
-<li><a href="#orge9c7c62">2. emacs 的 animate.el</a>
+<li><a href="#orge0b453f">1. emacs 与蝴蝶效应</a></li>
+<li><a href="#org0eb804e">2. emacs 的 animate.el</a>
 <ul>
-<li><a href="#org274f9cc">2.1. 什么是动画</a></li>
-<li><a href="#org5e1a827">2.2. animation.el 的具体实现</a></li>
+<li><a href="#orgdd6a96e">2.1. 什么是动画</a></li>
+<li><a href="#org065ca98">2.2. animation.el 的具体实现</a></li>
 </ul>
 </li>
-<li><a href="#orge397a7b">3. 使用 emacs 的 buffer 显示字符流</a>
+<li><a href="#orga435f32">3. 使用 emacs 的 buffer 显示字符流</a>
 <ul>
-<li><a href="#orgea61939">3.1. 如何将视频转为文本</a></li>
-<li><a href="#org8d4e796">3.2. 如何在 emacs 中“播放”文本</a></li>
-<li><a href="#org9cd6e82">3.3. 一个五年前的 bad apple on emacs</a></li>
-<li><a href="#orge7a0929">3.4. 总结</a></li>
+<li><a href="#orgc927119">3.1. 如何将视频转为文本</a></li>
+<li><a href="#org207ad61">3.2. 如何在 emacs 中“播放”文本</a></li>
+<li><a href="#org89c6687">3.3. 一个五年前的 bad apple on emacs</a></li>
+<li><a href="#org4596a69">3.4. 总结</a></li>
 </ul>
 </li>
 </ul>
@@ -123,8 +123,8 @@ for the JavaScript code in this tag.
 本文使用的编程环境是 emacs 27.1 on windows
 </p>
 
-<div id="outline-container-org282a81d" class="outline-2">
-<h2 id="org282a81d"><span class="section-number-2">1</span> emacs 与蝴蝶效应</h2>
+<div id="outline-container-orge0b453f" class="outline-2">
+<h2 id="orge0b453f"><span class="section-number-2">1</span> emacs 与蝴蝶效应</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 从 emacs-china 的<a href="https://emacs-china.org/t/real-programmers-use-butterfly/15599">这个帖子</a>我了解到了 emacs 还提供了 butterfly 这个奇怪又有趣的命令，它是针对下面的 xkcd 漫画<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>的：
@@ -193,8 +193,8 @@ for the JavaScript code in this tag.
 </div>
 
 
-<div id="outline-container-orge9c7c62" class="outline-2">
-<h2 id="orge9c7c62"><span class="section-number-2">2</span> emacs 的 animate.el</h2>
+<div id="outline-container-org0eb804e" class="outline-2">
+<h2 id="org0eb804e"><span class="section-number-2">2</span> emacs 的 animate.el</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 这个库的第一次 commit 时间是 2001 年 1 月 23 日，它的主要功能是动画显示“祝你生日快乐”，也就是在 buffer 中输出一些好玩的诗句。感兴趣的同学可以试试 <code>M-x animate-birthday-present</code> ，然后输入你的名字，它会在 buffer 中输出一些祝福，字符是从四面八方飞过来再摆放好的。
@@ -226,8 +226,8 @@ Include-Yy
 </p>
 </div>
 
-<div id="outline-container-org274f9cc" class="outline-3">
-<h3 id="org274f9cc"><span class="section-number-3">2.1</span> 什么是动画</h3>
+<div id="outline-container-orgdd6a96e" class="outline-3">
+<h3 id="orgdd6a96e"><span class="section-number-3">2.1</span> 什么是动画</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 在正式开始之前，我们不妨来了解一下动画（animation）这个词的含义。
@@ -292,16 +292,16 @@ Include-Yy
 </div>
 
 
-<div id="outline-container-org5e1a827" class="outline-3">
-<h3 id="org5e1a827"><span class="section-number-3">2.2</span> animation.el 的具体实现</h3>
+<div id="outline-container-org065ca98" class="outline-3">
+<h3 id="org065ca98"><span class="section-number-3">2.2</span> animation.el 的具体实现</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 在开始具体的代码分析之前，我们首先要知道这个库到底干了什么。在上面的 <code>butterfly</code> 中我们看到字符从窗口的各个位置“飞”到了它的最终位置，并组成了一句话。其实这也就是这个库的全部功能了：把一个字符串打散到 buffer 各处，然后让它们飞回约定的位置。下面就“打散”和“飞回”两部分来分析代码。
 </p>
 </div>
 
-<div id="outline-container-org43899c5" class="outline-4">
-<h4 id="org43899c5"><span class="section-number-4">2.2.1</span> 如何打散字符串</h4>
+<div id="outline-container-org6907ca6" class="outline-4">
+<h4 id="org6907ca6"><span class="section-number-4">2.2.1</span> 如何打散字符串</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 animate.el 提供了 animate-initialize 这个函数来打散字符串。它接受一个字符串和两个整数作为参数，并返回包括打散字符信息的表。它的第二参数和第三参数分别是字符串首字符的垂直位置和水平位置。字符串中的首字符的最终位置就是 (VPOS,HPOS)，它后面的字符就是 (VPOS, HPOS + 1)，后面依次水平坐标加一。至于它们的初始位置则由随机函数得到，这个位置与窗口的大小有关。
@@ -360,8 +360,8 @@ animate.el 提供了 animate-initialize 这个函数来打散字符串。它接�
 </div>
 
 
-<div id="outline-container-orgb89bf56" class="outline-4">
-<h4 id="orgb89bf56"><span class="section-number-4">2.2.2</span> 如何动态“移动字符”</h4>
+<div id="outline-container-org33631c9" class="outline-4">
+<h4 id="org33631c9"><span class="section-number-4">2.2.2</span> 如何动态“移动字符”</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 通过随机函数，我们就得到了各字符的起始坐标和终止坐标，接下来就要将字符从初始位置移动到终止位置。移动的方式是多种多样的，animate.el 选择了最简单的方式，即沿直线从一端到另一端。要体现出移动过程的话，就需要在直线上多次绘制字符，直到到达目的地为止。若有两点 \(x1, y1 \) 和 \(x2, y2 \) ，那么我们可以用中间点到初始点的距离与线段长的比来表示它在线段上的为止。若用 \(\alpha \) 表示比例，则有：
@@ -394,8 +394,8 @@ animate.el 提供了 animate-initialize 这个函数来打散字符串。它接�
 </div>
 
 
-<div id="outline-container-org7ac44a0" class="outline-4">
-<h4 id="org7ac44a0"><span class="section-number-4">2.2.3</span> 高级的接口函数</h4>
+<div id="outline-container-orgd5ce2f6" class="outline-4">
+<h4 id="orgd5ce2f6"><span class="section-number-4">2.2.3</span> 高级的接口函数</h4>
 <div class="outline-text-4" id="text-2-2-3">
 <p>
 利用上面的这些函数就足够我们写出从零散字符到通顺字符串的动画效果了，比如这样：
@@ -526,8 +526,8 @@ animate.el 中的 <code>animate-string</code> 函数巧妙地避免了这个问�
 </div>
 
 
-<div id="outline-container-org8e99cb6" class="outline-4">
-<h4 id="org8e99cb6"><span class="section-number-4">2.2.4</span> 关于上面函数的一些改进</h4>
+<div id="outline-container-org6cf8c34" class="outline-4">
+<h4 id="org6cf8c34"><span class="section-number-4">2.2.4</span> 关于上面函数的一些改进</h4>
 <div class="outline-text-4" id="text-2-2-4">
 <p>
 使用 <code>animate-sequence</code> 虽然可以方便地显示多个字符串，但是它内部调用的是 <code>animate-string</code> ，所以它的动画是由每个字符串的单独动画组成的，只有一个字符串的动画完成后才会进行下一个字符串的动画显示。这个函数是没有办法达到我上面的《静夜思》一下子显示所有字符的显示效果的。同时， <code>animate-string</code> 的间隔时间固定是 50 毫秒，它没有办法通过函数参数来变更。针对这两个问题，我们可以通过添加新的高级函数来解决。以下是我编写的几个辅助函数，它们包括：
@@ -648,8 +648,8 @@ animate.el 中的 <code>animate-string</code> 函数巧妙地避免了这个问�
 
 
 
-<div id="outline-container-orge397a7b" class="outline-2">
-<h2 id="orge397a7b"><span class="section-number-2">3</span> 使用 emacs 的 buffer 显示字符流</h2>
+<div id="outline-container-orga435f32" class="outline-2">
+<h2 id="orga435f32"><span class="section-number-2">3</span> 使用 emacs 的 buffer 显示字符流</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 在上面的 animate 一节中，我简单介绍了动画，对库中的函数实现做了一些解读，并对这个库做了一些简单但有趣的扩展。但是，光凭这个简单的库是实现不了比较复杂的动画效果的，毕竟它只能将字符串随机打散并按照直线运动复原。
@@ -671,8 +671,8 @@ animate.el 中的 <code>animate-string</code> 函数巧妙地避免了这个问�
 </div>
 
 
-<div id="outline-container-orgea61939" class="outline-3">
-<h3 id="orgea61939"><span class="section-number-3">3.1</span> 如何将视频转为文本</h3>
+<div id="outline-container-orgc927119" class="outline-3">
+<h3 id="orgc927119"><span class="section-number-3">3.1</span> 如何将视频转为文本</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 首先，我们要获取一个视频，这里我使用的是 bilibili 上的 bad apple<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup>。首先将它下载下来得到 mp4 格式的视频，随后使用 ffmpeg 对其进行切片，由于原视频帧率为 30 fps，使用以下指令<sup><a id="fnr.5" class="footref" href="#fn.5">5</a></sup>可以获取一张一张的 png 格式图片：
@@ -794,8 +794,8 @@ f.close()
 </div>
 
 
-<div id="outline-container-org8d4e796" class="outline-3">
-<h3 id="org8d4e796"><span class="section-number-3">3.2</span> 如何在 emacs 中“播放”文本</h3>
+<div id="outline-container-org207ad61" class="outline-3">
+<h3 id="org207ad61"><span class="section-number-3">3.2</span> 如何在 emacs 中“播放”文本</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 实际上到了这里要做的工作基本上已经做完了，只剩下播放字符串这一任务了。在 buffer 中显示不断变化的字符画的实现有多种方式，我想到的是在输出后擦除所有字符后再次输入，不过这样会导致非常明显的屏幕闪烁，非常影响观感。参考<a href="https://github.com/y-usuzumi/emacs-bad-apple/blob/master/badapple.el">这个 github 项目</a>，我发现只需要不断向下翻页就可以实现平滑的动画了，非要说的话记事本也可以做到，但是无法通过编程来实现整数倍的翻页。以下是实现代码：
@@ -819,8 +819,8 @@ f.close()
 </div>
 
 
-<div id="outline-container-org9cd6e82" class="outline-3">
-<h3 id="org9cd6e82"><span class="section-number-3">3.3</span> 一个五年前的 bad apple on emacs</h3>
+<div id="outline-container-org89c6687" class="outline-3">
+<h3 id="org89c6687"><span class="section-number-3">3.3</span> 一个五年前的 bad apple on emacs</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 上面代码最终得到的动画我上传到了 bilibili，也就是<a href="https://www.bilibili.com/video/BV1Br4y117S9/">这里</a>，感兴趣的同学可以看一看。另外，上面给的那个 github 项目早在 2016 年就有了，而且还有<a href="https://www.bilibili.com/video/av2393380/">演示视频</a>（不过他的项目里面没有具体介绍视频得到字符本文的方法，我这也不算白做了一遍XD）。
@@ -837,8 +837,8 @@ f.close()
 </div>
 
 
-<div id="outline-container-orge7a0929" class="outline-3">
-<h3 id="orge7a0929"><span class="section-number-3">3.4</span> 总结</h3>
+<div id="outline-container-org4596a69" class="outline-3">
+<h3 id="org4596a69"><span class="section-number-3">3.4</span> 总结</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 根据实际的动画效果，可以考虑在下面几个方向上做做改进：
@@ -870,6 +870,14 @@ f.close()
 <p>
 上面列出的一些问题等到我有时间的时候再去想想，毕竟最主要的工作已经完成了 —— 播放 bad apple。
 </p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzUwMjU1MzQ1.jpg" alt="load failed"></div><div class="yyimgcomment">flandre scarlet</div>
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzkyMzM1OA==.jpg" alt="load failed"></div>
+</p>
 </div>
 </div>
 </div>
@@ -896,7 +904,7 @@ f.close()
 </div></div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-10-23 Sat 22:44</p> <p>Last modified: 2021-10-25 Mon 20:54</p>
+<p>Create Date: 2021-10-23 Sat 22:44</p> <p>Last modified: 2021-10-27 Wed 13:08</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
