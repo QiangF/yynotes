@@ -1,0 +1,938 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-10-31 周日 17:19 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>emacs record and struct <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzQ1ODc1OTcy.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="content">
+<h1 class="title">emacs record and struct <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzQ1ODc1OTcy.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgda397c5">1. record</a>
+<ul>
+<li><a href="#orga628727">1.1. 关于 type-of 的一点补充</a></li>
+</ul>
+</li>
+<li><a href="#org6ddabfd">2. cl-defstruct</a>
+<ul>
+<li><a href="#orga5dbb48">2.1. *</a></li>
+<li><a href="#org95deb18">2.2. 结构的可用选项</a></li>
+<li><a href="#org3dbcdc8">2.3. 一些相关的函数</a></li>
+</ul>
+</li>
+<li><a href="#org944588e">3. 对 cl-defstruct 实现的分析</a>
+<ul>
+<li><a href="#org798f780">3.1. 变量的初始化</a></li>
+<li><a href="#org3d0983e">3.2. 对结构选项的处理</a></li>
+<li><a href="#orgd28ee21">3.3. 对 <code>:include</code> 的处理</a></li>
+<li><a href="#orgb88a8e2">3.4. 上一节示例代码中存在的疑点</a></li>
+<li><a href="#orgec6c19c">3.5. 各函数的生成代码</a></li>
+</ul>
+</li>
+<li><a href="#orgf88b428">4. 使用结构的好处</a></li>
+<li><a href="#org5a5c07d">5. 由 struct 到 eieio 之前的准备</a></li>
+</ul>
+</div>
+</div>
+<p>
+本文的目的是对 elisp 中的结构（也叫 record）做一个介绍，顺便介绍在此之上的 cl-defstruct。本来想着介绍一下 elisp 的面向对象系统 —— eieio，但是我在面向对象编程方面的经验少的可怜，这部分留到之后的文章中吧。
+</p>
+
+<p>
+本文中的代码在 emacs on windows 27.1 下可以正常运行。参考的文档版本是 emacs 27.2
+</p>
+
+<div id="outline-container-orgda397c5" class="outline-2">
+<h2 id="orgda397c5"><span class="section-number-2">1</span> record</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+record 可以用来创建 emacs 中没有的类型的对象。它被用作 <code>cl-defstruct</code> 和 eieio 中 <code>defclass</code> 对象的内部表示。
+</p>
+
+<p>
+record 和 vector 非常像（但并不是 vector），可以使用 aref 来访问它的 slot（段），使用 <code>copy-sequence</code> 来获取浅拷贝。它的第一个 slot 存储了类型，可以使用 <code>type-of</code> 获取。根据文档，在当前实现中（emacs 27.2），一个 record 最多可以有 4096 个 slot。
+</p>
+
+<p>
+record 的类型必须是一个 symbol 或类型描述符（type descriptor）。类型描述符也是一个 record，它包含了类型的相关信息。它的位于 1 序号位置的 slot 必须是表明类型的 symbol，函数 <code>type-of</code> 根据这个 slot 来获取 record 的类型。类型描述符的其他 slot 用于扩展。
+</p>
+
+<p>
+以下代码可以说明类型描述符的使用：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(type-of #s(a 1 2)) =&gt; a
+(type-of #s(#s(www h e) a b)) =&gt; h
+</pre>
+</div>
+
+<p>
+record 的打印表示是 <code>#s</code> 加上各 slot 的打印表示。record 是自求值的（self-evaluating form），对某个 record 求值会得到与之相同的 record。
+</p>
+
+<p>
+为了避免和其他类型出现名字冲突，定义新类型的 Lisp 程序应该使用 package 的命名规范。
+</p>
+
+<p>
+与 record 相关的函数就三个，判断对象是否为 record 的 <code>recordp</code> 和用于创建 record 的 <code>record</code> 与 <code>make-record</code> 。其中， <code>record</code> 和 <code>make-record</code> 的关系就像是 <code>list</code> 和 <code>make-list</code> 一样。
+</p>
+
+<p>
+下面是一些简单的例子，用作对上面文字的简单说明：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(recordp #s(a 1)) =&gt; t
+(recordp [a 1]) =&gt; nil
+
+(record 'yy-record 1 2 3) =&gt; #s(yy-record 1 2 3)
+(make-record 'yy-record 5 0) =&gt; #s(yy-record 0 0 0 0 0)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orga628727" class="outline-3">
+<h3 id="orga628727"><span class="section-number-3">1.1</span> 关于 type-of 的一点补充</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+<code>type-of</code> 这个函数可以用来判断对象的类型，它返回对象对应类型的符号。这里给出一点例子来说明它的使用。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(type-of 1) =&gt; integer
+(type-of 1.0) =&gt; float
+(type-of 1.0e+INF) =&gt; float
+(type-of -1.0e+INF) =&gt; float
+(type-of 0.0e+NaN) =&gt; float
+(type-of -0.0e+NaN) =&gt; float
+(type-of ?&#25105;) =&gt; integer
+(type-of ?a) =&gt; integer
+(type-of 'include-yy) =&gt; symbol
+(type-of 'quote) =&gt; symbol
+(type-of <span style="color: #ff1f8b;">""</span>) =&gt; string
+(type-of <span style="color: #ff1f8b;">"hello world"</span>) =&gt; string
+(type-of []) =&gt; vector
+(type-of [1 2 3]) =&gt; vector
+(type-of (make-char-table 'abc)) =&gt; char-table
+(type-of (make-bool-vector 10 0)) =&gt; bool-vector
+(type-of nil) =&gt; symbol
+(type-of t) =&gt; symbol
+(type-of ()) =&gt; symbol
+(type-of '(1 . 2)) =&gt; cons
+(type-of '(1 2)) =&gt; cons
+(type-of (make-hash-table)) =&gt; hash-table
+(type-of (symbol-function 'cons)) =&gt; subr
+(type-of (symbol-function 'cl-mapcar)) =&gt; compiled-function
+(type-of (<span style="color: #00af00;">lambda</span>(x) x)) =&gt; cons
+(type-of (make-record 'yyre 10 0)) =&gt; yyre
+(type-of (make-record #s(tt yy) 10 0)) =&gt; yy
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org6ddabfd" class="outline-2">
+<h2 id="org6ddabfd"><span class="section-number-2">2</span> cl-defstruct</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orga5dbb48" class="outline-3">
+<h3 id="orga5dbb48"><span class="section-number-3">2.1</span> *</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+既然这个宏的名字有 cl 前缀，那它自然是从 common lisp 中借过来的了。它提供了一种定义结构体的通用方法。在 r6rs 中有一个叫做 <code>define-record-type</code> 的宏（或者说 syntax extension）和 cl-defstruct 很像，它大概也是受到了 CL 的影响。 <code>define-record-type</code> 最早出现在 SRFI9<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>中。
+</p>
+
+<p>
+<code>cl-defstruct</code> 使用 record 作为内部的数据对象表示方法。emacs 早先版本中没有 record 的时候使用的是另外的表示方法，使用旧版本 emacs 编译的代码中含有 <code>cl-defstruct</code> 的部分不会使用 record。emacs 提供了一个叫做 <code>cl-old-struct-compat-mode</code> 的函数来兼容先前版本，若编译码中含有旧的 <code>cl-defstruct</code> ，就会激活该模式来提供兼容支持。
+</p>
+
+<p>
+<code>cl-defstruct</code> 的原型是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">name</span> slots ...)
+</pre>
+</div>
+
+<p>
+其中 name 是要定义结构的名称，slots 是结构各个 slot 对应的选项。在求值后， <code>cl-defstruct</code> 默认会为你生成一些函数： <code>make-name</code> 可以用来构建新的类型为 name 的对象， <code>copy-name</code> 可以获取某个 name 对象的浅拷贝， <code>name-p</code> 可以判断某个对象是否为 name 结构， <code>name-{slot-name}</code> 可以获取某个 name 对象的某 slot 的值。使用 <code>(setf (name-{slot-name} obj) newval)</code> 可以为对象的某个 slot 赋值。
+</p>
+
+<p>
+<code>make-name</code> 接受以 slots name 作为关键字的关键字参数，若调用函数时存在没有指定的 slot，那么得到的对象中该 slot 的值为 nil。各 getter 函数在获取 slot 值之前会判断对象的类型，若类型不符则引发错误。
+</p>
+
+<p>
+下面的例子可以说明上述函数的使用：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">website</span> domain ip)
+(<span style="color: #00af00;">setq</span> a (make-website <span style="color: #b218b2;">:domain</span> <span style="color: #ff1f8b;">"baidu.com"</span> <span style="color: #b218b2;">:ip</span> <span style="color: #ff1f8b;">"220.181.38.148"</span>))
+(website-domain a) =&gt; <span style="color: #ff1f8b;">"baidu.com"</span>
+(website-ip a) =&gt; <span style="color: #ff1f8b;">"220.181.38.148"</span>
+(<span style="color: #00af00;">setq</span> b (copy-website a)) =&gt; #s(website <span style="color: #ff1f8b;">"baidu.com"</span> <span style="color: #ff1f8b;">"220.181.38.148"</span>)
+
+(<span style="color: #00af00;">setq</span> c (make-website <span style="color: #b218b2;">:domain</span> <span style="color: #ff1f8b;">"zhihu.com"</span>)) =&gt; #s(website <span style="color: #ff1f8b;">"zhihu.com"</span> nil)
+(<span style="color: #00af00;">setf</span> (website-ip c) <span style="color: #ff1f8b;">"103.41.167.234"</span>)
+c =&gt; #s(website <span style="color: #ff1f8b;">"zhihu.com"</span> <span style="color: #ff1f8b;">"103.41.167.234"</span>)
+</pre>
+</div>
+
+<p>
+<code>cl-defstruct</code> 的 slot 除了是单个 slot-name 外，还可以是 <code>(slot-name default-value slot-options ...)</code> 的形式。 <code>default-value</code> 是一个表达式，每当创建实例但未指定 slot-name 的值时对该表达式求值，使用求值结果作为默认值。 <code>slot-options</code> 可以是 <code>:read-only</code> ， <code>:type</code> 和 <code>:documentation</code> 三个，其他的选项会被忽略掉。 <code>:raed-only</code> 表示该 slot 的值在对象创建时就确定，且随后不能被 setf 修改。 <code>:type</code> 用来指定 slot 的值类型，不过对于动态类型的 elisp 大概就图一乐。 <code>:documentation</code> 是描述 slot 的字符串。
+</p>
+
+<p>
+使用 list 形式的 slot，我们可以改进上面的代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">website3</span> (domain <span style="color: #ff1f8b;">""</span> <span style="color: #b218b2;">:type</span> string <span style="color: #b218b2;">:documentation</span> <span style="color: #cc0000;">"domain of webiste"</span>)
+                       (ip <span style="color: #ff1f8b;">""</span> <span style="color: #b218b2;">:type</span> string <span style="color: #b218b2;">:documentation</span> <span style="color: #cc0000;">"ip of host"</span>))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org95deb18" class="outline-3">
+<h3 id="org95deb18"><span class="section-number-3">2.2</span> 结构的可用选项</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+除了说 slot 具有选项外，整个结构也有一些关键字可用。它与 slot 的选项类似，以单个符号或包括选项的表出现。
+</p>
+
+<p>
+以下选项是可用的：
+</p>
+
+<ul class="org-ul">
+<li><code>:conc-name</code> ，用来指定 getter 函数的前缀名。默认前缀名是结构名加上 <code>-</code> 。
+<ul class="org-ul">
+<li>如果指定 nil，getter 函数名就是各 slot 的名字</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yyyy</span> (<span style="color: #b218b2;">:conc-name</span> y4-)) a b c)
+(y4-a (make-yyyy <span style="color: #b218b2;">:a</span> 1)) =&gt; 1
+
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yyyyy</span> (<span style="color: #b218b2;">:conc-name</span> nil)) yy-a b c)
+(yy-a (make-yyyyy <span style="color: #b218b2;">:yy-a</span> 1)) =&gt; 1
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>:constructor</code> 用来指定构造函数的名字，它可以多次使用来指定不同的构造函数。它有两种用法：
+<ul class="org-ul">
+<li>简单的就是 <code>(:constructor new-name)</code> ，可以使用 <code>new-name</code> 而不是 <code>make-{structname}</code> 来作为构造函数名。如果指定 nil，那就不生成默认的构造函数。如果有多个简单形式的 <code>:constructor</code> ，则取最后一个来作为构造函数名</li>
+<li>更复杂的用法则是指定构造名和相应的参数表。参数表是 CL 风格的，即可用 &amp;optional，&amp;rest，&amp;key 和 &amp;aux。参数表中与 slot 名字对应的参数会将它的值赋给对应的 slot。若某 slot 名字没有出现在参数表中，它在对象中的值就是 slot 指定的默认值或 nil。若对应于某 slot 的 &amp;optional 或 &amp;key 参数被忽略了，slot 的值就是 &amp;optional 或 &amp;key 的默认值或 slot 的默认值</li>
+</ul></li>
+</ul>
+
+<p>
+以下例子可以说明上面的用法：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">y6</span> (<span style="color: #b218b2;">:constructor</span> y6-make)) a b c)
+(y6-a (y6-make <span style="color: #b218b2;">:a</span> 1)) =&gt; 1
+(y6-a (make-y6 <span style="color: #b218b2;">:a</span> 1)) =&gt; Debugger entered--Lisp error: (void-function make-y6)
+
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">ytwo</span> (<span style="color: #b218b2;">:constructor</span> ytwo-make)
+                    (<span style="color: #b218b2;">:constructor</span> ytwo-ekam))
+  a b)
+(ytwo-ekam <span style="color: #b218b2;">:a</span> 1) =&gt; #s(ytwo 1 nil)
+(ytwo-make <span style="color: #b218b2;">:a</span> 1) =&gt; Debugger entered--Lisp error: (void-function ytwo-make)
+
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">y7</span> (<span style="color: #b218b2;">:constructor</span> nil)
+                  (<span style="color: #b218b2;">:constructor</span> y7-c1 (a b c))
+                  (<span style="color: #b218b2;">:constructor</span> y7-c2 (<span style="color: #18b2b2;">&amp;key</span> a b c))
+                  (<span style="color: #b218b2;">:constructor</span> y7-c3 (x y z <span style="color: #18b2b2;">&amp;aux</span> (a x) (b y) (c z)))
+                  (<span style="color: #b218b2;">:constructor</span> y7-c4 (a <span style="color: #18b2b2;">&amp;optional</span> (b (+ a 1)) (c 0)))
+                  (<span style="color: #b218b2;">:constructor</span> y7-c5 (b a <span style="color: #18b2b2;">&amp;rest</span> c0 <span style="color: #18b2b2;">&amp;aux</span> (c (car c0)))))
+  a b c)
+
+(make-y7) =&gt; Debugger entered--Lisp error: (void-function make-y7)
+(y7-c1 1 2 3) =&gt; #s(y7 1 2 3)
+(y7-c2 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; #s(y7 1 2 3)
+(y7-c3 1 2 3) =&gt; #s(y7 1 2 3)
+(y7-c4 1) =&gt; #s(y7 1 2 0)
+(y7-c4 1 0) =&gt; #s(y7 1 0 0)
+(y7-c4 1 3 3) =&gt; #s(y7 1 3 3)
+(y7-c5 1 2) =&gt; #s(y7 2 1 nil)
+(y7-c5 1 2 3 4) =&gt; #s(y7 2 1 3)
+
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">y8</span> (<span style="color: #b218b2;">:constructor</span> y8-c (a <span style="color: #18b2b2;">&amp;optional</span> b)))
+  a (b 123 <span style="color: #ff1f8b;">"hhh"</span>))
+
+(y8-c 1) =&gt; #s(y8 1 123)
+(y8-c 1 2) =&gt; #s(y8 1 2)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>:copier</code> ，为浅拷贝函数提供一个名字。默认情况下是 <code>copy-{name}</code>
+<ul class="org-ul">
+<li>若指定 nil 则不生成默认拷贝函数（拷贝函数使用 copy-sequence 实现）</li>
+</ul></li>
+
+<li><code>:predicate</code> ，为该结构的判断谓词提供一个名字，默认情况下是 <code>{name}-p</code>
+<ul class="org-ul">
+<li>若指定 nil 则不会生成谓词函数</li>
+<li>如果使用了 <code>:type</code> 且没有指定 <code>:named</code> 选项的话也会没有谓词函数</li>
+<li><code>cl-typep</code> 接受一个值和类型来判断值是否为该类型。它会使用 <code>typename-p</code> 来判断是否为该类型。若使用 <code>:predicate</code> 指定了其他的谓词名字， <code>cl-typep</code> 就用不了了。</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">example of common use</span>
+(cl-typep 'a 'atom) =&gt; t
+(<span style="color: #00af00;">and</span> (cl-typep nil 'atom) (cl-typep nil 'list)) =&gt; t
+(cl-typep 'a 'symbol) =&gt; t
+(cl-typep 1 'integer) =&gt; t
+(cl-typep 1.0 'float) =&gt; t
+(cl-typep 1 'number) =&gt; t
+(cl-typep ?a 'character) =&gt; t
+(cl-typep <span style="color: #ff1f8b;">"abc"</span> 'string) =&gt; t
+(cl-typep [1 2] 'vector) =&gt; t
+(cl-typep [] 'array) =&gt; t
+(cl-typep '(1) 'list) =&gt; t
+(cl-typep '(1 2) 'cons) =&gt; t
+(cl-typep [1 2 3] 'sequence) =&gt; t
+(cl-typep (make-hash-table) 'hash-table) =&gt; t
+(cl-typep #s(1 2) 'record) =&gt; t
+
+<span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">cl-typep with struct</span>
+(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">yy-9</span> a)
+(cl-typep (make-yy-9 <span style="color: #b218b2;">:a</span> 1) 'yy-9) =&gt; t
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-11</span> (<span style="color: #b218b2;">:predicate</span> huhu)) a)
+(cl-typep (make-yy-11 <span style="color: #b218b2;">:a</span> 1) 'yy-11) =&gt; t
+(cl-typep (make-yy-9 <span style="color: #b218b2;">:a</span> 1) 'yy-11) =&gt; nil
+</pre>
+</div>
+
+<p>
+不过就例子中定义的 yy-11 来看，指定了其他名字作为谓词， <code>cl-typep</code> 也可以正常工作。可能需要了解一下 <code>cl-typep</code> 的具体实现。
+</p>
+
+<ul class="org-ul">
+<li><code>:include</code> ，可以将其他结构中的 slot 包含到该结构中，类似于 C++ 中的继承操作。它接受一个结构作为父结构。父结构的 getter 函数可以用在子结构上
+<ul class="org-ul">
+<li>如果 <code>:include</code> 中结构名后面还有参数，那么它会替换掉原结构中同名 slot 的选项</li>
+<li>该选项只能使用一次，这也就是说只允许“单继承”</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">yy-father</span> a (b 0) c)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-son</span> (<span style="color: #b218b2;">:include</span> yy-father (b 1)))
+  d e)
+(yy-father-a (make-yy-son <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3 <span style="color: #b218b2;">:d</span> 4 <span style="color: #b218b2;">:e</span> 5)) =&gt; 1
+(yy-father-b (make-yy-son)) =&gt; 1
+(yy-father-b (make-yy-father)) =&gt; 0
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>:noinline</code> ，使用该选项指示结构的函数不会是内联（inline）的，即使一般情况下是内联的</li>
+
+<li><code>:type</code> ，使用它可以指定结构的内部表示方式，若不使用则默认使用 record。它只能是 vector 或 list
+<ul class="org-ul">
+<li>使用 record 或 vector 便于对 slot 的更快访问，但是创建速度相对比较慢。使用 list 创建更快，但是访问 slot 会花费更多时间</li>
+</ul></li>
+
+<li><code>:named</code> ，它不接受参数，一般和 <code>:type</code> 连用，表明在对象中加入结构 tag 信息
+<ul class="org-ul">
+<li>使用它会导致类型 tag 放在内部表示对象的最前面，举例来说，若指定类型为 vector，且指定了 :named，对于类型 yyy，它的向量结构就是 <code>[yyy slots...]</code></li>
+<li>使用 <code>:type</code> 而不使用 <code>:named</code> 会导致结构中不含类型 tag，也就是说创建的结构是没有类型 tag 的纯表或纯向量。对于类型 yyy，若它有 3 个 slot 且 type 为 list，它的对象表示就是 <code>(a b c)</code> ，其中没有 tag 信息</li>
+<li>由于无名结构的内部没有 tag， <code>cl-defstruct</code> 也就没有办法为它创建一个有意义的判断谓词。各种 getter 函数也无法在获取值之前判断对象是否为该类型</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">yy-21</span> a b c)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-22</span> (<span style="color: #b218b2;">:type</span> list)) a b c)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-22-n</span> (<span style="color: #b218b2;">:type</span> list) <span style="color: #b218b2;">:named</span>) a b c)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-23</span> (<span style="color: #b218b2;">:type</span> vector)) a b c)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-23-n</span> (<span style="color: #b218b2;">:type</span> vector) <span style="color: #b218b2;">:named</span>) a b c)
+
+(make-yy-21 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; #s(yy-21 1 2 3)
+(make-yy-22 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; (1 2 3)
+(yy-22-b '(1 2)) =&gt; 2
+(yy-22-p '(1 2 3)) =&gt; Debugger entered--Lisp error: (void-function yy-22-p)
+(make-yy-22-n <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; (yy-22-n 1 2 3)
+(make-yy-23 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; [1 2 3]
+(make-yy-23-n <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; [yy-23-n 1 2 3]
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>:initial-offset</code> ，它必须是一个非负值，用来指定在第一个 slot （slot 0）之前留置为空 slot 的个数
+<ul class="org-ul">
+<li>若 <code>:type</code> 为 vector 或 list 且没有指定 <code>:named</code> ，那么该关键字指定的是 slot 0 在序列中的位置，在它前面的元素会被 nil 填充并被忽略。若指定了 <code>:named</code> ，那么 tag 就在这个指定的位置</li>
+<li>如果 <code>:include</code> 了其他结构，那么该关键字指定的是在父结构最后一个 slot 到本结构第一个 slot 间的空 slot 数</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-31</span> (<span style="color: #b218b2;">:initial-offset</span> 1)) a b)
+(make-yy-31 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2) =&gt; #s(yy-31 nil 1 2)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-32</span> (<span style="color: #b218b2;">:initial-offset</span> 1) (<span style="color: #b218b2;">:type</span> vector)) a b)
+(make-yy-32 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2) =&gt; [nil 1 2]
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-33</span> (<span style="color: #b218b2;">:initial-offset</span> 1) (<span style="color: #b218b2;">:type</span> list) <span style="color: #b218b2;">:named</span>) a b)
+(make-yy-33 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2) =&gt; (nil yy-33 1 2)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-34</span> (<span style="color: #b218b2;">:initial-offset</span> 1) (<span style="color: #b218b2;">:include</span> yy-32) (<span style="color: #b218b2;">:type</span> vector) <span style="color: #b218b2;">:named</span>) c)
+(make-yy-34 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; [nil 1 2 nil 3]
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-35</span> (<span style="color: #b218b2;">:initial-offset</span> 1) (<span style="color: #b218b2;">:include</span> yy-31)) c)
+(make-yy-35 <span style="color: #b218b2;">:a</span> 1 <span style="color: #b218b2;">:b</span> 2 <span style="color: #b218b2;">:c</span> 3) =&gt; #s(yy-35 nil 1 2 nil 3)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-36</span> (<span style="color: #b218b2;">:initial-offset</span> 1) (<span style="color: #b218b2;">:include</span> yy-31) (<span style="color: #b218b2;">:type</span> vector) <span style="color: #b218b2;">:named</span>) c)
+=&gt; Debugger entered--Lisp error: (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">":type disagrees with :include for yy-36"</span>)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org3dbcdc8" class="outline-3">
+<h3 id="org3dbcdc8"><span class="section-number-3">2.3</span> 一些相关的函数</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+这是文档中列出的 4 个函数，这里简单抄了下来。
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-struct-sequence-type STRUCT-TYPE)</code> ，该函数返回某结构类型的内部表示方式
+<ul class="org-ul">
+<li>返回值是一个 symbol，它可以是 record，vector 或 list</li>
+<li>若 STRUCT-TYPE 不是结构则返回 nil</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">yy-c</span> a)
+(cl-struct-sequence-type 'yy-c) =&gt; nil
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-d</span> (<span style="color: #b218b2;">:type</span> vector)) a)
+(cl-struct-sequence-type 'yy-d) =&gt; vector
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-e</span> (<span style="color: #b218b2;">:type</span> list)) a)
+(cl-struct-sequence-type 'yy-e) =&gt; list
+</pre>
+</div>
+
+<p>
+经多次实验，若定义时不指定 <code>:type</code> ，该函数的返回值总为 nil。
+</p>
+
+<ul class="org-ul">
+<li><code>(cl-struct-slot-info STRUCT-TYPE)</code> ，返回结构类型对应的 slot 描述符组成的表
+<ul class="org-ul">
+<li>表中元素的格式是 <code>(name . opts)</code> ，name 是 slot 的名字，opts 是在 <code>cl-defstruct</code> 中指定的选项</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-xg</span> (<span style="color: #b218b2;">:copier</span> yyxg-cp)) (a 0 <span style="color: #b218b2;">:documentation</span> <span style="color: #cc0000;">"hhh"</span>) b (c 0 <span style="color: #b218b2;">:read-only</span> t))
+(cl-struct-slot-info 'yy-xg) =&gt;
+((cl-tag-slot) (a 0 <span style="color: #b218b2;">:documentation</span> <span style="color: #cc0000;">"hhh"</span>) (b nil) (c 0 <span style="color: #b218b2;">:read-only</span> t))
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>(cl-struct-slot-offset STRUCT-TYPE SLOT-NAME)</code> ，返回 SLOT-NAME 对应的 slot 的偏移量</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(cl-struct-slot-offset 'yy-xg 'a) =&gt; 1
+(cl-struct-slot-offset 'yy-xg 'b) =&gt; 2
+(cl-struct-slot-offset 'yy-xg 'c) =&gt; 3
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>(cl-struct-slot-value STRUCT-TYPE SLOT-NAME INST)</code> ，返回 SLOT-NAME 对应 slot 在 INST 对象中的值。</li>
+</ul>
+
+<pre class="example">
+(setq a (make-yy-xg :a 1 :b 2 :c 3))
+(cl-struct-slot-value 'yy-xg 'a a) =&gt; 1
+(cl-struct-slot-value 'yy-xg 'b a) =&gt; 2
+(cl-struct-slot-value 'yy-xg 'c a) =&gt; 3
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org944588e" class="outline-2">
+<h2 id="org944588e"><span class="section-number-2">3</span> 对 cl-defstruct 实现的分析</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+<code>cl-defstruct</code> 的定义位于 cl-macs.el 中，大约有 300 行。这么长的代码一股脑贴过来毫无意义，但是单独摘出一部分来分析又有点太难了，其中涉及到的变量有点多。这里我就将它的代码分为几个小节逐次分析。涉及到函数/宏声明的部分我略过了，我不太熟。
+</p>
+
+<p>
+首先，让我们打开 cl-macs.el ，随后将光标移到定义中，然后按下 <code>C-x n d</code> （narrow-to-defun），就可以看到这个 buffer 中只有 cl-defstruct 这一个宏了，这样就可以不受干扰的开始阅读代码了（可以使用 <code>C-x n w</code> (widden) 来复原）。如果你使用的是 emacs 27.1 的话，下面每段代码开头注明的行数应该和你看到的对的上，不过就算对不上也差不了多少。
+</p>
+
+<p>
+<code>(defmacro cl-defstruct (struct &amp;rest descs))</code> 是它的函数原型，struct 是结构名， descs 是各 slot。
+</p>
+</div>
+
+<div id="outline-container-org798f780" class="outline-3">
+<h3 id="org798f780"><span class="section-number-3">3.1</span> 变量的初始化</h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">from line 43 to line 84</span>
+(<span style="color: #00af00;">let*</span> ((name (<span style="color: #00af00;">if</span> (consp struct) (car struct) struct))
+       (opts (cdr-safe struct))
+       (slots nil)
+       (defaults nil)
+       (conc-name (concat (symbol-name name) <span style="color: #ff1f8b;">"-"</span>))
+       (constructor (intern (format <span style="color: #ff1f8b;">"make-%s"</span> name)))
+       (constrs nil)
+       (copier (intern (format <span style="color: #ff1f8b;">"copy-%s"</span> name)))
+       (predicate (intern (format <span style="color: #ff1f8b;">"%s-p"</span> name)))
+       (print-func nil) (print-auto nil)
+       (safety (<span style="color: #00af00;">if</span> (cl--compiling-file) cl--optimize-safety 3))
+       (include nil)
+       <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">There are 4 types of structs:</span>
+       <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">- `</span><span style="color: #1f5bff; font-style: italic;">vector</span><span style="color: #b2b2b2; font-style: italic;">' type: means we should use a vector, which can come</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">with or without a tag `</span><span style="color: #1f5bff; font-style: italic;">name</span><span style="color: #b2b2b2; font-style: italic;">', which is usually in slot 0</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">but obeys :initial-offset.</span>
+       <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">- `</span><span style="color: #1f5bff; font-style: italic;">list</span><span style="color: #b2b2b2; font-style: italic;">' type: same as `</span><span style="color: #1f5bff; font-style: italic;">vector</span><span style="color: #b2b2b2; font-style: italic;">' but using lists.</span>
+       <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">- `</span><span style="color: #1f5bff; font-style: italic;">record</span><span style="color: #b2b2b2; font-style: italic;">' type: means we should use a record, which necessarily</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">comes tagged in slot 0.  Currently we'll use the `</span><span style="color: #1f5bff; font-style: italic;">name</span><span style="color: #b2b2b2; font-style: italic;">' as</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">the tag, but we may want to change it so that the class object</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">is used as the tag.</span>
+       <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">- nil type: this is the "pre-record default", which uses a vector</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">with a tag in slot 0 which is a symbol of the form</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">`</span><span style="color: #1f5bff; font-style: italic;">cl-struct-NAME</span><span style="color: #b2b2b2; font-style: italic;">'.  We need to still support this for backward</span>
+       <span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">compatibility with old .elc files.</span>
+       (tag name)
+       (tag-symbol (intern (format <span style="color: #ff1f8b;">"cl-struct-%s-tags"</span> name)))
+       (include-descs nil)
+       (include-name nil)
+       (type nil)         <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">nil here means not specified explicitly.</span>
+       (named nil)
+       (cldefsym (<span style="color: #00af00;">if</span> cl--struct-inline 'cl-defsubst 'cl-defun))
+       (defsym (<span style="color: #00af00;">if</span> cl--struct-inline 'cl-defsubst 'defun))
+       (forms nil)
+       (docstring (<span style="color: #00af00;">if</span> (stringp (car descs)) (<span style="color: #00af00;">pop</span> descs)))
+       pred-form pred-check)
+  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">Can't use `</span><span style="color: #1f5bff; font-style: italic;">cl-check-type</span><span style="color: #b2b2b2; font-style: italic;">' yet.</span>
+  (<span style="color: #00af00;">unless</span> (cl--struct-name-p name)
+    (<span style="color: #cc0000; font-weight: bold;">signal</span> 'wrong-type-argument (list 'cl-struct-name-p name 'name)))
+  (<span style="color: #00af00;">setq</span> descs (cons '(cl-tag-slot)
+                    (mapcar (<span style="color: #00af00;">function</span> (<span style="color: #00af00;">lambda</span> (x) (<span style="color: #00af00;">if</span> (consp x) x (list x))))
+                            descs)))
+  ...
+</pre>
+</div>
+
+<p>
+上面的代码中包含了成吨的变量，这里我们逐一说明：
+</p>
+
+<ul class="org-ul">
+<li><code>name</code> 是结构名</li>
+<li><code>opts</code> 是结构选项组成的表</li>
+<li><code>slots</code> 是各 slot 组成的表，未初始化</li>
+<li><code>defaults</code> 各 slot 的默认值，未初始化</li>
+<li><code>conc-name</code> 是 getter 函数的前缀，这里初始化为 <code>{name}-</code></li>
+<li><code>constructor</code> 是构造函数的名字，这里初始化为 <code>make-{name}</code></li>
+<li><code>constrs</code> 是自定义构造函数的名字表，未初始化</li>
+<li><code>copier</code> 是拷贝函数的名字，初始化为 <code>copy-{name}</code></li>
+<li><code>predicate</code> 是谓词函数的名字，初始化为 <code>{name}-p</code></li>
+<li><code>print-func</code> 是打印函数，未初始化</li>
+<li><code>print-auto</code> 是自动打印，未初始化</li>
+<li><code>safety</code> 是安全等级，默认为 3</li>
+<li><code>include</code> 是父结构的名字，未初始化</li>
+<li><code>tag</code> 是 <code>name</code> 对应的符号</li>
+<li><code>tag-symbol</code> 将要作为存储 tag 的表变量，它是 <code>cl-struct-{name}-tags</code></li>
+<li><code>include-descs</code> 是父结构的 slot 表</li>
+<li><code>include-name</code> 是父结构的符号名</li>
+<li><code>type</code> 对应于 <code>:type</code> 参数</li>
+<li><code>named</code> 对应于 <code>:named</code> 参数</li>
+<li><code>cldefsym</code> 为 <code>cl-defsubst</code> 或 <code>cl-defun</code> ，取决于是否内联</li>
+<li><code>defsym</code> 为 <code>cl-defsubst</code> 或 <code>defun</code> ，取决于是否内联</li>
+<li><code>forms</code> 宏展开后求值的表达式，初始化为 nil</li>
+<li><code>docstring</code> 文档字符串，若第一个 slot 是字符串，则使用之</li>
+<li><code>pred-form</code> 存放谓词函数 body，未初始化</li>
+<li><code>pred-check</code> 存放谓词函数前面的表达式，未初始化</li>
+</ul>
+
+<p>
+若 <code>name</code> 不是合理的结构名（cl&#x2013;struct-name-p 返回 nil）会直接引发 wrong-type-argument 错误，就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">integer</span> a) =&gt;
+Debugger entered--Lisp error: (wrong-type-argument cl-struct-name-p integer name)
+</pre>
+</div>
+
+<p>
+<code>cl--struct-name-p</code> 的判断标准是：类型为非关键字的 symbol，且不能和基础类型名字相同，基础名字可以参考常量 <code>cl--typeof-types</code>
+</p>
+
+<p>
+在判断结构名是否合理后， <code>cl-defstruct</code> 会对 <code>descs</code> 进行处理，其中的非 list 项会被套一层 list，方便后面的统一处理。同时 descs 表头会加上 <code>(cl-tag-slot)</code> 元素，表示它之后的元素是 slot。举例来说，经处理后 <code>(cl-defstruct yy a (b 2))</code> 中的 descs 就是 <code>((cl-tag-slot) (a) (b 2))</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3d0983e" class="outline-3">
+<h3 id="org3d0983e"><span class="section-number-3">3.2</span> 对结构选项的处理</h3>
+<div class="outline-text-3" id="text-3-2">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">line 85 to 131</span>
+(<span style="color: #00af00;">while</span> opts
+  (<span style="color: #00af00;">let</span> ((opt (<span style="color: #00af00;">if</span> (consp (car opts)) (caar opts) (car opts)))
+        (args (cdr-safe (<span style="color: #00af00;">pop</span> opts))))
+    (<span style="color: #00af00;">cond</span> ((eq opt <span style="color: #b218b2;">:conc-name</span>)
+           (<span style="color: #00af00;">if</span> args
+               (<span style="color: #00af00;">setq</span> conc-name (<span style="color: #00af00;">if</span> (car args)
+                                   (symbol-name (car args)) <span style="color: #ff1f8b;">""</span>))))
+          ((eq opt <span style="color: #b218b2;">:constructor</span>)
+           (<span style="color: #00af00;">if</span> (cdr args)
+               (<span style="color: #00af00;">progn</span>
+                 <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">If this defines a constructor of the same name as</span>
+                 <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">the default one, don't define the default.</span>
+                 (<span style="color: #00af00;">if</span> (eq (car args) constructor)
+                     (<span style="color: #00af00;">setq</span> constructor nil))
+                 (<span style="color: #00af00;">push</span> args constrs))
+             (<span style="color: #00af00;">if</span> args (<span style="color: #00af00;">setq</span> constructor (car args)))))
+          ((eq opt <span style="color: #b218b2;">:copier</span>)
+           (<span style="color: #00af00;">if</span> args (<span style="color: #00af00;">setq</span> copier (car args))))
+          ((eq opt <span style="color: #b218b2;">:predicate</span>)
+           (<span style="color: #00af00;">if</span> args (<span style="color: #00af00;">setq</span> predicate (car args))))
+          ((eq opt <span style="color: #b218b2;">:include</span>)
+           <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">FIXME: Actually, we can include more than once as long as</span>
+           <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">we include EIEIO classes rather than cl-structs!</span>
+           (<span style="color: #00af00;">when</span> include-name (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"Can't :include more than once"</span>))
+           (<span style="color: #00af00;">setq</span> include-name (car args))
+           (<span style="color: #00af00;">setq</span> include-descs (mapcar (<span style="color: #00af00;">function</span>
+                                        (<span style="color: #00af00;">lambda</span> (x)
+                                          (<span style="color: #00af00;">if</span> (consp x) x (list x))))
+                                       (cdr args))))
+          ((eq opt <span style="color: #b218b2;">:print-function</span>)
+           (<span style="color: #00af00;">setq</span> print-func (car args)))
+          ((eq opt <span style="color: #b218b2;">:type</span>)
+           (<span style="color: #00af00;">setq</span> type (car args))
+           (<span style="color: #00af00;">unless</span> (memq type '(vector list))
+             (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"Invalid :type specifier: %s"</span> type)))
+          ((eq opt <span style="color: #b218b2;">:named</span>)
+           (<span style="color: #00af00;">setq</span> named t))
+          ((eq opt <span style="color: #b218b2;">:noinline</span>)
+           (<span style="color: #00af00;">setq</span> defsym 'defun) (<span style="color: #00af00;">setq</span> cldefsym 'cl-defun))
+          ((eq opt <span style="color: #b218b2;">:initial-offset</span>)
+           (<span style="color: #00af00;">setq</span> descs (nconc (make-list (car args) '(cl-skip-slot))
+                              descs)))
+          (t
+           (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"Structure option %s unrecognized"</span> opt)))))
+(<span style="color: #00af00;">unless</span> (<span style="color: #00af00;">or</span> include-name type)
+  (<span style="color: #00af00;">setq</span> include-name cl--struct-default-parent))
+(<span style="color: #00af00;">when</span> include-name (<span style="color: #00af00;">setq</span> include (cl--struct-get-class include-name)))
+</pre>
+</div>
+
+<p>
+opts 就是结构定义中的各种 option 组成的表，在 while 循环的开头定义的 <code>opt</code> 变量是选项关键字， <code>args</code> 是跟着关键字的参数。
+</p>
+
+<p>
+上面的代码大多比较简单，就是用 <code>args</code> 来指定某些变量的值。通过上面的代码我们可知，除了 <code>:include</code> 外，其他的关键字可以指定多次，不过总是以最后指定的为准。 <code>include-name</code> 和 <code>include-descs</code> 会被赋予对应的参数，例如 <code>(cl-defstruct (yy (:include yz b (a 1))))</code> 会使 <code>include-name</code> 的值为 'yz， <code>include-descs</code> 为 <code>((b) (a 1))</code>
+</p>
+
+<p>
+对于 <code>:constructor</code> ，若指定的不仅仅是构造名字则需进行更多的处理，它会被压入 constrs 中，为之后创建构造函数提供信息；若它的名字和 constructor 相同，那么 constructor 会被设为 nil。
+</p>
+
+<p>
+对于 <code>:type</code> ，若 <code>(car args)</code> 不为 vector 或 list 则引发错误。
+</p>
+
+<p>
+对于 <code>:initial-offset n</code> ，它会在 descs 前面添加 n 个 <code>(cl-skip-slot)</code> 。
+</p>
+
+<p>
+如果 <code>opts</code> 中不存在 <code>:include</code> 和 <code>:type</code> ，则使用 <code>cl--struct-defalut-parent</code> 作为 <code>include-name</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd28ee21" class="outline-3">
+<h3 id="orgd28ee21"><span class="section-number-3">3.3</span> 对 <code>:include</code> 的处理</h3>
+<div class="outline-text-3" id="text-3-3">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">if</span> include
+    (<span style="color: #00af00;">let*</span> ((inc-type (cl--struct-class-type include))
+           (old-descs (cl-struct-slot-info include)))
+      (<span style="color: #00af00;">and</span> type (not (eq inc-type type))
+           (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">":type disagrees with :include for %s"</span> name))
+      (<span style="color: #00af00;">while</span> include-descs
+        (setcar (memq (<span style="color: #00af00;">or</span> (assq (caar include-descs) old-descs)
+                          (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"No slot %s in included struct %s"</span>
+                                 (caar include-descs) include))
+                      old-descs)
+                (<span style="color: #00af00;">pop</span> include-descs)))
+      (<span style="color: #00af00;">setq</span> descs (append old-descs (delq (assq 'cl-tag-slot descs) descs))
+            type inc-type
+            named (<span style="color: #00af00;">if</span> (memq type '(vector list))
+                      (assq 'cl-tag-slot descs)
+                    'true))
+      (<span style="color: #00af00;">if</span> (cl--struct-class-named include) (<span style="color: #00af00;">setq</span> named t)))
+  (<span style="color: #00af00;">unless</span> type
+    (<span style="color: #00af00;">setq</span> named 'true)))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgb88a8e2" class="outline-3">
+<h3 id="orgb88a8e2"><span class="section-number-3">3.4</span> 上一节示例代码中存在的疑点</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+在文档中可以看到这样的描述：
+</p>
+
+<blockquote>
+<p>
+In true Common Lisp, ‘typep’ is always able to recognize a
+tructure object even if ‘:predicate’ was used.  In this
+ackage, ‘cl-typep’ simply looks for a function called
+TYPENAME-p’, so it will work for structure types only if they
+sed the default predicate name.
+</p>
+</blockquote>
+
+<p>
+但是在上面的这个例子中， <code>cl-typep</code> 是可以正常工作的：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> <span style="color: #18b2b2;">yy-9</span> a)
+(cl-typep (make-yy-9 <span style="color: #b218b2;">:a</span> 1) 'yy-9) =&gt; t
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-11</span> (<span style="color: #b218b2;">:predicate</span> huhu)) a)
+(cl-typep (make-yy-11 <span style="color: #b218b2;">:a</span> 1) 'yy-11) =&gt; t
+(cl-typep (make-yy-9 <span style="color: #b218b2;">:a</span> 1) 'yy-11) =&gt; nil
+</pre>
+</div>
+
+<p>
+至于 <code>cl-typep</code> 是否修改过以支持非默认名字的谓词，我们可以通过观察源代码或检索 commit 历史来了解。文档的更新速度是慢于代码更新速度的，我怀疑部分文档还停留在没有使用 record 作为内部表示的时候。
+</p>
+
+<p>
+另外一个问题和 <code>:include</code> 有关，那就是子结构是否会继承父结构的类型。根据上面的 <code>:initial-offset</code> 的例子可见：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-31</span> (<span style="color: #b218b2;">:initial-offset</span> 1)) a b)
+(<span style="color: #00af00;">cl-defstruct</span> (<span style="color: #18b2b2;">yy-36</span> (<span style="color: #b218b2;">:initial-offset</span> 1) (<span style="color: #b218b2;">:include</span> yy-31) (<span style="color: #b218b2;">:type</span> vector) <span style="color: #b218b2;">:named</span>) c)
+=&gt; Debugger entered--Lisp error: (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">":type disagrees with :include for yy-36"</span>)
+</pre>
+</div>
+
+<p>
+关于 <code>:include</code> 的另外一个问题是，父结构的 getter 函数是如何访问子结构的 slot 的？我对它的实现比较好奇。
+</p>
+
+<p>
+最后一个问题， <code>cl-struct-sequence-type</code> 根据文档来说应该返回 record，list 或 vector，但是当接受类型为 record 的结构名时却返回 nil。这也需要阅读代码来找到原因。
+</p>
+
+<p>
+下面的分析就“函数生成”， 谓词名字和 <code>cl-typep</code> 的关系，以及 <code>:include</code> 的实现细节三方面展开。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgec6c19c" class="outline-3">
+<h3 id="orgec6c19c"><span class="section-number-3">3.5</span> 各函数的生成代码</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+<code>cl-defstruct</code> 在定义结构时，会默认生成构造函数，getter 函数，谓词函数，拷贝函数。我们可以看看它生成的函数的代码是什么样子的。
+</p>
+
+<p>
+在开始前我对下面代码中出现的名字做一些说明
+</p>
+
+<ul class="org-ul">
+<li><code>tag-symbol</code> ，结构名符号，它是 <code>cl-struct-{name}-tag</code> ，在随后的求值中它的值为 <code>(name)</code></li>
+
+<li><code>form</code> 就是展开得到的待求值表达式，在宏展开期间可以通过 push 向里面塞东西</li>
+
+<li><code>copier</code> 是拷贝函数的名字符号</li>
+</ul>
+
+
+<p>
+在这些函数中，最简单的就是拷贝函数，如果 <code>:copy</code> 没有指定为 nil 的话，它会使用以下代码来生成拷贝函数。实际上它就是为 <code>copy-sequence</code> 添加了一个别名而已：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">and</span> copier
+         (<span style="color: #00af00;">push</span> `(<span style="color: #00af00;">defalias</span> ',copier #'copy-sequence)
+               forms))
+</pre>
+</div>
+
+<p>
+接下来就是谓词函数，它的构造分为两部，第一步是获得判断方法，第二步是组成函数体：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> pred-form (<span style="color: #00af00;">and</span> named
+                     (<span style="color: #00af00;">let</span> ((pos (- (length descs)
+                                   (length (memq (assq 'cl-tag-slot descs)
+                                                 descs)))))
+                       (<span style="color: #00af00;">cond</span>
+                        ((null type) <span style="color: #b2b2b2; font-style: italic;">;</span><span style="color: #b2b2b2; font-style: italic;">Record type.</span>
+                         `(memq (type-of cl-x) ,tag-symbol))
+                        ((eq type 'vector)
+                         `(<span style="color: #00af00;">and</span> (vectorp cl-x)
+                               (&gt;= (length cl-x) ,(length descs))
+                               (memq (aref cl-x ,pos) ,tag-symbol)))
+                        ((= pos 0) `(memq (car-safe cl-x) ,tag-symbol))
+                        (t `(<span style="color: #00af00;">and</span> (consp cl-x)
+                                 (memq (nth ,pos cl-x) ,tag-symbol))))))
+      pred-check (<span style="color: #00af00;">and</span> pred-form (&gt; safety 0)
+                      (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">and</span> (eq (cl-caadr pred-form) 'vectorp)
+                               (= safety 1))
+                          (cons 'and (cl-cdddr pred-form))
+                        `(,predicate cl-x))))
+(<span style="color: #00af00;">when</span> pred-form
+  (<span style="color: #00af00;">push</span> `(,defsym ,predicate (cl-x)
+           (<span style="color: #00af00;">declare</span> (side-effect-free error-free))
+           ,(<span style="color: #00af00;">if</span> (eq (car pred-form) 'and)
+                (append pred-form '(t))
+              `(<span style="color: #00af00;">and</span> ,pred-form t)))
+        forms)
+  (<span style="color: #00af00;">push</span> `(put ',name 'cl-deftype-satisfies ',predicate) forms))
+</pre>
+</div>
+
+<p>
+第一部分的目的是根据选择的类型和辅助消息来构造合适的判断表达式，第二部分负责生成定义表达式。在第一部分中，对于 <code>record</code> 类型，它仅仅比较了类型名字，对于 <code>vector</code> 类型，它通过判断向量长度和向量中是否存在 tag 名来判断
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf88b428" class="outline-2">
+<h2 id="orgf88b428"><span class="section-number-2">4</span> 使用结构的好处</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+1
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org5a5c07d" class="outline-2">
+<h2 id="org5a5c07d"><span class="section-number-2">5</span> 由 struct 到 eieio 之前的准备</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+1
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzEwNzcxMzE3.jpg" alt="load failed"></div><div class="yyimgcomment">letty whiterock</div>
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzU4NjA0MTUw.jpg" alt="load failed"></div><div class="yyimgcomment">letty whiterock</div>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara"><a href="https://srfi.schemers.org/srfi-9/">https://srfi.schemers.org/srfi-9/</a></p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="date">Date: 2021-10-09 周六 17:04</p>
+<p class="author">Author: include-yy</p>
+<p class="date">Created: 2021-10-31 周日 17:19</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

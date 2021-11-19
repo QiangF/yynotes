@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-04 Wed 13:06 -->
+<!-- 2021-11-19 Fri 10:09 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>写个C库-part1 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -12,26 +12,50 @@
 <link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -41,7 +65,7 @@
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
 </div><div id="preamble" class="status">
 <div>
-  <a href="../../index.html">Go Home </a>
+  <a href="http://www.incf19.com/index.html">Go Home </a>
   <hr class="Solid">
 </div>
 </div>
@@ -51,24 +75,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2695bee">1. 基本库</a>
+<li><a href="#orgcc9ac24">1. 基本库</a>
 <ul>
-<li><a href="#orgfe73bd6">1.1. 清单</a></li>
+<li><a href="#orgc22bd5a">1.1. 清单</a></li>
 </ul>
 </li>
-<li><a href="#orgb387589">2. 库的初始化和关闭</a>
+<li><a href="#orgb16fe94">2. 库的初始化和关闭</a>
 <ul>
-<li><a href="#orgafc7faa">2.1. 清单</a></li>
+<li><a href="#org6e99c9d">2.1. 清单</a></li>
 </ul>
 </li>
-<li><a href="#org159c954">3. 内存管理</a>
+<li><a href="#orgceb6129">3. 内存管理</a>
 <ul>
-<li><a href="#org138d6ff">3.1. 清单</a></li>
+<li><a href="#orgd8859fb">3.1. 清单</a></li>
 </ul>
 </li>
-<li><a href="#orgd28f26b">4. 多线程和多进程</a>
+<li><a href="#org2f5129a">4. 多线程和多进程</a>
 <ul>
-<li><a href="#org6989d62">4.1. 清单</a></li>
+<li><a href="#orgaf3ef63">4.1. 清单</a></li>
 </ul>
 </li>
 </ul>
@@ -90,8 +114,8 @@
 文章源地址：<a href="http://davidz25.blogspot.com/2011/06/writing-c-library-part-1.html">http://davidz25.blogspot.com/2011/06/writing-c-library-part-1.html</a>
 </p>
 
-<div id="outline-container-org2695bee" class="outline-2">
-<h2 id="org2695bee"><span class="section-number-2">1</span> 基本库</h2>
+<div id="outline-container-orgcc9ac24" class="outline-2">
+<h2 id="orgcc9ac24"><span class="section-number-2">1</span> 基本库</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 <a href="https://en.wikipedia.org/wiki/C_standard_library">libc</a> 是一个相当底层的库的集合，还存在一些能够让 C 编程更愉悦的更高层次的库，比如在 <a href="https://en.wikipedia.org/wiki/GLib">Glib</a> 和 <a href="https://en.wikipedia.org/wiki/GTK">GTK+</a> 中的一些库。即使下面写的内容是以 Glib 和 GTK+ 为中心的，它们对任何 C 代码都是有用的，无论是基于 libc，Glib 还是其他的库，比如 <a href="https://en.wikipedia.org/wiki/Netscape_Portable_Runtime">NSPR</a>，<a href="https://en.wikipedia.org/wiki/Apache_Portable_Runtime">APR</a>。
@@ -102,7 +126,7 @@
 </p>
 
 <p>
-特别是，对于像是密码学之类的东西，自己实现一个通常是个<a href="https://stackoverflow.com/questions/1914257/when-can-you-trust-yourself-to-implement-cryptography-based-solutions">坏主意</a>；取而代之的是，使用已有的良好测试的库会更好，比如 NSS（即便如此，你也要注意用正确的方法来使用库）。具体来说，如果你想要和美国政府打交道的话，这个库可能甚至需要经过 <a href="https://en.wikipedia.org/wiki/FIPS_140">FIPS-140</a> 认证，
+特别是，对于像是密码学之类的东西，自己实现一个通常是个<a href="https://stackoverflow.com/questions/1914257/when-can-you-trust-yourself-to-implement-cryptography-based-solutions">坏主意</a>；取而代之的是，使用已有的良好测试的库会更好，比如 NSS（即便如此，你也要注意用正确的方法来使用库）。具体来说，如果你想要和美国政府打交道的话，这个库可能甚至需要经过 <a href="https://en.wikipedia.org/wiki/FIPS_140">FIPS-140</a> 认证。
 </p>
 
 <p>
@@ -117,15 +141,22 @@
 最后，尽量不要和<a href="https://xkcd.com/386/">网上的陌生人</a>陷入关于 “臃肿” 的库的荒谬的讨论 —— 这通常是对时间和资源的浪费。
 </p>
 
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
-<div id="orgc62d647" class="figure">
-<p><img src="./1.jpg" alt="1.jpg" />
-</p>
-</div>
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./1.png" alt="1.png" /></td>
+</tr>
+</tbody>
+</table>
 </div>
 
-<div id="outline-container-orgfe73bd6" class="outline-3">
-<h3 id="orgfe73bd6"><span class="section-number-3">1.1</span> 清单</h3>
+<div id="outline-container-orgc22bd5a" class="outline-3">
+<h3 id="orgc22bd5a"><span class="section-number-3">1.1</span> 清单</h3>
 <div class="outline-text-3" id="text-1-1">
 <ul class="org-ul">
 <li>不要重新发明基本数据类型（除非关注性能问题）</li>
@@ -143,8 +174,8 @@
 </div>
 
 
-<div id="outline-container-orgb387589" class="outline-2">
-<h2 id="orgb387589"><span class="section-number-2">2</span> 库的初始化和关闭</h2>
+<div id="outline-container-orgb16fe94" class="outline-2">
+<h2 id="orgb16fe94"><span class="section-number-2">2</span> 库的初始化和关闭</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 一些库需要一个函数（通常叫做 foo_init()）在其他库函数调用之前先进行调用 —— 该函数一般会初始化全局变量和库使用的数据结构。除此之外，库也可能会提供一个关闭函数（通常叫做 foo_shutdown()）（也可以看到像是 foo_cleanup()，foo_fini()，foo_exit() 和 foo_deinit() 之类的名字） 来释放库使用的资源。使用 shutdown() 函数的主要原因是为了与 <a href="https://en.wikipedia.org/wiki/Valgrind">Valgrind</a> 更好的配合或是为了释放在使用 <a href="http://man7.org/linux/man-pages/man3/dlsym.3.html">dlopen() 一系列函数</a> 时的资源。
@@ -179,8 +210,8 @@
 </p>
 </div>
 
-<div id="outline-container-orgafc7faa" class="outline-3">
-<h3 id="orgafc7faa"><span class="section-number-3">2.1</span> 清单</h3>
+<div id="outline-container-org6e99c9d" class="outline-3">
+<h3 id="org6e99c9d"><span class="section-number-3">2.1</span> 清单</h3>
 <div class="outline-text-3" id="text-2-1">
 <ul class="org-ul">
 <li>避免 init() / shutdown() 函数 —— 如果你不能避免，一定确保它们是幂等，线程安全和引用计数的</li>
@@ -196,8 +227,8 @@
 </div>
 
 
-<div id="outline-container-org159c954" class="outline-2">
-<h2 id="org159c954"><span class="section-number-2">3</span> 内存管理</h2>
+<div id="outline-container-orgceb6129" class="outline-2">
+<h2 id="orgceb6129"><span class="section-number-2">3</span> 内存管理</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 最好为你的 API 所返回的各种分配内存的对象提供相应的 free() 函数。如果你的库使用了引用计数，那使用后缀 <code>_unref</code> 通常比使用 <code>_free</code> 更合适。一个例子是 Glib/GTK+ 中的函数 <a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-new">g_object_new()</a> ，<a href="http://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-ref">g_object_ref()</a> 和 <a href="http://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref">g_object_unref()</a> ，它们作用于 <a href="http://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html">GObject type</a> 的实例。类似地，对于 <a href="http://developer.gnome.org/gtk3/unstable/GtkTextIter.html">GtkTextIter</a> 类型，相关的函数有<a href="http://developer.gnome.org/gtk3/unstable/GtkTextIter.html#gtk-text-iter-copy">gtk_text_iter_copy()</a> 和 <a href="http://developer.gnome.org/gtk3/unstable/GtkTextIter.html#gtk-text-iter-free">gtk_text_iter_free()</a>。同样需要注意的是，一些对象是栈分配的（<a href="https://en.wikipedia.org/wiki/Stack-based_memory_allocation">stack-allocated</a>）（比如 GtkTextIter），另一些（比如 GObject）只能是堆分配的（<a href="https://en.wikipedia.org/wiki/Memory_management#DYNAMIC">heap-allocated</a>）。
@@ -228,8 +259,8 @@
 </p>
 </div>
 
-<div id="outline-container-org138d6ff" class="outline-3">
-<h3 id="org138d6ff"><span class="section-number-3">3.1</span> 清单</h3>
+<div id="outline-container-orgd8859fb" class="outline-3">
+<h3 id="orgd8859fb"><span class="section-number-3">3.1</span> 清单</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li>为你在库中引入的每种类型提供 free() 或 unref() 函数</li>
@@ -247,8 +278,8 @@
 </div>
 
 
-<div id="outline-container-orgd28f26b" class="outline-2">
-<h2 id="orgd28f26b"><span class="section-number-2">4</span> 多线程和多进程</h2>
+<div id="outline-container-org2f5129a" class="outline-2">
+<h2 id="org2f5129a"><span class="section-number-2">4</span> 多线程和多进程</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 一个库应该清楚地在文档中说明它能不能和怎样用于多线程。线程安全通常有多个级别 —— 如果库有对象和对象池的概念（大多数都有），对对象池的管理和枚举可能就是线程安全的，应用程序在从多个线程对单个对象操作时应提供自己的锁。
@@ -275,8 +306,8 @@
 </p>
 </div>
 
-<div id="outline-container-org6989d62" class="outline-3">
-<h3 id="org6989d62"><span class="section-number-3">4.1</span> 清单</h3>
+<div id="outline-container-orgaf3ef63" class="outline-3">
+<h3 id="orgaf3ef63"><span class="section-number-3">4.1</span> 清单</h3>
 <div class="outline-text-3" id="text-4-1">
 <ul class="org-ul">
 <li>为库能否及如何在多线程中使用建立文档</li>
@@ -291,8 +322,8 @@
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2020-05-18 Mon 00:00</p> <p>Last modified: 2021-08-04 Wed 13:06</p>
-<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+<p>Create Date: 2020-05-18 Mon 00:00</p> <p>Last modified: 2021-11-19 Fri 10:09</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
   <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>

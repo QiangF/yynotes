@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-23 Mon 22:33 -->
+<!-- 2021-11-19 Fri 11:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>我的从0开始的emacs配置 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -65,7 +65,7 @@ for the JavaScript code in this tag.
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
 </div><div id="preamble" class="status">
 <div>
-  <a href="../../index.html">Go Home </a>
+  <a href="http://www.incf19.com/index.html">Go Home </a>
   <hr class="Solid">
 </div>
 </div>
@@ -75,24 +75,24 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org73c922d">1. 写在前面</a></li>
-<li><a href="#orgfc2318a">2. 个人经历</a></li>
-<li><a href="#orga21b97f">3. 为什么要折腾 emacs</a></li>
-<li><a href="#orga0bced0">4. 之后会写的东西</a></li>
-<li><a href="#org916f5b1">5. 4、延申阅读</a>
+<li><a href="#orgc0fe292">1. 写在前面</a></li>
+<li><a href="#orgafa46aa">2. 个人经历</a></li>
+<li><a href="#org65d1bf0">3. 为什么要折腾 emacs</a></li>
+<li><a href="#org85a7bf4">4. 之后会写的东西</a></li>
+<li><a href="#orgb161b72">5. 4、延申阅读</a>
 <ul>
-<li><a href="#org5859549">5.1. 配置相关</a></li>
-<li><a href="#org687ca05">5.2. 博客相关</a></li>
-<li><a href="#orgb991995">5.3. 论坛相关</a></li>
+<li><a href="#org816e503">5.1. 配置相关</a></li>
+<li><a href="#orge252dfd">5.2. 博客相关</a></li>
+<li><a href="#org84fea5f">5.3. 论坛相关</a></li>
 </ul>
 </li>
-<li><a href="#org22bc399">6. 正文中出现的链接</a></li>
+<li><a href="#org812fd00">6. 正文中出现的链接</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org73c922d" class="outline-2">
-<h2 id="org73c922d"><span class="section-number-2">1</span> 写在前面</h2>
+<div id="outline-container-orgc0fe292" class="outline-2">
+<h2 id="orgc0fe292"><span class="section-number-2">1</span> 写在前面</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 本文并不是介绍如何从 0 开始配置一个完整的 emacs 配置过程，而是一系列我将要写的文章的一个主旨概括，或者说是一本书的卷首语。
@@ -108,8 +108,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgfc2318a" class="outline-2">
-<h2 id="orgfc2318a"><span class="section-number-2">2</span> 个人经历</h2>
+<div id="outline-container-orgafa46aa" class="outline-2">
+<h2 id="orgafa46aa"><span class="section-number-2">2</span> 个人经历</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 2018年，在学习当代工科大学生都要学习的 C 语言时，我听信了所谓命令行比傻瓜式 IDE 更高级的说法，尝试在 Windows 上使用 Mingw 和 notepad++ 来编写 C 程序。虽说后来知道了 notepad++ 的作者的某些事迹而转而使用 notepad3，但是 notepad++ 也确实是一个相当不错的编辑器软件，相比起连高亮都没有的 VC6.0 也算得上是赏心悦目了。既然都了解到命令行了，那自然我顺着了解到了 linux 上的两大编辑器 —— 神之编辑器 emacs 和编辑器之神 vim。vim 相比 emacs 在大小上轻便不少，但是由于第一次使用 vim 时不知道怎么退出，看着屏幕上一行行的 <code>~</code> 我有点摸不着头脑。emacs 相比于 vim 更像是一个正常的编辑器，那就用它了。
@@ -124,11 +124,11 @@ for the JavaScript code in this tag.
 </p>
 
 <p>
-Emacs 的 paredit-mode 让我彻底摆脱了括号匹配的痛苦，直到这时我才意识到除了 gnu-elpa 外还存在其他的插件。偶然搜索 emacs 时，我发现了子龙山人的 Emacs 教程<a href="#org393e326">【1】</a> ，照着他的代码加入 elpa 源后，list-package 瞬间暴涨到了上千个插件！通过 Emacs 自带的包管理我可以相当方便的下载和体验插件。但是在使用过多插件后 Emacs 的启动时间明显变长了不少，我所有的配置都堆在 .emacs 文件里，显得十分杂乱。由于不会 elisp 不知如何下手，我对 Emacs 再次丧失了兴趣，连子龙山人的教程都没读完。
+Emacs 的 paredit-mode 让我彻底摆脱了括号匹配的痛苦，直到这时我才意识到除了 gnu-elpa 外还存在其他的插件。偶然搜索 emacs 时，我发现了子龙山人的 Emacs 教程<a href="#orgc8fcc66">【1】</a> ，照着他的代码加入 elpa 源后，list-package 瞬间暴涨到了上千个插件！通过 Emacs 自带的包管理我可以相当方便的下载和体验插件。但是在使用过多插件后 Emacs 的启动时间明显变长了不少，我所有的配置都堆在 .emacs 文件里，显得十分杂乱。由于不会 elisp 不知如何下手，我对 Emacs 再次丧失了兴趣，连子龙山人的教程都没读完。
 </p>
 
 <p>
-又是一次偶然的搜索，我发现了 redguardtoo 的《一年成为Emacs高手》<a href="#org4237780">【2】</a>，文中提到的要点对我有很大的启发，即：
+又是一次偶然的搜索，我发现了 redguardtoo 的《一年成为Emacs高手》<a href="#org48fb16a">【2】</a>，文中提到的要点对我有很大的启发，即：
 </p>
 
 <ul class="org-ul">
@@ -142,7 +142,7 @@ Emacs 的 paredit-mode 让我彻底摆脱了括号匹配的痛苦，直到这时
 </p>
 
 <p>
-到了这里，我已经对 Emacs 的具体使用有了一定的经验了，对所谓的结构化配置有了一定的了解，知道了基本的 <code>require/provide</code> 机制。在参考 emacs-china 上各种各样的讨论之后，我觉得我的配置之路可以正式开始了。manateelazycat 在<a href="#orga389f3b">【3】</a>中展示了使用 git 管理插件的方法，也许可以拿来一用。
+到了这里，我已经对 Emacs 的具体使用有了一定的经验了，对所谓的结构化配置有了一定的了解，知道了基本的 <code>require/provide</code> 机制。在参考 emacs-china 上各种各样的讨论之后，我觉得我的配置之路可以正式开始了。manateelazycat 在<a href="#org05a2da1">【3】</a>中展示了使用 git 管理插件的方法，也许可以拿来一用。
 </p>
 
 <p>
@@ -159,13 +159,15 @@ manateelazycat 在 emacs-china 的一个帖子中这样写道：
 
 <li>安装复杂插件, 被各种配置搞崩溃了, 越改挂的越厉害, 大部分人卡在这个阶段, 因为不会Elisp, 导致东拼西凑的方法对于复杂插件行不通</li>
 
-<li>你搞不懂Emacs复杂的配置的原因是因为你不懂 Elisp 编程, 学习Elisp的方法: 老老实实读Emacs内置的 Elisp reference manual, 这么厚的手册怎么学?</li>
+<li>你搞不懂Emacs复杂的配置的原因是因为你不懂 Elisp 编程, 学习Elisp的方法: 老老实实读Emacs内置的 Elisp reference manual, 这么厚的手册怎么学?
 
+<ul class="org-ul">
 <li>一页一页的挨着看, 一个API一个API的读, 不要跳过</li>
 
 <li>每个API, 都在 ielm 里面实践一下</li>
 
 <li>遇到不知道啥鬼用的 API, 去 Google 或 EmacsWiki 上搜索一下, 看看别人怎么用这些API的?</li>
+</ul></li>
 
 <li>如果你花了一个月耐下心读完 Elisp reference manual 以后, Emacs 90% 以上的代码你都可以看懂了, 继续折腾复杂插件, 知道 require, autoload, set-key, 各种 hook, defadvice 的在不同环境下的细微差别, 编程上知道 save-excursion, ignore-errors 这些风骚 macro 的用法. 这个阶段可以尝试手动来写一写复杂的配置了, 这个阶段你已经是 Emacs 高级用户了.</li>
 
@@ -191,15 +193,15 @@ manateelazycat 在 emacs-china 的一个帖子中这样写道：
 </div>
 </div>
 
-<div id="outline-container-orga21b97f" class="outline-2">
-<h2 id="orga21b97f"><span class="section-number-2">3</span> 为什么要折腾 emacs</h2>
+<div id="outline-container-org65d1bf0" class="outline-2">
+<h2 id="org65d1bf0"><span class="section-number-2">3</span> 为什么要折腾 emacs</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 首先，折腾 Emacs 很好玩，我有折腾的兴趣。
 </p>
 
 <p>
-其次，manateelazycat 在一个帖子<a href="#org7cf11ca">【5】</a>中这样描述到：
+其次，manateelazycat 在一个帖子<a href="#org221d16e">【5】</a>中这样描述到：
 </p>
 
 <blockquote>
@@ -232,8 +234,8 @@ Emacs 在单方面的能力可能比不过特化的 IDE，但是它胜在整体�
 </div>
 </div>
 
-<div id="outline-container-orga0bced0" class="outline-2">
-<h2 id="orga0bced0"><span class="section-number-2">4</span> 之后会写的东西</h2>
+<div id="outline-container-org85a7bf4" class="outline-2">
+<h2 id="org85a7bf4"><span class="section-number-2">4</span> 之后会写的东西</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 现在，是时候去读一读 Elisp mannual【6】 了，学会使用 elisp 并组织自己的一套配置出来。
@@ -264,12 +266,12 @@ Emacs 在单方面的能力可能比不过特化的 IDE，但是它胜在整体�
 </div>
 
 
-<div id="outline-container-org916f5b1" class="outline-2">
-<h2 id="org916f5b1"><span class="section-number-2">5</span> 4、延申阅读</h2>
+<div id="outline-container-orgb161b72" class="outline-2">
+<h2 id="orgb161b72"><span class="section-number-2">5</span> 4、延申阅读</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-org5859549" class="outline-3">
-<h3 id="org5859549"><span class="section-number-3">5.1</span> 配置相关</h3>
+<div id="outline-container-org816e503" class="outline-3">
+<h3 id="org816e503"><span class="section-number-3">5.1</span> 配置相关</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 1、lazycat 的 emacs 配置：<a href="https://github.com/manateelazycat/lazycat-emacs">manateelazycat/lazycat-emacs: Andy Stewart's emacs (github.com)</a>
@@ -285,8 +287,8 @@ Emacs 在单方面的能力可能比不过特化的 IDE，但是它胜在整体�
 </div>
 </div>
 
-<div id="outline-container-org687ca05" class="outline-3">
-<h3 id="org687ca05"><span class="section-number-3">5.2</span> 博客相关</h3>
+<div id="outline-container-orge252dfd" class="outline-3">
+<h3 id="orge252dfd"><span class="section-number-3">5.2</span> 博客相关</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 1、王垠的 Emacs 整理：<a href="https://docs.huihoo.com/homepage/shredderyin/emacs.html">Emacs (huihoo.com)</a>
@@ -298,8 +300,8 @@ Emacs 在单方面的能力可能比不过特化的 IDE，但是它胜在整体�
 </div>
 </div>
 
-<div id="outline-container-orgb991995" class="outline-3">
-<h3 id="orgb991995"><span class="section-number-3">5.3</span> 论坛相关</h3>
+<div id="outline-container-org84fea5f" class="outline-3">
+<h3 id="org84fea5f"><span class="section-number-3">5.3</span> 论坛相关</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 reddit 上有 r/emacs，国内有 emacs-china，上面都有非常不错的内容。
@@ -312,38 +314,38 @@ reddit 上有 r/emacs，国内有 emacs-china，上面都有非常不错的内�
 </div>
 </div>
 
-<div id="outline-container-org22bc399" class="outline-2">
-<h2 id="org22bc399"><span class="section-number-2">6</span> 正文中出现的链接</h2>
+<div id="outline-container-org812fd00" class="outline-2">
+<h2 id="org812fd00"><span class="section-number-2">6</span> 正文中出现的链接</h2>
 <div class="outline-text-2" id="text-6">
 <p>
-<a id="org393e326">【1】</a> <a href="http://book.emacs-china.org/">Master Emacs in 21 Days (emacs-china.org)</a>
+<a id="orgc8fcc66">【1】</a> <a href="http://book.emacs-china.org/">Master Emacs in 21 Days (emacs-china.org)</a>
 </p>
 
 <p>
-<a id="org4237780">【2】</a> <a href="https://github.com/redguardtoo/mastering-emacs-in-one-year-guide/blob/master/guide-zh.org">mastering-emacs-in-one-year-guide/guide-zh.org at master · redguardtoo/mastering-emacs-in-one-year-guide (github.com)</a>
+<a id="org48fb16a">【2】</a> <a href="https://github.com/redguardtoo/mastering-emacs-in-one-year-guide/blob/master/guide-zh.org">mastering-emacs-in-one-year-guide/guide-zh.org at master · redguardtoo/mastering-emacs-in-one-year-guide (github.com)</a>
 </p>
 
 <p>
-<a id="orga389f3b">【3】</a> <a href="https://emacs-china.org/t/emacs/7116">讨论一下Emacs半手动包管理 - Emacs-general - Emacs China (emacs-china.org)</a>
+<a id="org05a2da1">【3】</a> <a href="https://emacs-china.org/t/emacs/7116">讨论一下Emacs半手动包管理 - Emacs-general - Emacs China (emacs-china.org)</a>
 </p>
 
 <p>
-<a id="orge644f7b">【4】</a> <a href="https://emacs-china.org/t/emacs/7532/16">以你多年的经验，请写出一个新手学习emacs的路线建议。 - Emacs-general - Emacs China (emacs-china.org)</a>
+<a id="org7e4352b">【4】</a> <a href="https://emacs-china.org/t/emacs/7532/16">以你多年的经验，请写出一个新手学习emacs的路线建议。 - Emacs-general - Emacs China (emacs-china.org)</a>
 </p>
 
 <p>
-<a id="org7cf11ca">【5】</a> <a href="https://emacs-china.org/t/emacs/9477/25">为什么我放弃emacs了？ - 闲聊灌水 - Emacs China (emacs-china.org)</a>
+<a id="org221d16e">【5】</a> <a href="https://emacs-china.org/t/emacs/9477/25">为什么我放弃emacs了？ - 闲聊灌水 - Emacs China (emacs-china.org)</a>
 </p>
 
 <p>
-<a id="org6c38333">【6】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/index.html#SEC_Contents">https://www.gnu.org/software/emacs/manual/html_node/elisp/index.html#SEC_Contents</a>
+<a id="org4d0500f">【6】</a> <a href="https://www.gnu.org/software/emacs/manual/html_node/elisp/index.html#SEC_Contents">https://www.gnu.org/software/emacs/manual/html_node/elisp/index.html#SEC_Contents</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-03-21 Sun 00:00</p> <p>Last modified: 2021-08-23 Mon 22:33</p>
+<p>Create Date: 2021-03-21 Sun 00:00</p> <p>Last modified: 2021-11-19 Fri 11:52</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
 
 <p style="text-align:center;">
