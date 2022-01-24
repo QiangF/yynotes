@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-01-24 Mon 22:47 -->
+<!-- 2022-01-24 Mon 23:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>emacs 中的哈希表与多值返回 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzg0Nzc3OTc2Cg==.jpg" alt="load failed"></div></title>
@@ -51,41 +51,41 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb41ebe2">1. 数据结构和数据类型</a>
+<li><a href="#org950b0ed">1. 数据结构和数据类型</a>
 <ul>
-<li><a href="#org1518fb6">1.1. 什么是数据类型</a></li>
-<li><a href="#orgf688f0a">1.2. 抽象数据类型（ADT）</a></li>
-<li><a href="#orge1c83b3">1.3. 什么是数据结构</a></li>
-<li><a href="#org73b3fcb">1.4. 数据类型，ADT 和数据结构之间的关系</a></li>
-<li><a href="#org728265b">1.5. 示例：一个简单的 ADT 及其实现</a></li>
+<li><a href="#org5771645">1.1. 什么是数据类型</a></li>
+<li><a href="#org42555b5">1.2. 抽象数据类型（ADT）</a></li>
+<li><a href="#org0e9f281">1.3. 什么是数据结构</a></li>
+<li><a href="#org546e3b7">1.4. 数据类型，ADT 和数据结构之间的关系</a></li>
+<li><a href="#org757d662">1.5. 示例：一个简单的 ADT 及其实现</a></li>
 </ul>
 </li>
-<li><a href="#orge5d2175">2. 什么是哈希表</a>
+<li><a href="#orge156bef">2. 什么是哈希表</a>
 <ul>
-<li><a href="#org2d0a5f3">2.1. 作为 ADT 的关联数组</a></li>
-<li><a href="#orgd23e012">2.2. 哈希函数</a></li>
-<li><a href="#orgf6f01b5">2.3. 哈希碰撞的解决方案</a></li>
+<li><a href="#org56ad1e8">2.1. 作为 ADT 的关联数组</a></li>
+<li><a href="#org3fa8ef7">2.2. 哈希函数</a></li>
+<li><a href="#org8ea5573">2.3. 哈希碰撞的解决方案</a></li>
 </ul>
 </li>
-<li><a href="#orgd46856a">3. emacs 的 hashtable</a>
+<li><a href="#org58a9ea0">3. emacs 的 hashtable</a>
 <ul>
-<li><a href="#orgd04380b">3.1. hashtable 的创建和表示</a></li>
-<li><a href="#org8ae67ae">3.2. 哈希表属性获取</a></li>
-<li><a href="#org038df1d">3.3. 哈希表的基本操作</a></li>
-<li><a href="#org62f7def">3.4. 自定义哈希函数</a></li>
+<li><a href="#org1acb66d">3.1. hashtable 的创建和表示</a></li>
+<li><a href="#org96d4127">3.2. 哈希表属性获取</a></li>
+<li><a href="#orgfab7531">3.3. 哈希表的基本操作</a></li>
+<li><a href="#org7021176">3.4. 自定义哈希函数</a></li>
 </ul>
 </li>
-<li><a href="#orga1e4dc1">4. emacs 的多值返回</a></li>
-<li><a href="#orga36a1ad">5. 一个简单的哈希表实现</a>
+<li><a href="#org69707ef">4. emacs 的多值返回</a></li>
+<li><a href="#org3b91957">5. 一个简单的哈希表实现</a>
 <ul>
-<li><a href="#orgbace0a7">5.1. 哈希函数</a></li>
-<li><a href="#orgfe1939e">5.2. 哈希表的结构定义</a></li>
-<li><a href="#orgdd3895d">5.3. 哈希表的查找、删除与遍历</a></li>
-<li><a href="#org46c764f">5.4. 哈希表的添加</a></li>
-<li><a href="#org9e43e9e">5.5. 测试与小结</a></li>
+<li><a href="#orge37da79">5.1. 哈希函数</a></li>
+<li><a href="#org0e841e7">5.2. 哈希表的结构定义</a></li>
+<li><a href="#org798bfdb">5.3. 哈希表的查找、删除与遍历</a></li>
+<li><a href="#org6725542">5.4. 哈希表的添加</a></li>
+<li><a href="#org508281c">5.5. 测试与小结</a></li>
 </ul>
 </li>
-<li><a href="#org89105c4">6. 后记</a></li>
+<li><a href="#org64300c6">6. 后记</a></li>
 </ul>
 </div>
 </div>
@@ -110,8 +110,8 @@
 <li>SBCL 2.2.0 on windows</li>
 </ul>
 
-<div id="outline-container-orgb41ebe2" class="outline-2">
-<h2 id="orgb41ebe2"><span class="section-number-2">1</span> 数据结构和数据类型</h2>
+<div id="outline-container-org950b0ed" class="outline-2">
+<h2 id="org950b0ed"><span class="section-number-2">1</span> 数据结构和数据类型</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 哈希表，它是一种数据类型呢，还是一种数据结构呢？不知你想过这个问题没有。在 Python 中我们有叫做 dict 的 <b>数据类型</b> ，但哈希表（或者叫做散列表）也是一种常见的 <b>数据结构</b> ，而且 Python 的字典类型还是以哈希表 <b>实现</b> 的。数据类型和数据结构的关系我貌似理解的不是很清楚，也许我在学习《数据结构与算法》的时候根本就没想过类似的问题。
@@ -157,8 +157,8 @@
 </table>
 </div>
 
-<div id="outline-container-org1518fb6" class="outline-3">
-<h3 id="org1518fb6"><span class="section-number-3">1.1</span> 什么是数据类型</h3>
+<div id="outline-container-org5771645" class="outline-3">
+<h3 id="org5771645"><span class="section-number-3">1.1</span> 什么是数据类型</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 关于数据类型，我不是太清楚它是什么时候出现的，这里就抄一下维基百科<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>上的内容吧：
@@ -184,8 +184,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgf688f0a" class="outline-3">
-<h3 id="orgf688f0a"><span class="section-number-3">1.2</span> 抽象数据类型（ADT）</h3>
+<div id="outline-container-org42555b5" class="outline-3">
+<h3 id="org42555b5"><span class="section-number-3">1.2</span> 抽象数据类型（ADT）</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 同样，这里先贴一点维基百科<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>过来：
@@ -219,8 +219,8 @@ ADT 是一个理论概念，在计算机科学中用于设计和分析算法，�
 </div>
 </div>
 
-<div id="outline-container-orge1c83b3" class="outline-3">
-<h3 id="orge1c83b3"><span class="section-number-3">1.3</span> 什么是数据结构</h3>
+<div id="outline-container-org0e9f281" class="outline-3">
+<h3 id="org0e9f281"><span class="section-number-3">1.3</span> 什么是数据结构</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 让我们再次参考维基百科<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup>：
@@ -276,8 +276,8 @@ TAOCP 第一卷的第二章介绍的就是各种各样的数据结构，在这�
 </div>
 </div>
 
-<div id="outline-container-org73b3fcb" class="outline-3">
-<h3 id="org73b3fcb"><span class="section-number-3">1.4</span> 数据类型，ADT 和数据结构之间的关系</h3>
+<div id="outline-container-org546e3b7" class="outline-3">
+<h3 id="org546e3b7"><span class="section-number-3">1.4</span> 数据类型，ADT 和数据结构之间的关系</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 就我上面提到的内容来看，我可以这样总结一下：数据类型 = ADT + 数据结构。数据类型作为程序实体，ADT 作为理论实体，数据结构负责具体的实现。ADT 和数据结构应该是一对多的关系，即一种接口可以对应不同实现。
@@ -302,8 +302,8 @@ TAOCP 第一卷的第二章介绍的就是各种各样的数据结构，在这�
 </div>
 </div>
 
-<div id="outline-container-org728265b" class="outline-3">
-<h3 id="org728265b"><span class="section-number-3">1.5</span> 示例：一个简单的 ADT 及其实现</h3>
+<div id="outline-container-org757d662" class="outline-3">
+<h3 id="org757d662"><span class="section-number-3">1.5</span> 示例：一个简单的 ADT 及其实现</h3>
 <div class="outline-text-3" id="text-1-5">
 <p>
 简单起见，这里我给出一个自然数的 ADT 定义，并使用 LIST 作为其实现。
@@ -365,8 +365,8 @@ TYPE NAT:
 </div>
 
 
-<div id="outline-container-orge5d2175" class="outline-2">
-<h2 id="orge5d2175"><span class="section-number-2">2</span> 什么是哈希表</h2>
+<div id="outline-container-orge156bef" class="outline-2">
+<h2 id="orge156bef"><span class="section-number-2">2</span> 什么是哈希表</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 （下大部分内容都来自维基百科中的 hash table 和 hash function 词条，出于美观原因我就不使用引用格式了。考虑到本文的主要内部并不是介绍各种哈希算法，这一节只是简单介绍一些相关知识。）
@@ -385,8 +385,8 @@ TYPE NAT:
 </p>
 </div>
 
-<div id="outline-container-org2d0a5f3" class="outline-3">
-<h3 id="org2d0a5f3"><span class="section-number-3">2.1</span> 作为 ADT 的关联数组</h3>
+<div id="outline-container-org56ad1e8" class="outline-3">
+<h3 id="org56ad1e8"><span class="section-number-3">2.1</span> 作为 ADT 的关联数组</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 在计算机科学中，关联表也叫做映射（map），符号表（symbol table），或字典（dictionary），它是由键值对组成的 ADT。与之联系的操作包括：
@@ -406,8 +406,8 @@ TYPE NAT:
 </div>
 
 
-<div id="outline-container-orgd23e012" class="outline-3">
-<h3 id="orgd23e012"><span class="section-number-3">2.2</span> 哈希函数</h3>
+<div id="outline-container-org3fa8ef7" class="outline-3">
+<h3 id="org3fa8ef7"><span class="section-number-3">2.2</span> 哈希函数</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 对哈希函数基本的要求就是提供一个离散均匀分布的值。非离散均匀分布会增加哈希碰撞和处理哈希碰撞的成本。在设计时哈希函数是很难保证均匀的，不过这可以通过统计测试来确认。
@@ -424,8 +424,8 @@ TYPE NAT:
 </div>
 
 
-<div id="outline-container-orgf6f01b5" class="outline-3">
-<h3 id="orgf6f01b5"><span class="section-number-3">2.3</span> 哈希碰撞的解决方案</h3>
+<div id="outline-container-org8ea5573" class="outline-3">
+<h3 id="org8ea5573"><span class="section-number-3">2.3</span> 哈希碰撞的解决方案</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 最为人所知的两种方法是拉链法和开放寻址法。这方面的文章也挺多了，搜一搜就可以找到，我也懒得自己写一份了，这里就放两个链接吧：
@@ -445,16 +445,16 @@ TYPE NAT:
 </div>
 
 
-<div id="outline-container-orgd46856a" class="outline-2">
-<h2 id="orgd46856a"><span class="section-number-2">3</span> emacs 的 hashtable</h2>
+<div id="outline-container-org58a9ea0" class="outline-2">
+<h2 id="org58a9ea0"><span class="section-number-2">3</span> emacs 的 hashtable</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 本节简单介绍 emacs 中哈希表的使用，简单介绍了各个函数的使用，算是过了一遍官方文档吧。
 </p>
 </div>
 
-<div id="outline-container-orgd04380b" class="outline-3">
-<h3 id="orgd04380b"><span class="section-number-3">3.1</span> hashtable 的创建和表示</h3>
+<div id="outline-container-org1acb66d" class="outline-3">
+<h3 id="org1acb66d"><span class="section-number-3">3.1</span> hashtable 的创建和表示</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 hashtable 是以 record 来表示的，它的 record 类型是 <code>hash-table</code> 。可以通过字面量来创建 hashtable，就像这样：
@@ -503,8 +503,8 @@ emacs 提供了 <code>make-hash-table</code> 这个函数来创建哈希表，�
 </div>
 </div>
 
-<div id="outline-container-org8ae67ae" class="outline-3">
-<h3 id="org8ae67ae"><span class="section-number-3">3.2</span> 哈希表属性获取</h3>
+<div id="outline-container-org96d4127" class="outline-3">
+<h3 id="org96d4127"><span class="section-number-3">3.2</span> 哈希表属性获取</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 以下函数可以获取 hashtable 的各项属性：
@@ -547,8 +547,8 @@ emacs 提供了 <code>make-hash-table</code> 这个函数来创建哈希表，�
 </div>
 </div>
 
-<div id="outline-container-org038df1d" class="outline-3">
-<h3 id="org038df1d"><span class="section-number-3">3.3</span> 哈希表的基本操作</h3>
+<div id="outline-container-orgfab7531" class="outline-3">
+<h3 id="orgfab7531"><span class="section-number-3">3.3</span> 哈希表的基本操作</h3>
 <div class="outline-text-3" id="text-3-3">
 <ul class="org-ul">
 <li><code>gethash key table &amp;optional default</code> ，在表中查找 key，并返回对应的值。若没找到则返回 default</li>
@@ -590,8 +590,8 @@ b =&gt; ((c 3) (b 2) (a 1))
 </div>
 </div>
 
-<div id="outline-container-org62f7def" class="outline-3">
-<h3 id="org62f7def"><span class="section-number-3">3.4</span> 自定义哈希函数</h3>
+<div id="outline-container-org7021176" class="outline-3">
+<h3 id="org7021176"><span class="section-number-3">3.4</span> 自定义哈希函数</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 哈希查找分为两个步骤，首先将键哈希化得到哈希值，随后在数组中寻找对应的键值对。要定义新的查找方式需要定义哈希计算函数和哈希比较函数。emacs（27.2）中处理哈希碰撞使用的是拉链法，之所以需要比较函数是因为要在拉链中找到正确的键。
@@ -641,8 +641,8 @@ emacs 默认支持的 test 有三种，分别是 eq, eql 和 equal。它们对�
 </div>
 
 
-<div id="outline-container-orga1e4dc1" class="outline-2">
-<h2 id="orga1e4dc1"><span class="section-number-2">4</span> emacs 的多值返回</h2>
+<div id="outline-container-org69707ef" class="outline-2">
+<h2 id="org69707ef"><span class="section-number-2">4</span> emacs 的多值返回</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 如果你学过一点 common lisp 的话，你会知道 <code>gethash</code> 函数会一下子返回两个值，第一个是键值对的值，第二个是是否找到该键值对的布尔值。就像这样：
@@ -728,8 +728,8 @@ nil
 </div>
 
 
-<div id="outline-container-orga36a1ad" class="outline-2">
-<h2 id="orga36a1ad"><span class="section-number-2">5</span> 一个简单的哈希表实现</h2>
+<div id="outline-container-org3b91957" class="outline-2">
+<h2 id="org3b91957"><span class="section-number-2">5</span> 一个简单的哈希表实现</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 emacs 中的哈希表是使用 C 实现的，代码位于 src/lisp.h 和 src/fns.c 中。下面我使用的代码是 emacs 27.2 的源代码，可以前往<a href="http://mirror.easyname.at/gnu/emacs/">官方网站</a>进行下载。要在线阅读代码的话可以去 github 上的<a href="https://github.com/emacs-mirror/emacs">镜像</a>看看，但是可能和文中使用的代码不完全一致，毕竟最新的 emacs 已经到了 29 了。
@@ -770,8 +770,8 @@ emacs 中的哈希结构定义在 lisp.h 的 2271 行开始，到 2467 行结束
 </ul>
 </div>
 
-<div id="outline-container-orgbace0a7" class="outline-3">
-<h3 id="orgbace0a7"><span class="section-number-3">5.1</span> 哈希函数</h3>
+<div id="outline-container-orge37da79" class="outline-3">
+<h3 id="orge37da79"><span class="section-number-3">5.1</span> 哈希函数</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 如上所言，我会将一些可选项硬编码到代码中，这需要定义一些常量：
@@ -805,8 +805,8 @@ emacs 中的哈希结构定义在 lisp.h 的 2271 行开始，到 2467 行结束
 </ul>
 </div>
 
-<div id="outline-container-orgbe7268a" class="outline-4">
-<h4 id="orgbe7268a"><span class="section-number-4">5.1.1</span> 定长整数</h4>
+<div id="outline-container-org4efd91f" class="outline-4">
+<h4 id="org4efd91f"><span class="section-number-4">5.1.1</span> 定长整数</h4>
 <div class="outline-text-4" id="text-5-1-1">
 <p>
 对于定长整数，emacs 直接返回该整数值，故整数哈希值可以直接用整数值：
@@ -845,8 +845,8 @@ INLINE <span style="color: #18b2b2;">EMACS_UINT</span>
 </div>
 </div>
 
-<div id="outline-container-orgc2ced69" class="outline-4">
-<h4 id="orgc2ced69"><span class="section-number-4">5.1.2</span> 符号</h4>
+<div id="outline-container-org32499b3" class="outline-4">
+<h4 id="org32499b3"><span class="section-number-4">5.1.2</span> 符号</h4>
 <div class="outline-text-4" id="text-5-1-2">
 <p>
 对于符号，emacs 返回符号的指针值，由于使用 elisp 拿不到指针值，我也就不能使用这种方法。我想到的办法是将符号转为字符串后使用字符串哈希处理，不过这样一来字符串和符号也就没什么区别了。
@@ -876,8 +876,8 @@ hash = XHASH (obj);
 </div>
 </div>
 
-<div id="outline-container-orgaa26b7e" class="outline-4">
-<h4 id="orgaa26b7e"><span class="section-number-4">5.1.3</span> 字符串</h4>
+<div id="outline-container-org8684036" class="outline-4">
+<h4 id="org8684036"><span class="section-number-4">5.1.3</span> 字符串</h4>
 <div class="outline-text-4" id="text-5-1-3">
 <p>
 对于字符串，emacs 的 sxhash_string 已经给出了实现，这里直接抄过来。这里给出 <code>hash--combine</code> 和 <code>hash--reduce</code> 两个函数的定义，它们用于处理字节。
@@ -951,8 +951,8 @@ C 使用的是 8 比特字节数组来计算字符串哈希，这里我们可以
 </div>
 </div>
 
-<div id="outline-container-org2da8e78" class="outline-4">
-<h4 id="org2da8e78"><span class="section-number-4">5.1.4</span> 浮点数</h4>
+<div id="outline-container-orgb562dcc" class="outline-4">
+<h4 id="orgb562dcc"><span class="section-number-4">5.1.4</span> 浮点数</h4>
 <div class="outline-text-4" id="text-5-1-4">
 <p>
 对于浮点数的处理，hashtable C 实现把 double 类型浮点数看作八个字节来处理。由于 elisp 同样拿不到浮点数的各个字节，这里就有了两种思路。一是将浮点数转字符串然后交给 <code>yyhash--string</code> 处理，二是通过浮点值推得最接近的 IEEE-754 表示，再进行哈希化。这里采用第二种方法（反正就是个玩具，随意吧）。咱的这个实现比较粗糙，准确性和性能可能不是很好。
@@ -973,7 +973,7 @@ C 使用的是 8 比特字节数组来计算字符串哈希，这里我们可以
 </div>
 
 
-<div id="orgb95cd01" class="figure">
+<div id="org89da6ba" class="figure">
 <p><img src="./5.png" alt="5.png" />
 </p>
 </div>
@@ -1013,8 +1013,8 @@ C 使用的是 8 比特字节数组来计算字符串哈希，这里我们可以
 </div>
 </div>
 
-<div id="outline-container-orgcb0e544" class="outline-4">
-<h4 id="orgcb0e544"><span class="section-number-4">5.1.5</span> 表和向量</h4>
+<div id="outline-container-orga9b2adc" class="outline-4">
+<h4 id="orga9b2adc"><span class="section-number-4">5.1.5</span> 表和向量</h4>
 <div class="outline-text-4" id="text-5-1-5">
 <p>
 接下来就是作为序列的表和向量了。因为这两种对象都是可以嵌套的，而且它们长度不定，所以需要添加一些约束，在 emacs 实现中限制作为哈希输入的最长长度为 7，最深嵌套为 3 层，这些措施显然是考虑到了哈希函数的计算时间。我们也仿照加上限制。
@@ -1114,8 +1114,8 @@ C 使用的是 8 比特字节数组来计算字符串哈希，这里我们可以
 </div>
 </div>
 
-<div id="outline-container-orgcfb3478" class="outline-4">
-<h4 id="orgcfb3478"><span class="section-number-4">5.1.6</span> 整合与测试</h4>
+<div id="outline-container-orgb2aceea" class="outline-4">
+<h4 id="orgb2aceea"><span class="section-number-4">5.1.6</span> 整合与测试</h4>
 <div class="outline-text-4" id="text-5-1-6">
 <p>
 现在我们可以通过将这些函数组装在一起完成整个哈希函数了。
@@ -1178,8 +1178,8 @@ C 使用的是 8 比特字节数组来计算字符串哈希，这里我们可以
 </div>
 </div>
 
-<div id="outline-container-org3050d25" class="outline-4">
-<h4 id="org3050d25"><span class="section-number-4">5.1.7</span> emacs 中实现的哈希函数</h4>
+<div id="outline-container-org93a1523" class="outline-4">
+<h4 id="org93a1523"><span class="section-number-4">5.1.7</span> emacs 中实现的哈希函数</h4>
 <div class="outline-text-4" id="text-5-1-7">
 <p>
 反正有的是时间，我就把三种比较函数 <code>eq</code> ， <code>eql</code> 和 <code>equal</code> 的 C 实现都读了一遍，下面我们来分析一下它们的区别。
@@ -1311,8 +1311,8 @@ DEFUN (<span style="color: #ff1f8b;">"equal"</span>, Fequal, Sequal, 2, 2, 0,
 </div>
 
 
-<div id="outline-container-orgfe1939e" class="outline-3">
-<h3 id="orgfe1939e"><span class="section-number-3">5.2</span> 哈希表的结构定义</h3>
+<div id="outline-container-org0e841e7" class="outline-3">
+<h3 id="org0e841e7"><span class="section-number-3">5.2</span> 哈希表的结构定义</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 接下来就是哈希结构体的定义了，这和具体的 C 实现方式是相关的。 <code>Lisp_Hash_Table</code> 的定义位于 lisp.h 的 2297 行到 2371 行，其中包括了许多我的实现中不需要的 slot。这里我摘取必要的 slot 来创建一个名为 yyhash 的 record 类型：
@@ -1402,7 +1402,7 @@ emacs 中处理哈希冲突的方法是拉链法，不过使用的是静态链�
                       res))
     (cons 'progn res)))
 
-(<span style="color: #00af00;">yyhash--s-gen-get/setter</span> yyhash--
+(yyhash--s-gen-get/setter yyhash--
                           (hash
                            next
                            index
@@ -1506,16 +1506,16 @@ emacs 中处理哈希冲突的方法是拉链法，不过使用的是静态链�
 </div>
 
 
-<div id="outline-container-orgdd3895d" class="outline-3">
-<h3 id="orgdd3895d"><span class="section-number-3">5.3</span> 哈希表的查找、删除与遍历</h3>
+<div id="outline-container-org798bfdb" class="outline-3">
+<h3 id="org798bfdb"><span class="section-number-3">5.3</span> 哈希表的查找、删除与遍历</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 由于加入键值对会涉及到哈希表的扩容，这里我们从比较简单的查找和删除开始。
 </p>
 </div>
 
-<div id="outline-container-org9b3bd5c" class="outline-4">
-<h4 id="org9b3bd5c"><span class="section-number-4">5.3.1</span> 查找</h4>
+<div id="outline-container-orgd1aa1ad" class="outline-4">
+<h4 id="orgd1aa1ad"><span class="section-number-4">5.3.1</span> 查找</h4>
 <div class="outline-text-4" id="text-5-3-1">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #b2b2b2; font-style: italic;">//</span><span style="color: #b2b2b2; font-style: italic;">fns.c 4307</span>
@@ -1584,8 +1584,8 @@ DEFUN (<span style="color: #ff1f8b;">"gethash"</span>, Fgethash, Sgethash, 2, 3,
 </div>
 
 
-<div id="outline-container-orgd128f00" class="outline-4">
-<h4 id="orgd128f00"><span class="section-number-4">5.3.2</span> 清空</h4>
+<div id="outline-container-org1b7829e" class="outline-4">
+<h4 id="org1b7829e"><span class="section-number-4">5.3.2</span> 清空</h4>
 <div class="outline-text-4" id="text-5-3-2">
 <p>
 移除操作比清空操作要复杂一点，因为它要负责管理静态链表。我们先从清空操作开始。
@@ -1644,8 +1644,8 @@ DEFUN (<span style="color: #ff1f8b;">"gethash"</span>, Fgethash, Sgethash, 2, 3,
 </div>
 
 
-<div id="outline-container-org115620c" class="outline-4">
-<h4 id="org115620c"><span class="section-number-4">5.3.3</span> 删除</h4>
+<div id="outline-container-org63c3867" class="outline-4">
+<h4 id="org63c3867"><span class="section-number-4">5.3.3</span> 删除</h4>
 <div class="outline-text-4" id="text-5-3-3">
 <p>
 接下来是删除操作，原实现有点长，这里就不贴出来了，它的位置是 fns.c 的 4375 行。
@@ -1686,8 +1686,8 @@ DEFUN (<span style="color: #ff1f8b;">"gethash"</span>, Fgethash, Sgethash, 2, 3,
 </div>
 
 
-<div id="outline-container-org81da965" class="outline-4">
-<h4 id="org81da965"><span class="section-number-4">5.3.4</span> 遍历</h4>
+<div id="outline-container-org931af12" class="outline-4">
+<h4 id="org931af12"><span class="section-number-4">5.3.4</span> 遍历</h4>
 <div class="outline-text-4" id="text-5-3-4">
 <p>
 最后是哈希表的遍历，由于在 elisp 中拿不到 unbound 值，所以我只能用键 nil 来代表空的 entry 了。这样一来我们也就没办法使用 nil 来作为键了。
@@ -1737,8 +1737,8 @@ DEFUN (<span style="color: #ff1f8b;">"maphash"</span>, Fmaphash, Smaphash, 2, 2,
 </div>
 
 
-<div id="outline-container-org46c764f" class="outline-3">
-<h3 id="org46c764f"><span class="section-number-3">5.4</span> 哈希表的添加</h3>
+<div id="outline-container-org6725542" class="outline-3">
+<h3 id="org6725542"><span class="section-number-3">5.4</span> 哈希表的添加</h3>
 <div class="outline-text-3" id="text-5-4">
 <p>
 添加是一个比较麻烦的步骤，因为它需要考虑扩容和管理链表等问题。咱们先实现放入操作，在放入之前需要使用 <code>maybe_resize_hash_table</code> 检查哈希表是否需要扩容。
@@ -1887,8 +1887,8 @@ DEFUN (<span style="color: #ff1f8b;">"puthash"</span>, Fputhash, Sputhash, 3, 3,
 </div>
 
 
-<div id="outline-container-org9e43e9e" class="outline-3">
-<h3 id="org9e43e9e"><span class="section-number-3">5.5</span> 测试与小结</h3>
+<div id="outline-container-org508281c" class="outline-3">
+<h3 id="org508281c"><span class="section-number-3">5.5</span> 测试与小结</h3>
 <div class="outline-text-3" id="text-5-5">
 <p>
 本哈希表的实现和测试我整合后放在 <a href="https://gist.github.com/include-yy/4b30d26e2a8b8bcdd46c1bcd717b3756">gist</a> 上了，可以方便地获取，这里就不放测试了，放张图说明测试的成功吧（毕竟测试代码也有近两百行&#x2026;&#x2026;）。
@@ -1902,7 +1902,7 @@ DEFUN (<span style="color: #ff1f8b;">"puthash"</span>, Fputhash, Sputhash, 3, 3,
 </colgroup>
 <tbody>
 <tr>
-<td class="org-left"><img src="./6.png" alt="6.png" /></td>
+<td class="org-left"><img src="./6.PNG" alt="6.PNG" /></td>
 </tr>
 </tbody>
 </table>
@@ -1926,8 +1926,8 @@ DEFUN (<span style="color: #ff1f8b;">"puthash"</span>, Fputhash, Sputhash, 3, 3,
 </div>
 </div>
 
-<div id="outline-container-org89105c4" class="outline-2">
-<h2 id="org89105c4"><span class="section-number-2">6</span> 后记</h2>
+<div id="outline-container-org64300c6" class="outline-2">
+<h2 id="org64300c6"><span class="section-number-2">6</span> 后记</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 这个摊子铺的大了点，本来只是准备记录一下 emacs 中哈希函数的用法，不过学学哈希表实现也算是有所收获。
@@ -1971,7 +1971,7 @@ DEFUN (<span style="color: #ff1f8b;">"puthash"</span>, Fputhash, Sputhash, 3, 3,
 </div></div>
 <div id="postamble" class="status">
 <hr class="Solid">
-<p>Create Date: 2021-10-09 Sat 17:06</p> <p>Last modified: 2022-01-24 Mon 22:46</p>
+<p>Create Date: 2021-10-09 Sat 17:06</p> <p>Last modified: 2022-01-24 Mon 23:00</p>
 <p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
 
 <p style="text-align:center;">
