@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-02-01 Tue 20:06 -->
+<!-- 2022-02-22 Tue 19:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Blog Home Page</title>
@@ -11,26 +11,50 @@
 <link rel="stylesheet" type="text/css" href="./css/style_gongzhitaao.css" />
 <link rel="icon" type="image/x-icon" href="./img/kagamine_rin.ico">
 <script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
 </script>
 </head>
 <body>
@@ -49,11 +73,12 @@
 </tbody>
 </table>
 
-<div id="outline-container-orgab3a441" class="outline-2">
-<h2 id="orgab3a441">目录：</h2>
-<div class="outline-text-2" id="text-orgab3a441">
-<div class="raw" id="orga3415c3">
+<div id="outline-container-org6952f31" class="outline-2">
+<h2 id="org6952f31">目录：</h2>
+<div class="outline-text-2" id="text-org6952f31">
+<div class="raw">
 <ul class="org-ul">
+<li><a href="./posts/2022-02-22-17-setf之CL的five-gangs与elisp的high-order-approach/index.html">2022-02-22-17-setf之CL的five-gangs与elisp的high-order-approach</a></li>
 <li><a href="./posts/2022-02-01-16-emacs的abbrev使用介绍/index.html">2022-02-01-16-emacs的abbrev使用介绍</a></li>
 <li><a href="./posts/2022-01-24-15-emacs的hashtable与多值返回/index.html">2022-01-24-15-emacs的hashtable与多值返回</a></li>
 <li><a href="./posts/2021-12-01-FFT小记/index.html">2021-12-01-FFT小记</a></li>
@@ -110,9 +135,24 @@
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2021-08-03 Tue 00:16</p>
-<p class="date">Created: 2022-02-01 Tue 20:06</p>
-<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+<hr class="Solid">
+<p>Create Date: 2021-08-03 Tue 00:16</p> <p>Last modified: 2022-02-22 Tue 19:33</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
 </div>
 </body>
 </html>

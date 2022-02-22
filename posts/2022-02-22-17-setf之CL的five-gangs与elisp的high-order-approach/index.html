@@ -1,0 +1,1394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-02-22 Tue 19:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>setf 之 CL 的 five gangs 与 elisp 的 high-order approach <div class="yyheadimg"><img src="./1.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="http://www.incf19.com/index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">setf 之 CL 的 five gangs 与 elisp 的 high-order approach <div class="yyheadimg"><img src="./1.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org8660f42">1. 什么是 setf</a></li>
+<li><a href="#org077f7dd">2. CL 中的 setf 与 gv</a></li>
+<li><a href="#org0540b70">3. 简单实现 CL 中的 setf 和 gv 机制</a></li>
+<li><a href="#org58fd390">4. elisp 中的 gv 机制</a></li>
+<li><a href="#orgcf37d66">5. elisp 的 gv.el 实现分析</a></li>
+<li><a href="#orgc40637f">6. 一些 setf 和 gv 的例子</a>
+<ul>
+<li><a href="#org8448459">6.1. incf, decf</a></li>
+<li><a href="#orgfd873a0">6.2. 字符串的范围赋值</a></li>
+<li><a href="#org7c53ccb">6.3. On Lisp 中的 _f 宏与 elisp 中的 cl-callf</a></li>
+<li><a href="#orgb06abfd">6.4. 排序</a></li>
+</ul>
+</li>
+<li><a href="#orgc229f49">7. 后记</a></li>
+<li><a href="#org2b2749d">8. 参考资料</a></li>
+</ul>
+</div>
+</div>
+<p>
+由标题可知，本文的内容与 <code>setf</code> 这个宏有关，这里我假设你已经知道了什么是 <code>setq</code> 。本文的主要内容可认为分为两大部分，首先我会展示 <code>setf</code> 的使用方法，以及介绍 CL 中 <code>setf</code> 的扩展方法。随后我会介绍 emacs 中的 <code>setf</code> 机制。在后一部分我会简单分析 emacs 中的实现，它位于 gv.el 文件中，核心代码行数在 200 行左右。
+</p>
+
+<p>
+在文中我会穿插一些 CL 和 emacs-lisp 中 setf 的简单用例以方便理解。在文章的最后我会集中列出一些用例，以供充分的参考。elisp reference manual 上的使用示例实在有点少。
+</p>
+
+<p>
+本文使用的代码环境如下：
+</p>
+
+<ul class="org-ul">
+<li>emacs 27.2 x86_64 on windows</li>
+<li>ECL 21.2.1 32 bit built with msvc</li>
+</ul>
+
+<div id="outline-container-org8660f42" class="outline-2">
+<h2 id="org8660f42"><span class="section-number-2">1</span> 什么是 setf</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+学过一点 Lisp（特指 CL）的人都知道，有个叫 <code>setq</code> 的东西，使用它可以方便地设置符号的 <code>symbol-value</code> 值，而不必要使用蹩脚的 <code>set</code> 。在 CL 中它是个 <code>special form</code> ，在 emacs lisp 中它是个 <code>#&lt;subr&gt;</code> 。下面的 <code>setq</code> 表达式和 <code>set</code> 表达式的效果相同：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(setq a 1) =&gt; 1
+(set 'a 1) =&gt; 1
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">emacs-lisp</span>
+(symbol-function 'setq)
+=&gt; #&lt;subr setq&gt;
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">common-lisp</span>
+(symbol-function 'setq)
+=&gt; SPECIAL
+</pre>
+</div>
+
+<p>
+<code>setf</code> 可以理解为 <code>setq</code> 一般化后的版本。除了符号外，它可以接受一个表达式，然后对表达式想要取值的“位置”进行赋值操作。换句话说，它可以根据 <code>getter</code> 表达式来得出对应的 <code>setter</code> 表达式，也就是获得 <code>getter</code> 对应的逆操作。举例来说的话就是这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(setq a '(1 2 3))
+(<span style="color: #00af00;">progn</span> (setf (car a) 2) a) =&gt; (2 2 3)
+(<span style="color: #00af00;">progn</span> (setf (car (cdr a)) 3) a) =&gt; (2 3 3)
+(<span style="color: #00af00;">progn</span> (setf (car (cdr (cdr a))) 4) a) =&gt; (2 3 4)
+</pre>
+</div>
+
+<p>
+<code>setf</code> 中的“位置”被称为 <i>generalized variable</i> ，非要翻译一下的话就是“一般化变量”。不加说明的话，下面我们使用 <code>gv</code> 来作为它的缩写。除了上面例子中使用的表操作， <code>setf</code> 还支持向量，哈希表等等。 <i>On Lisp</i> 的 176 页中这样写道：
+</p>
+
+<blockquote>
+<p>
+All the most frequently used Common Lisp access functions have predefined inversions, including car, cdr, nth, aref, get, gethash, and the access functions created by defstruct.
+</p>
+</blockquote>
+
+<p>
+容易看出 <code>setq</code> 中的 "q" 对应的是 <code>quote</code> ，用了它我们就不用写 <code>'</code> 了。那么 <code>setf</code> 中的 字母 "f" 对应的是哪个呢？不论是 common-lisp 还是 elisp 都使用 “PLACE” 来称呼 <code>setf</code> 中的赋值位置，那合理猜想一下 “f” 对应的应该是 “form”，也就是“形式”。不过也有认为它对应的应该是起源于 “function” 的说法<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>，而且有文献支持。文章中给出的 pdf<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup> 有兴趣的同学可以读一读。
+</p>
+
+<p>
+stackoverflow 有关于【f】本意的讨论，可以前往观之<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup> 。它的起源是 “function” 应该是没错了，不过个人理解为 field 或 form 也不是什么问题，毕竟你管不着我，我也管不着你（笑）。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org077f7dd" class="outline-2">
+<h2 id="org077f7dd"><span class="section-number-2">2</span> CL 中的 setf 与 gv</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+在这一节中我会介绍在 CL 中扩展 <code>setf</code> 的方法。 <code>setf</code> 默认支持一些常见的 <code>getter</code> ，我们可以使用 CL 提供的一些机制来对其进行扩展。对我这 CL 新手来说， <i>On Lisp</i> 上的一些例子看的我觉得有点匪夷所思。
+</p>
+
+<p>
+对于简单情况和复杂情况，CL 提供了不同的宏来供用户使用。 <code>define-modify-macro</code> 可以用来定义类似于 <code>incf</code> 和 <code>decf</code> 的宏，它的原型如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">define-modify-macro</span> <span style="color: #ef2929;">symbol</span> lambda-list function-name [doc])
+</pre>
+</div>
+
+<p>
+其中， <code>symbol</code> 是想要定义的宏的名字， <code>lambda-list</code> 是参数表，表示除 gv 外的其他参数。 <code>function-name</code> 是具体的赋值操作函数，它的第一个参数就是 gv，它的返回值将赋给 gv 对应的位置。举例来说，假如我们想要对一个 gv 进行取反操作，我们可以这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">define-modify-macro</span> <span style="color: #ef2929;">yy-nnot</span> () not)
+(setq a '(1 2 3))
+(yy-nnot (car a))
+a =&gt; (NIL 2 3)
+</pre>
+</div>
+
+<p>
+下面是一些带参数的例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">define-modify-macro</span> <span style="color: #ef2929;">yy-nmul</span> (n) (<span style="color: #00af00;">lambda</span> (place n) (* place n)))
+(setq a 2)
+(yy-nmul a 3) =&gt; 6
+
+(<span style="color: #00af00;">define-modify-macro</span> <span style="color: #ef2929;">yy-3mul</span> (m n) (<span style="color: #00af00;">lambda</span> (place o p) (* place o p)))
+(yy-3mul a 2 3) =&gt; 36
+
+(<span style="color: #00af00;">define-modify-macro</span> <span style="color: #ef2929;">yy-nconc</span> (<span style="color: #18b2b2;">&amp;rest</span> ls) (<span style="color: #00af00;">lambda</span> (place <span style="color: #18b2b2;">&amp;rest</span> ls) (apply #'nconc place ls)))
+(setq a '(1 2 3))
+(yy-nconc a '(4) '(5))
+a =&gt; (1 2 3 4 5)
+</pre>
+</div>
+
+<p>
+简单来说，使用 <code>define-modify-macro</code> 可以简化一些 <code>setf</code> 的操作，就比如使用 <code>incf</code> 我们就可以写 <code>(incf a 20)</code> 而不用写 <code>(setf a (+ a 20))</code> 了。emacs-lisp 在 cl.el 文件中也实现了这个宏，它在内部使用了 <code>cl-callf</code> 来完成 gv 的求值与赋值。考虑到 cl.el 已经废弃了，最好还是不要用了。
+</p>
+
+<p>
+<code>define-modify-macro</code> 只能用来编写一些简单的宏，想要实现更加复杂的功能，我们需要使用 <code>define-setf-expander</code> （以下简称 <code>dse</code> ）和 <code>get-setf-expansion</code> （以下简称 <code>gse</code> ）来定义和获取 gv 的一些信息。它们的原型如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">-----------------------------------------------------------------------------
+DEFINE-SETF-EXPANDER                                                  [Macro]
+Syntax: (<span style="color: #00af00;">define-setf-expander</span> <span style="color: #ef2929;">symbol</span> defmacro-lambda-list {decl | doc}*
+          {form}*)
+Defines the SETF-method for generalized-variables (SYMBOL ...).
+When a form (setf (SYMBOL arg1 ... argn) value-form) is evaluated, the FORMs
+given in the DEFINE-SETF-EXPANDER are evaluated in order with the parameters in
+DEFMACRO-LAMBDA-LIST bound to ARG1 ... ARGn.  The last FORM must return five
+values
+        (var1 ... vark)
+        (form1 ... formk)
+        (value-var)
+        storing-form
+        access-form
+in order.  These values are collectively called the five gangs of the
+generalized variable (SYMBOL arg1 ... argn).  The whole SETF form is then
+expanded into
+        (<span style="color: #00af00;">let*</span> ((var1 from1) ... (vark formk)
+               (value-var value-form))
+          storing-form)
+The doc-string DOC, if supplied, is saved as a SETF doc and can be retrieved
+by (DOCUMENTATION 'SYMBOL 'SETF).
+-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+GET-SETF-EXPANSION                                                 [Function]
+Args: (form)
+Returns the 'five gangs' (see DEFINE-SETF-EXPANDER) for PLACE as five values.
+Does not check if the third gang is a single-element list.
+-----------------------------------------------------------------------------
+</pre>
+</div>
+
+<p>
+简单起见，咱们还是先从 <code>gse</code> 开始说起。由上述文档可知， <code>gse</code> 会返回一个“五元组”（five gangs），它们分别是：
+</p>
+
+<ul class="org-ul">
+<li><code>(var1 ... vark)</code> ，它是一个符号表，各符号 <b>对应</b> 于出现在 <code>(symbol arg1 ... argn)</code> 中的 <code>arg1 ... argn</code></li>
+<li><code>(form1 ... formn)</code> ，它是 <code>(symbol arg1 ... argn)</code> 中的各 <code>arg1 ... argn</code> 表达式</li>
+<li><code>(value-var)</code> 最终用于赋值操作的符号</li>
+<li><code>storing-form</code> ，执行赋值操作的表达式</li>
+<li><code>access-form</code> ，用于访问 <code>form</code> 对应“位置”的表达式</li>
+</ul>
+
+<p>
+这里我们用个简单的例子来说明各值的具体作用：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(get-setf-expansion '(aref x (incf b)))
+(<span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G113</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G114</span>)
+(X (INCF B))
+(<span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G115</span>)
+(SI:ASET <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G113</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G114</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G115</span>)
+(AREF <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G113</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G114</span>)
+</pre>
+</div>
+
+<p>
+上面对应的 <code>form</code> 是 <code>(aref x (incf b))</code> ，可见表中有两个表达式，所以五元组的第一元素对应的是长度为 2 的符号表。第二元素就是 <code>form</code> 中各参数表达式，第三元素是出现在 <code>storing-form</code> 中的符号，第四元素是赋值操作表达式，第五元素是值访问表达式。
+</p>
+
+<p>
+<code>setf</code> 在遇到定义好的扩展（使用 <code>dse</code> 定义的展开器）时会将其展开成默认形式：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">let*</span> ((var1 from1) ... (vark formk)
+       (value-var value-form))
+  storing-form)
+</pre>
+</div>
+
+<p>
+可见，单纯地使用 <code>setf</code> 不需要 <code>access-form</code> 。
+</p>
+
+<p>
+下面我们不使用 <code>setf</code> ，而是自己编写一个宏来作为对五元组处理的例子：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-arefset</span> (form val)
+  (<span style="color: #cc0000; font-weight: bold;">assert</span> (eq (car form) 'aref))
+  (<span style="color: #00af00;">multiple-value-bind</span> (vs fs g sop aop)
+      (get-setf-expansion form)
+    `(<span style="color: #00af00;">let</span> (,@(mapcar #'list vs fs)
+           (,(car g) ,val))
+       ,sop)))
+
+(setq a #(1 2 3))
+(yy-arefset (aref a 1) 1)
+a =&gt; #(1 1 3)
+</pre>
+</div>
+
+<p>
+如果我们想使用 <code>setf</code> 而不是像上面一样自己定义宏，那么可以使用 <code>define-setf-expander</code> 来定义新的五元组生成器：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">define-setf-expander</span> <span style="color: #ef2929;">yy-arefset-g</span> (place index)
+  (<span style="color: #00af00;">let</span> ((var (gensym))
+        (pos (gensym))
+        (setvar (gensym)))
+    (values
+     `(,var ,pos)
+     `(,place ,index)
+     `(,setvar)
+     `(setf (aref ,var ,pos) ,setvar)
+     `(aref ,var ,pos))))
+
+(get-setf-expansion '(yy-arefset-g a (+ 1 2))) =&gt;
+(<span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G152</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G153</span>)
+(A (+ 1 2))
+(<span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G154</span>)
+(SETF (AREF <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G152</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G153</span>) <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G154</span>)
+(AREF <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G152</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G153</span>)
+
+(setq a #(1 2 3))
+(setf (yy-arefset-g a 0) 2) =&gt; #(2 2 3)
+
+(macroexpand '(setf (yy-arefset-g a 0) 2)) =&gt;
+(<span style="color: #00af00;">LET*</span> ((<span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G167</span> A) (<span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G168</span> 0))
+  (<span style="color: #00af00;">MULTIPLE-VALUE-BIND</span> (<span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G169</span>) 2 (SETF (AREF <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G167</span> <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G168</span>) <span style="color: #b2b2b2; font-style: italic;">#:</span><span style="color: #cc0000;">G169</span>)))
+</pre>
+</div>
+
+<p>
+CL 还提供了一种轻松定义 <code>getter</code> 对应的 <code>setter</code> 的方法，那就是使用 <code>defsetf</code> 。它的原型如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">-----------------------------------------------------------------------------
+DEFSETF                                                               [Macro]
+Syntax: (<span style="color: #00af00;">defsetf</span> <span style="color: #ef2929;">symbol</span> update-fun [doc])
+        or
+        (<span style="color: #00af00;">defsetf</span> <span style="color: #ef2929;">symbol</span> lambda-list (store-var*) {decl | doc}* {form}*)
+Defines an expansion
+(setf (SYMBOL arg1 ... argn) value)
+=&gt; (UPDATE-FUN arg1 ... argn value)
+or
+(<span style="color: #00af00;">let*</span> ((temp ARG)*)
+  (<span style="color: #00af00;">multiple-value-bind</span> (temp-s*)
+      values-form
+    rest)
+  where REST is the value of the last FORM with parameters in
+  LAMBDA-LIST bound to the symbols TEMP* and with STORE-VAR* bound to
+  the symbols TEMP-S*.  The doc-string DOC, if supplied, is saved as a
+  SETF doc and can be retrieved by (documentation 'SYMBOL 'setf).
+-----------------------------------------------------------------------------
+</pre>
+</div>
+
+<p>
+它的用法分为两种，一种简单的和一种复杂的，下面先演示简单的用法：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-caar</span> (x) (car (car x)))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-caar-set</span> (x v) (setf (caar x) v))
+(<span style="color: #00af00;">defsetf</span> <span style="color: #ef2929;">yy-caar</span> yy-caar-set)
+
+(setq a '((1) 2 3))
+(setf (yy-caar a) 2)
+a =&gt; ((2) 2 3)
+(macroexpand '(setf (yy-caar a) 1)) =&gt;
+(YY-CAAR-SET A 1)
+</pre>
+</div>
+
+<p>
+相比于简单用法，复杂用法使用 <code>store-var</code> 与 <code>setf</code> 剩余参数绑定，处理起来更加灵活：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-cadr</span> (x) (second x))
+(<span style="color: #00af00;">defsetf</span> <span style="color: #ef2929;">yy-cadr</span> (lst) (new-val)
+  `(<span style="color: #00af00;">progn</span> (setf (cadr ,lst) ,new-val)))
+
+(setq a '(1 2 3))
+(setf (yy-cadr a) 3)
+a =&gt; (1 3 3)
+</pre>
+</div>
+
+<p>
+除了说使用 <code>defsetf</code> ，我们还可以使用 <code>(defun (setf fun) ...)</code> 的形式来定义 <code>setter</code> ，例如：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-car</span> (x) (car x))
+(<span style="color: #00af00;">defun</span> (<span style="color: #ef2929;">setf yy-car</span>) (val ls) (rplaca ls val) val)
+(setq a '(1 3 3))
+(setf (yy-car a) 2) =&gt; (2 3 3)
+</pre>
+</div>
+
+<p>
+注意上面的参数表中，值放在第一位。
+</p>
+
+<p>
+以上，我们就完成了对 CL 中的 setf 和 gv 的简单介绍。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org0540b70" class="outline-2">
+<h2 id="org0540b70"><span class="section-number-2">3</span> 简单实现 CL 中的 setf 和 gv 机制</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+通过上一节的介绍，我们已经基本清楚了 CL 提供的 setf 和 gv 设施。它们是：
+</p>
+
+<ul class="org-ul">
+<li><code>define-modify-macro</code> ，提供简单的 <code>setf</code> 扩展</li>
+<li><code>defsetf</code> ，方便地定义 <code>getter</code> 对应的 <code>setter</code></li>
+<li><code>dse</code> 和 <code>gse</code> ，复杂且强大的 gv 扩展工具</li>
+</ul>
+
+<p>
+为了进一步理解 setf 和 gv，我们可以考虑自己实现一个简单版本的 setf 和 gv。在这一节中，我们会一步一步实现一个简化版的 gv 机制。
+</p>
+
+<p>
+容易想到，gv 中最关键的部分肯定是 five gangs 和 setf 宏，其他更简单的东西是在它们的基础上建立起来的。我们首先应该考虑实现 <code>define-setf-expander</code> 和 <code>get-setf-expansion</code> 。定义的展开器可以放在符号的 plist 中，不过这里我选择放在统一的 hashtable 中，当定义新的展开器时直接覆盖旧值。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defvar</span> <span style="color: #ff8700;">*yy-expander-table*</span> (make-hash-table))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-ref-table</span> (s)
+  (<span style="color: #00af00;">multiple-value-bind</span> (v f) (gethash s *yy-expander-table*)
+    (and f v)))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-set-table</span> (s v)
+  (setf (gethash s *yy-expander-table*) v))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-clr-table</span> ()
+  (clrhash *yy-expander-table*))
+</pre>
+</div>
+
+<p>
+接着就是编写 <code>define-setf-expander</code> 了，简便起见我使用 <code>yy-dse</code> 来作为它的名字（ <code>get-setf-expansion</code> 也同理）。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-dse</span> (name lambda-ls <span style="color: #18b2b2;">&amp;rest</span> form)
+  (<span style="color: #cc0000; font-weight: bold;">assert</span> (and (not (null lambda-ls))
+               (not (null form))))
+  (yy-set-table name (coerce `(<span style="color: #00af00;">lambda</span> ,lambda-ls ,@form) 'function)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-gse</span> (form)
+  (<span style="color: #00af00;">if</span> (symbolp form)
+      (<span style="color: #00af00;">let</span> ((v (gensym))
+            (g (gensym)))
+        (values `(,v) `(,form) `(,g) `(setq ,form ,g) v))
+      (<span style="color: #00af00;">let</span> ((res (yy-ref-table (car form))))
+        (<span style="color: #cc0000; font-weight: bold;">assert</span> res)
+        (apply res (cdr form)))))
+</pre>
+</div>
+
+<p>
+如你所见，它们两个是非常简单的函数和宏，用起来需要非常小心，因为基本上没有做任何检查（反正就是个玩具）。接下来我们就开始实现 <code>setf</code> 了，这是整个 gv 机制的要点之一。
+</p>
+
+<p>
+<code>setf</code> 接受成对的参数，并按顺序完成赋值操作。它的整个原理并不复杂，实现如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-setf</span> (<span style="color: #18b2b2;">&amp;rest</span> form)
+  (<span style="color: #00af00;">if</span> (/= (logand (length form) 1) 0)
+      (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"yy-setf: Wrong-number-of-arguments(~A)"</span> (length form)))
+  (<span style="color: #00af00;">if</span> (and form (null (cddr form)))
+      (<span style="color: #00af00;">let</span> ((place (pop form))
+            (val (car form)))
+        (<span style="color: #00af00;">if</span> (symbolp place) `(setq ,place ,val)
+            (<span style="color: #00af00;">multiple-value-bind</span>
+                  (vars fms value-var storing access) (yy-gse place)
+              `(<span style="color: #00af00;">let*</span> (,@(mapcar #'list vars fms)
+                      (,(car value-var) ,val))
+                 ,storing))))
+      (<span style="color: #00af00;">let</span> ((sets nil))
+        (<span style="color: #00af00;">prog</span> ()
+         it
+           (push `(setf ,(pop form) ,(pop form)) sets)
+           (<span style="color: #00af00;">when</span> form (<span style="color: #00af00;">go</span> it)))
+        (cons 'progn (nreverse sets)))))
+</pre>
+</div>
+
+<p>
+有了 <code>gse</code> <code>dse</code> 和 <code>setf</code> ，我们就已经完成了对 gv 机制的实现，下面用几个基本操作说明一下使用方法：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(yy-dse car (x)
+        (<span style="color: #00af00;">let</span> ((v (gensym))
+              (s (gensym)))
+          (values
+           `(,v)
+           `(,x)
+           `(,s)
+           `(yy-setcar ,v ,s)
+           `(car ,v))))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setcar</span> (x v)
+  (setf (car x) v))
+
+(setq a '(1 2 3))
+(yy-setf (car a) 2) =&gt; 2
+a =&gt; (2 2 3)
+
+(yy-dse aref (x n)
+        (<span style="color: #00af00;">let</span> ((v0 (gensym))
+              (v1 (gensym))
+              (s (gensym)))
+          (values
+           `(,v0 ,v1)
+           `(,x ,n)
+           `(,s)
+           `(yy-setvec ,v0 ,v1 ,s)
+           `(aref ,v0 ,v1))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setvec</span> (x n v)
+  (setf (aref x n) v))
+
+(setq a #(0 1 2))
+(yy-setf (aref a 0) 2)
+a =&gt; #(2 1 2)
+</pre>
+</div>
+
+<p>
+可以看到，即便是最简单的 <code>car</code> <code>aref</code> ，使用这套机制来实现也有点小麻烦，下面我们添加一些辅助函数和宏，也就是 <code>define-modify-macro</code> 和 <code>defsetf</code> 。由于在 <code>defun</code> 中使用 <code>(setf name)</code> 形式式定义需要自己定义一个 <code>defun</code> ，这里就不实现它了。出于实现简单考虑， <code>yy-ds</code> 只实现了接受修改函数名，而 <code>define-modify-macro</code> 的参数表只接受普通参数，没有考虑使用 <code>optional</code> 或 <code>rest</code> 的情况。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-ds</span> (symbol function-or-ls <span style="color: #18b2b2;">&amp;optional</span> store-var <span style="color: #18b2b2;">&amp;rest</span> form)
+  (<span style="color: #00af00;">if</span> (not (symbolp function-or-ls)) (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"yy-ds: not symbol"</span>)
+      (<span style="color: #00af00;">let</span> ((fun function-or-ls))
+        `(yy-dse ,symbol (<span style="color: #18b2b2;">&amp;rest</span> x)
+                 (<span style="color: #cc0000; font-weight: bold;">assert</span> x)
+                 (<span style="color: #00af00;">let</span> ((vs (mapcar (<span style="color: #00af00;">lambda</span> (x) (gensym)) x))
+                       (g (gensym)))
+                   (values vs x `(,g) `(funcall #',',fun ,@vs ,g) `(,',symbol ,@vs)))))))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-scar</span> (x v) (setf (car x) v))
+(yy-ds car yy-setcar)
+
+(setq a '(1 2 3))
+(yy-setf (car a) 2)
+a =&gt; (2 2 3)
+</pre>
+</div>
+
+<p>
+下面是 <code>yy-dmm</code> 的实现：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-dmm</span> (name arglist func)
+  (<span style="color: #00af00;">let*</span> ((arglist-1 (cons 'obj arglist)))
+    `(<span style="color: #00af00;">defmacro</span> ,name ,arglist-1
+       (<span style="color: #00af00;">multiple-value-bind</span> (vs fs val st as) (yy-gse obj)
+         `(<span style="color: #00af00;">let*</span> (,@(mapcar #'list vs fs)
+                 (,(car val) ,as))
+            (setq ,(car val) (funcall #',',func ,(car val) ,,@arglist))
+            ,st)))))
+
+(yy-dmm yy-incf (x) +)
+(setq a 1)
+(yy-incf a 4) =&gt; 5
+a =&gt; 5
+</pre>
+</div>
+
+<p>
+以上，我们就完成了对 gv 机制的一个基本实现。完整实现我放在了 gist<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup> 上。下面我们来一些测试代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setcar</span> (x v) (setf (car x) v))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setcdr</span> (x v) (setf (cdr x) v))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setcaar</span> (x v) (setf (caar x) v))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setcadr</span> (x v) (setf (cadr x) v))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setcdar</span> (x v) (setf (cdar x) v))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setcddr</span> (x v) (setf (cddr x) v))
+(yy-ds car yy-setcar)
+(yy-ds cdr yy-setcdr)
+(yy-ds caar yy-setcaar)
+(yy-ds cadr yy-setcadr)
+(yy-ds cdar yy-setcdar)
+(yy-ds cddr yy-setcddr)
+
+(setq a '(1 (2) (3 (4))))
+(yy-setf (car (car (cdr a))) 3) =&gt; a is (1 (3) (3 (4)))
+(yy-setf (cdr a) 2) =&gt; a is (1 . 2)
+(setq a '((1)))
+(yy-setf (caar a) 3) =&gt; a is ((3))
+(setq a '(1 2))
+(yy-setf (cadr a) 4) =&gt; a is (1 4)
+(setq a '((1) 2))
+(yy-setf (cdar a) 5) =&gt; a is ((1 . 5) 2)
+(setq a '(1 2 3))
+(yy-setf (cddr a) 5) =&gt; a is (1 2 . 5)
+
+(yy-dmm yy-mulf (x y) *)
+
+(setq a '(1 2 3))
+(yy-mulf (car a) 2 3)
+(yy-mulf (cadr a) 2 3)
+(yy-mulf (car (cddr a)) 2 4)
+a =&gt; (6 12 24)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org58fd390" class="outline-2">
+<h2 id="org58fd390"><span class="section-number-2">4</span> elisp 中的 gv 机制</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+elisp 中的 cl.el 提供了 <code>define-modify-macro</code> 和 <code>defsetf</code> ，但是只提供了 <code>dse</code> 而没有 <code>gse</code> 。在 cl.el 中有这样一段注释：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">FIXME: CL used to provide get-setf-method, which was used by some</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">setf-expanders, but now that we use gv.el, it is a lot more difficult</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">and in general impossible to provide get-setf-method.  Hopefully, it</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">won't be needed.  If needed, we'll have to do something nasty along the</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">lines of</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">(defun get-setf-method (place &amp;optional env)</span>
+<span style="color: #b2b2b2; font-style: italic;">;;   </span><span style="color: #b2b2b2; font-style: italic;">(let* ((witness (list 'cl-gsm))</span>
+<span style="color: #b2b2b2; font-style: italic;">;;          </span><span style="color: #b2b2b2; font-style: italic;">(expansion (gv-letplace (getter setter) place</span>
+<span style="color: #b2b2b2; font-style: italic;">;;                      </span><span style="color: #b2b2b2; font-style: italic;">`(,witness ,getter ,(funcall setter witness)))))</span>
+<span style="color: #b2b2b2; font-style: italic;">;;     </span><span style="color: #b2b2b2; font-style: italic;">...find "let prefix" of expansion, extract getter and setter from</span>
+<span style="color: #b2b2b2; font-style: italic;">;;     </span><span style="color: #b2b2b2; font-style: italic;">...the rest, and build the 5-tuple))</span>
+</pre>
+</div>
+
+<p>
+由注释可知，elisp 现在提供了全新的 gv 机制，它的实现位于 gv.el 中。因此本节的内容主要是对 gv.el 功能的介绍。由于要讲清楚它的功能必须要说明它的原理，这一节我会依照 gv.el 中的实现给出一个更简单的实现以方便理解。在下一节中我们会完整地介绍 gv.el 的全部功能。
+</p>
+
+<p>
+gv.el 的版权时间是从 2012 年开始的，它的作者是 Stefan Monnier。在文件开头的注释简要介绍了实现原理，这里我结合自己理解简述一下。相比于 CL 中的 <code>define-setf-expander</code> ，它使用了不同的方法重新实现了 setf 机制。
+</p>
+
+<p>
+<code>dse</code> 定义了返回五元组 <code>(vars values stores setter access)</code> 的展开器。与之不同的是，gv.el 使用了基于高阶函数的方法。展开器会返回一个函数而不是五元组。该函数接受一个 <code>do</code> 函数并完成相应工作。 <code>do</code> 函数接受两个参数，第一参数是获取 <code>PLACE</code> 值的表达式，第二参数是一个函数，它接受一个值表达式，并返回将 <code>PLACE</code> 设置为该值的表达式。
+</p>
+
+<p>
+怎么理解这个高阶函数的使用方法呢？我的理解是：首先使用展开器来获取 gv 的 <code>getter</code> 和 <code>setter</code> 表达式，并将它们以代码的形式存放到展开器返回的高阶函数中。类似于这个样子：
+</p>
+
+<pre class="example">
+(setq a (&lt;generate-function&gt; &lt;something&gt;)
+a =&gt;
+(lambda (do)
+  (funcall do &lt;getter-form&gt; &lt;setter-function&gt;))
+</pre>
+
+<p>
+这样一来，我们把动作写进 <code>do</code> 函数里面，就可以执行我们想要的操作了。如果想要获取值就可以返回第一参数的值，并忽略掉 <code>do</code> 的第二参数。如果想要进行赋值操作，就可以将想要的值放入 <code>do</code> 函数中，并在函数中调用 <code>setter</code> 函数获取赋值代码。这两个操作的代码如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">&#33719;&#21462;&#20540;</span>
+(funcall a (<span style="color: #00af00;">lambda</span> (g s) g))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">&#35774;&#32622;&#20540;</span>
+(<span style="color: #00af00;">defmacro</span> (set-a a v-exp)
+    (funcall a (<span style="color: #00af00;">lambda</span> (g s)
+                 (funcall s v-exp))))
+(set-a a &lt;something&gt;)
+</pre>
+</div>
+
+<p>
+这大概就是 gv.el 的基本原理。实际上不用展开器我们也可以定义出可用的高阶函数，下面我们来实现一下最基本的配套函数，也就是 <code>car</code> 和对应的 <code>setcar</code> 。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defvar</span> <span style="color: #ff8700;">yy-high-order-store-table</span> (make-hash-table))
+<span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">&#20026;(car symb) &#20013;&#30340;&#29983;&#25104;&#23545;&#24212;&#30340;&#39640;&#38454;&#20989;&#25968;</span>
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-genit</span> (symb)
+  `(<span style="color: #00af00;">lambda</span> (doit)
+     (funcall doit `(car ,',symb)
+              (<span style="color: #00af00;">lambda</span> (v) `(setcar ,',symb ,v)))))
+
+(puthash 'yycar 'yy-genit yy-high-order-store-table)
+
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-setf</span> (place val)
+  (<span style="color: #00af00;">if</span> (atom place)
+      `(<span style="color: #00af00;">setq</span> ,place ,val)
+    (funcall (funcall (gethash (car place) yy-high-order-store-table)
+                      (cadr place))
+             (<span style="color: #00af00;">lambda</span> (g s)
+               (funcall s val)))))
+
+(<span style="color: #00af00;">setq</span> a '(1 2 3))
+(car a) =&gt; 1
+(<span style="color: #00af00;">yy-setf</span> (yycar a) 2) =&gt; 2
+a =&gt; (2 2 3)
+</pre>
+</div>
+
+<p>
+上面的实现是个相当简陋的实现，使用哈希表来存储高阶函数生成函数，只支持单参数的 <code>getter</code> 函数，没有处理宏展开以及 function indirection， <code>setf</code> 不支持多组，不过也足以说明原理了。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgcf37d66" class="outline-2">
+<h2 id="orgcf37d66"><span class="section-number-2">5</span> elisp 的 gv.el 实现分析</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+上一小节实现的 <code>yy-setf</code> 太过简陋，在这一小节中我们学习一下 gv.el 中的实现。为了减小篇幅，这里我省去了源代码中的注释内容。
+</p>
+
+<p>
+对应于 CL 中 <code>dse</code> 的是名为 <code>gv-define-expander</code> 的宏，它接受一个符号和一个高阶函数，并将高阶函数放入符号的 plist 中，我上面实现的是放入哈希表中。 <code>gv-define-expander</code> 只有几行，高阶函数需要自行编写：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">gv-define-expander</span> (name handler)
+  (<span style="color: #00af00;">declare</span> (indent 1) (debug (sexp form)))
+  `(function-put ',name 'gv-expander ,handler))
+</pre>
+</div>
+
+<p>
+接下来介绍一下用于生成高阶函数的 <code>gv-define-setter</code> 和 <code>gv--defsetter</code> 。 <code>gv-define-setter</code> 在内部调用 <code>gv-define-expander</code> 将高阶函数与符号绑定。 <code>gv-define-setter</code> 是对 <code>gv--defsetter</code> 的简单包装：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">gv-define-setter</span> (name arglist <span style="color: #18b2b2;">&amp;rest</span> body)
+  (<span style="color: #00af00;">declare</span> (indent 2) (debug (<span style="color: #18b2b2;">&amp;define</span> name sexp def-body)))
+  `(<span style="color: #00af00;">gv-define-expander</span> ,name
+     (<span style="color: #00af00;">lambda</span> (<span style="color: #00af00;">do</span> <span style="color: #18b2b2;">&amp;rest</span> args)
+       (<span style="color: #00af00;">declare-function</span>
+        gv--defsetter <span style="color: #ff1f8b;">"gv"</span> (name setter do args <span style="color: #18b2b2;">&amp;optional</span> vars))
+       (gv--defsetter ',name (<span style="color: #00af00;">lambda</span> ,arglist ,@body) do args))))
+</pre>
+</div>
+
+<p>
+下面是 <code>gv-defsetter</code> 的定义，由它可以生成高阶函数应用于 <code>do</code> 函数时的调用过程。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">gv--defsetter</span> (name setter do args <span style="color: #18b2b2;">&amp;optional</span> vars)
+  (<span style="color: #00af00;">if</span> (null args)
+      (<span style="color: #00af00;">let</span> ((vars (nreverse vars)))
+        (funcall do `(,name ,@vars) (<span style="color: #00af00;">lambda</span> (v) (apply setter v vars))))
+    <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">FIXME: Often it would be OK to skip this `</span><span style="color: #1f5bff; font-style: italic;">let</span><span style="color: #b2b2b2; font-style: italic;">', but in general,</span>
+    <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">`</span><span style="color: #1f5bff; font-style: italic;">do</span><span style="color: #b2b2b2; font-style: italic;">' may have all kinds of side-effects.</span>
+    (<span style="color: #00af00;">macroexp-let2</span> nil v (car args)
+      (gv--defsetter name setter do (cdr args) (cons v vars)))))
+</pre>
+</div>
+
+<p>
+可以注意到， <code>gv-define-setter</code> 定义的第四行 <code>(lambda (do &amp;rest args)</code> ，高阶函数除了接受 <code>do</code> 函数外还接受 <code>rest</code> 参数，并将其作为 <code>gv-defsetter</code> 调用的 <code>args</code> 参数。而 <code>gv--defsetter</code> 对其的处理是使用单次求值宏 <code>macroexp-let2</code> 将这些参数一层层包起来，再统一交给 <code>setter</code> 处理。这个疑点会在我介绍 <code>gv-get</code> 时得到解决。这里我使用 <code>setcar</code> 作为例子介绍 <code>gv-define-setter</code> 的使用。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">gv-define-setter</span> yycar (val x)
+  `(setcar ,x ,val))
+(<span style="color: #00af00;">setq</span> a '(1 2 3))
+(<span style="color: #00af00;">setf</span> (yycar a) 2)
+a =&gt; (2 2 3)
+</pre>
+</div>
+
+<p>
+可以看到，要定义 <code>setter</code> 需要将值参数 <code>val</code> 作为第一参数，其余参数位置不变。除了 <code>gv-define-setter</code> ，elisp 还提供了更加方便的 <code>gv-define-simple-setter</code> 来定义简单赋值：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">gv-define-simple-setter</span> (name setter <span style="color: #18b2b2;">&amp;optional</span> fix-return)
+  (<span style="color: #00af00;">declare</span> (debug (sexp (<span style="color: #18b2b2;">&amp;or</span> symbolp lambda-expr) <span style="color: #18b2b2;">&amp;optional</span> sexp)))
+  (<span style="color: #00af00;">when</span> (eq 'lambda (car-safe setter))
+    (message <span style="color: #ff1f8b;">"Use `</span><span style="color: #1f5bff;">gv-define-setter</span><span style="color: #ff1f8b;">' or name %s's setter function"</span> name))
+  `(<span style="color: #00af00;">gv-define-setter</span> ,name (val <span style="color: #18b2b2;">&amp;rest</span> args)
+     ,(<span style="color: #00af00;">if</span> fix-return
+          `(<span style="color: #00af00;">macroexp-let2</span> nil v val
+             `(<span style="color: #00af00;">progn</span>
+                (,',setter ,@args ,v)
+                ,v))
+        ``(,',setter ,@args ,val))))
+</pre>
+</div>
+
+<p>
+使用它，我们可以将 <code>yycar</code> 的定义写的更加简单：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yycar2</span> (x) (car x))
+(<span style="color: #00af00;">gv-define-simple-setter</span> yycar2 setcar)
+(<span style="color: #00af00;">setq</span> a '(1 3 3))
+(<span style="color: #00af00;">setf</span> (yycar2 a) 2)
+a =&gt; (2 3 3)
+</pre>
+</div>
+
+<p>
+它的可选参数 <code>FIX-RETURN</code> 在 <code>setter</code> 不返回 <code>val</code> 时很有用，可以用来确保 <code>setf</code> 表达式的值为 <code>val</code> ，举例来说的话就像这样：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-setter</span> (x v) (<span style="color: #00af00;">prog1</span> 'wocao (setcar x v)))
+(<span style="color: #00af00;">setq</span> a '(2 3 3))
+(yy-setter a 3) =&gt; wocao
+a =&gt; (3 3 3)
+(<span style="color: #00af00;">gv-define-simple-setter</span> yycar3 yy-setter t)
+(<span style="color: #00af00;">setf</span> (yycar3 a) 4) =&gt; 4
+a =&gt; (4 3 3)
+</pre>
+</div>
+
+<p>
+接下来就是接口宏 <code>setf</code> 了，根据它的定义我们可以清楚地明白它的作用，这里我就不废话了：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">setf</span> (<span style="color: #18b2b2;">&amp;rest</span> args)
+  (<span style="color: #00af00;">declare</span> (debug (<span style="color: #18b2b2;">&amp;rest</span> [gv-place form])))
+  (<span style="color: #00af00;">if</span> (/= (logand (length args) 1) 0)
+      (<span style="color: #cc0000; font-weight: bold;">signal</span> 'wrong-number-of-arguments (list 'setf (length args))))
+  (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">and</span> args (null (cddr args)))
+      (<span style="color: #00af00;">let</span> ((place (<span style="color: #00af00;">pop</span> args))
+            (val (car args)))
+        (<span style="color: #00af00;">gv-letplace</span> (_getter setter) place
+          (funcall setter val)))
+    (<span style="color: #00af00;">let</span> ((sets nil))
+      (<span style="color: #00af00;">while</span> args (<span style="color: #00af00;">push</span> `(<span style="color: #00af00;">setf</span> ,(<span style="color: #00af00;">pop</span> args) ,(<span style="color: #00af00;">pop</span> args)) sets))
+      (cons 'progn (nreverse sets)))))
+</pre>
+</div>
+
+<p>
+接下来就来到了本小节的重头戏 —— 高阶函数的标准调用入口 <code>gv-get</code> 。在这里我们将解决掉上面指出的疑点。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"> 1 (<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">gv-get</span> (place do)
+ 2   (<span style="color: #00af00;">cond</span>
+ 3    ((symbolp place) (funcall do place (<span style="color: #00af00;">lambda</span> (v) `(<span style="color: #00af00;">setq</span> ,place ,v))))
+ 4    ((not (consp place)) (<span style="color: #cc0000; font-weight: bold;">signal</span> 'gv-invalid-place (list place)))
+ 5    (t
+ 6     (<span style="color: #00af00;">let*</span> ((head (car place))
+ 7            (gf (function-get head 'gv-expander 'autoload)))
+ 8       (<span style="color: #00af00;">if</span> gf (apply gf do (cdr place))
+ 9         (<span style="color: #00af00;">let</span> ((me (macroexpand-1 place
+10                                  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">(append macroexpand-all-environment</span>
+11                                  <span style="color: #b2b2b2; font-style: italic;">;;         </span><span style="color: #b2b2b2; font-style: italic;">gv--macro-environment)</span>
+12                                  macroexpand-all-environment)))
+13           (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">and</span> (eq me place) (get head 'compiler-macro))
+14               <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">Expand compiler macros: this takes care of all the accessors</span>
+15               <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">defined via cl-defsubst, such as cXXXr and defstruct slots.</span>
+16               (<span style="color: #00af00;">setq</span> me (apply (get head 'compiler-macro) place (cdr place))))
+17           (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">and</span> (eq me place) (fboundp head)
+18                    (symbolp (symbol-function head)))
+19               <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">Follow aliases.</span>
+20               (<span style="color: #00af00;">setq</span> me (cons (symbol-function head) (cdr place))))
+21           (<span style="color: #00af00;">if</span> (eq me place)
+22               (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">and</span> (symbolp head) (get head 'setf-method))
+23                   (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"Incompatible place needs recompilation: %S"</span> head)
+24                 (<span style="color: #00af00;">let*</span> ((setter (gv-setter head)))
+25                   (gv--defsetter head (<span style="color: #00af00;">lambda</span> (<span style="color: #18b2b2;">&amp;rest</span> args) `(,setter ,@args))
+26                                  do (cdr place))))
+27             (gv-get me do))))))))
+</pre>
+</div>
+
+<p>
+首先，若 <code>place</code> 是符号，那么直接使用最简单的形式应用 <code>do</code> 函数。若 <code>place</code> 是非序对值则直接报错。
+</p>
+
+<p>
+接下来的 <code>place</code> 就是 <code>(symbol exp ...)</code> 的情况了，若在 <code>symbol</code> 的 plist 中找到了高阶函数，那就直接使用 do 和 <code>(cdr place)</code> 进行调用。从这里我们就可以看看 <code>gv-define-setter</code> 中定义函数的 <code>rest</code> 参数的作用了。举例来说，当我们调用 <code>(setf (yycar2 (yycar2 a)) 2)</code> （ <code>(gv-define-simple-setter yycar2 setcar)</code> 且 <code>yycar2 is car</code> ）时， <code>(car place)</code> 就是 <code>yycar2</code> ， <code>(cdr place)</code> 就是 <code>((yycar2 a))</code> 。 <code>gv--defsetter</code> 展开就是先对 <code>(yycar2 a)</code> 求值并绑到一个变量上（假设是 a0），随后再使用 <code>(setcar a0 2)</code> 来完成赋值。对于 <code>getter</code> 函数多参的情况也是类似的过程。
+</p>
+
+<p>
+接着，若在 <code>(car place)</code> 中未找到高阶函数， <code>gv-get</code> 会通过三种方式来进一步查找，一是使用宏展开，二是使用 <code>compiler-macro</code> ，三是使用 function indirection。最后实在不行就使用 <code>gv-setter</code> 来获取 <code>setter</code> 函数，不过这个在 gv.el 里面几乎是个空实现。
+</p>
+
+<p>
+那么，什么是 <code>compiler-macro</code> 呢？顾名思义，编译宏，应该是编译期才起作用的宏，事实上也是如此<sup><a id="fnr.5" class="footref" href="#fn.5">5</a></sup>。下面的代码可以说明其作用：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(funcall (get 'cadr 'compiler-macro) '(cadr x) 'x) =&gt; (car (cdr x))
+</pre>
+</div>
+
+<p>
+下面我们以 <code>gv-letplace</code> 来收尾，它的定义如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">gv-letplace</span> (vars place <span style="color: #18b2b2;">&amp;rest</span> body)
+  (<span style="color: #00af00;">declare</span> (indent 2) (debug (sexp form body)))
+  `(gv-get ,place (<span style="color: #00af00;">lambda</span> ,vars ,@body)))
+</pre>
+</div>
+
+<p>
+使用它，我们可以容易定义一些像是 <code>incf</code> ， <code>decf</code> 的宏，比如这个：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-mulf</span> (place <span style="color: #18b2b2;">&amp;optional</span> n)
+  (<span style="color: #00af00;">unless</span> n (<span style="color: #00af00;">setq</span> n 0.114514))
+  (<span style="color: #00af00;">gv-letplace</span> (gEt sEt) place
+    (funcall sEt `(* ,gEt ,n))))
+</pre>
+</div>
+
+<p>
+以上，我们就完成了对 gv.el 的基本介绍。与 five gangs 相对进行比较的话，我们可以这样来列：
+</p>
+
+<ul class="org-ul">
+<li><code>gv-define-simple-setter</code> 对应于 <code>defsetf</code></li>
+<li><code>gv-define-setter</code> 对应于 <code>define-setf-expander</code></li>
+<li><code>gv-get</code> 可认为对应于 <code>get-setf-expansion</code></li>
+<li><code>gv-letplace</code> 对应于 <code>define-modify-macro</code></li>
+</ul>
+
+<p>
+在这一小节完成之前，我们还介绍两个小玩具，它们是 <code>gv-ref</code> 和 <code>gv-deref</code> 。它们借助高阶函数实现了类似于指针的取址操作和解引用操作（也就是 <code>&amp;</code> 和 <code>*</code> ）。定义如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">gv-ref</span> (place)
+  (<span style="color: #00af00;">let</span> ((code
+         (<span style="color: #00af00;">gv-letplace</span> (getter setter) place
+           `(cons (<span style="color: #00af00;">lambda</span> () ,getter)
+                  (<span style="color: #00af00;">lambda</span> (gv--val) ,(funcall setter 'gv--val))))))
+    (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">or</span> lexical-binding
+            <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">If `</span><span style="color: #1f5bff; font-style: italic;">code</span><span style="color: #b2b2b2; font-style: italic;">' still starts with `</span><span style="color: #1f5bff; font-style: italic;">cons</span><span style="color: #b2b2b2; font-style: italic;">' then presumably gv-letplace</span>
+            <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">did not add any new let-bindings, so the `</span><span style="color: #1f5bff; font-style: italic;">lambda</span><span style="color: #b2b2b2; font-style: italic;">'s don't capture</span>
+            <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">any new variables.  As a consequence, the code probably works in</span>
+            <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">dynamic binding mode as well.</span>
+            (eq (car-safe code) 'cons))
+        code
+      (macroexp--warn-and-return
+       <span style="color: #ff1f8b;">"Use of gv-ref probably requires lexical-binding"</span>
+       code))))
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defsubst</span> <span style="color: #ef2929;">gv-deref</span> (ref)
+  (funcall (car ref)))
+
+(<span style="color: #00af00;">gv-define-setter</span> gv-deref (v ref) `(funcall (cdr ,ref) ,v))
+</pre>
+</div>
+
+<p>
+举个简单例子说明一下使用吧：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-swap</span> (a b)
+  (<span style="color: #00af00;">let</span> ((c (gv-deref a)))
+    (<span style="color: #00af00;">setf</span> (gv-deref a) (gv-deref b)
+          (gv-deref b) c)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-swap2</span> (a b)
+  (<span style="color: #00af00;">cl-psetf</span> (gv-deref a) (gv-deref b)
+            (gv-deref b) (gv-deref a)))
+
+(<span style="color: #00af00;">let</span> ((a 1)
+      (b 2))
+  (<span style="color: #00af00;">let</span> ((a&amp; (<span style="color: #00af00;">gv-ref</span> a))
+        (b&amp; (<span style="color: #00af00;">gv-ref</span> b))
+        res)
+    (yy-swap a&amp; b&amp;)
+    (<span style="color: #00af00;">push</span> (list a b) res)
+    (yy-swap2 a&amp; b&amp;)
+    (<span style="color: #00af00;">push</span> (list a b) res)))
+=&gt; ((1 2) (2 1))
+</pre>
+</div>
+
+<p>
+本节完结。关于 gv 的更多例子可以参考 gv.el，除去上面的实现，该文件的剩余部分都是在生成对应的 setf 形式。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgc40637f" class="outline-2">
+<h2 id="orgc40637f"><span class="section-number-2">6</span> 一些 setf 和 gv 的例子</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+我会使用 CL 和 elisp 中的 gv 机制来分别实现这一节中的每一个例子，以供参考。这些例子来自 On lisp 和 gv.el。
+</p>
+</div>
+
+
+<div id="outline-container-org8448459" class="outline-3">
+<h3 id="org8448459"><span class="section-number-3">6.1</span> incf, decf</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+用过 CL 的人都知道这两个宏，CL 不能没有 incf/decf ，就像 C 不能没有 i++（笑）。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">define-modify-macro</span> <span style="color: #ef2929;">yy-incf</span> (<span style="color: #18b2b2;">&amp;optional</span> (x 1)) +)
+(<span style="color: #00af00;">define-modify-macro</span> <span style="color: #ef2929;">yy-decf</span> (<span style="color: #18b2b2;">&amp;optional</span> (x 1)) -)
+</pre>
+</div>
+
+<p>
+以下是使用 <code>gv-letplace</code> 实现的 incf 和 decf。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-inc/dec</span> (name op)
+  `(<span style="color: #00af00;">defmacro</span> ,name (place <span style="color: #18b2b2;">&amp;optional</span> n)
+     (<span style="color: #00af00;">gv-letplace</span> (gett sett) place
+       (<span style="color: #00af00;">macroexp-let2</span> nil v (<span style="color: #00af00;">or</span> n 1)
+         (funcall sett `(,',op ,gett ,v))))))
+
+(<span style="color: #00af00;">yy-inc/dec</span> yy-incf +)
+(<span style="color: #00af00;">yy-inc/dec</span> yy-decf -)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgfd873a0" class="outline-3">
+<h3 id="orgfd873a0"><span class="section-number-3">6.2</span> 字符串的范围赋值</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+在 elsip 中我们可以使用 <code>substring</code> 来获取字符串的字串，借助 gv，我们也可以来设置某范围内的串。
+</p>
+
+<p>
+由于我没找到 CL 里面的 <code>substring</code> 和设置子字符串函数，这里简单写了两个，所以看起来有点长。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-sbs</span> (s from <span style="color: #18b2b2;">&amp;optional</span> to)
+  (<span style="color: #00af00;">let*</span> ((to (or to (length s))))
+    (<span style="color: #cc0000; font-weight: bold;">assert</span> (&gt; to from))
+    (<span style="color: #00af00;">let</span> ((my-s (make-string (- to from)))
+          (f from))
+      (<span style="color: #00af00;">loop</span> for i from f below to
+            for j from 0
+            do (setf (aref my-s j) (aref s i)))
+      my-s)))
+
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">yy-sbs-set</span> (s fr to str)
+  (<span style="color: #00af00;">let</span> ((to (or to (length s))))
+    (<span style="color: #cc0000; font-weight: bold;">assert</span> (integerp fr))
+    (<span style="color: #cc0000; font-weight: bold;">assert</span> (&gt;= (length s) to))
+    (<span style="color: #00af00;">loop</span> for i from fr below to
+          for j from 0
+          do (setf (aref s i) (aref str j)))
+    s))
+
+(<span style="color: #00af00;">define-setf-expander</span> <span style="color: #ef2929;">yy-sbs</span> (s from <span style="color: #18b2b2;">&amp;optional</span> to)
+  (<span style="color: #00af00;">let</span> ((v0 (gensym))
+        (v1 (gensym))
+        (v2 (gensym))
+        (g (gensym)))
+    (values
+     `(,v0 ,v1 ,v2)
+     `(,s ,from ,to)
+     `(,g)
+     `(yy-sbs-set ,v0 ,v1 ,v2 ,g)
+     `(yy-sbs ,v0 ,v1 ,v2))))
+</pre>
+</div>
+
+<p>
+下面是 elisp 实现，这是 elisp manual 上的例子
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">gv-define-expander</span> yy-sbs
+  (<span style="color: #00af00;">lambda</span> (doit place from <span style="color: #18b2b2;">&amp;optional</span> to)
+    (<span style="color: #00af00;">gv-letplace</span> (gett sett) place
+      (<span style="color: #00af00;">macroexp-let2*</span> nil ((start from) (end to))
+        (funcall doit `(substring ,gett ,start ,end)
+                 (<span style="color: #00af00;">lambda</span> (v)
+                   (funcall sett `(cl--set-substring
+                                   ,gett ,start ,end, v))))))))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org7c53ccb" class="outline-3">
+<h3 id="org7c53ccb"><span class="section-number-3">6.3</span> On Lisp 中的 _f 宏与 elisp 中的 cl-callf</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+这个宏的原型如下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">_f</span> (op place <span style="color: #18b2b2;">&amp;rest</span> args) ...)
+</pre>
+</div>
+
+<p>
+它接受一个函数，一个 gv 和一些参数，然后将函数 op 应用于 gv 和参数，即 <code>(apply op place args ...)</code> ，随后将得到的结果放入 gv 中。相比于 incf 或 decf ，它的适用性显然更强，使用它甚至可以进行乘除操作。
+</p>
+
+<p>
+以下是 On Lisp 上的实现：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">_f</span> (op place <span style="color: #18b2b2;">&amp;rest</span> args)
+  (<span style="color: #00af00;">multiple-value-bind</span> (vars forms var set access)
+      (get-setf-expansion place)
+    `(<span style="color: #00af00;">let*</span> (,@(mapcar #'list vars forms)
+            (,(car var) (,op ,access ,@args)))
+       ,set)))
+</pre>
+</div>
+
+<p>
+在 elisp 中有类似的东西，它们叫做 <code>cl-callf</code> 和 <code>cl-callf2</code> ，定义如下
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">cl-callf</span> (func place <span style="color: #18b2b2;">&amp;rest</span> args)
+  <span style="color: #cc0000;">"Set PLACE to (FUNC PLACE ARGS...).</span>
+<span style="color: #cc0000;">FUNC should be an unquoted function name or a lambda expression.</span>
+<span style="color: #cc0000;">PLACE may be a symbol, or any generalized variable allowed by</span>
+<span style="color: #cc0000;">`</span><span style="color: #1f5bff;">setf</span><span style="color: #cc0000;">'."</span>
+  (<span style="color: #00af00;">declare</span> (indent 2) (debug (cl-function place <span style="color: #18b2b2;">&amp;rest</span> form)))
+  (<span style="color: #00af00;">gv-letplace</span> (getter setter) place
+    (<span style="color: #00af00;">let*</span> ((rargs (cons getter args)))
+      (funcall setter
+               (<span style="color: #00af00;">if</span> (symbolp func) (cons func rargs)
+                 `(funcall #',func ,@rargs))))))
+
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">cl-callf2</span> (func arg1 place <span style="color: #18b2b2;">&amp;rest</span> args)
+  <span style="color: #cc0000;">"Set PLACE to (FUNC ARG1 PLACE ARGS...).</span>
+<span style="color: #cc0000;">Like `</span><span style="color: #1f5bff;">cl-callf</span><span style="color: #cc0000;">', but PLACE is the second argument of FUNC, not the first.</span>
+<span style="color: #cc0000;">\(fn FUNC ARG1 PLACE ARGS...)"</span>
+  (<span style="color: #00af00;">declare</span> (indent 3) (debug (cl-function form place <span style="color: #18b2b2;">&amp;rest</span> form)))
+  (<span style="color: #00af00;">if</span> (<span style="color: #00af00;">and</span> (cl--safe-expr-p arg1) (cl--simple-expr-p place) (symbolp func))
+      `(<span style="color: #00af00;">setf</span> ,place (,func ,arg1 ,place ,@args))
+    (<span style="color: #00af00;">macroexp-let2</span> nil a1 arg1
+      (<span style="color: #00af00;">gv-letplace</span> (getter setter) place
+        (<span style="color: #00af00;">let*</span> ((rargs (cl-list* a1 getter args)))
+          (funcall setter
+                   (<span style="color: #00af00;">if</span> (symbolp func) (cons func rargs)
+                     `(funcall #',func ,@rargs))))))))
+</pre>
+</div>
+
+<p>
+<code>cl-callf2</code> 的 <code>place</code> 是第三参数，而 <code>cl-callf</code> 和 <code>_f</code> 一样是第二参数。On Lisp 上使用这个宏方便地实现了记忆化：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">memoize</span> (fn)
+  (<span style="color: #00af00;">let</span> ((cache (make-hash-table <span style="color: #b218b2;">:test</span> #'equal)))
+    #'(<span style="color: #00af00;">lambda</span> (<span style="color: #18b2b2;">&amp;rest</span> args)
+        (<span style="color: #00af00;">multiple-value-bind</span> (val win) (gethash args cache)
+          (<span style="color: #00af00;">if</span> win
+              val
+              (setf (gethash args cache)
+                    (apply fn args)))))))
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">fib</span> (n)
+   (<span style="color: #00af00;">cond</span> ((= n 0) 0)
+         ((= n 1) 1)
+         (t (+ (fib (- n 1)) (fib (- n 2))))))
+
+(time (fib 30))
+  real time : 0.502 secs
+  run time  : 0.515 secs
+  gc count  : 16 times
+  consed    : 86166048 bytes
+  832040
+
+(_f memoize (symbol-function 'fib))
+
+(time (fib 30))
+  real time : 0.000 secs
+  run time  : 0.000 secs
+  gc count  : 1 times
+  consed    : 7616 bytes
+  832040
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgb06abfd" class="outline-3">
+<h3 id="orgb06abfd"><span class="section-number-3">6.4</span> 排序</h3>
+<div class="outline-text-3" id="text-6-4">
+<p>
+在 On Lisp 中，作者使用 gv 实现了多变量冒泡排序，下面是代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">sortf</span> (op <span style="color: #18b2b2;">&amp;rest</span> places)
+  (<span style="color: #00af00;">let*</span> ((meths (mapcar #'(<span style="color: #00af00;">lambda</span> (p)
+                            (multiple-value-list
+                             (get-setf-expansion p)))
+                        places))
+         (temps (apply #'append (mapcar #'third meths))))
+    `(<span style="color: #00af00;">let*</span> ,(mapcar #'list
+                    (mapcan #'(<span style="color: #00af00;">lambda</span> (m)
+                                (append (first m)
+                                        (third m)))
+                            meths)
+                    (mapcan #'(<span style="color: #00af00;">lambda</span> (m)
+                                (append (second m)
+                                        (list (fifth m))))
+                            meths))
+       ,@(mapcon #'(<span style="color: #00af00;">lambda</span> (rest)
+                     (mapcar
+                      #'(<span style="color: #00af00;">lambda</span> (arg)
+                          `(<span style="color: #00af00;">unless</span> (,op ,(car rest) ,arg)
+                             (rotatef ,(car rest) ,arg)))
+                      (cdr rest)))
+                 temps)
+       ,@(mapcar #'fourth meths))))
+
+(setq a 1 b 2 c 3)
+(sortf &gt; a b c)
+(list a b c) =&gt; (3 2 1)
+
+(setq a '(1 1 4 5 1 4))
+(sortf &gt; (nth 0 a) (nth 1 a) (nth 2 a) (nth 3 a) (nth 4 a) (nth 5 a))
+a =&gt; (5 4 4 1 1 1)
+</pre>
+</div>
+
+<p>
+我反正是想不到 gv 还能这么用。下面是我用 elisp 实现的代码：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">yy-sortf</span> (op <span style="color: #18b2b2;">&amp;rest</span> places)
+  (<span style="color: #00af00;">let</span> ((temps (<span style="color: #00af00;">cl-loop</span> for a in places
+                        collect (gensym))))
+    `(<span style="color: #00af00;">let*</span> ,(cl-mapcar #'list
+                       temps
+                       (mapcar #'(lambda (p)
+                                   (<span style="color: #00af00;">gv-letplace</span> (ge se) p
+                                     ge))
+                               places))
+       ,@(mapcon (<span style="color: #00af00;">lambda</span> (rest)
+                   (mapcar
+                    (<span style="color: #00af00;">lambda</span> (arg)
+                      `(<span style="color: #00af00;">unless</span> (,op ,(car rest) ,arg)
+                         (<span style="color: #00af00;">cl-rotatef</span> ,(car rest) ,arg)))
+                    (cdr rest)))
+                 temps)
+       ,@(cl-mapcar (<span style="color: #00af00;">lambda</span> (v p) (<span style="color: #00af00;">gv-letplace</span> (g s) p (funcall s v)))
+                    temps places))))
+
+(<span style="color: #00af00;">setq</span> a '(1 2 3))
+(sortf &gt; (car a) (caddr a) (cadr a))
+a =&gt; (3 1 2)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc229f49" class="outline-2">
+<h2 id="orgc229f49"><span class="section-number-2">7</span> 后记</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+在去学校的火车上，由于手机没电了且实在闲的无聊，我读完了 gv.el 的实现并完成了本文的一半，剩下的一半总算是在今晚完成了。读完 gv.el 的最大收获是重新学了一遍二阶宏的写法，联想起寒假推的色鸟鸟，二阶堂真红不就是“二阶红”吗（笑）。
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./2.jpg" alt="load failed"></div><div class="yyimgcomment">Nikaidou Shinku</div>
+</p>
+
+<p>
+寒假快要结束的几天，《保健室的老师与沉迷吹泡泡的助手》汉化出来了，也算是对我的一点慰藉吧（笑）。
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzgzMzQwNDU4.jpg" alt="load failed"></div><div class="yyimgcomment">shirobana</div>
+</p>
+
+<p>
+今天（22 号）上午 9:00 出了考研成绩，通过我这 68 分的数学一，我学到了一点，那就是十七乘四得六十八。根据我的专业课和数学课分数，我还学到了一点，那就是 <code>(reverse "68") =&gt; "86"</code> ，这不就是八六吗（笑）。
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzgwOTE3NjU0.jpg" alt="load failed"></div><div class="yyimgcomment">hachiroku</div>
+</p>
+
+<p>
+好了，玩笑话说的差不多了，来点正经的东西吧。在查资料的过程中我发现了一个与 CL 相关的日文网站 <a href="https://g000001.cddddr.org/">https://g000001.cddddr.org/</a> ，上面有接近两千篇内容。这网站的名字也挺别致， <code>g000001</code> 正是 <code>(gensym)</code> 的第一个返回值，而 <code>cddddr</code> 是 <code>cxr</code> 的最后一个。在这个网站上可以找到许多 CL 相关的内容，希望对你有所帮助。
+</p>
+
+<p>
+お前の明日が、お前が思っているよりもずっと、ずっと……素敵な一日になることを祈ってる〜
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org2b2749d" class="outline-2">
+<h2 id="org2b2749d"><span class="section-number-2">8</span> 参考资料</h2>
+<div class="outline-text-2" id="text-8">
+<ul class="org-ul">
+<li><i>On lisp</i> - Paul Graham</li>
+</ul>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzI2NTY1NDY1.jpg" alt="load failed"></div><div class="yyimgcomment">alice margatroid</div>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara"><a href="https://cireu.github.io/2019/09/17/lisp-setf/">https://cireu.github.io/2019/09/17/lisp-setf/</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara"><a href="http://www.softwarepreservation.org/projects/LISP/interlisp-d/Deutsch-3IJCAI.pdf">http://www.softwarepreservation.org/projects/LISP/interlisp-d/Deutsch-3IJCAI.pdf</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara"><a href="https://stackoverflow.com/questions/23808189/what-does-the-f-in-setf-stand-for">https://stackoverflow.com/questions/23808189/what-does-the-f-in-setf-stand-for</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara"><a href="https://gist.github.com/include-yy/dddaba707bfeebb177f0bfba06056097">https://gist.github.com/include-yy/dddaba707bfeebb177f0bfba06056097</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.5" class="footnum" href="#fnr.5">5</a></sup> <div class="footpara"><p class="footpara"><a href="https://www.gnu.org/software/emacs/manual/html_node/cl/Macros.html">https://www.gnu.org/software/emacs/manual/html_node/cl/Macros.html</a></p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2022-02-21 Mon 09:08</p> <p>Last modified: 2022-02-22 Tue 19:28</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.1 (<a href="https://orgmode.org">Org</a> mode 9.3)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
