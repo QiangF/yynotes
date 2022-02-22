@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-02-22 Tue 19:38 -->
+<!-- 2022-02-22 Tue 19:45 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>关于作用域的一个小结 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></title>
@@ -63,55 +63,61 @@ for the JavaScript code in this tag.
  <a accesskey="h" href="../../index.html"> UP </a>
  |
  <a accesskey="H" href="http://www.incf19.com"> HOME </a>
-</div><div id="content">
+</div><div id="preamble" class="status">
+<div>
+  <a href="http://www.incf19.com/index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
 <h1 class="title">关于作用域的一个小结 <div class="yyheadimg"><img src="./head.jpg" alt="load failed"></div></h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb88edc2">1. 写在前面</a></li>
-<li><a href="#org7688b5f">2. 一些名词</a>
+<li><a href="#org0b5f770">1. 写在前面</a></li>
+<li><a href="#org7b3aa0e">2. 一些名词</a>
 <ul>
-<li><a href="#org2492a6d">2.1. 什么是名字绑定（name binding）</a></li>
-<li><a href="#org9cdfcab">2.2. 什么是上下文（context）</a></li>
-<li><a href="#org09c1512">2.3. 什么是环境（environment）</a></li>
-<li><a href="#org6a117d0">2.4. 总结</a></li>
+<li><a href="#orgd56543b">2.1. 什么是名字绑定（name binding）</a></li>
+<li><a href="#org5b1c311">2.2. 什么是上下文（context）</a></li>
+<li><a href="#org1bbf390">2.3. 什么是环境（environment）</a></li>
+<li><a href="#org76ee548">2.4. 总结</a></li>
 </ul>
 </li>
-<li><a href="#org5aece50">3. 什么是作用域（scope）</a>
+<li><a href="#org4c4e4e1">3. 什么是作用域（scope）</a>
 <ul>
-<li><a href="#org5a3ee45">3.1. 为什么要有作用域</a></li>
-<li><a href="#orga596eb7">3.2. 各种各样的作用域</a></li>
-<li><a href="#org67a8622">3.3. 作用域与名字解析（name resolution）</a></li>
-<li><a href="#orgc8c925d">3.4. 作用域与生存期（extent）</a></li>
-<li><a href="#orgd0b319d">3.5. 什么是“静态作用域”</a></li>
-<li><a href="#org8044dc2">3.6. 什么是“动态作用域”</a></li>
-<li><a href="#org4c506e4">3.7. 总结</a></li>
+<li><a href="#org6896d9f">3.1. 为什么要有作用域</a></li>
+<li><a href="#org293c498">3.2. 各种各样的作用域</a></li>
+<li><a href="#orgf847fb1">3.3. 作用域与名字解析（name resolution）</a></li>
+<li><a href="#orgae5a627">3.4. 作用域与生存期（extent）</a></li>
+<li><a href="#org97b54f4">3.5. 什么是“静态作用域”</a></li>
+<li><a href="#org0499c9c">3.6. 什么是“动态作用域”</a></li>
+<li><a href="#org23f2bbc">3.7. 总结</a></li>
 </ul>
 </li>
-<li><a href="#org05e25af">4. elisp 的 lexical-binding</a>
+<li><a href="#org88483b2">4. elisp 的 lexical-binding</a>
 <ul>
-<li><a href="#orgae73bb1">4.1. elisp 文档中的内容</a></li>
-<li><a href="#org84cdfd1">4.2. 特殊变量与 defvar</a></li>
-<li><a href="#org527d087">4.3. lexical-binding 的使用</a></li>
+<li><a href="#org354c401">4.1. elisp 文档中的内容</a></li>
+<li><a href="#org3781b14">4.2. 特殊变量与 defvar</a></li>
+<li><a href="#org86c89ce">4.3. lexical-binding 的使用</a></li>
 </ul>
 </li>
-<li><a href="#org32ea6f0">5. Scheme 的 syntax-case</a>
+<li><a href="#org83480b4">5. Scheme 的 syntax-case</a>
 <ul>
-<li><a href="#orgcf6d0ce">5.1. 什么是卫生宏（Hygienic macro）</a></li>
-<li><a href="#orgc4e7484">5.2. 什么是 syntax-case</a></li>
-<li><a href="#org722aef9">5.3. 与 syntax-case 相关的函数与宏</a></li>
-<li><a href="#orgde7e78d">5.4. Scheme 宏的一些使用用例</a></li>
+<li><a href="#orgdf23c64">5.1. 什么是卫生宏（Hygienic macro）</a></li>
+<li><a href="#org773ff24">5.2. 什么是 syntax-case</a></li>
+<li><a href="#orga114358">5.3. 与 syntax-case 相关的函数与宏</a></li>
+<li><a href="#org7c5569b">5.4. Scheme 宏的一些使用用例</a></li>
 </ul>
 </li>
-<li><a href="#org5f2ab98">6. 后记</a></li>
-<li><a href="#org7cd1f5e">7. 参考资料</a></li>
+<li><a href="#org43502bb">6. 后记</a></li>
+<li><a href="#org744de3a">7. 参考资料</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgb88edc2" class="outline-2">
-<h2 id="orgb88edc2"><span class="section-number-2">1</span> 写在前面</h2>
+<div id="outline-container-org0b5f770" class="outline-2">
+<h2 id="org0b5f770"><span class="section-number-2">1</span> 写在前面</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 我很早之前就想总结一下作用域相关的知识了，但是限于个人水平一直没有写。除开能力因素，另一个原因是没有找到动态作用域的语言，没有具体的例子来供我学习理解。通过 scheme 的 <code>fulid-let</code> 和 racket 的 <code>parameterize</code> 可以使用动态作用域，但我也不常用，一直以来也没什么印象。
@@ -165,16 +171,16 @@ for the JavaScript code in this tag.
 </div>
 
 
-<div id="outline-container-org7688b5f" class="outline-2">
-<h2 id="org7688b5f"><span class="section-number-2">2</span> 一些名词</h2>
+<div id="outline-container-org7b3aa0e" class="outline-2">
+<h2 id="org7b3aa0e"><span class="section-number-2">2</span> 一些名词</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 本来我准备直接从作用域开始，但是查阅资料后我发现要弄清楚作用域还需要其他的一些概念。这一小节用来介绍与之相关的东西，比如名字绑定、上下文，环境等。
 </p>
 </div>
 
-<div id="outline-container-org2492a6d" class="outline-3">
-<h3 id="org2492a6d"><span class="section-number-3">2.1</span> 什么是名字绑定（name binding）</h3>
+<div id="outline-container-orgd56543b" class="outline-3">
+<h3 id="orgd56543b"><span class="section-number-3">2.1</span> 什么是名字绑定（name binding）</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 名字绑定指实体与标识符之间的关联。标识符绑定到实体被称为引用该对象。最简单的，以下代码就建立了变量名 <code>a</code> 与 <code>int</code> 型整数 19 的绑定：
@@ -199,11 +205,11 @@ for the JavaScript code in this tag.
 </p>
 
 <p>
-绑定可以分为两类，即 <b>动态绑定</b> （dynamic/late binding）和 <b>静态绑定</b> （static/early binding）。动态绑定指名字绑定发生在程序运行时，而静态绑定指名字绑定发生在程序开始运行之前。<a href="#org9360ee4">【2】</a>
+绑定可以分为两类，即 <b>动态绑定</b> （dynamic/late binding）和 <b>静态绑定</b> （static/early binding）。动态绑定指名字绑定发生在程序运行时，而静态绑定指名字绑定发生在程序开始运行之前。<a href="#orgf246937">【2】</a>
 </p>
 
 <p>
-与绑定相关的概念还有 <b>重绑定</b> （rebinding）和 <b>修改</b> （mutation），前者指变更标识符引用的对象，后者指对对象进行修改。后者的就是一般意义上的副作用（side effect）。在下面的代码中，前者是重绑定，而后者是修改：<a href="#org9360ee4">【2】</a>
+与绑定相关的概念还有 <b>重绑定</b> （rebinding）和 <b>修改</b> （mutation），前者指变更标识符引用的对象，后者指对对象进行修改。后者的就是一般意义上的副作用（side effect）。在下面的代码中，前者是重绑定，而后者是修改：<a href="#orgf246937">【2】</a>
 </p>
 
 <div class="org-src-container">
@@ -226,8 +232,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org9cdfcab" class="outline-3">
-<h3 id="org9cdfcab"><span class="section-number-3">2.2</span> 什么是上下文（context）</h3>
+<div id="outline-container-org5b1c311" class="outline-3">
+<h3 id="org5b1c311"><span class="section-number-3">2.2</span> 什么是上下文（context）</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 “上下文”是一个非常宽泛的概念，撇开编程不管的话我们也会时不时碰到这个词语，例如出现在语文题目中的“联系上下文解释文中词语”。我查了查现代汉语词典，它的解释和例句如下：
@@ -269,7 +275,7 @@ for the JavaScript code in this tag.
 </p>
 
 <p>
-在维基百科<a href="#org83a01d9">【3】</a>中是这样定义上下文的：
+在维基百科<a href="#orgf0dddaa">【3】</a>中是这样定义上下文的：
 </p>
 
 <blockquote>
@@ -296,8 +302,8 @@ Scheme 中的 call/cc 可以捕获 continuation，并一次或多次地回到这
 </div>
 </div>
 
-<div id="outline-container-org09c1512" class="outline-3">
-<h3 id="org09c1512"><span class="section-number-3">2.3</span> 什么是环境（environment）</h3>
+<div id="outline-container-org1bbf390" class="outline-3">
+<h3 id="org1bbf390"><span class="section-number-3">2.3</span> 什么是环境（environment）</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 ”环境“也是一个很常见的概念，最近也发生了一件看上去对世界环境影响很大的环境事件呢 (  ^ω^)。我们先看看字典上对这个词的解释吧：
@@ -344,8 +350,8 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </div>
 </div>
 
-<div id="outline-container-org6a117d0" class="outline-3">
-<h3 id="org6a117d0"><span class="section-number-3">2.4</span> 总结</h3>
+<div id="outline-container-org76ee548" class="outline-3">
+<h3 id="org76ee548"><span class="section-number-3">2.4</span> 总结</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 在我看来，上下文就是某件事要进行下去最少需要的东西，而环境就是与某个体有交互的所有东西构成的总体。按我这么理解的话，上下文也算是一种环境，借用集合的概念，它是某件事的环境的子环境。
@@ -359,8 +365,8 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </div>
 
 
-<div id="outline-container-org5aece50" class="outline-2">
-<h2 id="org5aece50"><span class="section-number-2">3</span> 什么是作用域（scope）</h2>
+<div id="outline-container-org4c4e4e1" class="outline-2">
+<h2 id="org4c4e4e1"><span class="section-number-2">3</span> 什么是作用域（scope）</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 首先，我们需要知道作用域是用来描述什么的 —— 它描述的是名字绑定在程序中的可见性。 <b>某个名字绑定的作用域就是程序中该绑定可见的那一部分</b> 。
@@ -375,8 +381,8 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </p>
 </div>
 
-<div id="outline-container-org5a3ee45" class="outline-3">
-<h3 id="org5a3ee45"><span class="section-number-3">3.1</span> 为什么要有作用域</h3>
+<div id="outline-container-org6896d9f" class="outline-3">
+<h3 id="org6896d9f"><span class="section-number-3">3.1</span> 为什么要有作用域</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 这方面我也在网上几乎找不到什么资料，凡是搜索“作用域”都会不可避免的搜到 javascript 相关的东西，而且大多都是闭包啊，引入 let 块作用域啊之类的东西。所以，这一小节的内容纯粹就是我的个人发挥了，如果有不同意的地方，欢迎与我交流。
@@ -387,7 +393,7 @@ Marx 说过“人是一切社会关系的总和”，根据这个句子仿写一
 </p>
 
 <p>
-这样自然是不利于模块化的，在编写一部分代码时还不得不考虑另一部分。考虑到不是所有的变量都要被所有人使用，给变量划分一个作用区域，让区域外的代码看不见该变量的话就 ok 了。作用域对各个变量的势力范围做了一个划分，有利于更好的模块化。维基百科<a href="#org171f733">【8】</a>上这样写道：
+这样自然是不利于模块化的，在编写一部分代码时还不得不考虑另一部分。考虑到不是所有的变量都要被所有人使用，给变量划分一个作用区域，让区域外的代码看不见该变量的话就 ok 了。作用域对各个变量的势力范围做了一个划分，有利于更好的模块化。维基百科<a href="#org6b15fb5">【8】</a>上这样写道：
 </p>
 
 <blockquote>
@@ -398,8 +404,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orga596eb7" class="outline-3">
-<h3 id="orga596eb7"><span class="section-number-3">3.2</span> 各种各样的作用域</h3>
+<div id="outline-container-org293c498" class="outline-3">
+<h3 id="org293c498"><span class="section-number-3">3.2</span> 各种各样的作用域</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 作用域可以龟缩于一个简单的表示式，也可以囊括整个程序，这取决于具体的作用域规则。在最小与最大的两者之间还存在许多其他的作用域。
@@ -410,8 +416,8 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 </div>
 
-<div id="outline-container-org1aaed3f" class="outline-4">
-<h4 id="org1aaed3f"><span class="section-number-4">3.2.1</span> 表达式作用域（expression scope）</h4>
+<div id="outline-container-orgc869830" class="outline-4">
+<h4 id="orgc869830"><span class="section-number-4">3.2.1</span> 表达式作用域（expression scope）</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <p>
 表达式作用域指名字绑定的作用域是一个表达式。许多语言中都有表达式作用域，尤其是提供了 let 表达式的函数式语言。下面的例子使用 elisp 说明了表达式作用域的范围，使用 <code>;</code> 围成的小盒子就是 <code>a</code> 在 let 表达式中的作用域：
@@ -433,8 +439,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-org66876d6" class="outline-4">
-<h4 id="org66876d6"><span class="section-number-4">3.2.2</span> 块作用域（block scope）</h4>
+<div id="outline-container-org3727f2a" class="outline-4">
+<h4 id="org3727f2a"><span class="section-number-4">3.2.2</span> 块作用域（block scope）</h4>
 <div class="outline-text-4" id="text-3-2-2">
 <p>
 名字绑定的作用域是一个块，这样的作用域就是块作用域。它几乎存在于所有的块结构化编程语言中，例如 C 系语言。大多数情况下块一般都在函数内。
@@ -494,8 +500,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-org254d6e2" class="outline-4">
-<h4 id="org254d6e2"><span class="section-number-4">3.2.3</span> 函数作用域（function scope）</h4>
+<div id="outline-container-orgb73f30f" class="outline-4">
+<h4 id="orgb73f30f"><span class="section-number-4">3.2.3</span> 函数作用域（function scope）</h4>
 <div class="outline-text-4" id="text-3-2-3">
 <p>
 名字绑定的作用域是整个函数的作用域就是函数作用域。几乎所有的语言中都有函数作用域，语言提供了一种在函数或子例程中创建局部变量的方法：它的作用域从函数头开始，在函数返回语句处结束。大多数情况下，它的生命周期就是函数调用的过程 —— 它在函数调用开始时被创建，在函数返回时被销毁。不过某些语言提供了静态局部变量（比如 C），它的生命周期贯穿程序的生命周期，但是它的作用域仅限于所在的函数。
@@ -522,8 +528,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orgd1f410c" class="outline-4">
-<h4 id="orgd1f410c"><span class="section-number-4">3.2.4</span> 文件作用域（file scope）</h4>
+<div id="outline-container-org26eb320" class="outline-4">
+<h4 id="org26eb320"><span class="section-number-4">3.2.4</span> 文件作用域（file scope）</h4>
 <div class="outline-text-4" id="text-3-2-4">
 <p>
 名字绑定的作用域是一个文件目的作用域就是文件作用域。文件作用域这种叫法一般都是指 C 语言，在 C 语言中它被称为文件链接。在文件的 top level 定义的函数和变量的作用域就是从它们的声明处直到文件末尾。这也可以被看做是一种模块作用域。
@@ -531,8 +537,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orgacfdfa3" class="outline-4">
-<h4 id="orgacfdfa3"><span class="section-number-4">3.2.5</span> 模块作用域（module scope）</h4>
+<div id="outline-container-org418f95a" class="outline-4">
+<h4 id="org418f95a"><span class="section-number-4">3.2.5</span> 模块作用域（module scope）</h4>
 <div class="outline-text-4" id="text-3-2-5">
 <p>
 名字的作用域是一个模块，这样的作用域就是模块作用域。模块作用域可以在模块化编程语言中使用，这些语言以模块作为复杂程序的单元，它们允许隐藏信息并暴露有限的接口。Python 是一个很典型的例子。
@@ -540,8 +546,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orgee9bf0e" class="outline-4">
-<h4 id="orgee9bf0e"><span class="section-number-4">3.2.6</span> 全局作用域（global scope）</h4>
+<div id="outline-container-org17b7ea1" class="outline-4">
+<h4 id="org17b7ea1"><span class="section-number-4">3.2.6</span> 全局作用域（global scope）</h4>
 <div class="outline-text-4" id="text-3-2-6">
 <p>
 作用域是整个程序的作用域被称为全局作用域。一般来说，使用具有全局作用域的变量（即全局变量）被认为是坏习惯，因为它会可能导致名字冲突或不小心掩盖变量。全局作用域一般用于其他类型的名字，比如函数名，类名和数据类型名。
@@ -550,8 +556,8 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-org67a8622" class="outline-3">
-<h3 id="org67a8622"><span class="section-number-3">3.3</span> 作用域与名字解析（name resolution）</h3>
+<div id="outline-container-orgf847fb1" class="outline-3">
+<h3 id="orgf847fb1"><span class="section-number-3">3.3</span> 作用域与名字解析（name resolution）</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 会不会存在两个名字相同的名字绑定的作用域部分重叠的情况呢？这样的代码很容易想出来，比如全局变量与块变量同名的情况，以及块嵌套中的重名变量：
@@ -581,7 +587,7 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 
 <p>
-我在 wikipedia 上面找到了一个描述这种特性的术语，即名字解析<a href="#org45e47a0">【7】</a>。在编程语言中， <b>名字解析指通过程序表达式中的符号找到对应的实体</b> 。对于变量而言，就是找到变量的值。名字解析规则并不只和作用域有关，微机百科上面有更加详细的描述，由于这里只关注作用域其他内容就从略了。
+我在 wikipedia 上面找到了一个描述这种特性的术语，即名字解析<a href="#orgfac5f45">【7】</a>。在编程语言中， <b>名字解析指通过程序表达式中的符号找到对应的实体</b> 。对于变量而言，就是找到变量的值。名字解析规则并不只和作用域有关，微机百科上面有更加详细的描述，由于这里只关注作用域其他内容就从略了。
 </p>
 
 <p>
@@ -598,11 +604,11 @@ It is considered good programming practice to make the scope of variables as nar
 </div>
 </div>
 
-<div id="outline-container-orgc8c925d" class="outline-3">
-<h3 id="orgc8c925d"><span class="section-number-3">3.4</span> 作用域与生存期（extent）</h3>
+<div id="outline-container-orgae5a627" class="outline-3">
+<h3 id="orgae5a627"><span class="section-number-3">3.4</span> 作用域与生存期（extent）</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
-说到作用域就不得不谈另一个概念，那就是 extent。网上有人将其翻译为“生命周期”，但是这已经是 lifetime 的翻译了，我这里就翻译为“生存期”<a href="#org6094d73">【5】</a>与其区分。
+说到作用域就不得不谈另一个概念，那就是 extent。网上有人将其翻译为“生命周期”，但是这已经是 lifetime 的翻译了，我这里就翻译为“生存期”<a href="#orgcc7dc65">【5】</a>与其区分。
 </p>
 
 <p>
@@ -618,7 +624,7 @@ It is considered good programming practice to make the scope of variables as nar
 </p>
 
 <p>
-在参考资料<a href="#org736a664">【6】</a>中列出了几种有用的作用域和生存期，我把它们列在下面。
+在参考资料<a href="#orga83429c">【6】</a>中列出了几种有用的作用域和生存期，我把它们列在下面。
 </p>
 
 <p>
@@ -644,7 +650,7 @@ It is considered good programming practice to make the scope of variables as nar
 
 
 <p>
-在<a href="#org736a664">【6】</a>中还这样写道：
+在<a href="#orga83429c">【6】</a>中还这样写道：
 </p>
 
 <blockquote>
@@ -654,7 +660,7 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </blockquote>
 
 <p>
-动态作用域被定义为同时具有不定作用域和动态生存期的名字绑定。不过<a href="#org736a664">【6】</a>中也提到，dynamic scope 是一个误称，因为它除了描述了作用域还描述了生存期，管它叫动态绑定（dynamic binding）可能更好些。
+动态作用域被定义为同时具有不定作用域和动态生存期的名字绑定。不过<a href="#orga83429c">【6】</a>中也提到，dynamic scope 是一个误称，因为它除了描述了作用域还描述了生存期，管它叫动态绑定（dynamic binding）可能更好些。
 </p>
 
 <p>
@@ -663,8 +669,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 </div>
 
-<div id="outline-container-orgd0b319d" class="outline-3">
-<h3 id="orgd0b319d"><span class="section-number-3">3.5</span> 什么是“静态作用域”</h3>
+<div id="outline-container-org97b54f4" class="outline-3">
+<h3 id="org97b54f4"><span class="section-number-3">3.5</span> 什么是“静态作用域”</h3>
 <div class="outline-text-3" id="text-3-5">
 <p>
 在开始具体的讨论之前，我觉得有必要对动态作用域和静态作用域这两个名字做一个说明。动态作用域和静态作用域的叫法是不太准确的，因为严格来说作用域描述的只是绑定的空间性质。管它们叫“动态作用域规则”和“静态作用域规则”可能更好一些。我会在下文中给所有的动态和静态作用域加上双引号，以此和纯粹的作用域相区分。
@@ -731,8 +737,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 </div>
 
-<div id="outline-container-org8044dc2" class="outline-3">
-<h3 id="org8044dc2"><span class="section-number-3">3.6</span> 什么是“动态作用域”</h3>
+<div id="outline-container-org0499c9c" class="outline-3">
+<h3 id="org0499c9c"><span class="section-number-3">3.6</span> 什么是“动态作用域”</h3>
 <div class="outline-text-3" id="text-3-6">
 <p>
 有了上面的关于“静态作用域”的总结，我们来看看什么是“动态作用域”。
@@ -785,15 +791,15 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 </div>
 
-<div id="outline-container-org4c506e4" class="outline-3">
-<h3 id="org4c506e4"><span class="section-number-3">3.7</span> 总结</h3>
+<div id="outline-container-org23f2bbc" class="outline-3">
+<h3 id="org23f2bbc"><span class="section-number-3">3.7</span> 总结</h3>
 <div class="outline-text-3" id="text-3-7">
 <p>
 这一节中我对作用域进行了一个比较详细的介绍。我介绍了作用域的作用，作用域的种类，以及名字解析这个概念。
 </p>
 
 <p>
-关于“动态作用域”和“静态作用域”的区别，我在知乎上找到了一个不错的回答<a href="#org72ae1e2">【9】</a>，虽然有些不完整但是非常容易理解：
+关于“动态作用域”和“静态作用域”的区别，我在知乎上找到了一个不错的回答<a href="#orgccdc84f">【9】</a>，虽然有些不完整但是非常容易理解：
 </p>
 
 <blockquote>
@@ -818,8 +824,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </div>
 
 
-<div id="outline-container-org05e25af" class="outline-2">
-<h2 id="org05e25af"><span class="section-number-2">4</span> elisp 的 lexical-binding</h2>
+<div id="outline-container-org88483b2" class="outline-2">
+<h2 id="org88483b2"><span class="section-number-2">4</span> elisp 的 lexical-binding</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 啰里啰唆的说了那么多，总算是到本文的主要部分。（并不是）
@@ -830,8 +836,8 @@ In addition to the above terms, it is convenient to define <b>dynamic scope</b> 
 </p>
 </div>
 
-<div id="outline-container-orgae73bb1" class="outline-3">
-<h3 id="orgae73bb1"><span class="section-number-3">4.1</span> elisp 文档中的内容</h3>
+<div id="outline-container-org354c401" class="outline-3">
+<h3 id="org354c401"><span class="section-number-3">4.1</span> elisp 文档中的内容</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 每个局部绑定都有一定的作用域和生存期。作用域指源代码文本中可以访问绑定的位置。生存期指程序执行时绑定存在的时间。
@@ -863,8 +869,8 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </div>
 </div>
 
-<div id="outline-container-org84cdfd1" class="outline-3">
-<h3 id="org84cdfd1"><span class="section-number-3">4.2</span> 特殊变量与 defvar</h3>
+<div id="outline-container-org3781b14" class="outline-3">
+<h3 id="org3781b14"><span class="section-number-3">4.2</span> 特殊变量与 defvar</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 即便启用了词法绑定，某些变量仍然是动态绑定，它们被称作特殊变量（special variables）。使用 defvar，defcustom 和 defconst 定义的变量就是特殊变量。
@@ -887,8 +893,8 @@ Emacs 也可以创建词法绑定，词法绑定具有词法作用域，这意�
 </div>
 </div>
 
-<div id="outline-container-org527d087" class="outline-3">
-<h3 id="org527d087"><span class="section-number-3">4.3</span> lexical-binding 的使用</h3>
+<div id="outline-container-org86c89ce" class="outline-3">
+<h3 id="org86c89ce"><span class="section-number-3">4.3</span> lexical-binding 的使用</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
 通过上面的例子可以看到，改变变量 <code>lexical-binding</code> 的值就可以确定到底是使用动态绑定还是静态绑定。设置 <code>lexical-binding</code> 为 <code>nil</code> 使用动态绑定，否则使用词法绑定。
@@ -1003,15 +1009,15 @@ c =&gt; t
 </div>
 
 
-<div id="outline-container-org32ea6f0" class="outline-2">
-<h2 id="org32ea6f0"><span class="section-number-2">5</span> Scheme 的 syntax-case</h2>
+<div id="outline-container-org83480b4" class="outline-2">
+<h2 id="org83480b4"><span class="section-number-2">5</span> Scheme 的 syntax-case</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 好了，本节是本文的最后一节，会对 Scheme 的 syntax-case 宏进行一个简单的介绍，也作为我学习 Scheme 的一个小结。如果您只对 syntax-case 感兴趣的话，您也只需要阅读本文的这一部分。
 </p>
 
 <p>
-syntax-case 的发明者是 chez-scheme 的作者 Kent，据他所说，syntax-case 的功能比 syntax-rules 要强很多。强大自然也要有相应的代价，那就是很难写。参考资料<a href="#org6921d48">【10】</a>中是这样说的：
+syntax-case 的发明者是 chez-scheme 的作者 Kent，据他所说，syntax-case 的功能比 syntax-rules 要强很多。强大自然也要有相应的代价，那就是很难写。参考资料<a href="#org3f5fcab">【10】</a>中是这样说的：
 </p>
 
 <blockquote>
@@ -1025,15 +1031,15 @@ syntax-case 非常强大，既可以支持高级宏，也可以支持过程宏�
 </p>
 </div>
 
-<div id="outline-container-orgcf6d0ce" class="outline-3">
-<h3 id="orgcf6d0ce"><span class="section-number-3">5.1</span> 什么是卫生宏（Hygienic macro）</h3>
+<div id="outline-container-orgdf23c64" class="outline-3">
+<h3 id="orgdf23c64"><span class="section-number-3">5.1</span> 什么是卫生宏（Hygienic macro）</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 <b>卫生宏保证展开时不会出现意外的名字捕获</b> 。
 </p>
 
 <p>
-那么什么是意外的名字捕获呢？下面的一段 C 代码<a href="#orga3feff1">【11】</a>可以说明这个问题：
+那么什么是意外的名字捕获呢？下面的一段 C 代码<a href="#org2f8ce3f">【11】</a>可以说明这个问题：
 </p>
 
 <div class="org-src-container">
@@ -1117,14 +1123,14 @@ syntax-case 非常强大，既可以支持高级宏，也可以支持过程宏�
 </div>
 
 <p>
-就解决意外的名字捕获这个问题而言，卫生宏只是一种解决方案而已。更多的解决方法可以参考<a href="#orga3feff1">【11】</a>。
+就解决意外的名字捕获这个问题而言，卫生宏只是一种解决方案而已。更多的解决方法可以参考<a href="#org2f8ce3f">【11】</a>。
 </p>
 </div>
 </div>
 
 
-<div id="outline-container-orgc4e7484" class="outline-3">
-<h3 id="orgc4e7484"><span class="section-number-3">5.2</span> 什么是 syntax-case</h3>
+<div id="outline-container-org773ff24" class="outline-3">
+<h3 id="org773ff24"><span class="section-number-3">5.2</span> 什么是 syntax-case</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 在这里我默认你已经学过了 syntax-rules，对 Scheme 的宏有了一定的了解，一些比较基础的东西我就不做过多解释了，我主要介绍与 syntax-case 相关的东西。这里我也不详细说明 syntax-case 的语法了，通过一些例子你就明白了，具体的语法可以参考书上的定义。
@@ -1393,8 +1399,8 @@ C 语言的宏是“动态作用域”的，你看：
 </div>
 
 
-<div id="outline-container-org722aef9" class="outline-3">
-<h3 id="org722aef9"><span class="section-number-3">5.3</span> 与 syntax-case 相关的函数与宏</h3>
+<div id="outline-container-orga114358" class="outline-3">
+<h3 id="orga114358"><span class="section-number-3">5.3</span> 与 syntax-case 相关的函数与宏</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 首先，与 syntax-case 最相关的就是 syntax-rules 啦，毕竟 syntax-case 是从它上面出来的。syntax-rules 是可以用 syntax-case 定义出来的，TSPL 上面是这样写的：
@@ -1462,16 +1468,16 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 
 
-<div id="outline-container-orgde7e78d" class="outline-3">
-<h3 id="orgde7e78d"><span class="section-number-3">5.4</span> Scheme 宏的一些使用用例</h3>
+<div id="outline-container-org7c5569b" class="outline-3">
+<h3 id="org7c5569b"><span class="section-number-3">5.4</span> Scheme 宏的一些使用用例</h3>
 <div class="outline-text-3" id="text-5-4">
 <p>
 这里是我对宏的一些整理，它的一部分来自 TSPL，一部分来自Racket 文档，一部分来自网上的代码，一部分来自我的一点脑洞，宏的难度和复杂程度大概呈递增规律，希望这些例子能有助于你的学习。大部分宏都使用 syntax-case，为了简便少部分也使用 syntax-rules，毕竟它都可以用 syntax-case 定义出来了。
 </p>
 </div>
 
-<div id="outline-container-org75942aa" class="outline-4">
-<h4 id="org75942aa"><span class="section-number-4">5.4.1</span> 递归转换器</h4>
+<div id="outline-container-orgf692779" class="outline-4">
+<h4 id="orgf692779"><span class="section-number-4">5.4.1</span> 递归转换器</h4>
 <div class="outline-text-4" id="text-5-4-1">
 <p>
 功能：通过普通的匿名函数得到一个递归函数。
@@ -1503,8 +1509,8 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 </div>
 
-<div id="outline-container-org428378b" class="outline-4">
-<h4 id="org428378b"><span class="section-number-4">5.4.2</span> 特殊形式 and 和 or</h4>
+<div id="outline-container-org6c98ef4" class="outline-4">
+<h4 id="org6c98ef4"><span class="section-number-4">5.4.2</span> 特殊形式 and 和 or</h4>
 <div class="outline-text-4" id="text-5-4-2">
 <p>
 功能：实现短路逻辑
@@ -1544,8 +1550,8 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 </div>
 
-<div id="outline-container-org8b40ba4" class="outline-4">
-<h4 id="org8b40ba4"><span class="section-number-4">5.4.3</span> 特殊形式 when 和 unless</h4>
+<div id="outline-container-org6614713" class="outline-4">
+<h4 id="org6614713"><span class="section-number-4">5.4.3</span> 特殊形式 when 和 unless</h4>
 <div class="outline-text-4" id="text-5-4-3">
 <p>
 功能：当条件为真/假时，顺序执行给定的表达式，不需要加 begin
@@ -1580,8 +1586,8 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 </div>
 
-<div id="outline-container-orged36630" class="outline-4">
-<h4 id="orged36630"><span class="section-number-4">5.4.4</span> loop 循环</h4>
+<div id="outline-container-org0296d3c" class="outline-4">
+<h4 id="org0296d3c"><span class="section-number-4">5.4.4</span> loop 循环</h4>
 <div class="outline-text-4" id="text-5-4-4">
 <p>
 功能：实现带有 break 功能的循环
@@ -1623,8 +1629,8 @@ It is sometimes useful to construct a transformer's output in separate pieces, t
 </div>
 </div>
 
-<div id="outline-container-org7ff9069" class="outline-4">
-<h4 id="org7ff9069"><span class="section-number-4">5.4.5</span> letcc</h4>
+<div id="outline-container-orge1ae418" class="outline-4">
+<h4 id="orge1ae418"><span class="section-number-4">5.4.5</span> letcc</h4>
 <div class="outline-text-4" id="text-5-4-5">
 <p>
 功能：不用写 call/cc 中接受的函数，少些点字
@@ -1662,8 +1668,8 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
 </div>
 </div>
 
-<div id="outline-container-org589cb55" class="outline-4">
-<h4 id="org589cb55"><span class="section-number-4">5.4.6</span> 简单的函数生成器</h4>
+<div id="outline-container-org80dad2a" class="outline-4">
+<h4 id="org80dad2a"><span class="section-number-4">5.4.6</span> 简单的函数生成器</h4>
 <div class="outline-text-4" id="text-5-4-6">
 <p>
 功能：使用这个宏来定义一个变量时，生成它的 getter/setter 函数
@@ -1746,8 +1752,8 @@ letcc 是 <i>the seasoned schemer</i> 里面的一个宏。
 </div>
 </div>
 
-<div id="outline-container-orgcd20a94" class="outline-4">
-<h4 id="orgcd20a94"><span class="section-number-4">5.4.7</span> generator</h4>
+<div id="outline-container-orgb294ef1" class="outline-4">
+<h4 id="orgb294ef1"><span class="section-number-4">5.4.7</span> generator</h4>
 <div class="outline-text-4" id="text-5-4-7">
 <p>
 功能：创建一个 generator，就像 js 和 python 中的那样。
@@ -1858,8 +1864,8 @@ store-return 作为返回锚点，store-k 存储上一次跳出时的 continuait
 </div>
 </div>
 
-<div id="outline-container-org3a9e9c1" class="outline-4">
-<h4 id="org3a9e9c1"><span class="section-number-4">5.4.8</span> setf</h4>
+<div id="outline-container-org25f208e" class="outline-4">
+<h4 id="org25f208e"><span class="section-number-4">5.4.8</span> setf</h4>
 <div class="outline-text-4" id="text-5-4-8">
 <p>
 setf 是 elisp（common lisp 中应该也有吧）的一个宏，它的功能很强大也很奇怪，它把第一个参数看做“左值”，然后对其中的对象进行赋值操作。举例来说的话：
@@ -1902,8 +1908,8 @@ a =&gt; 1
 </div>
 </div>
 
-<div id="outline-container-orgf0f96fb" class="outline-4">
-<h4 id="orgf0f96fb"><span class="section-number-4">5.4.9</span> 延时let</h4>
+<div id="outline-container-org9ae84c5" class="outline-4">
+<h4 id="org9ae84c5"><span class="section-number-4">5.4.9</span> 延时let</h4>
 <div class="outline-text-4" id="text-5-4-9">
 <p>
 在 elisp 和 Scheme 中都有延时求值的宏，Scheme 中是 delay/force， elisp 中则是 thunk-delay 和 thunk-force，但是 elisp 中还有一个宏，可以像 let 一样用延时求值：
@@ -2004,8 +2010,8 @@ delay-let* 定义变量时里层可以使用外层的变量，以下代码可以
 </div>
 </div>
 
-<div id="outline-container-org004a14b" class="outline-4">
-<h4 id="org004a14b"><span class="section-number-4">5.4.10</span> 其他</h4>
+<div id="outline-container-org8fbc34b" class="outline-4">
+<h4 id="org8fbc34b"><span class="section-number-4">5.4.10</span> 其他</h4>
 <div class="outline-text-4" id="text-5-4-10">
 <p>
 Kent，Fridman 写了一个非常厉害的模式匹配宏，链接在<a href="https://github.com/guenchi/match">这里</a>，不过我看不懂。
@@ -2024,8 +2030,8 @@ Kent，Fridman 写了一个非常厉害的模式匹配宏，链接在<a href="ht
 </div>
 
 
-<div id="outline-container-org5f2ab98" class="outline-2">
-<h2 id="org5f2ab98"><span class="section-number-2">6</span> 后记</h2>
+<div id="outline-container-org43502bb" class="outline-2">
+<h2 id="org43502bb"><span class="section-number-2">6</span> 后记</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 本文最开始取的题目是“elisp 的 lexical-binding”，但是写着写着突然发现我对作用域这个概念的理解似乎出了点问题，似乎是有必要把作用域相关的概念全都过一遍。看完了作用域后我终于明白了作用域和动态/静态作用域好像根本不是一个东西。这时候我又想起了很久之前学过的 syntax-case，我对里面的 <code>datum-&gt;syntax</code> 总是无法理解透彻。但是学完作用域后我终于明白了它到底是干什么的了。那就干脆把 syntax-case 也整理一遍吧，蛤。
@@ -2057,59 +2063,59 @@ syntax-case 不就是带了上下文信息的列表变换吗，这有什么难�
 </div>
 
 
-<div id="outline-container-org7cd1f5e" class="outline-2">
-<h2 id="org7cd1f5e"><span class="section-number-2">7</span> 参考资料</h2>
+<div id="outline-container-org744de3a" class="outline-2">
+<h2 id="org744de3a"><span class="section-number-2">7</span> 参考资料</h2>
 <div class="outline-text-2" id="text-7">
 <p>
-<a id="orge4d5803">【1】</a> <a href="https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding">EmacsWiki: Dynamic Binding Vs Lexical Binding</a>
+<a id="orgadaae1c">【1】</a> <a href="https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding">EmacsWiki: Dynamic Binding Vs Lexical Binding</a>
 </p>
 
 <p>
-<a id="org9360ee4">【2】</a> <a href="https://en.wikipedia.org/wiki/Name_binding">Name binding - Wikipedia</a>
+<a id="orgf246937">【2】</a> <a href="https://en.wikipedia.org/wiki/Name_binding">Name binding - Wikipedia</a>
 </p>
 
 <p>
-<a id="org83a01d9">【3】</a> <a href="https://en.wikipedia.org/wiki/Context_(computing)">Context (computing) - Wikipedia</a>
+<a id="orgf0dddaa">【3】</a> <a href="https://en.wikipedia.org/wiki/Context_(computing)">Context (computing) - Wikipedia</a>
 </p>
 
 <p>
-<a id="org3b7ba22">【4】</a> <a href="https://en.wikipedia.org/wiki/Scope_(computer_science)">Scope (computer science) - Wikipedia</a>
+<a id="orge589f80">【4】</a> <a href="https://en.wikipedia.org/wiki/Scope_(computer_science)">Scope (computer science) - Wikipedia</a>
 </p>
 
 <p>
-<a id="org6094d73">【5】</a> 翻译取自这里，<a href="http://blog.huati365.com/5db5259c3933e332">Lisp的作用域和生存期（scope and extent in lisp)- 每日博客 (huati365.com)</a>
+<a id="orgcc7dc65">【5】</a> 翻译取自这里，<a href="http://blog.huati365.com/5db5259c3933e332">Lisp的作用域和生存期（scope and extent in lisp)- 每日博客 (huati365.com)</a>
 </p>
 
 <p>
-<a id="org736a664">【6】</a> <a href="https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node43.html#SECTION00700000000000000000">3. Scope and Extent (cmu.edu)</a>
+<a id="orga83429c">【6】</a> <a href="https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node43.html#SECTION00700000000000000000">3. Scope and Extent (cmu.edu)</a>
 </p>
 
 <p>
-<a id="org45e47a0">【7】</a> <a href="https://en.wikipedia.org/wiki/Name_resolution_(programming_languages)">Name resolution (programming languages) - Wikipedia</a>
+<a id="orgfac5f45">【7】</a> <a href="https://en.wikipedia.org/wiki/Name_resolution_(programming_languages)">Name resolution (programming languages) - Wikipedia</a>
 </p>
 
 <p>
-<a id="org171f733">【8】</a> <a href="https://en.wikipedia.org/wiki/Variable_(computer_science)">Variable (computer science) - Wikipedia</a>
+<a id="org6b15fb5">【8】</a> <a href="https://en.wikipedia.org/wiki/Variable_(computer_science)">Variable (computer science) - Wikipedia</a>
 </p>
 
 <p>
-<a id="org72ae1e2">【9】</a> <a href="https://www.zhihu.com/question/20032419/answer/44059188">动态作用域和词法域的区别是什么？ - 知乎 (zhihu.com)</a>
+<a id="orgccdc84f">【9】</a> <a href="https://www.zhihu.com/question/20032419/answer/44059188">动态作用域和词法域的区别是什么？ - 知乎 (zhihu.com)</a>
 </p>
 
 <p>
-<a id="org6921d48">【10】</a> <a href="https://www.zenlife.tk/scheme-hygiene-macro.md">scheme 卫生宏实现介绍 (zenlife.tk)</a>
+<a id="org3f5fcab">【10】</a> <a href="https://www.zenlife.tk/scheme-hygiene-macro.md">scheme 卫生宏实现介绍 (zenlife.tk)</a>
 </p>
 
 <p>
-<a id="orga3feff1">【11】</a> <a href="https://en.wikipedia.org/wiki/Hygienic_macro">Hygienic macro - Wikipedia</a>
+<a id="org2f8ce3f">【11】</a> <a href="https://en.wikipedia.org/wiki/Hygienic_macro">Hygienic macro - Wikipedia</a>
 </p>
 
 <p>
-<a id="org3e6a886">【12】</a> <i>the scheme programming lanugage</i>
+<a id="orgd51c506">【12】</a> <i>the scheme programming lanugage</i>
 </p>
 
 <p>
-<a id="orgbbb421b">【13】</a> <a href="https://www.cs.fsu.edu/~engelen/courses/COP402001/notes5_4.pdf">notes5_4.pdf (fsu.edu)</a>
+<a id="org07cabc7">【13】</a> <a href="https://www.cs.fsu.edu/~engelen/courses/COP402001/notes5_4.pdf">notes5_4.pdf (fsu.edu)</a>
 </p>
 </div>
 </div>
