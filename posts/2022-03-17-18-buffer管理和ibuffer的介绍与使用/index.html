@@ -1,0 +1,1438 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-03-17 Thu 17:14 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>buffer 管理和 ibuffer 的介绍与使用 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzEyNDEzMjg1.jpg" alt="load failed"></div></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="include-yy" />
+<link rel="stylesheet" type="text/css" href="../../css/style_gongzhitaao.css" />
+<link rel="icon" type="image/x-icon" href="../../img/kagamine_rin.ico">
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../../index.html"> UP </a>
+ |
+ <a accesskey="H" href="http://www.incf19.com"> HOME </a>
+</div><div id="preamble" class="status">
+<div>
+  <a href="http://www.incf19.com/index.html">Go Home </a>
+  <hr class="Solid">
+</div>
+</div>
+<div id="content">
+<h1 class="title">buffer 管理和 ibuffer 的介绍与使用 <div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzEyNDEzMjg1.jpg" alt="load failed"></div></h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgfe53e4c">1. buffer 概念及其基本操作</a>
+<ul>
+<li><a href="#org666902a">1.1. 选择 buffer</a></li>
+<li><a href="#orga1ab852">1.2. 列出 buffer</a></li>
+<li><a href="#orgda26b97">1.3. 关闭 buffer</a></li>
+<li><a href="#org17671ca">1.4. 创建间接 buffer</a></li>
+<li><a href="#org08faab1">1.5. 其他杂项</a></li>
+</ul>
+</li>
+<li><a href="#org222b953">2. 使用 buffer-menu 来管理 buffer</a>
+<ul>
+<li><a href="#org59bd825">2.1. 打开光标所在 buffer</a></li>
+<li><a href="#orgfbe0f30">2.2. 对 buffer 中内容的搜索</a></li>
+<li><a href="#org039ced8">2.3. 对 buffer 的标记</a></li>
+<li><a href="#org675bcba">2.4. 其他杂项</a></li>
+</ul>
+</li>
+<li><a href="#orgfa89d41">3. 使用 bs-show 来管理 buffer</a>
+<ul>
+<li><a href="#org77eea07">3.1. 打开 buffer</a></li>
+<li><a href="#org2da3e28">3.2. 标记 buffer</a></li>
+<li><a href="#orga761269">3.3. 杂项</a></li>
+<li><a href="#orge5ba1e2">3.4. 显示设置</a></li>
+</ul>
+</li>
+<li><a href="#org1ef9b10">4. 使用 ibuffer 来管理 buffer</a>
+<ul>
+<li><a href="#org2c82e4d">4.1. 标记 buffer</a></li>
+<li><a href="#orge5ffa01">4.2. 对所标记 buffer 的操作</a></li>
+<li><a href="#org648d23b">4.3. 对 buffer 的筛选</a></li>
+<li><a href="#org908abb3">4.4. 对 buffer 进行分组</a></li>
+<li><a href="#org2d86904">4.5. 对 buffer 进行排序</a></li>
+<li><a href="#orgf253491">4.6. 杂项</a></li>
+</ul>
+</li>
+<li><a href="#orgf8d876a">5. 配置 ibuffer</a></li>
+<li><a href="#org5a111a8">6. ibuffer 的扩展</a></li>
+<li><a href="#org3f5deb3">7. 后记</a></li>
+</ul>
+</div>
+</div>
+<p>
+本文并不是用来介绍 buffer 相关的 elisp 接口函数的，而是介绍如何使用 emacs 提供的功能来使用和管理 buffer。首先我会介绍 buffer-menu 的使用，随后我会介绍更强大的 ibuffer，它已经内置到 emacs 里面了。
+</p>
+
+<div id="outline-container-orgfe53e4c" class="outline-2">
+<h2 id="orgfe53e4c"><span class="section-number-2">1</span> buffer 概念及其基本操作</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+在这一节中，我首先根据 emacs manual<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>来介绍一下 buffer 是什么，随后介绍一些常见的 buffer 操作。
+</p>
+
+<p>
+我们所有的编辑操作都是在 buffer 中完成的，当我们使用 emacs 打开一个文件时，文件中的内容就会放入 buffer 中，当我们对 buffer 执行保存操作时，buffer 中的内容就会写入文件中。buffer 也不一定要与文件绑定，我们可以创建空的 buffer，在必要的时候可以使用命令来将其保存在文件中。
+</p>
+
+<p>
+在 emacs 中，同一时间只能选中一个 buffer，它被叫做当前 buffer（current buffer），它就像是键盘焦点一样，键盘只能在获得焦点的窗口中进行输入。
+</p>
+
+<p>
+下面我会根据 emacs manual 的内容来介绍一些简单的 buffer 操作，我们了解一下就行了，其中一些命令我也用的不多。
+</p>
+</div>
+
+<div id="outline-container-org666902a" class="outline-3">
+<h3 id="org666902a"><span class="section-number-3">1.1</span> 选择 buffer</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+在没有改键的 emacs 中，下面的按键分别对应的命令是：
+</p>
+
+<ul class="org-ul">
+<li><code>C-x b buffer RET</code> ，选择或创建一个 buffer， <code>switch-to-buffer</code></li>
+
+<li><code>C-x 4 b buffer RET</code> ， 在另一 window 中选择或创建 buffer， <code>switch-to-buffer-other-window</code></li>
+
+<li><code>C-x 5 b buffer RET</code> ， 在另一 frame 中选择或创建 buffer， <code>switch-to-buffer-other-frame</code></li>
+
+<li><code>C-x LEFT</code> <code>C-x RIGHT</code> ，选择 buffer list 中的上一或下一 buffer， <code>previous-buffer</code> ， <code>next-buffer</code></li>
+</ul>
+
+
+<p>
+上面这几个命令我用的最多的还是 <code>switch-to-buffer</code> ，更准确地说是 <code>ido-switch-buffer</code> （它提供了显示 buffer 的 minibuffer ，比 emacs 原本的功能更直观一点）。buffer 多起来之后 <code>previous-buffer</code> 和 <code>next-buffer</code> 就不太实用了。至于在其他 window 或 frame 中切换 buffer，我感觉还是直接移到 window 内再选择 buffer 更方便。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orga1ab852" class="outline-3">
+<h3 id="orga1ab852"><span class="section-number-3">1.2</span> 列出 buffer</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+通过调用 <code>C-x C-b</code> （ <code>list-buffer</code> ），emacs 会为我们弹出一个叫做 <code>*Buffer List*</code> 的 buffer 菜单，菜单中的每一行会显示各 buffer 的名字，大小和 major mode。下面是效果图：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./1.PNG" alt="1.PNG" /></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+在这个 buffer 内，我们可以执行一些 buffer 的管理操作，我会在下一节进行简单的介绍。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgda26b97" class="outline-3">
+<h3 id="orgda26b97"><span class="section-number-3">1.3</span> 关闭 buffer</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+emacs 中对这类操作的用词是 <i>kill buffers</i> ，但直译为杀死 buffer 感觉不太好。
+</p>
+
+<p>
+<code>C-x k buffer RET</code> 即 <code>kill-buffer</code> 可以关闭一个指定的 buffer，在关闭该 buffer 后，另一 buffer 就会成为当前 buffer。如果被关闭的 buffer 未保存的话，emacs 会询问你是否在关闭前将 buffer 内容保存到文件中。
+</p>
+
+<p>
+<code>kill-some-buffers</code> 会拿着 buffer-list 中的 buffer 一个个问你要不要删除，如果确定删除那就对 buffer 执行 <code>kill-buffer</code> 操作。
+</p>
+
+<p>
+<code>kill-matching-buffers</code> 会要求你输入一个正则表达式，并对名字匹配正则表达式的 buffer 执行关闭操作。它会像 <code>kill-some-buffers</code> 一样拿匹配的 buffer 一个个问你是否关闭。
+</p>
+
+<p>
+<code>clean-buffer-list</code> 用于关闭长时间未使用的 buffer，要控制它的行为的话，可以通过阅读该函数的文档来了解。
+</p>
+
+<p>
+除了 <code>kill-buffer</code> （实际上我用的是 <code>ido-kill-buffer</code> ）外，其他的命令我基本上没有用过。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org17671ca" class="outline-3">
+<h3 id="org17671ca"><span class="section-number-3">1.4</span> 创建间接 buffer</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+所谓间接 buffer（indirect buffer）指的是和原 buffer 共享文本的 buffer，但除了文本一致外，它们的其他属性是分开的，也就是说间接 buffer 可以使用不同的 major mode，不同的 narrow，等等。当我们关闭原 buffer 时，它的间接 buffer 也会被关闭，但是关闭间接 buffer 不会影响到原 buffer。
+</p>
+
+<p>
+<code>make-indirect-buffer</code> 可用来创建间接 buffer。 <code>clone-indirect-buffer</code> 使用当前 buffer 来创建间接 buffer。 <code>C-x 4 c</code> 对应的 <code>clone-indirect-buffer-other-window</code> 在另一 windows 打开根据当前 buffer 创建的间接 buffer。
+</p>
+
+<p>
+出于懒惰的考虑，上面这些命令的效果我就不演示了，自己试一试也不麻烦。在浏览许多 emacs 中的 elisp 源代码文件时，在比较大的文件中，我们时不时可以看到使用 <code>^L</code> 字符进行分页的操作。分页也许是出于功能分模块放置的考虑，不过代码的作者可能是对不同分页使用了间接 buffer，然后在不同间接 buffer 中使用 narrow-to-page 命令，这样一来就实现了“逻辑分页”的功能，将一个 elisp 文件看作多个 elisp 文件。
+</p>
+
+<p>
+我之前也设想过将一个文件根据函数分为多页，每页一个函数，然后根据函数名而不是文件内容查找来进行页面跳转。但是当时没有了解到 emacs 提供的 narrow 功能，以及提供的间接 buffer 功能。有时间了我去简单实践一下，或者去找找已有的最佳实践。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org08faab1" class="outline-3">
+<h3 id="org08faab1"><span class="section-number-3">1.5</span> 其他杂项</h3>
+<div class="outline-text-3" id="text-1-5">
+<ul class="org-ul">
+<li><code>C-x C-q</code> 可以控制当前 buffer 是否只读（read-only）</li>
+
+<li><code>rename-buffer</code> 可以更改当前 buffer 的名字</li>
+
+<li><code>rename-uniquely</code> 类似于 <code>rename-buffer</code> ，但是会在必要的时候在名字后面添加 <code>&lt;num&gt;</code> 来避免冲突</li>
+
+<li><code>view-buffer RET buffer RET</code> 在 buffer 中开启 view-mode</li>
+</ul>
+
+
+<p>
+这些命令都没什么好说的，其中 <code>C-x C-q</code> 我用的很频繁，这是为了避免在阅读 elisp 源代码时不小心修改。也许我应该考虑使用代码实现源代码自动只读，而不是每次都按一次 <code>C-x C-q</code> 。
+</p>
+
+<p>
+还有一件事，如果不同目录下的文件有相同的名字，emacs 会采取一些办法来区分这两个 buffer。默认的办法是在 buffer 名字前面加上后缀，比如我在 foo 和 bar 目录下都有 index.txt 文件，那 emacs 会将它们显示为 <code>index.txt&lt;foo&gt;</code> 和 <code>index.txt&lt;bar&gt;</code> 。如果目录更加复杂，那么 emacs 也会使用更长的后缀以达到区分的效果。
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./2.PNG" alt="2.PNG" /></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+我们可以通过一些变量来控制 emacs 的同名 buffer 修饰规则。 <code>uniquify-buffer-name-style</code> 共有 5 个选项，它们对应的显示如下：
+</p>
+
+<ul class="org-ul">
+<li><code>forward</code>: <code>bar/mumble/name</code> and <code>quux/mumble/name</code></li>
+<li><code>reverse</code>: <code>name\mumble\bar</code> and <code>name\mumble\quux</code></li>
+<li><code>post-forward</code>: <code>name|bar/mumble</code> and <code>name|quux/mumble</code></li>
+<li><code>post-forward-angle-brackets</code>: <code>name&lt;bar/mumble&gt;</code> and <code>name&lt;quux/mumble&gt;</code></li>
+<li><code>nil</code>: <code>name</code> and <code>name&lt;2&gt;</code></li>
+</ul>
+
+<p>
+我比较喜欢用 <code>reverse</code> 风格，它将多出的信息添加在 buffer 名字后面。
+</p>
+
+<p>
+除了 <code>name-style</code> 外，还有其他的选项可用：
+</p>
+
+<ul class="org-ul">
+<li><code>uniquify-after-kill-buffer-p</code> ，当关闭 buffer 时是否刷新名字，它默认为 t</li>
+
+<li><code>uniquify-ignore-buffers-re</code> ，一个正则表达式，满足该表达式的 buffer 不会被修饰</li>
+
+<li><code>uniquify-separator</code> ，修饰内容与 buffer 名字之间的间隔符，如果不指定则使用默认分隔</li>
+</ul>
+
+
+<p>
+我使用的配置代码如下，这是从 redguardtoo 的 emacs 配置中抄过来的，他的配置可以在 github 上找到
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">Nicer naming of buffers for files with identical names</span>
+(<span style="color: #00af00;">setq</span> uniquify-buffer-name-style 'reverse)
+(<span style="color: #00af00;">setq</span> uniquify-separator <span style="color: #ff1f8b;">" &#8226; "</span>)
+(<span style="color: #00af00;">setq</span> uniquify-after-kill-buffer-p t)
+(<span style="color: #00af00;">setq</span> uniquify-ignore-buffers-re <span style="color: #ff1f8b;">"^\\*"</span>)
+</pre>
+</div>
+
+<p>
+想要进一步了解 buffer 修饰相关内容，可以查看 uniquify.el 源代码。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org222b953" class="outline-2">
+<h2 id="org222b953"><span class="section-number-2">2</span> 使用 buffer-menu 来管理 buffer</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+所谓的 buffer-menu 就是我们上面提到的 <code>C-x C-b</code> 呼出的 <code>*Buffer List*</code> ，该 buffer 提供了一些快捷键来供我们方便地管理多个 buffer。除了说 buffer-menu 外，我们还可以使用 bs-show 来管理 buffer，相比于 buffer-menu，它提供了更多可扩展的功能。
+</p>
+
+<p>
+在按下 <code>C-x C-b</code> 或调用 <code>buffer-menu</code> （或 <code>list-buffers</code> ）后，我们就进入了 <code>*Buffer List*</code> 中，按下 <code>?</code> 可以查看使用帮助。下面我就帮助中的内容来介绍一下 buffer-menu 的功能。
+</p>
+</div>
+
+<div id="outline-container-org59bd825" class="outline-3">
+<h3 id="org59bd825"><span class="section-number-3">2.1</span> 打开光标所在 buffer</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+将光标移到某一行再按下 <code>RET</code> 就可以在 <code>*Buffer List*</code> 所在 windows 打开该 buffer 了，除了回车键外，我们也可以使用 <code>o</code> ， <code>C-o</code> ， <code>v</code> ， <code>1</code> ， <code>2</code> ，它们的功能如下：
+</p>
+
+<ul class="org-ul">
+<li><code>RET</code> ，在当前 window 打开 buffer</li>
+<li><code>o</code> ，在另一 window 打开 buffer</li>
+<li><code>C-o</code> ，和 <code>o</code> 类似，但是光标不移动到打开的 buffer 中</li>
+<li><code>V</code> ，使用 view-mode 打开 buffer</li>
+<li><code>v</code> ，打开所有有标记的 buffer，使用多个 window 垂直分屏显示，标记需要使用 <code>m</code></li>
+<li><code>1</code> ，在当前 frame 中打开 buffer，使用整个 frame 的空间</li>
+<li><code>2</code> ，在一个 window 中打开 buffer，在另一 window 中显示先前的 current buffer</li>
+<li><code>t</code> ，以 tags-mode 打开 buffer，它应该是用来阅读 tags 文件的</li>
+</ul>
+
+<p>
+老实说，我只用过 <code>RET</code> 切换 buffer，其他的爱用不用吧。 <code>buffer-menu</code> 提供了在其他 window 中打开 buffer 的功能，但是我没感觉平时用过多少。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgfbe0f30" class="outline-3">
+<h3 id="orgfbe0f30"><span class="section-number-3">2.2</span> 对 buffer 中内容的搜索</h3>
+<div class="outline-text-3" id="text-2-2">
+<ul class="org-ul">
+<li><code>M-s a C-s</code> ，在标记的 buffer 中使用增量式文本搜索</li>
+<li><code>M-s a C-M-s</code> ，在标记的 buffer 中使用增量式正则搜索</li>
+<li><code>M-s a C-o</code> ，在 buffer 中显示匹配的行，也就是多文件版的 occur</li>
+</ul>
+
+
+<p>
+很不幸，在阅读帮助文档前我还不知道有多 buffer 搜索这回事，我一般都直接使用 <code>git grep</code> 进行项目内文件搜索。感兴趣的同学可以试试。使用 <code>M-s a C-o</code> 可以实现多文件快速修改，也许可以拿来重构用。
+</p>
+
+<p>
+总之，它和一般的搜索没什么区别，除了多了 <code>M-s a</code> 这个前缀外。标记 buffer 同样是使用 <code>m</code> 。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org039ced8" class="outline-3">
+<h3 id="org039ced8"><span class="section-number-3">2.3</span> 对 buffer 的标记</h3>
+<div class="outline-text-3" id="text-2-3">
+<ul class="org-ul">
+<li><code>m</code> ，仅标记 buffer</li>
+<li><code>s</code> ，标记 buffer 将执行保存操作</li>
+<li><code>C-k</code> ，标记 buffer 将被删除，然后将光标下移</li>
+<li><code>k</code> 和 <code>d</code> ，和 <code>C-k</code> 一样</li>
+<li><code>C-d</code> ，标记 buffer 将被删除，然后将光标上移</li>
+<li><code>u</code> ，取消光标所在 buffer 的标记，光标下移</li>
+<li><code>U</code> ，取消所有的标记</li>
+<li><code>DEL</code> ，取消标记，光标上移</li>
+<li><code>M-DEL</code> ，取消所有的某一类标记</li>
+<li><code>x</code> ，对标记为 save 的 buffer 执行保存操作，对标记为 delete 的 buffer 执行关闭操作</li>
+</ul>
+
+
+<p>
+这一部分就是对多个 buffer 的管理，可以批量保存，批量关闭。但是不能批量标记，这个我们会在 ibuffer 中讲到。
+</p>
+
+<p>
+这些选项同样我也没用过，我只是一个一个关 buffer 罢了，save 操作直接交给 ⛤lazy-cat⛤ 的 auto-save 了。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org675bcba" class="outline-3">
+<h3 id="org675bcba"><span class="section-number-3">2.4</span> 其他杂项</h3>
+<div class="outline-text-3" id="text-2-4">
+<ul class="org-ul">
+<li><code>~</code> ，取消 buffer 的 modify 标记，就当 buffer 没有被修改过</li>
+<li><code>%</code> ，切换 buffer 的 read-only 状态</li>
+<li><code>g</code> ，更新 buffer list</li>
+<li><code>T</code> ，切换是否只显示文件 buffer</li>
+<li><code>b</code> ，将光标所在 buffer 放到 buffer list 的最后位置</li>
+<li><code>q</code> ，回到 current buffer</li>
+</ul>
+
+
+<p>
+同样，我也没用过这些，更新通过多次调用 <code>list-buffers</code> ，只读切换通过 <code>C-x C-q</code> ，其他的就没用过了。
+</p>
+
+<p>
+综上，其实这 emacs 自带的 buffer 管理平时我也没用多少，如果不读文档的话我还真不知道有这么多功能，借此机会整理一下也是个不错的休闲时光。那个多 buffer 搜索是个挺厉害的功能，也许我会在本文的最后稍微演示一下。
+</p>
+
+<p>
+<code>buffer-menu</code> 也支持一定的自定义，可以通过浏览 buffer-menu.el 来了解。由于本文的重点不在配置 buffer-menu，这一部分我就略过了，有兴趣的读者可以去试试。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgfa89d41" class="outline-2">
+<h2 id="orgfa89d41"><span class="section-number-2">3</span> 使用 bs-show 来管理 buffer</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+正如上面所说，相比于 <code>list-buffers</code> ， <code>bs-show</code> 提供了可自定义的一些选项，快捷键和 <code>buffer-menu</code> 有些区别（下面会提到）。它的配置主要通过 <code>bs-customize</code> 来进行。界面如下：（考虑到我也用不上这东西，这里我就简单讲讲了）
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./3.PNG" alt="3.PNG" /></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+它有一个控制外观的 subgroup <code>Bs Appearance</code> ：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./4.PNG" alt="4.PNG" /></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+<div id="outline-container-org77eea07" class="outline-3">
+<h3 id="org77eea07"><span class="section-number-3">3.1</span> 打开 buffer</h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li><code>RET</code> ，和 <code>buffer-menu</code> 一致</li>
+<li><code>o</code> ， <code>C-o</code> 和 <code>buffer-menu</code> 一致</li>
+<li><code>!</code> ，和 <code>buffer-menu</code> 的 <code>1</code> 一致</li>
+<li><code>F</code> ，在新 frame 中打开 buffer</li>
+<li><code>v</code> ，对光标所在 buffer 打开并开启 view-mode</li>
+<li><code>t</code> ，和 <code>buffer-menu</code> 一致</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org2da3e28" class="outline-3">
+<h3 id="org2da3e28"><span class="section-number-3">3.2</span> 标记 buffer</h3>
+<div class="outline-text-3" id="text-3-2">
+<ul class="org-ul">
+<li><code>m</code> ，一致</li>
+<li><code>u</code> ，一致</li>
+<li><code>DEL</code> ，一致</li>
+<li><code>U</code> ，一致</li>
+
+<li><code>s</code> ，直接保存当前位置 buffer</li>
+<li><code>k</code> ，直接关闭当前位置 buffer</li>
+<li><code>C-d</code> ，同 <code>k</code> ，但随后光标上移</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orga761269" class="outline-3">
+<h3 id="orga761269"><span class="section-number-3">3.3</span> 杂项</h3>
+<div class="outline-text-3" id="text-3-3">
+<ul class="org-ul">
+<li><code>b</code> ，将当前位置 buffer 放到末尾</li>
+<li><code>~</code> ，移除 modify 标志</li>
+<li><code>%</code> ，切换当前位置 buffer 的 read-only 属性</li>
+<li><code>+</code> ，总是在 bs-show 中显示该 buffer</li>
+<li><code>M</code> ，切换 buffer 在 bs-show 中的显示属性，分 <code>-</code> ， <code>+</code> 和 <code>nothing</code> 三档</li>
+<li><code>g</code> ，更新 buffer list</li>
+<li><code>q</code> ，退出 bs-show</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orge5ba1e2" class="outline-3">
+<h3 id="orge5ba1e2"><span class="section-number-3">3.4</span> 显示设置</h3>
+<div class="outline-text-3" id="text-3-4">
+<ul class="org-ul">
+<li><code>a</code> ，切换是否显示特殊 buffer （比如带 <code>*</code> 号的）</li>
+<li><code>c</code> ，切换可用的显示配置</li>
+<li><code>C</code> ，让用户选择配置并应用</li>
+<li><code>S</code> ，切换不同规则来对 buffer 进行排序</li>
+</ul>
+
+<p>
+相比于 <code>buffer-menu</code> ， <code>bs-show</code> 提供了多种排列 buffer 的选择，以及自定义排序的能力，但是它没有提供多 buffer 搜索的能力。我基本上用不到它，这里我也说不出什么东西来。
+</p>
+
+<p>
+配置上感觉没啥好说的。。。。。。跟着 customize 界面的注释就大概知道啥意思了。接下来我们开始介绍 ibuffer，这也是本文的重头戏。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org1ef9b10" class="outline-2">
+<h2 id="org1ef9b10"><span class="section-number-2">4</span> 使用 ibuffer 来管理 buffer</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+ibuffer 相当于 buffer-menu 的超级强化版，除了 buffer-menu 的一些基本功能外，它还提供了给 buffer 分组的功能，等等。这一节中我会介绍 ibuffer 的使用，在下一节中我会介绍 ibuffer 的简单配置方法。同样，我们还是先从它提供的快捷键开始说起，它所提供的快捷键集合远大于 <code>buffer-menu</code> 和 <code>bs-show</code> 。讲完它所有的功能的意义可能不是很大，毕竟日常用不了这么多，但是提供一个速查中文文本对我而言还是有必要的。
+</p>
+
+<p>
+在开始之前，请将 <code>C-x C-b</code> 使用以下代码设置为 <code>ibuffer</code> ：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(global-unset-key (kbd <span style="color: #ff1f8b;">"C-x C-b"</span>))
+(global-set-key (kbd <span style="color: #ff1f8b;">"C-x C-b"</span>) 'ibuffer)
+</pre>
+</div>
+
+<p>
+需要说明的是， <code>*Help*</code> buffer 中列出的快捷键并没有包括 ibuffer 的全部快捷键，要了解 ibuffer 的全部功能请阅读源代码。
+</p>
+</div>
+
+
+<div id="outline-container-org2c82e4d" class="outline-3">
+<h3 id="org2c82e4d"><span class="section-number-3">4.1</span> 标记 buffer</h3>
+<div class="outline-text-3" id="text-4-1">
+<ul class="org-ul">
+<li><code>m</code> ，标记光标所在 buffer</li>
+<li><code>d</code> ，标记光标所在 buffer 为将删除</li>
+<li><code>t</code> ，取消所有标记，并标记所有未标记的 buffer</li>
+<li><code>u</code> ，取消光标所在 buffer 标记</li>
+<li><code>U</code> ，取消所有标记</li>
+<li><code>DEL</code> ，取消上面一个 buffer 的标记</li>
+<li><code>M-DEL</code> ，取消所有特定标记（需要输入标记字符，不输入则去掉所有标记）</li>
+</ul>
+
+
+<p>
+上面的标记方式和 <code>buffer-menu</code> 中的没有太大区别，下面的就是 ibuffer 中特有的批量标记功能了：
+</p>
+
+<ul class="org-ul">
+<li><code>* c</code> ，将某种标记全部替换为另一种标记（需要输入待替换标记字符和替换标记字符，普通标记是 <code>&gt;</code> ）</li>
+<li><code>* M</code> ，根据 major mode 对 buffer 进行标记（需要选择一个 major mode）</li>
+<li><code>* u</code> ，标记所有未保存的 buffer（用了 auto-save 估计用不上这种方法了）</li>
+<li><code>* m</code> ，标记所谓修改过的 buffer （同上）</li>
+<li><code>* s</code> ，标记所有以 <code>*</code> 开头的 buffer （也就是一些临时 buffer ，比如 <code>*message*</code> ）</li>
+<li><code>* e</code> ，标记所有拥有关联文件但暂时不存在的 buffer</li>
+<li><code>* r</code> ，标记所有 read-only 的 buffer</li>
+<li><code>* /</code> ，标记是 <code>dired-mode</code> 的 buffer</li>
+<li><code>* h</code> ，标记所有 <code>help-mode</code> 和 <code>apropos-mode</code> 的 buffer</li>
+<li><code>.</code> ，标记比 <code>ibuffer-old-time</code> 更老的 buffer，它的值是 72 小时</li>
+</ul>
+
+
+<p>
+第三种标记方式是根据正则匹配，它们包括：
+</p>
+
+<ul class="org-ul">
+<li><code>% n</code> ，根据 buffer name 进行标记，名字要匹配正则</li>
+<li><code>% m</code> ，根据 major mode 进行标记，major mode 名字要匹配正则</li>
+<li><code>% f</code> ，根据文件名进行标记，文件名匹配正则，对绝对路径</li>
+<li><code>% g</code> ，根据文件内容进行标记，内容匹配正则</li>
+<li><code>% L</code> ，标记所有被锁定的 buffer</li>
+</ul>
+
+
+<p>
+老实说，上面的大部分我都用不上，记住最基本的，以及根据名字匹配的差不多就够了，我觉得大概只需要下面这些：
+</p>
+
+<ul class="org-ul">
+<li><code>m</code> <code>d</code> <code>t</code> <code>u</code> <code>U</code></li>
+<li><code>* c</code> <code>* M</code> <code>* r</code> <code>* s</code></li>
+<li><code>% n</code> <code>% m</code> <code>% f</code> <code>% g</code></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orge5ffa01" class="outline-3">
+<h3 id="orge5ffa01"><span class="section-number-3">4.2</span> 对所标记 buffer 的操作</h3>
+<div class="outline-text-3" id="text-4-2">
+<ul class="org-ul">
+<li><code>S</code> ，保存标记的 buffer</li>
+<li><code>A</code> ，在 frame 中观察标记的 buffer，以垂直方式分屏</li>
+<li><code>H</code> ，在另一 frame 中打开该 buffer</li>
+<li><code>V</code> ，对标记 buffer 进行 revert 操作（将文件内容重新写入 buffer，相当于取消保存前的所有编辑，用了 auto-save 就基本上不用管了）</li>
+<li><code>T</code> ，切换标记 buffer 的 read-only 状态</li>
+<li><code>L</code> ，切换标记 buffer 的锁定状态</li>
+<li><code>D</code> ，关闭标记 buffer</li>
+<li><code>x</code> ，关闭所有标记为删除的 buffer</li>
+<li><code>k</code> ，将当前位置的 buffer 从 <b>Ibuffer</b> 中移除，但是不关闭该 buffer</li>
+</ul>
+
+<p>
+上面的一些操作可在 <code>buffer-menu</code> 找到对应的，下面是一些查找替换操作：
+</p>
+
+<ul class="org-ul">
+<li><code>M-s a C-s</code> ，在标记 buffer 中进行增量搜索</li>
+<li><code>M-s a C-M-s</code> ，在标记 buffer 中进行增量正则搜索</li>
+<li><code>O</code> ，在标记 buffer 中进行 Occur 操作</li>
+<li><code>r</code> ，在标记 buffer 中进行正则替换</li>
+<li><code>Q</code> ，在标记 buffer 中进行字符串逐个替换</li>
+<li><code>I</code> ，在标记 buffer 中进行正则逐个替换</li>
+</ul>
+
+
+<p>
+下面的这些就是 ibuffer 中独有的了，和命令的执行有关：
+</p>
+
+<ul class="org-ul">
+<li><code>X</code> ，将标记 buffer 的内容通过管道传给命令行</li>
+<li><code>N</code> ，使用命令行输出内容替换标记 buffer 的内容</li>
+<li><code>!</code> ，使用标记 buffer 的内容作为命令行参数调用命令</li>
+<li><code>E</code> ，在标记的 buffer 中执行一条 elisp 表达式</li>
+<li><code>W</code> ，和 <code>E</code> 类似，但是在执行时会对被执行 buffer 进行观察</li>
+</ul>
+
+
+<p>
+对于 buffer 的打开操作也没什么好记的， <code>A</code> 对应于 <code>buffer-menu</code> 中的 <code>v</code> 。对于查找与替换，ibuffer 中多出了替换的功能。对于执行操作，我感觉在 windows 上可能只用得上 <code>E</code> 和 <code>W</code> 。你可以试试在 <code>*Ibuffer*</code> 中标记所有 buffer 后执行 <code>(sit-for 1.0)</code> ，emacs 会以每秒一个 buffer 的速度为你显示所有的 buffer ，并在结束后显示 buffer 总数。 <code>E</code> 和 <code>W</code> 相当于使用某个表达式对 buffer 进行了选择性的遍历。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org648d23b" class="outline-3">
+<h3 id="org648d23b"><span class="section-number-3">4.3</span> 对 buffer 的筛选</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+所谓筛选就是按照选出某些满足条件的 buffer，ibuffer 提供了多种多样的筛选方式，各筛选器还可以进行逻辑组合来得到组合筛选器。
+</p>
+
+<ul class="org-ul">
+<li><code>/ RET</code> ，根据 major mode 进行筛选，它包括所有的 major mode</li>
+<li><code>/ m</code> ，根据当前所有 buffer 中使用的 major mode 进行筛选，也就是 major mode in use</li>
+<li><code>/ M</code> ，根据派生 mode 进行筛选</li>
+<li><code>/ n</code> ，根据 buffer name 进行筛选</li>
+<li><code>/ c</code> ，根据 buffer 内容进行筛选（c for contents）</li>
+<li><code>/ b</code> ，根据文件基础名字（不带扩展名）进行筛选</li>
+<li><code>/ F</code> ，根据目录名进行筛选（不含文件名）</li>
+<li><code>/ f</code> ，根据文件名进行筛选（绝对路径名）</li>
+<li><code>/ .</code> ，根据扩展名进行筛选</li>
+<li><code>/ i</code> ，筛选处于 modified 的 buffer</li>
+<li><code>/ e</code> ，根据 elisp 表达式进行筛选，该表达式的求值环境为对应 buffer</li>
+<li><code>/ &gt;</code> ，根据 buffer 大小筛选，要大于某一大小</li>
+<li><code>/ &lt;</code> ，根据 buffer 大小筛选，要小于某一大小</li>
+<li><code>/ *</code> ，筛选特殊的 buffer（一般以 <code>*</code> 开头）</li>
+<li><code>/ v</code> ，根据 buffer 是否有关联文件进行筛选，要有对应文件</li>
+</ul>
+
+<p>
+上面的选项是 ibuffer 提供的不同类型的筛选器，记不住也没关系，我们可以使用 <code>/ SPC</code> 来从中选择一种，它会提示你各筛选器的具体作用。下面的选项是对筛选器的操作：
+</p>
+
+<ul class="org-ul">
+<li><code>/ s</code> ，保存当前筛选器，并给它一个名字</li>
+<li><code>/ r</code> ，选择一个筛选器，将它作为当前筛选器</li>
+<li><code>/ a</code> ，选择一个筛选器，并添加到当前筛选中</li>
+<li><code>/ &amp;</code> ，使用 and 连接当前的两个筛选器</li>
+<li><code>/ |</code> ，使用 or 连接当前的两个筛选器</li>
+<li><code>/ p</code> ，移除最近添加的筛选器，比如 a b 得到 b</li>
+<li><code>/ !</code> ，对当前筛选器取反，由 a 得到 [not a]</li>
+<li><code>/ d</code> ，拆开组合筛选器，比如 [and a b c] 得到 a b c</li>
+<li><code>/ /</code> ，移除当前所有筛选器</li>
+</ul>
+
+
+<p>
+通过筛选器，我们可以对 buffer 进行分类了。具体的分组需要通过下面的分组命令。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org908abb3" class="outline-3">
+<h3 id="org908abb3"><span class="section-number-3">4.4</span> 对 buffer 进行分组</h3>
+<div class="outline-text-3" id="text-4-4">
+<ul class="org-ul">
+<li><code>/ g</code> ，根据当前筛选器创建一个组，创建后 ibuffer 中会将它归为一组中</li>
+<li><code>/ P</code> ，移除最近添加的组，类似于弹栈</li>
+<li><code>TAB</code> ，移动到下一个筛选组，组间光标移动</li>
+<li><code>M-p</code> ，移动到上一个筛选组，组间光标移动</li>
+<li><code>/ \</code> ，移除所有的筛选组</li>
+<li><code>/ S</code> ，保存当前的筛选组到文件中，这样下次就可以复用当前的分组方案了</li>
+<li><code>/ R</code> ，使用之前保存的某个筛选组，从文件中获取</li>
+<li><code>/ X</code> ，删除之前保存的筛选组</li>
+</ul>
+
+<p>
+进行分组后，不同种类的 buffer 就在不同的组中了，具体效果差不多是这样。没有分组的 buffer 就位于 [default] 分组中：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><img src="./5.PNG" alt="5.PNG" /></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-org2d86904" class="outline-3">
+<h3 id="org2d86904"><span class="section-number-3">4.5</span> 对 buffer 进行排序</h3>
+<div class="outline-text-3" id="text-4-5">
+<ul class="org-ul">
+<li><code>,</code> ，切换排序方式，具体多少种可以自己去试试</li>
+<li><code>s i</code> ，对当前的排序反序</li>
+<li><code>s a</code> ，按字典序排序，就是字符码排序，比如 A &lt; B &lt; a &lt; b 等等</li>
+<li><code>s f</code> ，根据文件名排序</li>
+<li><code>s v</code> ，根据 buffer 的最近访问时间排序</li>
+<li><code>s s</code> ，根据 buffer 大小排序</li>
+<li><code>s m</code> ，根据 major mode 排序</li>
+</ul>
+
+<p>
+排序基本上通过 <code>,</code> 切换就差不多了，感觉没太大用。。。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgf253491" class="outline-3">
+<h3 id="orgf253491"><span class="section-number-3">4.6</span> 杂项</h3>
+<div class="outline-text-3" id="text-4-6">
+<ul class="org-ul">
+<li><code>g</code> ，更新 <code>*Ibuffer</code> 内容</li>
+<li><code>`</code> ，改变当前显示格式，用了就知道咋回事了</li>
+<li><code>SPC</code> ，向下移动一行</li>
+<li><code>C-p</code> ，向上移动一行</li>
+<li><code>b</code> ，将光标所在 buffer 放到最后</li>
+<li><code>RET</code> 和 buffer-menu 一致</li>
+<li><code>o</code> ， <code>C-o</code> 和 buffer-menu 一致</li>
+<li><code>=</code> ，比较 buffer 内容与对应文件内容，需要 diff 命令，windows 不弄个 diff 用不了</li>
+</ul>
+
+<p>
+好了，到了这里关于 ibuffer 的操作就介绍的差不多了，下面我们介绍一下配置方法。ibuffer 应该可以当作一个简单的项目资源浏览器来用。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgf8d876a" class="outline-2">
+<h2 id="orgf8d876a"><span class="section-number-2">5</span> 配置 ibuffer</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+在上一节中，通过一些实践你应该基本了解了 ibuffer 的使用，这一节我们来介绍一下 ibuffer 的配置，在下一节我们介绍一下 <code>ibuffer-vc</code> 。说是配置方法介绍，其实也就是读了下 ibuffer.el 以及 customize 界面中的 option。
+</p>
+
+<p>
+想要打开 ibuffer 对应的 customize 界面，可以使用 <code>ibuffer-customize</code> 命令。其中有非常多的选项，下面我们一个一个的来介绍。我尽量保证覆盖所有的选项。（这一节可能会很长）
+</p>
+
+<p>
+我们开始吧。下面涉及到的文件有 ibuf-ext.el，ibuffer.el。
+</p>
+
+<ul class="org-ul">
+<li><code>ibuffer-never-show-predicates</code> ，它是由判断 buffer 是否应不该显示的函数的名字或正则表达式组成的表，若某一 buffer 满足其中的任一谓词，那么它就不会显示在 <code>*Ibuffer</code> 中
+<ul class="org-ul">
+<li>函数接收 buffer 对象为参数，返回非空值说明它不应该显示</li>
+<li>正则表达式则是匹配的 buffer name 表示不显示</li>
+<li>该选项的默认值为 nil，可以考虑在配置文件中写个 <code>(setq ibuffer-never-show-predicates nil)</code> （感觉没必要）</li>
+<li>如果设为某返回 t 的函数名的话，那么 <code>*Ibuffer</code> 中就不会显示任何 buffer</li>
+<li>就像这样： <code>(progn (defun a (x) t) (setq ibuffer-never-show-predicates '(a)))</code></li>
+</ul></li>
+
+<li><code>ibuffer-always-show-predicates</code> ，它由判断 buffer 是否总是该显示的谓词或正则组成的表，若某一 buffer 满足任一条件，那么它会显示在 <code>*Ibuffer</code> 中
+<ul class="org-ul">
+<li>满足该条件的 buffer 的显示不受 filter 的影响</li>
+<li>基本上和 <code>ibuffer-never-show-predicates</code> 是反着来的</li>
+<li>我对它和 <code>never</code> 使用了相同的正则，在 <code>*Ibuffer</code> 中找不到满足正则的 buffer，这也许说明它的优先级比 <code>never</code> 要低</li>
+</ul></li>
+
+<li><code>ibuffer-never-search-content-name</code> ，由正则组成的表，用于根据内容标记 buffer 时排除包含表中正则的 buffer
+<ul class="org-ul">
+<li>ibuf-ext.el 中已经添加了一些，我觉得这个东西没必要改了</li>
+</ul></li>
+
+<li><code>ibuffer-never-search-content-mode</code> ，由 major-mode 符号组成的表，用于根据内容标记 buffer 时排除 major-mode 为表中元素的 buffer
+<ul class="org-ul">
+<li>ibuf-ext.el 默认排除 <code>dired-mode</code> ，我们可以考虑加入一些其他的</li>
+</ul></li>
+
+<li><code>ibuffer-tmp-hide-regexps</code> ，由正则组成的表，buffer 名字满足正则则不显示该 buffer
+<ul class="org-ul">
+<li>可通过 <code>ibuffer-add-to-tmp-hide</code> 进行添加，这是个命令</li>
+<li>根据名字可知它应该是个临时起作用的选项</li>
+</ul></li>
+
+<li><code>ibuffer-tmp-show-regexps</code> ，由正则组成的表，buffer 名字满足正则则显示该 buffer
+<ul class="org-ul">
+<li>可通过 <code>ibuffer-add-to-tmp-show</code> 进行添加，这是个命令</li>
+<li>根据名字可知，同上</li>
+</ul></li>
+
+<li><code>ibuffer-saved-filters</code> ，由 filter 组成的表，格式为 <code>'((name spec) ...)</code>
+<ul class="org-ul">
+<li>举个例子， <code>'(("yy" (mode . c-mode)) ("yy2" (or (mode . lisp-mode) (mode . prog-mode))))</code></li>
+<li>它的默认值在 ibuf-ext.el 中，可以考虑给它个新的默认值（比如 nil），然后通过 <code>push</code> 不断添加</li>
+<li>在之前的 emacs 版本中，它的格式和现在不一样，不过我也懒得管了</li>
+<li>建议不要自己手写 filter，先通过 ibuffer 构造出来再抄下来就行了</li>
+</ul></li>
+
+<li><code>ibuffer-filtering-qualifiers</code> ，一张表，记录当前用于 buffer list 的 filter 及其组合状况
+<ul class="org-ul">
+<li>这个选项与当前的 filter 及其组合有关，不需要自定义，它是各 <code>*Ibuffer</code> 的 local 变量</li>
+<li>话是这么说，它的注释告诉了我们一共 4 中组合方式
+<ul class="org-ul">
+<li><code>(not FILTER-SPEC)</code> ，用来表示对 filter 取反</li>
+<li><code>(and F1 ...)</code> ，表示多个 filter 串联</li>
+<li><code>(or F1 ...</code> ，表示多个 filter 并联</li>
+<li><code>(saved . "name")</code> ，表示从 <code>ibuffer-saved-filters</code> 中获取的保存 filter</li>
+</ul></li>
+</ul></li>
+
+<li><code>ibuffer-filtering-alist</code> ，存放 filter 描述符的表
+<ul class="org-ul">
+<li>根据注释来看，最好不要手动修改，而是使用 <code>define-ibuffer-filter</code> 来添加 filter 描述符</li>
+<li>具体添加用法可以参考 ibuf-ext.el 中的例子，你可以找到 mode， used-mode，derived-mode，name 等 filter 描述符的定义</li>
+</ul></li>
+
+<li><code>ibuffer-filter-format-alist</code> ，控制 filter 显示格式的 alist，默认为 nil
+<ul class="org-ul">
+<li>我不太清楚这个 option 的作用，可以参考一下它的注释</li>
+</ul></li>
+
+<li><code>ibuffer-filter-groups</code> ，当前 <code>*Ibuffer</code> 中的分组情况，是 buffer local 的，不用管</li>
+
+<li><code>ibuffer-show-empty-filter-groups</code> ，若为非空值，就显示实际上为空的分组，默认为 t
+<ul class="org-ul">
+<li>也就是说，该选项非空，若在当前分组下若没有 buffer，那么还是会显示该分组的名字</li>
+<li>若为 nil，如果当前分组下没有 buffer，就什么也不显示了</li>
+</ul></li>
+
+<li><code>ibuffer-saved-filter-groups</code> ，保存的分组
+<ul class="org-ul">
+<li>可以考虑使用 push 添加，而不是使用 custom 方法保存</li>
+</ul></li>
+
+<li><code>ibuffer-old-time</code> ，单位为小时的时间，超过该时间的 buffer 被视为老旧的 buffer
+<ul class="org-ul">
+<li>可以设置为任意的小时数</li>
+</ul></li>
+
+<li><code>ibuffer-save-with-custom</code> ，是否使用 custom 保存，默认为 t
+<ul class="org-ul">
+<li>这个标志被 <code>ibuffer-saved-filters</code> 和 <code>ibuffer-saved-filter-groups</code> 所使用</li>
+<li>要自己另外保存最好关掉它</li>
+</ul></li>
+
+<li><code>ibuffer-formats</code> ，显示 buffer 行的格式描述，默认有正常版和精简版两种
+<ul class="org-ul">
+<li>编写方法可以参考注释</li>
+<li>可以通过 <code>ibuffer-switch-format</code> （也就是 <code>`</code> ）来切换显示</li>
+</ul></li>
+
+<li><code>ibuffer-always-compile-formats</code> ，是否字节编译 <code>ibuffer-formats</code> ，默认为 <code>(featurep 'bytecomp)</code>
+<ul class="org-ul">
+<li>若为 t，编译 <code>ibuffer-formats</code> 可以加快绘制速度</li>
+</ul></li>
+
+<li><code>ibuffer-fontification-alist</code> ，描述具有某些特征的 buffer 的颜色的 alist
+<ul class="org-ul">
+<li>alist 格式为 <code>(PRIORITY FORM FACE)</code> ，其中 PRIORITY 为优先级，当某行 buffer 同时满足多个 FORM 条件时使用数字最大的那个</li>
+<li>FACE 为显示样式</li>
+</ul></li>
+
+<li><code>ibuffer-use-other-window</code> ，若为非空值，那么默认在另一 window 显示 ibuffer
+<ul class="org-ul">
+<li>默认值为 nil</li>
+<li>控制调用 ibuffer 命令的行为</li>
+</ul></li>
+
+<li><code>ibuffer-default-shrink-to-minimum-size</code> ，若为非空值，默认使用最小尺寸的 ibuffer WINDOW，默认值为 nil
+<ul class="org-ul">
+<li>也就是不要求显示完全的 ibuffer 内容，还需要在 window 内下移才能看完整个 ibuffer</li>
+<li>设为 nil 吧，或者不管它</li>
+</ul></li>
+
+<li><code>ibuffer-display-summary</code> ，若为非空值，在 ibuffer 的最后显示汇总信息，默认为 t
+<ul class="org-ul">
+<li>也就是显示 buffer 个数，以及一些其他的统计信息</li>
+<li>我觉得没必要，设为 nil 就行了</li>
+</ul></li>
+
+<li><code>ibuffer-truncate-lines</code> ，若为非空值，则不显示连续的行，默认为 t
+<ul class="org-ul">
+<li>我不太清楚这个选项的作用，先不管了</li>
+</ul></li>
+
+<li><code>i1buffer-case-fold-search</code> ，若为非空值，则搜索时忽略大小写，默认为 case-fold-search，也就是 t
+<ul class="org-ul">
+<li>忽略大小写搜索应该更好，所以不需要改</li>
+</ul></li>
+
+<li><code>ibuffer-default-sorting-mode</code> ，默认的排序模式，默认值为 recency
+<ul class="org-ul">
+<li>排序默认是从小到大的顺序</li>
+<li>可选模式有 recency ，表示按最近访问时间排序</li>
+<li>alphabetic，字典顺序</li>
+<li>size，buffer 大小排序</li>
+<li>filename/process ，文件或进程的名字排序</li>
+<li>major-mode ，按 major-mode 排序</li>
+</ul></li>
+
+<li><code>ibuffer-default-sorting-reversep</code> ，是否使用排序的反序，默认为否，即 nil
+<ul class="org-ul">
+<li>反序之后就是从大到小</li>
+</ul></li>
+
+<li><code>ibuffer-eliding-string</code> ，表示省略的字符串，默认为 "&#x2026;"
+<ul class="org-ul">
+<li>当某一列太长了就会使用省略号</li>
+</ul></li>
+
+<li><code>ibuffer-maybe-show-predicates</code> ，一个由谓词和正则组成的表，若 buffer 满足其中一个，它就会被显示
+<ul class="org-ul">
+<li>它需要在 <code>g</code> 命令前面添加 <code>C-u</code> 前缀来切换是否使用</li>
+<li>这个 filter 在标准 filter 之前起作用，也就是说它得到的结果与标准 filter 结果合在一起吃作为最后的结果</li>
+<li>读者可以试试 <code>C-u</code> <code>g</code> ，看看多出了哪些 buffer</li>
+</ul></li>
+
+<li><code>ibuffer-default-display-maybe-show-predicates</code> ，默认为 nil
+<ul class="org-ul">
+<li>若为非空值，那就会显示满足 <code>ibuffer-maybe-show-predicates</code> 的 buffer</li>
+<li>设为 nil 就好了，其他的别管了</li>
+</ul></li>
+
+<li><code>ibuffer-movement-cycle</code> ，若为非空值，那么会循环移动，默认为 t
+<ul class="org-ul">
+<li>循环移动指的是组中不同 filter 间的循环移动，通过 <code>TAB</code> 和 <code>M-TAB</code> 来进行</li>
+<li>设为 t 移动感觉顺滑一点</li>
+</ul></li>
+
+<li><code>ibuffer-modified-char</code> ，表示 buffer 处于 modified 的字符，默认为 <code>*</code>
+<ul class="org-ul">
+<li>不用改</li>
+</ul></li>
+
+<li><code>ibuffer-read-only-char</code> ，表示 buffer 处于 read-only 的字符，默认为 <code>%</code>
+<ul class="org-ul">
+<li>不用改</li>
+</ul></li>
+
+<li><code>ibuffer-marked-char</code> ，表示 buffer 被标记的字符，默认为 <code>&gt;</code>
+<ul class="org-ul">
+<li>不用改</li>
+</ul></li>
+
+<li><code>ibuffer-locked-char</code> ，表示 buffer 处于 locked 的字符，默认为 <code>L</code>
+<ul class="org-ul">
+<li>不用改</li>
+</ul></li>
+
+<li><code>ibuffer-deletion-char</code> ，表示 buffer 处于待关闭的字符，默认为 <code>D</code>
+<ul class="org-ul">
+<li>不用改</li>
+</ul></li>
+
+<li><code>ibuffer-expert</code> ，你是否是 ibuffer 专家？ 默认为 nil
+<ul class="org-ul">
+<li>建议在不会扩展 ibuffer 之前不要改成 t</li>
+</ul></li>
+
+<li><code>ibuffer-view-ibuffer</code> ，是否在 <code>*Ibuffer</code> 中显示 <code>*Ibuffer</code> ，默认为 nil
+<ul class="org-ul">
+<li>一般来说应该是不需要的</li>
+</ul></li>
+
+<li><code>ibuffer-always-show-last-buffer</code> ，总是显示打开或更新 ibuffer 之前的 current buffer，默认为 Never，也即 nil
+<ul class="org-ul">
+<li>感觉好像没这需求，我们一般也不需要显示 minibuffer 之类的东西</li>
+<li>它的优先级很高，高于 <code>ibuffer-never-show-predicates</code></li>
+</ul></li>
+
+<li><code>ibuffer-jump-offer-only-visible-buffers</code> ，使用 jump 命令（ <code>j</code> ）是否允许跳到不可见的 buffer，默认为 nil
+<ul class="org-ul">
+<li>话说回来，这个 <code>j</code> 在 <code>*help*</code> 中是找不到的</li>
+<li>不可见的 buffer 指的是用 <code>k</code> 隐藏的 buffer</li>
+</ul></li>
+
+<li><code>ibuffer-use-header-line</code> ，是否显示包含当前 filter 的 headline，默认为 <code>(boundp 'header-line-format)</code>
+<ul class="org-ul">
+<li>应该不用改吧，这样挺好</li>
+</ul></li>
+
+<li><code>ibuffer-default-directory</code> ， <code>*Ibuffer</code> 的 <code>default-directory</code> ，默认为 nil
+<ul class="org-ul">
+<li>默认继承调用 <code>ibuffer</code> 时所在 buffer 的 <code>default-directory</code></li>
+<li>感觉默认行为已经可以了</li>
+</ul></li>
+
+<li><code>ibuffer-help-buffer-modes</code> ，一张元素为 major-mode 的表，若 buffer 为其中之一模式，那么 ibuffer 认为它处于帮助模式中
+<ul class="org-ul">
+<li>感觉不用改</li>
+</ul></li>
+
+<li><code>ibuffer-compressed-file-name-regexp</code> ，匹配压缩文件的正则
+<ul class="org-ul">
+<li>不用改</li>
+</ul></li>
+
+<li><code>ibuffer-hook</code> ，在调用 <code>ibuffer</code> 时运行的钩子
+<ul class="org-ul">
+<li>不知道怎么用</li>
+</ul></li>
+
+<li><code>ibuffer-mode-hook</code> ，在开启 <code>ibuffer-mode</code> 时运行的钩子
+<ul class="org-ul">
+<li>同上</li>
+</ul></li>
+
+<li><code>ibuffer-load-hook</code> ，载入 <code>ibuffer</code> 时运行的钩子
+<ul class="org-ul">
+<li>也许可以用来做一些初始化工作</li>
+</ul></li>
+
+<li><code>ibuffer-marked-face</code> ，标记 <code>m</code> 的 buffer FACE，默认为 warning
+<ul class="org-ul">
+<li>也许可以考虑改的炫酷一点</li>
+</ul></li>
+
+<li><code>ibuffer-deletion-face</code> ，标记 <code>d</code> 的 buffer FACE，默认为 error</li>
+
+<li><code>ibuffer-title-face</code> ，ibuffer title 的 FACE，默认为 bold
+<ul class="org-ul">
+<li>也就是 ibuffer 顶上的一行的 FACE</li>
+</ul></li>
+
+<li><code>ibuffer-filter-group-name-face</code> ，显示 group 各组名字的 FACE ，默认为 bold</li>
+
+<li><code>ibuffer-directory-abbrev-alist</code> ，类似于 <code>directory-abbrev-alist</code> ，默认为 nil
+<ul class="org-ul">
+<li>可以参考 <code>directory-abbrev-alist</code> 的用法，这里就不介绍了</li>
+</ul></li>
+</ul>
+
+
+<p>
+综上，我们就介绍完了 ibuffer 提供的选项，我可能漏掉了一些，不过这些大概够用了。
+</p>
+
+<p>
+下面是我使用的 ibuffer 配置代码，其中的某些选项完全没必要设置。希望对你有所帮助：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #b2b2b2; font-style: italic;">;;; </span><span style="color: #b2b2b2; font-style: italic;">init-ibuffer.el config ibuffer -*- lexical-binding:t; -*-</span>
+(<span style="color: #00af00;">require</span> '<span style="color: #1f5bff;">ibuffer</span>)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">use C-x C-b call ibuffer command</span>
+(global-unset-key (kbd <span style="color: #ff1f8b;">"C-x C-b"</span>))
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">don't open other window when in a Ibuffer</span>
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">init-ibuffer-ibuffer</span> ()
+  (<span style="color: #00af00;">interactive</span>)
+  (<span style="color: #00af00;">if</span> (string= (buffer-name) <span style="color: #ff1f8b;">"*Ibuffer*"</span>)
+      (ibuffer-update nil t)
+    (ibuffer)))
+(global-set-key (kbd <span style="color: #ff1f8b;">"C-x C-b"</span>) 'init-ibuffer-ibuffer)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">ibuffer formats</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">see ibuffer.el</span>
+(<span style="color: #00af00;">setq</span> ibuffer-formats '((mark modified read-only locked
+                              <span style="color: #ff1f8b;">" "</span> (name 18 18 <span style="color: #b218b2;">:left</span> <span style="color: #b218b2;">:elide</span>)
+                              <span style="color: #ff1f8b;">" "</span> (size 9 -1 <span style="color: #b218b2;">:right</span>)
+                              <span style="color: #ff1f8b;">" "</span> (mode 16 16 <span style="color: #b218b2;">:left</span> <span style="color: #b218b2;">:elide</span>) <span style="color: #ff1f8b;">" "</span> filename-and-process)
+                        (mark <span style="color: #ff1f8b;">" "</span> (name 16 -1) <span style="color: #ff1f8b;">" "</span> filename)))
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">ibuffer fontification-alist</span>
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">just copy from ibuffer.el</span>
+(<span style="color: #00af00;">setq</span> ibuffer-fontification-alist
+      '((10 buffer-read-only font-lock-constant-face)
+        (15 (<span style="color: #00af00;">and</span> buffer-file-name
+                 (string-match ibuffer-compressed-file-name-regexp
+                               buffer-file-name))
+            font-lock-doc-face)
+        (20 (string-match <span style="color: #ff1f8b;">"^\\*"</span> (buffer-name)) font-lock-keyword-face)
+        (25 (<span style="color: #00af00;">and</span> (string-match <span style="color: #ff1f8b;">"^ "</span> (buffer-name))
+                 (null buffer-file-name))
+            italic)
+        (30 (memq major-mode ibuffer-help-buffer-modes) font-lock-comment-face)
+        (35 (derived-mode-p 'dired-mode) font-lock-function-name-face)
+        (40 (<span style="color: #00af00;">and</span> (boundp 'emacs-lock-mode) emacs-lock-mode) ibuffer-locked-buffer)))
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">don't use custom save</span>
+(<span style="color: #00af00;">setq</span> ibuffer-save-with-custom nil)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">saved filters</span>
+(<span style="color: #00af00;">let</span> (it)
+  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add push here</span>
+  (<span style="color: #00af00;">push</span> '(<span style="color: #ff1f8b;">"el"</span>
+         (<span style="color: #00af00;">or</span>
+          (file-extension . <span style="color: #ff1f8b;">"el"</span>)
+          (used-mode . emacs-lisp-mode)))
+        it)
+  (<span style="color: #00af00;">push</span> '(<span style="color: #ff1f8b;">"cl"</span>
+         (<span style="color: #00af00;">or</span>
+          (used-mode . lisp-mode)
+          (file-extension . <span style="color: #ff1f8b;">"lisp"</span>)))
+        it)
+  (<span style="color: #00af00;">push</span> '(<span style="color: #ff1f8b;">"esrc"</span>
+         (<span style="color: #00af00;">or</span>
+          (file-extension . <span style="color: #ff1f8b;">"el"</span>)
+          (directory . <span style="color: #ff1f8b;">"emacs/.*/lisp"</span>)))
+        it)
+  (<span style="color: #00af00;">push</span> '(<span style="color: #ff1f8b;">"org"</span>
+         (<span style="color: #00af00;">or</span>
+          (file-extension . <span style="color: #ff1f8b;">"org"</span>)
+          (used-mode . org-mode)))
+        it)
+  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">set option to it</span>
+  (<span style="color: #00af00;">setq</span> ibuffer-saved-filters it)
+  )
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">saved groups</span>
+(<span style="color: #00af00;">let</span> (it)
+  <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">add push here</span>
+  (<span style="color: #00af00;">push</span> '(<span style="color: #ff1f8b;">"default"</span>
+         (<span style="color: #ff1f8b;">"clisp"</span>
+          (saved . <span style="color: #ff1f8b;">"cl"</span>))
+         (<span style="color: #ff1f8b;">"src"</span>
+          (saved . <span style="color: #ff1f8b;">"esrc"</span>))
+         (<span style="color: #ff1f8b;">"elisp"</span>
+          (saved . <span style="color: #ff1f8b;">"el"</span>))
+         (<span style="color: #ff1f8b;">"org"</span>
+          (saved . <span style="color: #ff1f8b;">"org"</span>)))
+        it)
+  <span style="color: #b2b2b2; font-style: italic;">;;</span><span style="color: #b2b2b2; font-style: italic;">set option to it</span>
+  (<span style="color: #00af00;">setq</span> ibuffer-saved-filter-groups it)
+  )
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">switch to default group when start ibuffer</span>
+(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">init-ibuffer-use-default-group</span> ()
+  (<span style="color: #00af00;">and</span> (not ibuffer-filter-groups) <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">not use group</span>
+       (assoc <span style="color: #ff1f8b;">"default"</span> ibuffer-saved-filter-groups)
+       (ibuffer-switch-to-saved-filter-groups <span style="color: #ff1f8b;">"default"</span>)))
+(add-hook 'ibuffer-hook 'init-ibuffer-use-default-group)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">functions used to save filter and group config code</span>
+(<span style="color: #00af00;">defmacro</span> <span style="color: #ef2929;">init-ibuffer-generate-saver</span> (name var)
+  `(<span style="color: #00af00;">defun</span> ,name (name)
+     (<span style="color: #00af00;">interactive</span>
+      (<span style="color: #00af00;">if</span> (null ,var)
+          (<span style="color: #cc0000; font-weight: bold;">error</span> <span style="color: #ff1f8b;">"No item saved"</span>)
+        (list (completing-read <span style="color: #ff1f8b;">"get group: "</span> ,var nil t))))
+     (insert (concat <span style="color: #ff1f8b;">"(push '"</span>
+                     (pp-to-string (assoc name ,var))
+                     <span style="color: #ff1f8b;">" it)"</span>))))
+(<span style="color: #00af00;">init-ibuffer-generate-saver</span> init-ibuffer-filter ibuffer-saved-filters)
+(<span style="color: #00af00;">init-ibuffer-generate-saver</span> init-ibuffer-group ibuffer-saved-filter-groups)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">preds and regexps that buffer not show</span>
+(<span style="color: #00af00;">let</span> (it)
+  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add push here</span>
+
+  (<span style="color: #00af00;">setq</span> ibuffer-never-show-predicates it)
+  )
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">preds and regexps that buffer show</span>
+(<span style="color: #00af00;">let</span> (it)
+  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add push here</span>
+
+  (<span style="color: #00af00;">setq</span> ibuffer-always-show-predicates it)
+  )
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">major mode never mark by content</span>
+
+(<span style="color: #00af00;">let</span> (it)
+  <span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">add push here</span>
+  (<span style="color: #00af00;">push</span> 'dired-mode it)
+  (<span style="color: #00af00;">setq</span> ibuffer-never-search-content-mode it)
+  )
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">don't show empty filter groups</span>
+(<span style="color: #00af00;">setq</span> ibuffer-show-empty-filter-groups nil)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">use other windows ibuffer</span>
+(<span style="color: #00af00;">setq</span> ibuffer-use-other-window t)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">use full size ibuffer</span>
+(<span style="color: #00af00;">setq</span> ibuffer-default-shrink-to-minimum-size nil)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">don't show summary</span>
+(<span style="color: #00af00;">setq</span> ibuffer-display-summary nil)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">enable cycle movement</span>
+(<span style="color: #00af00;">setq</span> ibuffer-movement-cycle t)
+
+<span style="color: #b2b2b2; font-style: italic;">;; </span><span style="color: #b2b2b2; font-style: italic;">the ibuffer-vc</span>
+(<span style="color: #00af00;">require</span> '<span style="color: #1f5bff;">ibuffer-vc</span>)
+
+(<span style="color: #00af00;">provide</span> '<span style="color: #1f5bff;">init-ibuffer</span>)
+</pre>
+</div>
+
+<p>
+在这一段代码中，我做了一些额外的配置操作：
+</p>
+
+<ul class="org-ul">
+<li>当 current buffer 是 <code>*Ibuffer</code> 时，快捷键 <code>C-x C-b</code> 只会更新 buffer ，而不是在其他 windows 中打开 <code>*Ibuffer</code></li>
+
+<li>使用代码而不是 custom 来存储 filter 和 group，为此我添加了两个函数，它们可以选择 filter 和 group 并插入配置代码，它们是 <code>init-ibuffer-filter</code> 和 <code>init-ibuffer-group</code></li>
+
+<li>在打开 ibuffer 时，我通过添加钩子函数来让它在没有 group 时打开默认的 <code>default</code> group</li>
+</ul>
+
+<p>
+以上就是完整的配置，下一节我们来介绍一下 ibuffer 的扩展方法，以及 <code>ibuffer-vc</code> 这个插件。
+</p>
+
+<p>
+注意，添加 filter 和 group 建议先在 <code>*Ibuffer</code> 中创建好后使用我定义的函数进行插入，而不是手写。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5a111a8" class="outline-2">
+<h2 id="org5a111a8"><span class="section-number-2">6</span> ibuffer 的扩展</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+这一节我们来介绍一下 ibuffer 提供的标准扩展方式，顺带简单介绍下 ibuffer 的实现细节。网上关于 ibuffer 的资料有点少，下面都是参考 ibuffer 实现源代码。
+</p>
+
+<p>
+ibuffer 的实现位于三个文件中，它们分别是 ibuf-macs.el，ibuf-ext.el 和 ibuffer.el。其中 ibuffer 可看作一个巨大的接口文件，它里面定义了一系列可在 ibuffer-mode 中使用的快捷键，以及其他的一些接口命令。ibuf-macs 中定义了一些 <i>ANSI Common Lisp</i> 中的宏，比如 <code>aif</code> <code>awhen</code> 之类的，有兴趣的同学可以读读这本书，以及另一本叫做 <i>On Lisp</i> 的书。ibuf-ext 可看作 ibuffer 的“下层实现”。
+</p>
+
+<p>
+通过 <code>define-ibuffer-column</code> 我们可以定义一些列，就像 <code>ibuffer-formats</code> 注释中允许使用的那些一样。这个宏的用法可以参考 ibuffer.el，在 ibuffer.el 中搜索 <code>define-ibuffer-column</code> 即可。
+</p>
+
+<p>
+通过 <code>define-ibuffer-sorter</code> 可以定义排序函数，定义后就可以和像 <code>major-mode</code> ， <code>alphabetic</code> 等 sorter 一样使用了，使用例子可以在 <code>ibuf-ext.el</code> 中搜索 <code>define-ibuffer-sorter</code> 找到。
+</p>
+
+<p>
+通过 <code>define-ibuffer-op</code> 可以定义一些操作，就像 <code>*Ibuffer</code> 中的 <code>W</code> <code>E</code> <code>!</code> <code>O</code> 等操作一样的操作。可以在 ibuf-ext.el 中搜索 <code>define-ibuffer-op</code> 找到使用例子。
+</p>
+
+<p>
+通过 <code>define-ibuffer-filter</code> 可以定义 filter 修饰符，默认的修饰符有 <code>mode</code> <code>used-mode</code> <code>name</code> <code>starred-name</code> 等等。可以在 ibuf-ext.el 中搜索 <code>define-ibuffer-filter</code> 找到使用例。
+</p>
+
+<p>
+要想控制 ibuffer 的行为，可以去 ibuffer.el 中找到一些相关的函数，由于实在是太多了，而且我也没有什么探索的欲望了，关于 ibuffer 扩展的介绍就到这里吧。
+</p>
+
+<p>
+接下来我们介绍一下 <code>ibuffer-vc</code><sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup> 这个插件。它的作者是大名鼎鼎的 Steve Purcell，MELPA 的维护者。通过这个小插件我们也可以学习一下 ibuffer 的扩展方法。这个插件不过百余行，读起来应该是比较容易的。
+</p>
+
+<p>
+根据 readme 的内容，这个插件提供了以下功能：
+</p>
+
+<ul class="org-ul">
+<li>通过项目来创建 group，以区分不同的项目文件</li>
+
+<li>可以观察文件的当前版本控制状态</li>
+
+<li>通过版本控制状态对文件进行排序</li>
+
+<li>根据项目根目录来显示文件名</li>
+</ul>
+
+<p>
+ibuffer-vc 的主要功能是提供了依据仓库的分组，以及一些 sorter，filter 和 column。它最主要的函数是 <code>ibuffer-vc-set-filter-groups-by-vc-root</code> ，在 <code>*Ibuffer</code> 中使用它就会使用项目区分的分组。为了能够显示版本管理状态，我们需要修改一下 ibuffer-formats：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">setq</span> ibuffer-formats
+      '((mark modified read-only vc-status-mini <span style="color: #ff1f8b;">" "</span>
+              (name 18 18 <span style="color: #b218b2;">:left</span> <span style="color: #b218b2;">:elide</span>)
+              <span style="color: #ff1f8b;">" "</span>
+              (size 9 -1 <span style="color: #b218b2;">:right</span>)
+              <span style="color: #ff1f8b;">" "</span>
+              (mode 16 16 <span style="color: #b218b2;">:left</span> <span style="color: #b218b2;">:elide</span>)
+              <span style="color: #ff1f8b;">" "</span>
+              (vc-status 16 16 <span style="color: #b218b2;">:left</span>)
+              <span style="color: #ff1f8b;">" "</span>
+              vc-relative-file)))
+</pre>
+</div>
+
+<p>
+这样就可以显示类似于 <code>git status</code> 的状态标识了。
+</p>
+
+<p>
+为了能够快速切换到根据项目区分的分组，我们可以添加快捷键来快速打开 vc-group，这里我就不贴代码了，毕竟个人都有自己习惯的快捷键。
+</p>
+
+<p>
+最后来张图看下效果吧：
+</p>
+
+
+<div id="org9032ffc" class="figure">
+<p><img src="./6.PNG" alt="6.PNG" />
+</p>
+</div>
+
+<p>
+需要说明的是，调用 <code>ibuffer-vc-set-filter-groups-by-vc-root</code> 只是根据当前文件的项目所属来生成 group，如果新加入了其他项目的文件，那么需要重新生成 group，这样就会打乱当前的 group，我建议使用 <code>ibuffer-vc-generate-filter-groups-by-vc-root</code> 来生成 group，再与原先的 group 组合生成新 group。也就是这样做：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #00af00;">defun</span> <span style="color: #ef2929;">init-ibuffer-group-by-vc-and-default</span> ()
+  (<span style="color: #00af00;">interactive</span>)
+  (<span style="color: #00af00;">let*</span> ((vc-res (ibuffer-vc-generate-filter-groups-by-vc-root))
+         (new-group (append vc-res (cdr (assoc <span style="color: #ff1f8b;">"default"</span> ibuffer-saved-filter-groups)))))
+    (<span style="color: #00af00;">setq</span> ibuffer-filter-groups new-group)
+    (<span style="color: #00af00;">let</span> ((ibuf (get-buffer <span style="color: #ff1f8b;">"*Ibuffer*"</span>)))
+      (<span style="color: #00af00;">when</span> ibuf
+        (<span style="color: #00af00;">with-current-buffer</span> ibuf
+          (pop-to-buffer ibuf)
+          (ibuffer-update nil t))))))
+</pre>
+</div>
+
+<p>
+我的完整配置在这里<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>，有兴趣的同学可以参考一下。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org3f5deb3" class="outline-2">
+<h2 id="org3f5deb3"><span class="section-number-2">7</span> 后记</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+我大概一年前就看到过有人推荐使用 ibuffer，比如这个视频<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup>。 但是我也懒得去用，毕竟那个时候也没有什么 buffer 管理的概念，要管理文件的话，IDE 的侧边栏已经够用了。现在看来 ibuffer 的功能还是挺强大的，但我也不知道花在这上面的时间到底值不值（笑）。
+</p>
+
+<p>
+春天到了~ ，为了发点可爱的莉莉白我也是蛮拼的（笑）
+</p>
+
+<p>
+<i>haru desu yo</i>
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzgyMjcxNzA4.png" alt="load failed"></div><div class="yyimgcomment">lily white</div>
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./aHR0cHM6Ly93d3cucGl4aXYubmV0L2FydHdvcmtzLzYxNjgxMDM3.jpg" alt="load failed"></div>
+</p>
+
+<p>
+<div class="yyheadimg"><img src="./12538230ae749b28e1f54b52c918a121.jpg" alt="load failed"></div>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara"><a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Buffers.html">https://www.gnu.org/software/emacs/manual/html_node/emacs/Buffers.html</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara"><a href="https://github.com/purcell/ibuffer-vc/blob/master/ibuffer-vc.el">https://github.com/purcell/ibuffer-vc/blob/master/ibuffer-vc.el</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara"><a href="https://github.com/include-yy/yy-emacs/blob/master/site-lisp/config/init-ibuffer.el">https://github.com/include-yy/yy-emacs/blob/master/site-lisp/config/init-ibuffer.el</a></p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara"><a href="https://protesilaos.com/codelog/2020-04-02-emacs-intro-ibuffer/">https://protesilaos.com/codelog/2020-04-02-emacs-intro-ibuffer/</a></p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<hr class="Solid">
+<p>Create Date: 2022-03-15 Tue 15:56</p> <p>Last modified: 2022-03-17 Thu 17:10</p>
+<p>Creator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2 (<a href="https://orgmode.org">Org</a> mode 9.4.4)</p>
+
+<p style="text-align:center;">
+  <a href="https://beian.miit.gov.cn/">京ICP备2021021729号</a>
+</p>
+
+<p style="text-align:center;">
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    <img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" />
+  </a><br />
+  本作品采用
+  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+    知识共享署名 4.0 国际许可协议
+  </a>
+  进行许可。
+</p>
+</div>
+</body>
+</html>
